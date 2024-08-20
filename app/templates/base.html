@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Flask App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        /* Estilos generales del layout */
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+
+        #wrapper {
+            display: flex;
+            height: 100%;
+        }
+
+        /* Sidebar estilo para pantallas grandes */
+        #sidebar {
+            min-width: 80px;
+            max-width: 80px;
+            background: #ffffff;
+            transition: all 0.3s;
+            flex-shrink: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        #sidebar.expanded {
+            min-width: 250px;
+            max-width: 250px;
+        }
+
+        #sidebar .nav-link {
+            font-size: 1.5em;
+            font-weight: 500;
+            padding: 15px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+        }
+
+        #sidebar.expanded .nav-link {
+            justify-content: flex-start;
+            font-size: 1.1em;
+        }
+
+        #sidebar .nav-link .text {
+            display: none;
+        }
+
+        #sidebar.expanded .nav-link .text {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        #sidebar .nav-link:hover {
+            background-color: #e9ecef;
+        }
+
+        /* Estilo para dark mode */
+        .bg-dark .nav-link, .bg-dark .nav-link i, .bg-dark .nav-link .text {
+            color: white !important;
+        }
+
+        .bg-light .nav-link, .bg-light .nav-link i, .bg-light .nav-link .text {
+            color: black !important;
+        }
+
+        /* Estilo específico para el ícono de Dark Mode */
+        #toggleThemeIcon {
+            font-size: 1.5rem;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        .bg-dark #toggleThemeIcon {
+            color: white;
+        }
+
+        /* Estilo para el área de contenido centrada */
+        #content {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav id="navbar" class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <button type="button" id="sidebarCollapse" class="btn btn-outline-secondary">
+                    <i class="bi bi-list"></i> <!-- Icono de lista para representar el toggle -->
+                </button>
+                <!-- Ícono de Dark Mode al lado del botón de colapsar el Sidebar -->
+                <i id="toggleThemeIcon" class="bi bi-toggle-on ms-3"></i>
+            </div>
+            <a class="navbar-brand ms-3" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="authDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> Cuenta
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authDropdown">
+                           
+                            <li><a class="dropdown-item" href="">Iniciar Sesión</a></li>
+                            
+                            <li><a class="dropdown-item" href="#">Mi Perfil</a></li>
+                            <li><a class="dropdown-item" href="">Cerrar Sesión</a></li>
+                            
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div id="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar" class="bg-light">
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-house-door"></i>
+                        <span class="text">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-box-seam"></i>
+                        <span class="text">Orders</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-tags"></i>
+                        <span class="text">Products</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">
+                        <i class="bi bi-people"></i>
+                        <span class="text">Customers</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Main content -->
+        <div id="content" class="container-fluid">
+            <div class="row">
+                <div class="col text-center">
+                    {% block content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle Sidebar
+        document.getElementById("sidebarCollapse").addEventListener("click", function () {
+            document.getElementById("sidebar").classList.toggle("expanded");
+        });
+
+        // Toggle Dark Mode for Sidebar and Navbar
+        document.getElementById("toggleThemeIcon").addEventListener("click", function () {
+            var sidebar = document.getElementById("sidebar");
+            var navbar = document.getElementById("navbar");
+
+            sidebar.classList.toggle("bg-dark");
+            sidebar.classList.toggle("bg-light");
+
+            navbar.classList.toggle("navbar-dark");
+            navbar.classList.toggle("navbar-light");
+            navbar.classList.toggle("bg-dark");
+            navbar.classList.toggle("bg-light");
+
+            this.classList.toggle("bi-toggle-on");
+            this.classList.toggle("bi-toggle-off");
+        });
+    </script>
+</body>
+
+</html>

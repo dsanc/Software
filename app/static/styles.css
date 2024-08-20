@@ -1,0 +1,50 @@
+
+#wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: #f8f9fa;
+    transition: all 0.3s;
+}
+
+#sidebar.collapsed {
+    width: 80px;
+    min-width: 80px;
+    max-width: 80px;
+}
+
+#sidebar .list-group-item {
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s;
+}
+
+#sidebar .list-group-item .text {
+    margin-left: 10px;
+    display: inline-block;
+}
+
+#sidebar.collapsed .list-group-item .text {
+    display: none;
+}
+
+#sidebar.collapsed .list-group-item {
+    justify-content: center;
+}
+
+#content {
+    width: 100%;
+    padding: 20px;
+}
+
+#sidebarCollapse {
+    display: inline-block;
+    margin-left: auto;
+}
