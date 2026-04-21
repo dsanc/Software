@@ -1,0 +1,260 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Prueba del Sistema de Permisos{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-card {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.test-card-header {
+    background-color: #f8f9fa;
+    padding: 15px 20px;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+.test-card-body {
+    padding: 20px;
+}
+.test-btn {
+    margin: 5px;
+    min-width: 200px;
+}
+.alert-info {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #0277bd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-shield-alt me-2"></i>Prueba del Sistema de Permisos
+        </h1>
+        <a href="{% url 'evaluadores:lista' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Volver a Evaluadores
+        </a>
+    </div>
+
+    <!-- Información del Usuario -->
+    <div class="alert alert-info">
+        <h5><i class="fas fa-info-circle me-2"></i>Información Actual:</h5>
+        <p><strong>Usuario:</strong> {{ user.username }}</p>
+        <p><strong>Es Evaluador:</strong> 
+            {% if evaluator.is_evaluator %}
+                <span class="badge bg-success">Sí</span> - Acceso limitado según permisos configurados
+            {% else %}
+                <span class="badge bg-primary">No</span> - Acceso completo como administrador
+            {% endif %}
+        </p>
+        {% if evaluator.is_evaluator %}
+        <p><strong>Permisos en Risk Hoteles:</strong>
+            {% for permiso, valor in evaluator.permissions_risk_hoteles.items %}
+                <span class="badge {% if valor %}bg-success{% else %}bg-danger{% endif %}">{{ permiso }}: {% if valor %}✓{% else %}✗{% endif %}</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+    </div>
+
+    <!-- Pruebas de Permisos CRUD -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <i class="fas fa-tools me-2"></i>Pruebas de Permisos CRUD
+        </div>
+        <div class="test-card-body">
+            <p>Estas pruebas verifican si puedes realizar acciones específicas (crear, editar, eliminar) en diferentes módulos.</p>
+            
+            <h6>Risk Hoteles:</h6>
+            <button class="btn btn-primary test-btn test-permission" 
+                    data-url="?test=permission&module=risk_hoteles&action=create">
+                <i class="fas fa-plus me-1"></i>Probar CREAR
+            </button>
+            <button class="btn btn-warning test-btn test-permission" 
+                    data-url="?test=permission&module=risk_hoteles&action=update">
+                <i class="fas fa-edit me-1"></i>Probar EDITAR
+            </button>
+            <button class="btn btn-danger test-btn test-permission" 
+                    data-url="?test=permission&module=risk_hoteles&action=delete">
+                <i class="fas fa-trash me-1"></i>Probar ELIMINAR
+            </button>
+            
+            <hr>
+            
+            <h6>Risk Conjuntos:</h6>
+            <button class="btn btn-primary test-btn test-permission" 
+                    data-url="?test=permission&module=risk_conjuntos&action=create">
+                <i class="fas fa-plus me-1"></i>Probar CREAR
+            </button>
+            <button class="btn btn-warning test-btn test-permission" 
+                    data-url="?test=permission&module=risk_conjuntos&action=update">
+                <i class="fas fa-edit me-1"></i>Probar EDITAR
+            </button>
+            
+            <hr>
+            
+            <h6>Security Probabilistic:</h6>
+            <button class="btn btn-primary test-btn test-permission" 
+                    data-url="?test=permission&module=security_probabilistic&action=create">
+                <i class="fas fa-plus me-1"></i>Probar CREAR
+            </button>
+        </div>
+    </div>
+
+    <!-- Pruebas de Acceso a Módulos -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <i class="fas fa-cube me-2"></i>Pruebas de Acceso a Módulos
+        </div>
+        <div class="test-card-body">
+            <p>Estas pruebas verifican si tienes acceso general a cada módulo.</p>
+            
+            <button class="btn btn-info test-btn test-module" 
+                    data-url="?test=module&module=risk_hoteles">
+                <i class="fas fa-hotel me-1"></i>Acceso Risk Hoteles
+            </button>
+            <button class="btn btn-info test-btn test-module" 
+                    data-url="?test=module&module=risk_conjuntos">
+                <i class="fas fa-building me-1"></i>Acceso Risk Conjuntos
+            </button>
+            <button class="btn btn-info test-btn test-module" 
+                    data-url="?test=module&module=security_probabilistic">
+                <i class="fas fa-chart-line me-1"></i>Acceso Security Probabilistic
+            </button>
+        </div>
+    </div>
+
+    <!-- Área de Resultados -->
+    <div class="test-card">
+        <div class="test-card-header">
+            <i class="fas fa-clipboard-list me-2"></i>Resultados de Pruebas
+        </div>
+        <div class="test-card-body">
+            <div id="test-results">
+                <p class="text-muted">Haz clic en los botones de arriba para probar el sistema de permisos.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Variables para tracking de pruebas
+    let testResults = [];
+    
+    // Función para mostrar resultados
+    function showResult(success, message, type, details = '') {
+        const timestamp = new Date().toLocaleTimeString();
+        const badgeClass = success ? 'bg-success' : 'bg-danger';
+        const icon = success ? 'fa-check' : 'fa-times';
+        
+        const resultHtml = `
+            <div class="alert ${success ? 'alert-success' : 'alert-danger'} alert-dismissible fade show" role="alert">
+                <i class="fas ${icon} me-2"></i>
+                <strong>${type}:</strong> ${message}
+                ${details ? `<br><small>${details}</small>` : ''}
+                <span class="badge ${badgeClass} float-end">${timestamp}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+        
+        $('#test-results').prepend(resultHtml);
+        
+        // Guardar resultado
+        testResults.push({
+            timestamp,
+            success,
+            message,
+            type,
+            details
+        });
+    }
+    
+    // Manejar pruebas de permisos CRUD
+    $('.test-permission').click(function() {
+        const url = $(this).data('url');
+        const btn = $(this);
+        
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin me-1"></i>Probando...');
+        
+        $.get(url)
+            .done(function(response) {
+                if (response.success) {
+                    showResult(true, response.message, 'Permiso Concedido');
+                } else {
+                    showResult(false, response.message || 'Error desconocido', 'Permiso Denegado');
+                }
+            })
+            .fail(function(xhr) {
+                if (xhr.status === 403) {
+                    // El sistema de permisos interceptó la petición
+                    showResult(false, 'Permiso denegado - Modal mostrado', 'Sistema de Permisos', 'El sistema mostró correctamente un modal de permisos denegados');
+                } else {
+                    showResult(false, `Error HTTP ${xhr.status}`, 'Error de Sistema');
+                }
+            })
+            .always(function() {
+                // Restaurar botón
+                const originalText = btn.text().replace('Probando...', '').trim();
+                btn.prop('disabled', false);
+                
+                if (btn.hasClass('btn-primary')) {
+                    btn.html('<i class="fas fa-plus me-1"></i>' + originalText);
+                } else if (btn.hasClass('btn-warning')) {
+                    btn.html('<i class="fas fa-edit me-1"></i>' + originalText);
+                } else if (btn.hasClass('btn-danger')) {
+                    btn.html('<i class="fas fa-trash me-1"></i>' + originalText);
+                }
+            });
+    });
+    
+    // Manejar pruebas de acceso a módulos
+    $('.test-module').click(function() {
+        const url = $(this).data('url');
+        const btn = $(this);
+        
+        btn.prop('disabled', true);
+        btn.html('<i class="fas fa-spinner fa-spin me-1"></i>Probando...');
+        
+        $.get(url)
+            .done(function(response) {
+                if (response.success) {
+                    showResult(true, response.message, 'Acceso Concedido');
+                } else {
+                    showResult(false, response.message || 'Error desconocido', 'Acceso Denegado');
+                }
+            })
+            .fail(function(xhr) {
+                if (xhr.status === 403) {
+                    showResult(false, 'Acceso denegado - Modal mostrado', 'Sistema de Permisos', 'El sistema mostró correctamente un modal de acceso denegado');
+                } else {
+                    showResult(false, `Error HTTP ${xhr.status}`, 'Error de Sistema');
+                }
+            })
+            .always(function() {
+                btn.prop('disabled', false);
+                const originalText = btn.text().replace('Probando...', '').trim();
+                btn.html('<i class="fas fa-cube me-1"></i>' + originalText);
+            });
+    });
+    
+    // Limpiar resultados
+    $('<button class="btn btn-sm btn-outline-secondary mt-3" id="clear-results"><i class="fas fa-trash me-1"></i>Limpiar Resultados</button>')
+        .appendTo('#test-results')
+        .click(function() {
+            $('#test-results').html('<p class="text-muted">Resultados limpiados. Haz clic en los botones de arriba para probar el sistema de permisos.</p>');
+            $(this).appendTo('#test-results');
+            testResults = [];
+        });
+});
+</script>
+{% endblock %}

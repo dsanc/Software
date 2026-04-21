@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suscripción Expirada</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #ffc107; color: #212529; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f8f9fa; }
+        .footer { padding: 15px; text-align: center; color: #666; font-size: 0.9em; }
+        .warning-box { background: #fff3cd; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #ffc107; }
+        .cta-button { display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Tu suscripción ha expirado</h1>
+        </div>
+        
+        <div class="content">
+            <h2>Hola {{ user.get_full_name }}</h2>
+            
+            <div class="warning-box">
+                <p><strong>Tu suscripción a {{ plan.name }} ha expirado</strong></p>
+                <p><strong>Fecha de expiración:</strong> {{ subscription.end_date|date:"d/m/Y" }}</p>
+            </div>
+            
+            <p>El acceso a las funcionalidades premium ha sido suspendido temporalmente.</p>
+            
+            <p>Para continuar disfrutando de todas las características de {{ plan.name }}, renueva tu suscripción ahora:</p>
+            
+            <div style="text-align: center;">
+                <a href="#" class="cta-button">Renovar Suscripción</a>
+            </div>
+            
+            <p>¿No estás seguro? Contáctanos y estaremos felices de ayudarte a encontrar el plan perfecto para ti.</p>
+            
+            <p>¡Esperamos tenerte de vuelta pronto!</p>
+        </div>
+        
+        <div class="footer">
+            <p>© {% now "Y" %} Tu Empresa. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

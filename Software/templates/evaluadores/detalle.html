@@ -1,0 +1,450 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}{{ evaluador.get_full_name }} - Detalle del Evaluador{% endblock %}
+
+{% block extra_css %}
+<style>
+.evaluador-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.evaluador-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.evaluador-info h2 {
+    margin-bottom: 10px;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.evaluador-meta {
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.estado-badge {
+    padding: 8px 16px;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.estado-activo {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.estado-inactivo {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    color: white;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+.stats-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
+.stats-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.action-buttons {
+    margin: 25px 0;
+}
+
+.btn-action {
+    margin: 5px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.permission-summary {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.permission-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.permission-item:last-child {
+    border-bottom: none;
+}
+
+.permission-badge {
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.permission-granted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.permission-denied {
+    background: #f8d7da;
+    color: #721c24;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del evaluador -->
+    <div class="evaluador-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="evaluador-avatar d-flex align-items-center justify-content-center bg-primary text-white fw-bold fs-4">
+                    {{ evaluador.nombres.0 }}{{ evaluador.apellidos.0 }}
+                </div>
+            </div>
+            <div class="col evaluador-info">
+                <h2>{{ evaluador.nombres }} {{ evaluador.apellidos }}</h2>
+                <div class="mb-2">
+                    <span class="badge bg-info text-dark px-3 py-2">
+                        <i class="fas fa-user-tie me-1"></i>{{ evaluador.get_tipo_evaluador_display }}
+                    </span>
+                </div>
+                <div class="evaluador-meta">
+                    <i class="fas fa-envelope me-2"></i>{{ evaluador.usuario_evaluador.email }}
+                    <span class="mx-3">|</span>
+                    <i class="fas fa-user me-2"></i>{{ evaluador.usuario_evaluador.username }}
+                    <span class="mx-3">|</span>
+                    <i class="fas fa-calendar me-2"></i>Creado: {{ evaluador.created_at|date:"d M Y" }}
+                </div>
+            </div>
+            <div class="col-auto">
+                <span class="estado-badge {% if evaluador.estado == 'active' %}estado-activo{% else %}estado-inactivo{% endif %}">
+                    <i class="fas fa-{% if evaluador.estado == 'active' %}check{% else %}times{% endif %} me-2"></i>
+                    {{ evaluador.get_estado_display }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="action-buttons text-center">
+        <a href="{% url 'evaluadores:editar' evaluador.pk %}" class="btn btn-primary btn-action">
+            <i class="fas fa-edit"></i> Editar Evaluador
+        </a>
+        
+        <!-- Formulario para cambiar estado -->
+        <form method="post" action="{% url 'evaluadores:cambiar_estado' evaluador.pk %}" style="display: inline;">
+            {% csrf_token %}
+            <input type="hidden" name="estado" value="{% if evaluador.estado == 'active' %}inactive{% else %}active{% endif %}">
+            <button type="submit" class="btn {% if evaluador.estado == 'active' %}btn-danger{% else %}btn-success{% endif %} btn-action"
+                    onclick="return confirm('¿Estás seguro de que quieres {% if evaluador.estado == 'active' %}desactivar{% else %}activar{% endif %} este evaluador?')">
+                <i class="fas fa-{% if evaluador.estado == 'active' %}pause{% else %}play{% endif %}"></i>
+                {% if evaluador.estado == 'active' %}Desactivar{% else %}Activar{% endif %}
+            </button>
+        </form>
+        
+        <a href="{% url 'evaluadores:lista' %}" class="btn btn-outline-secondary btn-action">
+            <i class="fas fa-arrow-left"></i> Volver a Lista
+        </a>
+    </div>
+
+    <!-- Estadísticas -->
+    <div class="row">
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stats-number">{{ evaluador.max_evaluaciones_mes|default:"0" }}</div>
+                <div class="stats-label">Max Evaluaciones/Mes</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stats-number">{% if evaluador.fecha_ultimo_acceso %}{{ evaluador.fecha_ultimo_acceso|timesince }}{% else %}Nunca{% endif %}</div>
+                <div class="stats-label">Último Acceso</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #ffc107, #fd7e14);">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stats-number">{% if evaluador.modulos_permitidos %}{{ evaluador.modulos_permitidos|length }}{% else %}Todos{% endif %}</div>
+                <div class="stats-label">Módulos Permitidos</div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 col-sm-6 mb-4">
+            <div class="stats-card">
+                <div class="stats-icon" style="background: linear-gradient(135deg, #6f42c1, #e83e8c);">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="stats-number">{% if evaluador.acceso_completo_dashboard %}Sí{% else %}No{% endif %}</div>
+                <div class="stats-label">Dashboard Completo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información detallada -->
+    <div class="row">
+        <!-- Información personal -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-user-info me-2"></i>
+                        Información Personal
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tr>
+                            <td><strong>Nombres:</strong></td>
+                            <td>{{ evaluador.nombres }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Apellidos:</strong></td>
+                            <td>{{ evaluador.apellidos }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Tipo de Evaluador:</strong></td>
+                            <td><span class="badge bg-info">{{ evaluador.get_tipo_evaluador_display }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Usuario:</strong></td>
+                            <td>{{ evaluador.usuario_evaluador.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{{ evaluador.usuario_evaluador.email }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Estado:</strong></td>
+                            <td>
+                                <span class="badge bg-{% if evaluador.estado == 'active' %}success{% elif evaluador.estado == 'inactive' %}danger{% elif evaluador.estado == 'pending' %}warning{% else %}secondary{% endif %}">
+                                    {{ evaluador.get_estado_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fecha de creación:</strong></td>
+                            <td>{{ evaluador.created_at|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Usuario Principal:</strong></td>
+                            <td>{{ evaluador.usuario_principal.get_full_name|default:evaluador.usuario_principal.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Evaluaciones Max/Mes:</strong></td>
+                            <td>{{ evaluador.max_evaluaciones_mes }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Módulos y Permisos -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-puzzle-piece me-2"></i>
+                        Módulos Permitidos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if evaluador.modulos_permitidos %}
+                        {% for modulo in evaluador.modulos_permitidos %}
+                            <span class="badge bg-primary me-2 mb-2 px-3 py-2">
+                                <i class="fas fa-{% if modulo == 'risk_hoteles' %}hotel{% elif modulo == 'risk_conjuntos' %}building{% elif modulo == 'security_probabilistic' %}shield-alt{% else %}cube{% endif %} me-1"></i>
+                                {% if modulo == 'risk_hoteles' %}Risk Hoteles
+                                {% elif modulo == 'risk_conjuntos' %}Risk Conjuntos
+                                {% elif modulo == 'security_probabilistic' %}Security Probabilistic
+                                {% else %}{{ modulo|title }}{% endif %}
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Sin restricciones:</strong> Acceso a todos los módulos disponibles
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-key me-2"></i>
+                        Permisos y Capacidades
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="permission-item">
+                                <span><i class="fas fa-chart-line me-2"></i>Crear Reportes</span>
+                                <span class="permission-badge {% if evaluador.puede_crear_reportes %}permission-granted{% else %}permission-denied{% endif %}">
+                                    {% if evaluador.puede_crear_reportes %}✓ Permitido{% else %}✗ Denegado{% endif %}
+                                </span>
+                            </div>
+                            <div class="permission-item">
+                                <span><i class="fas fa-edit me-2"></i>Editar Evaluaciones</span>
+                                <span class="permission-badge {% if evaluador.puede_editar_evaluaciones %}permission-granted{% else %}permission-denied{% endif %}">
+                                    {% if evaluador.puede_editar_evaluaciones %}✓ Permitido{% else %}✗ Denegado{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="permission-item">
+                                <span><i class="fas fa-tachometer-alt me-2"></i>Dashboard Completo</span>
+                                <span class="permission-badge {% if evaluador.acceso_completo_dashboard %}permission-granted{% else %}permission-denied{% endif %}">
+                                    {% if evaluador.acceso_completo_dashboard %}✓ Permitido{% else %}✗ Denegado{% endif %}
+                                </span>
+                            </div>
+                            <div class="permission-item">
+                                <span><i class="fas fa-user-check me-2"></i>Estado</span>
+                                <span class="permission-badge {% if evaluador.is_active %}permission-granted{% else %}permission-denied{% endif %}">
+                                    {% if evaluador.is_active %}✓ Activo{% else %}✗ Inactivo{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if evaluador.notas %}
+                    <div class="mt-3 pt-3 border-top">
+                        <h6 class="text-muted mb-2"><i class="fas fa-sticky-note me-2"></i>Notas</h6>
+                        <p class="text-muted mb-0">{{ evaluador.notas }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial reciente -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Información de Fechas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-calendar-plus text-primary fs-1 mb-2"></i>
+                                <h6 class="text-muted mb-1">Creado</h6>
+                                <p class="mb-0 fw-bold">{{ evaluador.created_at|date:"d/m/Y" }}</p>
+                                <small class="text-muted">{{ evaluador.created_at|timesince }} atrás</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-calendar-check text-success fs-1 mb-2"></i>
+                                <h6 class="text-muted mb-1">Actualizado</h6>
+                                <p class="mb-0 fw-bold">{{ evaluador.updated_at|date:"d/m/Y" }}</p>
+                                <small class="text-muted">{{ evaluador.updated_at|timesince }} atrás</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center p-3 border rounded">
+                                <i class="fas fa-clock text-warning fs-1 mb-2"></i>
+                                <h6 class="text-muted mb-1">Último Acceso</h6>
+                                {% if evaluador.fecha_ultimo_acceso %}
+                                    <p class="mb-0 fw-bold">{{ evaluador.fecha_ultimo_acceso|date:"d/m/Y" }}</p>
+                                    <small class="text-muted">{{ evaluador.fecha_ultimo_acceso|timesince }} atrás</small>
+                                {% else %}
+                                    <p class="mb-0 fw-bold text-muted">Nunca</p>
+                                    <small class="text-muted">Sin registro</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Script para manejar cambios de estado
+document.addEventListener('DOMContentLoaded', function() {
+    // Ya no necesitamos el script anterior porque ahora usamos onclick en el botón
+    // El formulario ya tiene la confirmación integrada en el onclick del button
+    
+    // Agregar cualquier otra funcionalidad JavaScript si es necesaria
+    console.log('Página de detalle de evaluador cargada');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<!-- CSS de suscripciones eliminado -->
+{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Inicio</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'subscriptions:plans' %}">Planes</a></li>
+                    <li class="breadcrumb-item active">{{ page_title }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Carrito flotante (icono) -->
+    <div class="cart-floating" id="cart-floating">
+        <button class="btn btn-primary btn-cart" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+            <i class="fas fa-shopping-cart"></i>
+            <span class="cart-badge badge bg-danger" id="cart-count">0</span>
+        </button>
+    </div>
+
+    <!-- Offcanvas del carrito -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-shopping-cart me-2"></i>
+                Carrito de Compras
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div id="cart-content">
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                    <p>Tu carrito está vacío</p>
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary">Ver Planes</a>
+                </div>
+            </div>
+        </div>
+        <div class="offcanvas-footer border-top p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <strong>Total: $<span id="cart-total">0</span></strong>
+            </div>
+            <div class="d-grid gap-2">
+                <a href="{% url 'subscriptions:cart' %}" class="btn btn-outline-primary">Ver Carrito</a>
+                <a href="{% url 'subscriptions:checkout' %}" class="btn btn-primary" id="checkout-btn" style="display: none;">
+                    Proceder al Pago
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido principal -->
+    <main>
+        {% block subscription_content %}
+        {% endblock %}
+    </main>
+</div>
+
+<!-- Toast para notificaciones -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cartToast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="fas fa-shopping-cart me-2 text-primary"></i>
+            <strong class="me-auto">Carrito</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            <!-- Mensaje dinámico -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart_logic.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Cargar contador del carrito usando la función global de cart_logic.js
+    if (window.loadCartCount) {
+        window.loadCartCount();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% if analisis_ia.recomendaciones_ml.total_recomendaciones > 0 %}
+<div class="mb-section page-break">
+    <h3 class="mb-4"><i class="fas fa-lightbulb text-warning me-2"></i>Recomendaciones Inteligentes (ML)</h3>
+    
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Resumen de Recomendaciones</h6>
+                    <p class="card-text">
+                        <strong>Total:</strong> {{ analisis_ia.recomendaciones_ml.total_recomendaciones }}<br>
+                        <strong>Urgencia Promedio:</strong> {{ analisis_ia.recomendaciones_ml.urgencia_promedio }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Distribución por Urgencia</h6>
+                    <div class="chart-container" style="height: 150px;">
+                        <canvas id="urgencia-chart" width="300" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% for recomendacion in analisis_ia.recomendaciones_ml.recomendaciones %}
+    <div class="recomendacion-item urgencia-{{ recomendacion.urgencia|lower }}">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="mb-0">{{ forloop.counter }}. {{ recomendacion.descripcion }}</h6>
+            <span class="badge 
+                {% if recomendacion.urgencia == 'Alta' %}bg-danger
+                {% elif recomendacion.urgencia == 'Media' %}bg-warning
+                {% else %}bg-success{% endif %}">
+                {{ recomendacion.urgencia }}
+            </span>
+        </div>
+        <div class="text-small text-muted">
+            <strong>Área:</strong> {{ recomendacion.tipo_riesgo }} | 
+            <strong>Impacto:</strong> {{ recomendacion.score_impacto|floatformat:1 }} |
+            <strong>Tiempo:</strong> {{ recomendacion.tiempo_implementacion }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

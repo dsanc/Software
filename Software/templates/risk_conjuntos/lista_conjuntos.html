@@ -1,0 +1,2000 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+{% load humanize %}
+{% load evaluador_permissions %}
+{% load pagination_tags %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .table-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1rem;
+    }
+    
+    .table th {
+        border: none;
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 1rem 0.75rem;
+    }
+    
+    .table td {
+        border-color: #e9ecef;
+        padding: 1rem 0.75rem;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .risk-badge {
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+    
+    .risk-muy-bajo { background: #d4edda; color: #155724; }
+    .risk-bajo { background: #cce5f0; color: #0c5460; }
+    .risk-medio { background: #fff3cd; color: #856404; }
+    .risk-alto { background: #f8d7da; color: #721c24; }
+    .risk-critico { background: #f5c6cb; color: #491217; }
+    
+    .filter-card {
+        background: #f8f9fa;
+        border: none;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .conjunto-name {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+    
+    .conjunto-nit {
+        font-size: 0.75rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+        font-family: monospace;
+    }
+    
+    .conjunto-location {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0;
+    }
+    
+    .score-display {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #667eea;
+    }
+    
+    .score-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .amenities-icons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .amenity-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+    
+    /* Nueva estructura de amenidades */
+    .amenities-grid {
+        min-width: 120px;
+    }
+    
+    .amenities-count {
+        margin-bottom: 0.5rem;
+    }
+    
+    .amenities-icons-organized {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: center;
+    }
+    
+    .amenity-group {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .amenity-icon i {
+        font-size: 0.8rem;
+    }
+    
+    /* Colores por categoría */
+    .security-group .amenity-icon i { color: #28a745 !important; }
+    .recreation-group .amenity-icon i { color: #007bff !important; }
+    .services-group .amenity-icon i { color: #6c757d !important; }
+    
+    /* Estilos para información del conjunto */
+    .location-info .ciudad {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    .location-info .departamento {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .location-info .direccion {
+        font-size: 0.75rem;
+    }
+    
+    /* Estilos para características */
+    .caracteristicas-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .caracteristicas-grid > div {
+        min-width: 80px;
+        text-align: center;
+    }
+    
+    /* Estilos para administración */
+    .admin-info {
+        min-width: 150px;
+    }
+    
+    .admin-name, .admin-phone, .admin-email {
+        margin-bottom: 0.25rem;
+        font-size: 0.8rem;
+    }
+    
+    .admin-name i, .admin-phone i, .admin-email i {
+        width: 12px;
+        text-align: center;
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+        padding: 2rem;
+    }
+    
+    .empty-state i {
+        opacity: 0.5;
+    }
+    
+    /* Estilos para promedio general */
+    .risk-score-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        min-width: 120px;
+    }
+    
+    .score-circle {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin: 0 auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+    
+    .score-circle:hover {
+        transform: scale(1.05);
+    }
+    
+    .score-number {
+        font-size: 0.85rem;
+        font-weight: 700;
+    }
+    
+    .score-label {
+        font-size: 0.7rem;
+        line-height: 1.1;
+    }
+    
+    .evaluations-count {
+        font-size: 0.65rem;
+        opacity: 0.8;
+    }
+    
+    .no-evaluations .score-circle {
+        border: 2px dashed #dee2e6;
+        background-color: transparent !important;
+    }
+    
+    .no-evaluations .score-number {
+        font-size: 1.2rem;
+        color: #6c757d !important;
+    }
+    
+    /* Estilos para paginación avanzada */
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin: 2rem 0;
+        gap: 2rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    .pagination-info {
+        flex: 1;
+        min-width: 250px;
+    }
+    
+    .per-page-selector {
+        flex-shrink: 0;
+    }
+    
+    .pagination {
+        margin: 0;
+        flex-shrink: 0;
+    }
+    
+    .pagination .page-link {
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #dee2e6;
+        color: #495057;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #667eea;
+        border-color: #667eea;
+        color: white;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+    
+    .pagination .page-item.disabled .page-link {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: #fff;
+        border-color: #dee2e6;
+    }
+    
+    .pagination-ellipsis {
+        padding: 0.5rem 0.75rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    
+    .pagination-controls {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    .pagination-text strong {
+        color: #495057;
+    }
+    
+    .pagination-summary strong {
+        color: #667eea;
+    }
+    
+    .empty-state h5 {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .amenity-security { background: #d4edda; color: #155724; }
+    .amenity-tech { background: #cce5f0; color: #0c5460; }
+    .amenity-recreation { background: #fff3cd; color: #856404; }
+    .amenity-parking { background: #f8d7da; color: #721c24; }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+    
+    .action-buttons .btn {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+        
+        /* Ocultar administración en tablets */
+        .table th:nth-child(3), /* Administración */
+        .table td:nth-child(3) {
+            display: none;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .action-buttons .btn {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        /* Hacer más compactas las secciones */
+        .amenities-grid {
+            font-size: 0.8rem;
+        }
+        
+        .admin-info {
+            font-size: 0.75rem;
+        }
+        
+        /* Iconos más pequeños en móvil */
+        .amenity-icon i {
+            font-size: 0.7rem;
+        }
+        
+        /* Reducir tamaño del círculo de score */
+        .score-circle {
+            width: 45px;
+            height: 45px;
+        }
+        
+        .score-number {
+            font-size: 0.75rem;
+        }
+        
+        /* Paginación responsive */
+        .pagination-container {
+            flex-direction: column;
+            gap: 1rem;
+            text-align: center;
+        }
+        
+        .pagination-info {
+            order: 1;
+        }
+        
+        .per-page-selector {
+            order: 3;
+        }
+        
+        .pagination {
+            order: 2;
+        }
+        
+        .pagination .page-link {
+            min-width: 35px;
+            height: 35px;
+            font-size: 0.875rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        /* En móvil muy pequeño, ocultar amenidades y promedio, mantener solo información básica, ubicación y acciones */
+        .table th:nth-child(4), /* Amenidades */
+        .table td:nth-child(4),
+        .table th:nth-child(5), /* Promedio General */
+        .table td:nth-child(5) {
+            display: none;
+        }
+        
+        .conjunto-name {
+            font-size: 0.9rem;
+        }
+        
+        .conjunto-nit {
+            font-size: 0.7rem;
+        }
+        
+        .location-info .ciudad {
+            font-size: 0.85rem;
+        }
+    }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-1">Mis Conjuntos</h1>
+                    <p class="text-muted mb-0">Gestión de conjuntos residenciales</p>
+                </div>
+                <div>
+                    {% has_module_permission user 'risk_conjuntos' 'create' as can_create %}
+                    {% if can_create %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#conjuntoModal" onclick="openCreateModal()">
+                        <i class="fas fa-plus me-2"></i>Nuevo Conjunto
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card filter-card">
+        <div class="card-body">
+            <form method="get" id="filterForm" class="row g-3 filter-form">
+                <div class="col-md-3">
+                    {{ filter_form.busqueda }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.tipo_conjunto }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.ciudad }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.nivel_riesgo }}
+                </div>
+                <div class="col-md-2">
+                    {{ filter_form.tiene_evaluaciones }}
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lista de conjuntos -->
+    {% if page_obj.object_list %}
+    
+    <!-- Controles de paginación superiores -->
+    {% if page_obj.has_other_pages or per_page_options %}
+    <div class="pagination-controls">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                {% pagination_info page_obj start_index end_index total_items %}
+            </div>
+            <div class="col-md-6 text-md-end">
+                {% per_page_selector request items_per_page per_page_options %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="table-container">
+        <div class="table-header">
+            <h5 class="mb-0">
+                <i class="fas fa-building me-2"></i>
+                Conjuntos Registrados ({{ total_items }})
+            </h5>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Información Básica</th>
+                        <th>Ubicación</th>
+                        <th class="text-center">Administración</th>
+                        <th class="text-center">Amenidades</th>
+                        <th class="text-center">Promedio General</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for conjunto in page_obj.object_list %}
+                    <tr>
+                        <!-- Información Básica -->
+                        <td>
+                            <div class="conjunto-nit">
+                                <small class="text-muted">NIT: {{ conjunto.nit }}</small>
+                            </div>
+                            <div class="conjunto-name">{{ conjunto.nombre }}</div>
+                            <div class="conjunto-tipo">
+                                <i class="fas fa-{{ conjunto.tipo_conjunto.icono }} me-1 text-primary"></i>
+                                <span class="badge bg-light text-dark">{{ conjunto.tipo_conjunto.get_nombre_display }}</span>
+                            </div>
+                            <div class="conjunto-stats mt-1">
+                                <small class="text-muted">
+                                    <i class="fas fa-home me-1"></i>{{ conjunto.numero_unidades }} unidades
+                                    {% if conjunto.numero_torres > 1 %}
+                                    <span class="ms-2"><i class="fas fa-building me-1"></i>{{ conjunto.numero_torres }} torres</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </td>
+                        
+                        <!-- Ubicación -->
+                        <td>
+                            <div class="location-info">
+                                <div class="ciudad">
+                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                    <strong>{{ conjunto.ciudad }}</strong>
+                                </div>
+                                <div class="departamento text-muted">
+                                    {{ conjunto.departamento }}
+                                </div>
+                                {% if conjunto.direccion %}
+                                <div class="direccion">
+                                    <small class="text-muted">{{ conjunto.direccion|truncatechars:30 }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Administración -->
+                        <td class="text-center">
+                            {% if conjunto.administrador_nombre %}
+                            <div class="admin-info">
+                                <div class="admin-name">
+                                    <i class="fas fa-user me-1 text-secondary"></i>
+                                    <small>{{ conjunto.administrador_nombre|truncatechars:20 }}</small>
+                                </div>
+                                {% if conjunto.administrador_telefono %}
+                                <div class="admin-phone">
+                                    <i class="fas fa-phone me-1 text-success"></i>
+                                    <small>{{ conjunto.administrador_telefono }}</small>
+                                </div>
+                                {% endif %}
+                                {% if conjunto.administrador_email %}
+                                <div class="admin-email">
+                                    <i class="fas fa-envelope me-1 text-warning"></i>
+                                    <small>{{ conjunto.administrador_email|truncatechars:25 }}</small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <span class="text-muted">Sin información</span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Amenidades -->
+                        <td class="text-center">
+                            <div class="amenities-grid">
+                                {% if conjunto.tiene_piscina or conjunto.tiene_salon_social or conjunto.tiene_gimnasio or conjunto.tiene_juegos_infantiles or conjunto.tiene_canchas_deportivas %}
+                                    <!-- Contador de amenidades -->
+                                    <div class="amenities-count mb-2">
+                                        {% with total_amenidades=conjunto.tiene_piscina|add:conjunto.tiene_salon_social|add:conjunto.tiene_gimnasio|add:conjunto.tiene_juegos_infantiles|add:conjunto.tiene_canchas_deportivas %}
+                                        <div class="score-display text-success">{{ total_amenidades }}</div>
+                                        <div class="score-label">amenidades</div>
+                                        {% endwith %}
+                                    </div>
+                                    
+                                    <!-- Iconos de amenidades (solo las del formulario) -->
+                                    <div class="amenities-icons-organized">
+                                        <div class="amenity-group recreation-group">
+                                            {% if conjunto.tiene_piscina %}
+                                            <div class="amenity-icon amenity-recreation" title="Piscina">
+                                                <i class="fas fa-swimmer text-primary"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if conjunto.tiene_salon_social %}
+                                            <div class="amenity-icon amenity-social" title="Salón Social">
+                                                <i class="fas fa-users text-warning"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if conjunto.tiene_gimnasio %}
+                                            <div class="amenity-icon amenity-fitness" title="Gimnasio">
+                                                <i class="fas fa-dumbbell text-success"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if conjunto.tiene_juegos_infantiles %}
+                                            <div class="amenity-icon amenity-kids" title="Juegos Infantiles">
+                                                <i class="fas fa-child text-info"></i>
+                                            </div>
+                                            {% endif %}
+                                            {% if conjunto.tiene_canchas_deportivas %}
+                                            <div class="amenity-icon amenity-sports" title="Canchas Deportivas">
+                                                <i class="fas fa-futbol text-danger"></i>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted">
+                                        <div class="score-display">0</div>
+                                        <div class="score-label">amenidades</div>
+                                        <i class="fas fa-minus-circle text-muted mt-1"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        
+                        <!-- Promedio General -->
+                        <td class="text-center">
+                            {% if conjunto.promedio_porcentaje %}
+                                {% with promedio=conjunto.promedio_porcentaje %}
+                                <div class="risk-score-display">
+                                    <div class="score-circle {% if promedio <= 30 %}bg-success{% elif promedio <= 50 %}bg-warning{% elif promedio <= 70 %}bg-danger{% else %}bg-dark{% endif %}">
+                                        <span class="score-number">{{ promedio|floatformat:1 }}%</span>
+                                    </div>
+                                    <div class="score-label mt-1">
+                                        <small class="text-muted">
+                                            {% if promedio <= 30 %}
+                                                <i class="fas fa-check-circle text-success"></i> Bajo Riesgo
+                                            {% elif promedio <= 50 %}
+                                                <i class="fas fa-exclamation-triangle text-warning"></i> Moderado
+                                            {% elif promedio <= 70 %}
+                                                <i class="fas fa-exclamation-circle text-danger"></i> Alto Riesgo
+                                            {% else %}
+                                                <i class="fas fa-times-circle text-dark"></i> Crítico
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="evaluations-count mt-1">
+                                        <small class="text-muted">
+                                            <i class="fas fa-chart-line me-1"></i>{{ conjunto.total_evaluaciones }} evaluación{{ conjunto.total_evaluaciones|pluralize:"es" }}
+                                        </small>
+                                    </div>
+                                </div>
+                                {% endwith %}
+                            {% else %}
+                                <div class="no-evaluations">
+                                    <div class="score-circle bg-light">
+                                        <span class="score-number text-muted">--</span>
+                                    </div>
+                                    <div class="score-label mt-1">
+                                        <small class="text-muted">
+                                            <i class="fas fa-question-circle"></i> Sin evaluar
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- Acciones -->
+                        <td class="text-center">
+                            <div class="action-buttons">
+                                {% has_module_permission user 'risk_conjuntos' 'read' as can_read %}
+                                {% if can_read %}
+                                <a href="{% url 'risk_conjuntos:detalle_conjunto' conjunto.id %}" 
+                                   class="btn btn-primary btn-sm" title="Ver detalles">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% has_module_permission user 'risk_conjuntos' 'update' as can_update %}
+                                {% has_module_permission user 'risk_conjuntos' 'delete' as can_delete %}
+                                {% if can_update or can_delete %}
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" 
+                                            data-bs-toggle="dropdown" aria-expanded="false" title="Más opciones">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% if can_update %}
+                                        <li>
+                                            <a class="dropdown-item" href="#" onclick="openEditModal('{{ conjunto.id }}')">
+                                                <i class="fas fa-edit me-2"></i>Editar
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                        {% if can_delete %}
+                                        {% if can_update %}<li><hr class="dropdown-divider"></li>{% endif %}
+                                        <li>
+                                            <a class="dropdown-item text-danger" href="#" 
+                                               onclick="confirmarEliminacion('{{ conjunto.id }}', '{{ conjunto.nombre }}')">
+                                                <i class="fas fa-trash me-2"></i>Eliminar
+                                            </a>
+                                        </li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5">
+                            <div class="empty-state">
+                                <i class="fas fa-building fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted mb-2">No hay conjuntos registrados</h5>
+                                <p class="text-muted mb-3">Comienza registrando tu primer conjunto residencial</p>
+                                {% has_module_permission user 'risk_conjuntos' 'create' as can_create_first %}
+                                {% if can_create_first %}
+                                <button onclick="openCreateModal()" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Registrar Primer Conjunto
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Paginación avanzada -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            {% pagination_info page_obj start_index end_index total_items %}
+        </div>
+        
+        <nav aria-label="Paginación de conjuntos">
+            <ul class="pagination">
+                <!-- Primera página y anterior -->
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="{% url_replace request page=1 %}" title="Primera página">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{% url_replace request page=page_obj.previous_page_number %}" title="Página anterior">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                </li>
+                {% endif %}
+
+                <!-- Páginas numeradas con lógica inteligente -->
+                {% pagination_range page_obj as page_range %}
+                {% for page_num in page_range %}
+                    {% if page_num == '...' %}
+                    <li class="page-item disabled">
+                        <span class="page-link pagination-ellipsis">…</span>
+                    </li>
+                    {% elif page_num == page_obj.number %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{% url_replace request page=page_num %}">{{ page_num }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Siguiente página y última -->
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{% url_replace request page=page_obj.next_page_number %}" title="Página siguiente">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="{% url_replace request page=page_obj.paginator.num_pages %}" title="Última página">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        
+        <div class="per-page-selector">
+            {% per_page_selector request items_per_page per_page_options %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Estado vacío -->
+    <div class="table-container">
+        <div class="table-header">
+            <h5 class="mb-0">
+                <i class="fas fa-building me-2"></i>
+                Conjuntos Registrados
+            </h5>
+        </div>
+        <div class="text-center py-5">
+            <i class="fas fa-building text-muted mb-4" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mb-3">No se encontraron conjuntos</h4>
+            {% if request.GET %}
+            <p class="text-muted mb-4">Intenta ajustar los filtros de búsqueda</p>
+            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="btn btn-outline-primary me-3">
+                <i class="fas fa-times me-2"></i>Limpiar filtros
+            </a>
+            {% else %}
+            <p class="text-muted mb-4">Crea tu primer conjunto para comenzar</p>
+            {% endif %}
+            <a href="{% url 'risk_conjuntos:crear_conjunto' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Crear conjunto
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="eliminarModal" tabindex="-1" aria-labelledby="eliminarModalLabel" role="dialog" aria-modal="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eliminarModalLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar modal de confirmación"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar el conjunto <strong id="conjuntoNombre"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Esta acción no se puede deshacer. El conjunto será marcado como inactivo.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="eliminarForm" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmarEliminacion(conjuntoId, conjuntoNombre) {
+    document.getElementById('conjuntoNombre').textContent = conjuntoNombre;
+    document.getElementById('eliminarForm').action = '/risk-conjuntos/conjuntos/' + conjuntoId + '/eliminar/';
+    
+    const modalElement = document.getElementById('eliminarModal');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
+}
+
+// Funciones para el modal de conjunto
+function openCreateModal() {
+    console.log('Creando nuevo conjunto');
+    
+    // Obtener el modal
+    const modalElement = document.getElementById('conjuntoModal');
+    if (!modalElement) {
+        console.error('Modal no encontrado');
+        return;
+    }
+    
+    // Limpiar formulario completamente
+    const form = document.getElementById('conjuntoModalForm');
+    form.reset();
+    document.getElementById('conjuntoId').value = '';
+    
+    // Limpiar clases visuales de checkboxes
+    const checkboxCards = form.querySelectorAll('.checkbox-card');
+    checkboxCards.forEach(card => {
+        card.classList.remove('checked');
+    });
+    
+    // Limpiar campos específicos que pueden tener valores persistentes
+    const campos = ['id_nit', 'id_nombre', 'id_direccion', 'id_ciudad', 'id_departamento', 'id_numero_unidades', 
+                   'id_administrador_telefono', 'id_administrador_email', 'id_administrador_nombre'];
+    campos.forEach(campoId => {
+        const campo = document.getElementById(campoId);
+        if (campo) {
+            campo.value = '';
+        }
+    });
+    
+    // Resetear el select de tipo de conjunto
+    const tipoSelect = document.getElementById('id_tipo_conjunto');
+    if (tipoSelect) {
+        tipoSelect.selectedIndex = 0;
+    }
+    
+    // Actualizar título
+    document.getElementById('modalTitle').textContent = 'Nuevo Conjunto';
+    document.getElementById('submitText').textContent = 'Crear Conjunto';
+    
+    // Cargar tipos de conjunto y amenidades
+    loadFormData();
+    
+    // Mostrar modal
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement, {
+        backdrop: 'static',
+        keyboard: false
+    });
+    modal.show();
+    
+    console.log('✅ Modal de creación mostrado correctamente');
+}
+
+function openEditModal(conjuntoId) {
+    console.log('Editando conjunto:', conjuntoId);
+    
+    // Obtener el modal
+    const modalElement = document.getElementById('conjuntoModal');
+    if (!modalElement) {
+        console.error('Modal no encontrado');
+        return;
+    }
+    
+    // Cargar datos del conjunto
+    fetch(`/risk-conjuntos/api/conjunto/${conjuntoId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('� Datos recibidos del API:', data.conjunto);
+                    
+                    // PRIMERO: Llenar formulario ANTES de mostrar el modal
+                    populateForm(data.conjunto);
+                    
+                    // Configurar títulos y metadatos
+                    document.getElementById('modalTitle').textContent = `Editar ${data.conjunto.nombre}`;
+                    document.getElementById('submitText').textContent = 'Actualizar Conjunto';
+                    document.getElementById('conjuntoId').value = conjuntoId;
+                    
+                    // Mostrar modal usando Bootstrap
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalElement, {
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    modal.show();
+                    
+                    console.log('✅ Modal de edición mostrado correctamente');
+                    
+                } else {
+                    showErrorToast('Error al cargar los datos del conjunto');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showErrorToast('Error al cargar los datos del conjunto');
+            });
+}
+
+function loadFormData() {
+    // Los tipos de conjunto ya están cargados en el HTML del modal
+    // Solo necesitamos cargar las amenidades
+    loadAmenidades();
+}
+
+function loadAmenidades() {
+    // Las amenidades ahora están hardcodeadas en el template del modal
+    // Solo necesitamos agregar la funcionalidad de clic en las cards
+    document.querySelectorAll('.checkbox-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            if (e.target.type !== 'checkbox') {
+                const checkbox = this.querySelector('input[type="checkbox"]');
+                checkbox.checked = !checkbox.checked;
+            }
+            this.classList.toggle('checked', this.querySelector('input[type="checkbox"]').checked);
+        });
+    });
+}
+
+    // Debug adicional: función para inspeccionar el estado del modal
+    window.debugModal = function() {
+        const modal = document.getElementById('conjuntoModal');
+        const tipoSelect = document.getElementById('id_tipo_conjunto');
+        const ciudadInput = document.getElementById('id_ciudad');
+        
+        console.log('🔍 DEBUG COMPLETO DEL MODAL:');
+        console.log('Modal element:', modal);
+        console.log('Modal classes:', modal ? modal.className : 'N/A');
+        console.log('Modal style display:', modal ? modal.style.display : 'N/A');
+        console.log('Modal computed display:', modal ? getComputedStyle(modal).display : 'N/A');
+        
+        console.log('Tipo select element:', tipoSelect);
+        console.log('Tipo select value:', tipoSelect ? tipoSelect.value : 'N/A');
+        console.log('Tipo select selectedIndex:', tipoSelect ? tipoSelect.selectedIndex : 'N/A');
+        console.log('Tipo select computed style:', tipoSelect ? getComputedStyle(tipoSelect).display : 'N/A');
+        
+        console.log('Ciudad input element:', ciudadInput);
+        console.log('Ciudad input value:', ciudadInput ? ciudadInput.value : 'N/A');
+        console.log('Ciudad input style:', ciudadInput ? ciudadInput.style.cssText : 'N/A');
+        console.log('Ciudad computed style:', ciudadInput ? getComputedStyle(ciudadInput).display : 'N/A');
+        
+        // Mostrar toda la estructura del formulario
+        const form = document.getElementById('conjuntoModalForm');
+        if (form) {
+            console.log('📋 Formulario encontrado, elementos:');
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach((input, index) => {
+                const computedStyle = getComputedStyle(input);
+                console.log(`  ${index}: ${input.tagName} id="${input.id}" value="${input.value}" display="${computedStyle.display}" visibility="${computedStyle.visibility}"`);
+            });
+        }
+        
+        return {
+            modal: modal,
+            tipoSelect: tipoSelect,
+            ciudadInput: ciudadInput,
+            form: form
+        };
+    };
+    
+    // Función para forzar actualización visual de todo el formulario
+    window.forceRefreshForm = function() {
+        console.log('🔄 Forzando actualización visual de todo el formulario...');
+        const form = document.getElementById('conjuntoModalForm');
+        if (form) {
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach((input) => {
+                if (input.value || input.type === 'checkbox') {
+                    forceUpdate(input);
+                }
+            });
+        }
+        console.log('✅ Actualización visual completada');
+    };
+    
+    // NUEVA: Función nuclear para recrear todo el formulario
+    window.forceRecreateForm = function() {
+        console.log('💥 RECREANDO FORMULARIO COMPLETO...');
+        
+        const modal = document.getElementById('conjuntoModal');
+        const modalBody = modal.querySelector('.modal-body');
+        
+        // Guardar todos los datos del formulario primero
+        const formData = {};
+        const form = document.getElementById('conjuntoModalForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach(input => {
+            if (input.type === 'checkbox') {
+                formData[input.id] = input.checked;
+            } else {
+                formData[input.id] = input.value;
+            }
+        });
+        
+        console.log('📋 Datos guardados:', formData);
+        
+        // Forzar re-render completo del modal-body
+        const bodyHTML = modalBody.innerHTML;
+        modalBody.innerHTML = '';
+        modalBody.offsetHeight; // Force reflow
+        modalBody.innerHTML = bodyHTML;
+        
+        // Esperar un frame y restaurar todos los datos
+        setTimeout(() => {
+            Object.keys(formData).forEach(inputId => {
+                const input = document.getElementById(inputId);
+                if (input) {
+                    if (input.type === 'checkbox') {
+                        input.checked = formData[inputId];
+                    } else {
+                        input.value = formData[inputId];
+                    }
+                    
+                    // Disparar eventos
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
+            
+            console.log('✅ Formulario completamente recreado y datos restaurados');
+        }, 50);
+    };
+    
+    // Función para verificar qué datos específicos tiene el formulario
+    window.checkFormData = function() {
+        const form = document.getElementById('conjuntoModalForm');
+        const data = new FormData(form);
+        
+        console.log('📋 DATOS ACTUALES DEL FORMULARIO:');
+        for (let [key, value] of data.entries()) {
+            console.log(`  ${key}: "${value}"`);
+        }
+        
+        // Verificar campos específicos
+        const campos = ['id_nit', 'id_nombre', 'id_tipo_conjunto', 'id_ciudad'];
+        console.log('🔍 CAMPOS CRÍTICOS:');
+        campos.forEach(campoId => {
+            const campo = document.getElementById(campoId);
+            if (campo) {
+                console.log(`  ${campoId}: value="${campo.value}" visible=${campo.offsetParent !== null}`);
+                if (campo.tagName === 'SELECT') {
+                    console.log(`    selectedIndex: ${campo.selectedIndex}, text: "${campo.options[campo.selectedIndex]?.text}"`);
+                }
+            }
+        });
+        
+        return data;
+    };
+    
+    // NUEVA: Función para forzar visibilidad absoluta de los campos
+    window.forceVisibility = function() {
+        console.log('👁️ Forzando visibilidad absoluta de todos los campos...');
+        
+        const form = document.getElementById('conjuntoModalForm');
+        const inputs = form.querySelectorAll('input, select, textarea');
+        
+        inputs.forEach((input, index) => {
+            // Forzar CSS directo
+            input.style.display = 'block !important';
+            input.style.visibility = 'visible !important';
+            input.style.opacity = '1 !important';
+            input.style.height = 'auto !important';
+            input.style.maxHeight = 'none !important';
+            input.style.overflow = 'visible !important';
+            input.style.position = 'static !important';
+            input.style.left = 'auto !important';
+            input.style.top = 'auto !important';
+            input.style.zIndex = 'auto !important';
+            
+            // Para campos específicos, agregar borde rojo para debug
+            if (input.id === 'id_tipo_conjunto' || input.id === 'id_ciudad') {
+                input.style.border = '3px solid red !important';
+                input.style.backgroundColor = 'yellow !important';
+            }
+            
+            console.log(`  ${index}: ${input.tagName} id="${input.id}" value="${input.value}" - FORZADO VISIBLE`);
+        });
+        
+        // También forzar el contenedor del modal
+        const modal = document.getElementById('conjuntoModal');
+        const modalBody = modal.querySelector('.modal-body');
+        
+        modal.style.display = 'block !important';
+        modalBody.style.display = 'block !important';
+        
+        console.log('✅ Visibilidad forzada completada');
+    };
+    
+    // Función para examinar CSS específico de los campos problemáticos
+    window.examineCSS = function() {
+        console.log('🔍 EXAMINANDO CSS DE CAMPOS PROBLEMÁTICOS:');
+        
+        const tipoSelect = document.getElementById('id_tipo_conjunto');
+        const ciudadInput = document.getElementById('id_ciudad');
+        
+        function analyzeElement(element, name) {
+            if (!element) {
+                console.log(`❌ ${name}: ELEMENTO NO ENCONTRADO`);
+                return;
+            }
+            
+            const computed = getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            
+            console.log(`\n📋 ${name} (${element.tagName}#${element.id}):`);
+            console.log(`  Value: "${element.value}"`);
+            console.log(`  Display: ${computed.display}`);
+            console.log(`  Visibility: ${computed.visibility}`);
+            console.log(`  Opacity: ${computed.opacity}`);
+            console.log(`  Position: ${computed.position}`);
+            console.log(`  Z-index: ${computed.zIndex}`);
+            console.log(`  Width: ${computed.width} (${rect.width}px)`);
+            console.log(`  Height: ${computed.height} (${rect.height}px)`);
+            console.log(`  Top: ${rect.top}px, Left: ${rect.left}px`);
+            console.log(`  Overflow: ${computed.overflow}`);
+            console.log(`  Transform: ${computed.transform}`);
+            console.log(`  Clip: ${computed.clip}`);
+            console.log(`  ClipPath: ${computed.clipPath}`);
+            
+            // Verificar si está dentro del viewport
+            const inViewport = rect.top >= 0 && rect.left >= 0 && 
+                              rect.bottom <= window.innerHeight && 
+                              rect.right <= window.innerWidth;
+            console.log(`  En viewport: ${inViewport}`);
+            
+            // Verificar ancestros que puedan estar ocultando
+            let parent = element.parentElement;
+            let level = 1;
+            while (parent && level <= 5) {
+                const parentComputed = getComputedStyle(parent);
+                if (parentComputed.display === 'none' || parentComputed.visibility === 'hidden' || parentComputed.opacity === '0') {
+                    console.log(`  ⚠️ Ancestro ${level} (${parent.tagName}.${parent.className}) está oculto:`);
+                    console.log(`    Display: ${parentComputed.display}, Visibility: ${parentComputed.visibility}, Opacity: ${parentComputed.opacity}`);
+                }
+                parent = parent.parentElement;
+                level++;
+            }
+        }
+        
+        analyzeElement(tipoSelect, 'TIPO DE CONJUNTO');
+        analyzeElement(ciudadInput, 'CIUDAD');
+    };
+    window.createTestModal = function() {
+        const testHTML = `
+        <div id="testModal" style="position: fixed; top: 50px; left: 50px; background: white; border: 2px solid red; padding: 20px; z-index: 9999;">
+            <h3>TEST DE CAMPOS</h3>
+            <div>
+                <label>Tipo de Conjunto:</label>
+                <select id="test_tipo">
+                    <option value="">Seleccione</option>
+                    <option value="1">Conjunto Cerrado</option>
+                    <option value="2">Urbanización</option>
+                    <option value="3">Condominio</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label>Ciudad:</label>
+                <input type="text" id="test_ciudad" value="">
+            </div>
+            <br>
+            <button onclick="document.getElementById('test_tipo').value='3'; document.getElementById('test_ciudad').value='Medellin';">POBLAR</button>
+            <button onclick="document.getElementById('testModal').remove();">CERRAR</button>
+        </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', testHTML);
+        console.log('✅ Modal de prueba creado');
+    };
+    
+    // FUNCIÓN PARA INTERCEPTAR Y BLOQUEAR LIMPIEZA DE VALORES
+    window.lockFieldValues = function(tipoValue, ciudadValue) {
+        console.log('🔒 BLOQUEANDO limpieza de valores...');
+        
+        const tipoSelect = document.getElementById('id_tipo_conjunto');
+        const ciudadInput = document.getElementById('id_ciudad');
+        
+        // Establecer valores iniciales
+        if (tipoSelect) {
+            tipoSelect.value = tipoValue;
+            for (let i = 0; i < tipoSelect.options.length; i++) {
+                if (tipoSelect.options[i].value == tipoValue) {
+                    tipoSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (ciudadInput) {
+            ciudadInput.value = ciudadValue;
+        }
+        
+        // INTERCEPTAR cualquier intento de limpiar los valores
+        let lockActive = true;
+        
+        // Vigilar cambios con MutationObserver
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'value') {
+                    const target = mutation.target;
+                    if (lockActive && (target.id === 'id_tipo_conjunto' || target.id === 'id_ciudad')) {
+                        if (target.value === '' || target.value === null) {
+                            console.log(`🚫 RESTAURANDO valor limpiado en ${target.id}`);
+                            if (target.id === 'id_tipo_conjunto') {
+                                target.value = tipoValue;
+                            } else if (target.id === 'id_ciudad') {
+                                target.value = ciudadValue;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        
+        if (tipoSelect) observer.observe(tipoSelect, { attributes: true, attributeFilter: ['value'] });
+        if (ciudadInput) observer.observe(ciudadInput, { attributes: true, attributeFilter: ['value'] });
+        
+        // Verificación periódica cada 100ms
+        const interval = setInterval(() => {
+            if (!lockActive) {
+                clearInterval(interval);
+                observer.disconnect();
+                return;
+            }
+            
+            if (tipoSelect && (tipoSelect.value === '' || tipoSelect.value !== tipoValue)) {
+                console.log(`🔄 REESTABLECIENDO tipo_conjunto: "${tipoSelect.value}" -> "${tipoValue}"`);
+                tipoSelect.value = tipoValue;
+            }
+            
+            if (ciudadInput && (ciudadInput.value === '' || ciudadInput.value !== ciudadValue)) {
+                console.log(`🔄 REESTABLECIENDO ciudad: "${ciudadInput.value}" -> "${ciudadValue}"`);
+                ciudadInput.value = ciudadValue;
+            }
+        }, 100);
+        
+        // Desactivar bloqueo después de 10 segundos
+        setTimeout(() => {
+            lockActive = false;
+            clearInterval(interval);
+            observer.disconnect();
+            console.log('🔓 Bloqueo de valores desactivado');
+        }, 10000);
+    };
+    
+    // FUNCIÓN FINAL: Forzar valores directamente en FormData
+    window.forceFormDataValues = function() {
+        console.log('� FORZANDO valores directamente en FormData...');
+        
+        const form = document.getElementById('conjuntoModalForm');
+        
+        // Encontrar TODOS los elementos con estos IDs
+        const allTipoElements = document.querySelectorAll('#id_tipo_conjunto, [name="tipo_conjunto"]');
+        const allCiudadElements = document.querySelectorAll('#id_ciudad, [name="ciudad"]');
+        
+        console.log(`🔍 Encontrados ${allTipoElements.length} elementos tipo_conjunto`);
+        console.log(`🔍 Encontrados ${allCiudadElements.length} elementos ciudad`);
+        
+        // Forzar valores en TODOS los elementos encontrados
+        allTipoElements.forEach((element, index) => {
+            console.log(`  📝 Elemento ${index}: ${element.tagName} value="${element.value}"`);
+            element.value = "3";
+            if (element.tagName === 'SELECT') {
+                element.selectedIndex = 3; // Condominio
+            }
+            element.style.border = '3px solid blue !important';
+        });
+        
+        allCiudadElements.forEach((element, index) => {
+            console.log(`  📝 Elemento ${index}: ${element.tagName} value="${element.value}"`);
+            element.value = "Medellin";
+            element.style.border = '3px solid green !important';
+        });
+        
+        // Verificar FormData después del forzado
+        setTimeout(() => {
+            const formData = new FormData(form);
+            console.log('📊 FormData después del forzado:');
+            for (let [key, value] of formData.entries()) {
+                if (key === 'tipo_conjunto' || key === 'ciudad') {
+                    console.log(`  ${key}: "${value}"`);
+                }
+            }
+        }, 100);
+        
+        console.log('✅ Valores forzados en todos los elementos');
+    };
+    window.fixCriticalFields = function(tipoValue, ciudadValue) {
+        console.log('🔧 Reparando campos críticos específicamente...');
+        
+        const tipoSelect = document.getElementById('id_tipo_conjunto');
+        const ciudadInput = document.getElementById('id_ciudad');
+        
+        if (tipoSelect && tipoValue) {
+            console.log(`🔧 Reparando tipo_conjunto con valor: ${tipoValue}`);
+            
+            // Limpiar completamente
+            tipoSelect.value = "";
+            tipoSelect.selectedIndex = 0;
+            
+            // Esperar un frame
+            setTimeout(() => {
+                // Buscar y seleccionar
+                for (let i = 0; i < tipoSelect.options.length; i++) {
+                    if (tipoSelect.options[i].value == tipoValue) {
+                        tipoSelect.selectedIndex = i;
+                        tipoSelect.value = tipoValue;
+                        console.log(`  ✅ Tipo seleccionado: ${tipoSelect.value} (${tipoSelect.options[i].text})`);
+                        break;
+                    }
+                }
+                
+                // Forzar eventos
+                tipoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                tipoSelect.focus();
+                tipoSelect.blur();
+            }, 10);
+        }
+        
+        if (ciudadInput && ciudadValue) {
+            console.log(`🔧 Reparando ciudad con valor: ${ciudadValue}`);
+            
+            // Limpiar completamente
+            ciudadInput.value = "";
+            ciudadInput.removeAttribute('value');
+            
+            // Esperar un frame
+            setTimeout(() => {
+                ciudadInput.setAttribute('value', ciudadValue);
+                ciudadInput.value = ciudadValue;
+                console.log(`  ✅ Ciudad establecida: ${ciudadInput.value}`);
+                
+                // Forzar eventos
+                ciudadInput.dispatchEvent(new Event('input', { bubbles: true }));
+                ciudadInput.dispatchEvent(new Event('change', { bubbles: true }));
+                ciudadInput.focus();
+                ciudadInput.blur();
+            }, 10);
+        }
+        
+        console.log('✅ Reparación de campos críticos completada');
+    };
+    
+    // FUNCIÓN DE DIAGNÓSTICO PROFUNDO
+    window.deepDiagnosis = function() {
+        console.log('🔬 === DIAGNÓSTICO PROFUNDO ===');
+        
+        const tipoSelect = document.getElementById('id_tipo_conjunto');
+        const ciudadInput = document.getElementById('id_ciudad');
+        
+        // 1. INSPECCIÓN DE ELEMENTOS
+        console.log('📋 1. INSPECCIÓN DE ELEMENTOS:');
+        console.log('  Tipo Select:', tipoSelect);
+        console.log('  Ciudad Input:', ciudadInput);
+        
+        if (tipoSelect) {
+            console.log('🔍 TIPO SELECT PROFUNDO:');
+            console.log('  - Value:', tipoSelect.value);
+            console.log('  - SelectedIndex:', tipoSelect.selectedIndex);
+            console.log('  - Options length:', tipoSelect.options.length);
+            
+            // Mostrar todas las opciones
+            for (let i = 0; i < tipoSelect.options.length; i++) {
+                const opt = tipoSelect.options[i];
+                console.log(`    Option ${i}: value="${opt.value}", text="${opt.text}", selected=${opt.selected}`);
+            }
+            
+            // CSS Computed
+            const computedStyle = getComputedStyle(tipoSelect);
+            console.log('  - Display:', computedStyle.display);
+            console.log('  - Visibility:', computedStyle.visibility);
+            console.log('  - Opacity:', computedStyle.opacity);
+            console.log('  - Font-size:', computedStyle.fontSize);
+            console.log('  - Color:', computedStyle.color);
+            console.log('  - Background:', computedStyle.backgroundColor);
+            
+            // Posición y dimensiones
+            const rect = tipoSelect.getBoundingClientRect();
+            console.log('  - Rect:', rect);
+            console.log('  - OffsetParent:', tipoSelect.offsetParent);
+        }
+        
+        if (ciudadInput) {
+            console.log('🔍 CIUDAD INPUT PROFUNDO:');
+            console.log('  - Value:', ciudadInput.value);
+            console.log('  - DefaultValue:', ciudadInput.defaultValue);
+            console.log('  - Placeholder:', ciudadInput.placeholder);
+            
+            // CSS Computed
+            const computedStyle = getComputedStyle(ciudadInput);
+            console.log('  - Display:', computedStyle.display);
+            console.log('  - Visibility:', computedStyle.visibility);
+            console.log('  - Opacity:', computedStyle.opacity);
+            console.log('  - Font-size:', computedStyle.fontSize);
+            console.log('  - Color:', computedStyle.color);
+            console.log('  - Background:', computedStyle.backgroundColor);
+            
+            // Posición y dimensiones
+            const rect = ciudadInput.getBoundingClientRect();
+            console.log('  - Rect:', rect);
+            console.log('  - OffsetParent:', ciudadInput.offsetParent);
+        }
+        
+        // 2. VERIFICAR MODAL
+        console.log('📋 2. ESTADO DEL MODAL:');
+        const modal = document.getElementById('conjuntoModal');
+        if (modal) {
+            const modalStyle = getComputedStyle(modal);
+            console.log('  - Modal display:', modalStyle.display);
+            console.log('  - Modal visibility:', modalStyle.visibility);
+            console.log('  - Modal z-index:', modalStyle.zIndex);
+            
+            // Verificar backdrop
+            const backdrop = document.querySelector('.modal-backdrop');
+            console.log('  - Backdrop exists:', !!backdrop);
+        }
+        
+        // 3. FORZAR VISIBILIDAD EXTREMA
+        console.log('📋 3. APLICANDO VISIBILIDAD EXTREMA...');
+        if (tipoSelect) {
+            tipoSelect.style.cssText = `
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                z-index: 10000 !important;
+                background-color: yellow !important;
+                border: 5px solid red !important;
+                font-size: 20px !important;
+                color: black !important;
+                height: auto !important;
+                width: auto !important;
+            `;
+        }
+        
+        if (ciudadInput) {
+            ciudadInput.style.cssText = `
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                position: relative !important;
+                z-index: 10000 !important;
+                background-color: lime !important;
+                border: 5px solid blue !important;
+                font-size: 20px !important;
+                color: black !important;
+                height: auto !important;
+                width: auto !important;
+            `;
+        }
+        
+        console.log('✅ Diagnóstico completo. Los campos deberían ser súper visibles ahora.');
+    };
+    
+    console.log('🎯 Funciones de debug disponibles si es necesario:');
+    console.log('  - debugModal() - Debug completo del modal');
+    console.log('  - checkFormData() - Verificar datos del formulario');
+    console.log('  - deepDiagnosis() - Diagnóstico visual profundo de campos');
+
+// Función para reparar campos críticos que necesitan ajuste después del show del modal
+function repairCriticalFields(tipoValue, ciudadValue) {
+    // Usar selectores específicos del modal para evitar conflictos con filtros
+    const modal = document.getElementById('conjuntoModal');
+    const tipoSelect = modal ? modal.querySelector('select[name="tipo_conjunto"]') : null;
+    const ciudadInput = modal ? modal.querySelector('input[name="ciudad"]') : null;
+    
+    // Reparar tipo de conjunto
+    if (tipoValue && tipoSelect) {
+        tipoSelect.value = '';
+        tipoSelect.selectedIndex = 0;
+        
+        for (let i = 0; i < tipoSelect.options.length; i++) {
+            if (tipoSelect.options[i].value == tipoValue) {
+                tipoSelect.selectedIndex = i;
+                tipoSelect.value = tipoValue;
+                break;
+            }
+        }
+        
+        tipoSelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    
+    // Reparar ciudad
+    if (ciudadValue && ciudadInput) {
+        ciudadInput.value = '';
+        ciudadInput.removeAttribute('value');
+        ciudadInput.setAttribute('value', ciudadValue);
+        ciudadInput.value = ciudadValue;
+        ciudadInput.defaultValue = ciudadValue;
+        
+        ciudadInput.dispatchEvent(new Event('input', { bubbles: true }));
+        ciudadInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+// Función auxiliar para forzar actualización visual (global)
+function forceUpdate(element) {
+    if (!element) return;
+    
+    console.log(`🔧 Forzando actualización para: ${element.id}`);
+    
+    // NUEVA TÉCNICA AGRESIVA: Recrear completamente el elemento
+    const parent = element.parentNode;
+    const tagName = element.tagName;
+    const attributes = {};
+    
+    // Guardar todos los atributos
+    for (let i = 0; i < element.attributes.length; i++) {
+        const attr = element.attributes[i];
+        attributes[attr.name] = attr.value;
+    }
+    
+    // Guardar valor y estado
+    const value = element.value;
+    const selectedIndex = element.selectedIndex || 0;
+    const checked = element.checked;
+    const innerHTML = element.innerHTML;
+    
+    // Crear nuevo elemento idéntico
+    const newElement = document.createElement(tagName);
+    
+    // Restaurar atributos
+    Object.keys(attributes).forEach(attrName => {
+        newElement.setAttribute(attrName, attributes[attrName]);
+    });
+    
+    // Restaurar contenido para selects
+    if (tagName === 'SELECT') {
+        newElement.innerHTML = innerHTML;
+    }
+    
+    // Reemplazar elemento en el DOM
+    parent.replaceChild(newElement, element);
+    
+    // Restaurar valor y estado DESPUÉS de insertar
+    newElement.value = value;
+    if (tagName === 'SELECT') {
+        newElement.selectedIndex = selectedIndex;
+    }
+    if (newElement.type === 'checkbox') {
+        newElement.checked = checked;
+    }
+    
+    // Forzar eventos para que otros componentes detecten el cambio
+    newElement.dispatchEvent(new Event('input', { bubbles: true }));
+    newElement.dispatchEvent(new Event('change', { bubbles: true }));
+    
+    console.log(`✅ Elemento recreado para: ${newElement.id}, valor final: ${newElement.value}`);
+    
+    return newElement;
+}
+
+function populateForm(conjunto) {
+    // Obtener referencia al modal específico
+    const modal = document.getElementById('conjuntoModal');
+    if (!modal) {
+        console.error('No se encontró el modal conjuntoModal');
+        return;
+    }
+    
+    // Llenar campos básicos usando selectores específicos del modal
+    const campos = [
+        { selector: 'input[name="nit"]', valor: conjunto.nit },
+        { selector: 'input[name="nombre"]', valor: conjunto.nombre },
+        { selector: 'input[name="direccion"]', valor: conjunto.direccion },
+        { selector: 'input[name="ciudad"]', valor: conjunto.ciudad },
+        { selector: 'input[name="departamento"]', valor: conjunto.departamento },
+        { selector: 'input[name="numero_unidades"]', valor: conjunto.numero_unidades },
+        { selector: 'input[name="numero_torres"]', valor: conjunto.numero_torres },
+        { selector: 'input[name="administrador_telefono"]', valor: conjunto.administrador_telefono },
+        { selector: 'input[name="administrador_email"]', valor: conjunto.administrador_email },
+        { selector: 'input[name="administrador_nombre"]', valor: conjunto.administrador_nombre }
+    ];
+    
+    campos.forEach(campo => {
+        const elemento = modal.querySelector(campo.selector);
+        if (elemento) {
+            elemento.value = campo.valor || '';
+        }
+    });
+    
+    // Seleccionar el tipo de conjunto usando selector específico del modal
+    const tipoSelect = modal.querySelector('select[name="tipo_conjunto"]');
+    if (tipoSelect && conjunto.tipo_conjunto) {
+        tipoSelect.selectedIndex = 0;
+        for (let i = 0; i < tipoSelect.options.length; i++) {
+            if (tipoSelect.options[i].value == conjunto.tipo_conjunto) {
+                tipoSelect.selectedIndex = i;
+                break;
+            }
+        }
+    }
+    
+    // Configurar amenidades (checkboxes) usando selectores específicos del modal
+    const amenidadFields = [
+        'tiene_piscina', 'tiene_gimnasio', 'tiene_salon_social', 
+        'tiene_juegos_infantiles', 'tiene_canchas_deportivas'
+    ];
+    
+    amenidadFields.forEach(field => {
+        const checkbox = modal.querySelector(`input[name="${field}"]`);
+        if (checkbox) {
+            checkbox.checked = !!conjunto[field];
+            const card = checkbox.closest('.checkbox-card');
+            if (card) {
+                card.classList.toggle('checked', checkbox.checked);
+            }
+        }
+    });
+}
+
+function handleFormSubmit() {
+    try {
+        const formData = new FormData(document.getElementById('conjuntoModalForm'));
+        const conjuntoId = document.getElementById('conjuntoId').value;
+        
+        const url = conjuntoId ? 
+            `/risk-conjuntos/api/conjunto/${conjuntoId}/editar/` : 
+            '/risk-conjuntos/api/conjunto/crear/';
+        
+        // Deshabilitar botón de envío
+        const submitBtn = document.getElementById('submitBtn');
+        if (!submitBtn) {
+            console.error('No se encontró el botón submitBtn');
+            showErrorToast('Error interno: botón no encontrado');
+            return;
+        }
+        
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+        
+        // Agregar timeout al fetch
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            signal: controller.signal
+        })
+        .then(response => {
+            clearTimeout(timeoutId);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Restaurar botón
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            
+            if (data.success) {
+                // Cerrar modal
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('conjuntoModal'));
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+                
+                // Mostrar mensaje de éxito con toast
+                showSuccessToast(data.message || 'Conjunto guardado exitosamente');
+                
+                // Recargar página después de un breve delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                // Mostrar errores sin cerrar el modal
+                showFormErrors(data.errors || {});
+            }
+        })
+        .catch(error => {
+            clearTimeout(timeoutId);
+            console.error('Error en fetch:', error);
+            
+            // Restaurar botón en caso de error
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+            
+            if (error.name === 'AbortError') {
+                showErrorToast('La solicitud tardó demasiado. Por favor, intente nuevamente.');
+            } else {
+                showErrorToast('Error al procesar la solicitud. Por favor, intente nuevamente.');
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error en handleFormSubmit:', error);
+        showErrorToast('Error interno. Por favor, recargue la página e intente nuevamente.');
+    }
+}
+
+function showSuccessToast(message) {
+    try {
+        // Actualizar el mensaje del toast
+        const toastMessage = document.getElementById('successToastMessage');
+        if (toastMessage) {
+            toastMessage.textContent = message;
+        }
+        
+        // Mostrar el toast
+        const toastElement = document.getElementById('successToast');
+        if (toastElement) {
+            const toast = new bootstrap.Toast(toastElement, {
+                delay: 4000  // Mostrar por 4 segundos
+            });
+            toast.show();
+        }
+    } catch (error) {
+        console.error('Error mostrando toast de éxito:', error);
+        // Fallback a alert si hay error con toast
+        alert(message);
+    }
+}
+
+function showErrorToast(message) {
+    try {
+        // Actualizar el mensaje del toast
+        const toastMessage = document.getElementById('errorToastMessage');
+        if (toastMessage) {
+            toastMessage.textContent = message;
+        }
+        
+        // Mostrar el toast
+        const toastElement = document.getElementById('errorToast');
+        if (toastElement) {
+            const toast = new bootstrap.Toast(toastElement, {
+                delay: 5000  // Mostrar por 5 segundos para errores
+            });
+            toast.show();
+        }
+    } catch (error) {
+        console.error('Error mostrando toast de error:', error);
+        // Fallback a alert si hay error con toast
+        alert(message);
+    }
+}
+
+function showFormErrors(errors) {
+    // Limpiar errores anteriores
+    document.querySelectorAll('.is-invalid').forEach(field => {
+        field.classList.remove('is-invalid');
+    });
+    document.querySelectorAll('.invalid-feedback').forEach(feedback => {
+        feedback.textContent = '';
+    });
+    
+    // Mostrar nuevos errores
+    Object.keys(errors).forEach(fieldName => {
+        const field = document.getElementById(`id_${fieldName}`);
+        const feedback = field ? field.nextElementSibling : null;
+        
+        if (field && feedback && feedback.classList.contains('invalid-feedback')) {
+            field.classList.add('is-invalid');
+            feedback.textContent = errors[fieldName][0];
+        }
+    });
+}
+
+$(document).ready(function() {
+    try {
+        // Suprimir errores de extensiones del navegador que no afectan funcionalidad
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('message channel closed')) {
+                e.preventDefault();
+                return true;
+            }
+        });
+        
+        // Auto-submit del formulario de filtros cuando cambian los select (SOLO filtros, NO modal)
+        $('#filterForm select[name="tipo_conjunto"], #filterForm select[name="nivel_riesgo"], #filterForm select[name="tiene_evaluaciones"]').change(function() {
+            console.log('🔄 Filtro cambiado:', this.name, '=', this.value);
+            $(this).closest('form').submit();
+        });
+        
+        // Limpiar filtros
+        $('.btn-clear-filters').click(function(e) {
+            e.preventDefault();
+            window.location.href = '{% url "risk_conjuntos:lista_conjuntos" %}';
+        });
+        
+        // Manejar eventos del modal para accesibilidad
+        const conjuntoModal = document.getElementById('conjuntoModal');
+        if (conjuntoModal) {
+            conjuntoModal.addEventListener('shown.bs.modal', function() {
+                try {
+                    // Enfocar el primer campo cuando el modal esté completamente visible
+                    const firstInput = this.querySelector('input[type="text"], input[type="email"], select, textarea');
+                    if (firstInput) {
+                        setTimeout(() => firstInput.focus(), 100);
+                    }
+                } catch (error) {
+                    console.warn('Error al enfocar campo:', error);
+                }
+            }, { passive: true });
+        }
+        
+        // Configurar event listener del formulario del modal
+        const conjuntoForm = document.getElementById('conjuntoModalForm');
+        if (conjuntoForm) {
+            // PREVENIR auto-submit en campos del modal
+            const modalInputs = conjuntoForm.querySelectorAll('select, input');
+            modalInputs.forEach(input => {
+                if (input.name === 'tipo_conjunto') {
+                    console.log('🔧 Configurando prevención auto-submit para tipo_conjunto del modal');
+                    input.addEventListener('change', function(e) {
+                        console.log('📝 MODAL: Tipo conjunto cambiado a:', this.value);
+                        e.stopPropagation(); // Prevenir propagación que pueda disparar auto-submit
+                    });
+                }
+            });
+            
+            conjuntoForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('🚀 MODAL: Submit interceptado - procesando con handleFormSubmit');
+                try {
+                    handleFormSubmit();
+                } catch (error) {
+                    console.error('Error en handleFormSubmit:', error);
+                    showErrorToast('Error al procesar el formulario');
+                }
+            }, { passive: false });
+        } else {
+            console.warn('No se encontró el formulario conjuntoModalForm');
+        }
+        
+        // Manejar eventos del modal de eliminar
+        const eliminarModal = document.getElementById('eliminarModal');
+        if (eliminarModal) {
+            eliminarModal.addEventListener('shown.bs.modal', function() {
+                try {
+                    // Enfocar el botón de cancelar por seguridad
+                    const cancelButton = this.querySelector('[data-bs-dismiss="modal"]');
+                    if (cancelButton) {
+                        setTimeout(() => cancelButton.focus(), 100);
+                    }
+                } catch (error) {
+                    console.warn('Error al enfocar botón cancelar:', error);
+                }
+            }, { passive: true });
+        }
+        
+        console.info('✅ Risk Conjuntos: JavaScript inicializado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Risk Conjuntos: Error inicializando eventos:', error);
+    }
+});
+</script>
+
+<!-- Toast Container -->
+<div aria-live="polite" aria-atomic="true" class="position-relative">
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <!-- Toast de éxito -->
+        <div id="successToast" class="toast bg-success text-white" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-success text-white border-0">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong class="me-auto">Éxito</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="successToastMessage">
+                <!-- El mensaje se insertará aquí -->
+            </div>
+        </div>
+        
+        <!-- Toast de error -->
+        <div id="errorToast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-danger text-white border-0">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="errorToastMessage">
+                <!-- El mensaje se insertará aquí -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir el modal -->
+{% include 'risk_conjuntos/modal_conjunto.html' %}
+
+{% endblock %}

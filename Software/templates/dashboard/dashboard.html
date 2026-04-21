@@ -1,0 +1,1900 @@
+﻿{% extends 'base_with_sidebar.html' %}
+{% load static %}
+{% load subscription_extras %}
+
+{# 
+Dashboard Template - Seguridad y Validaciones:
+- Todos los datos mostrados están filtrados por usuario autenticado en la vista
+- Las template tags validan la propiedad de las suscripciones
+- El context processor de evaluadores filtra solo datos del usuario autenticado
+- Los servicios de herencia validan que el usuario tenga permisos como evaluador
+#}
+
+{% block title %}Dashboard - {{ block.super }}{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard-enhanced.css' %}">
+<link rel="stylesheet" href="{% static 'css/dashboard-mobile.css' %}">
+<link rel="stylesheet" href="{% static 'css/layout-integration.css' %}">
+<style>
+.activity-row {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.activity-row:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    transform: translateX(5px);
+}
+
+.activity-description {
+    max-width: 300px;
+}
+
+.time-info {
+    min-width: 80px;
+}
+
+.activity-stat {
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.activity-stat:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+    transform: translateY(-2px);
+}
+
+.avatar-sm {
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.btn-group .btn {
+    border-radius: 0.25rem !important;
+    margin: 0 1px;
+}
+
+@media (max-width: 768px) {
+    .activity-description {
+        max-width: 200px;
+    }
+    
+    .time-info {
+        min-width: 60px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+}
+
+.floating-actions-container {
+    transition: all 0.3s ease-in-out;
+}
+
+.floating-toggle {
+    border: none !important;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+}
+
+.floating-toggle:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 10px 25px rgba(0, 123, 255, 0.4) !important;
+}
+
+.floating-toggle[aria-expanded="true"] {
+    transform: rotate(45deg);
+    background: linear-gradient(135deg, #6f42c1 0%, #495057 100%) !important;
+}
+
+.floating-toggle[aria-expanded="true"] .fas {
+    transform: rotate(-45deg);
+}
+
+.floating-actions-list {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.floating-action-item {
+    animation: fadeInRight 0.3s ease-out forwards;
+    opacity: 0;
+}
+
+.floating-action-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.floating-action-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.floating-action-item:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.floating-label {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.floating-action-item:hover .floating-label {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.floating-actions-list .btn {
+    border: 2px solid;
+    background: white;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.floating-actions-list .btn:hover {
+    transform: scale(1.1);
+}
+
+.floating-actions-list .btn-outline-primary:hover {
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.floating-actions-list .btn-outline-success:hover {
+    box-shadow: 0 6px 20px rgba(25, 135, 84, 0.4);
+    background-color: #198754;
+    color: white;
+    border-color: #198754;
+}
+
+.floating-actions-list .btn-outline-danger:hover {
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    background-color: #dc3545;
+    color: white;
+    border-color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .floating-actions-container {
+        right: 20px !important;
+        bottom: 20px !important;
+    }
+    
+    .floating-toggle {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .floating-actions-list .btn {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .floating-label {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .floating-actions-container {
+        right: 15px !important;
+        bottom: 15px !important;
+    }
+    
+    .floating-toggle {
+        width: 55px !important;
+        height: 55px !important;
+    }
+    
+    .floating-actions-list .btn {
+        width: 42px !important;
+        height: 42px !important;
+    }
+}
+
+@media (min-width: 992px) {
+    .floating-actions-container {
+        right: 40px !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/dashboard-enhanced.js' %}?v=20251118-2121"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header Mejorado con Mejor Accesibilidad -->
+    <header class="dashboard-header" role="banner">
+        <div class="d-flex align-items-center justify-content-between flex-wrap">
+            <div class="header-content">
+                <h1 class="mb-2 text-white fw-bold">
+                    <i class="fas fa-sun me-2" aria-hidden="true"></i>
+                    ¡Hola, <span class="text-gradient">{{ user.get_full_name|default:user.username }}</span>!
+                </h1>
+                <p class="text-white-50 mb-0 fs-5">
+                    <i class="fas fa-calendar-day me-1" aria-hidden="true"></i>
+                    Bienvenido a tu panel de control
+                    <span class="d-none d-md-inline">- {% now "l, d F Y" %}</span>
+                </p>
+            </div>
+            <div class="header-badges d-flex gap-2 flex-wrap">
+                <span class="badge status-badge bg-white text-primary px-3 py-2" 
+                      data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                      title="Hora actual del sistema">
+                    <i class="fas fa-clock me-1" aria-hidden="true"></i>
+                    <span id="current-time">{% now "H:i" %}</span>
+                </span>
+                <span class="badge status-badge bg-success text-white px-3 py-2"
+                      data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                      title="Estado de conexión">
+                    <i class="fas fa-circle me-1 animate-pulse" aria-hidden="true"></i>
+                    En línea
+                </span>
+                {% if user.is_superuser %}
+                <span class="badge status-badge bg-warning text-dark px-3 py-2"
+                      data-bs-toggle="tooltip" data-bs-placement="bottom" 
+                      title="Privilegios de administrador">
+                    <i class="fas fa-crown me-1" aria-hidden="true"></i>
+                    Admin
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Indicador de progreso del día -->
+        <div class="mt-3">
+            <div class="progress" style="height: 3px; background: rgba(255,255,255,0.2);">
+                <div class="progress-bar bg-white" role="progressbar" 
+                     style="width: {{ day_progress }}%" 
+                     aria-valuenow="{{ day_progress }}" aria-valuemin="0" aria-valuemax="100"
+                     data-bs-toggle="tooltip" title="Progreso del día: {{ day_progress }}% transcurrido">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Cards Principales Mejoradas -->
+    <section aria-label="Métricas principales" class="metrics-section">
+        <div class="row g-4 mb-5">
+            <!-- Suscripciones Card - solo visible para Usuario Principal -->
+            {% if not is_evaluador %}
+            <div class="col-lg-3 col-md-6">
+                <article class="card dashboard-card border-0 shadow-sm h-100" aria-label="Tarjeta de suscripciones">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="card-icon bg-primary bg-opacity-10 text-primary rounded-circle me-3">
+                                <i class="fas fa-star fs-4" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title mb-1 text-gray-800 h6">Suscripciones</h3>
+                                <p class="card-text small text-muted mb-0">Total activas</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="display-6 mb-0 text-primary fw-bold" 
+                                  data-counter="{{ total_subscriptions }}"
+                                  aria-label="Total de suscripciones: {{ total_subscriptions }}">
+                                {{ total_subscriptions }}
+                            </span>
+                            <span class="badge bg-primary-subtle text-primary">
+                                {{ total_modules }} módulo{{ total_modules|pluralize }}
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-arrow-up text-success me-1" aria-hidden="true"></i>
+                                Todas activas
+                            </small>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            
+            <!-- Por Vencer Card -->
+            <div class="col-lg-3 col-md-6">
+                <article class="card dashboard-card border-0 shadow-sm h-100" aria-label="Tarjeta de suscripciones por vencer">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="card-icon bg-warning bg-opacity-10 text-warning rounded-circle me-3">
+                                <i class="fas fa-clock fs-4" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title mb-1 text-gray-800 h6">Por Vencer</h3>
+                                <p class="card-text small text-muted mb-0">Próximos 30 días</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="display-6 mb-0 text-warning fw-bold" 
+                                  data-counter="{{ expiring_soon }}"
+                                  aria-label="Suscripciones por vencer: {{ expiring_soon }}">
+                                {{ expiring_soon }}
+                            </span>
+                            {% if expiring_soon > 0 %}
+                            <span class="badge bg-warning-subtle text-warning">
+                                <i class="fas fa-exclamation-triangle me-1" aria-hidden="true"></i>Atención
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success-subtle text-success">
+                                <i class="fas fa-check me-1" aria-hidden="true"></i>Todo bien
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                {% if expiring_soon > 0 %}
+                                <i class="fas fa-exclamation-circle text-warning me-1" aria-hidden="true"></i>
+                                Requiere atención
+                                {% else %}
+                                <i class="fas fa-check-circle text-success me-1" aria-hidden="true"></i>
+                                Sin próximos vencimientos
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            {% endif %}
+            
+            <!-- Actividad Card -->
+            <div class="col-lg-3 col-md-6">
+                <article class="card dashboard-card border-0 shadow-sm h-100" aria-label="Tarjeta de actividad">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="card-icon bg-info bg-opacity-10 text-info rounded-circle me-3">
+                                <i class="fas fa-chart-line fs-4" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title mb-1 text-gray-800 h6">Actividad</h3>
+                                <p class="card-text small text-muted mb-0">Este mes</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="display-6 mb-0 text-info fw-bold" 
+                                  data-counter="{{ total_reports_used }}"
+                                  aria-label="Reportes utilizados: {{ total_reports_used }}">
+                                {{ total_reports_used }}
+                            </span>
+                            <span class="badge bg-info-subtle text-info">
+                                {{ total_evaluations }} evaluaciones
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-trending-up text-info me-1" aria-hidden="true"></i>
+                                Actividad regular
+                            </small>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            
+            <!-- Mi Perfil Card -->
+            <div class="col-lg-3 col-md-6">
+                <article class="card dashboard-card border-0 shadow-sm h-100" aria-label="Tarjeta de perfil">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="card-icon bg-success bg-opacity-10 text-success rounded-circle me-3">
+                                <i class="fas fa-user-circle fs-4" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <h3 class="card-title mb-1 text-gray-800 h6">Mi Perfil</h3>
+                                <p class="card-text small text-muted mb-0">Gestionar cuenta</p>
+                            </div>
+                        </div>
+                        <a href="{% url 'users:profile' %}" 
+                           class="btn btn-success btn-enhanced w-100 focus-visible"
+                           aria-label="Ir a mi perfil de usuario">
+                            <i class="fas fa-edit me-2" aria-hidden="true"></i>
+                            Ver Perfil
+                        </a>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <i class="fas fa-shield-alt text-success me-1" aria-hidden="true"></i>
+                                Perfil verificado
+                            </small>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Suscripciones Activas - solo visible para Usuario Principal -->
+    {% if user_subscriptions and not is_evaluador %}
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-star text-warning me-3 fs-4"></i>
+                            <h5 class="mb-0 text-gray-800">Mis Suscripciones Activas</h5>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                <i class="fas fa-check-circle me-1"></i>{{ total_subscriptions }} activa{{ total_subscriptions|pluralize }}
+                            </span>
+                            <span class="badge bg-info-subtle text-info px-3 py-2">
+                                <i class="fas fa-layer-group me-1"></i>{{ subscriptions_by_module|length }} módulo{{ subscriptions_by_module|length|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    {% for module_name, subscriptions in subscriptions_by_module.items %}
+                        <div class="module-subscription-section mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if module_name == 'risk_hoteles' %}
+                                    <div class="module-icon bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                                        <i class="fas fa-hotel"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-gray-800">Risk Hoteles</h6>
+                                {% elif module_name == 'risk_conjuntos' %}
+                                    <div class="module-icon bg-success bg-opacity-10 text-success rounded-circle p-2 me-3">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-gray-800">Risk Conjuntos</h6>
+                                {% elif module_name == 'security_probabilistic' %}
+                                    <div class="module-icon bg-danger bg-opacity-10 text-danger rounded-circle p-2 me-3">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-gray-800">Security Probabilistic</h6>
+                                {% else %}
+                                    <div class="module-icon bg-info bg-opacity-10 text-info rounded-circle p-2 me-3">
+                                        <i class="fas fa-cube"></i>
+                                    </div>
+                                    <h6 class="mb-0 text-gray-800">{{ module_name|title }}</h6>
+                                {% endif %}
+                                <span class="badge bg-light text-muted ms-auto">{{ subscriptions|length }} plan{{ subscriptions|length|pluralize:"es" }}</span>
+                            </div>
+                            
+                            <div class="row g-3">
+                                {% for subscription in subscriptions %}
+                                <div class="col-12">
+                                    <div class="subscription-card p-4 rounded border shadow-sm">
+                                        <div class="d-flex align-items-start justify-content-between mb-3">
+                                            <div class="flex-grow-1">
+                                                <h6 class="subscription-title mb-1">{{ subscription.plan.name }}</h6>
+                                                <p class="text-muted small mb-0">{{ subscription.plan.plan_type.name }}</p>
+                                            </div>
+                                            <span class="badge bg-{{ subscription|subscription_status_color }}-subtle text-{{ subscription|subscription_status_color }} px-3 py-2">
+                                                {{ subscription.get_status_display }}
+                                            </span>
+                                        </div>
+                                        
+                                        {% if subscription.plan.description %}
+                                        <p class="subscription-description text-muted small mb-3">
+                                            {{ subscription.plan.description|truncatechars:100 }}
+                                        </p>
+                                        {% endif %}
+                                        
+                                        <div class="subscription-details">
+                                            <!-- Row para dividir el contenido en columnas optimizadas -->
+                                            <div class="row g-4">
+                                                <!-- Columna izquierda: Información básica y uso (col-xl-4 col-lg-5) -->
+                                                <div class="col-xl-4 col-lg-5 col-md-6">
+                                                    <!-- Información básica de vigencia -->
+                                                    <div class="info-section mb-3">
+                                                        <h6 class="small fw-bold text-muted mb-2">
+                                                            <i class="fas fa-calendar-alt me-1"></i>Información de Vigencia
+                                                        </h6>
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <small class="text-muted">Vigencia:</small>
+                                                            <small class="fw-semibold">{{ subscription.end_date|date:"d/m/Y" }}</small>
+                                                        </div>
+                                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                                            <small class="text-muted">Tiempo restante:</small>
+                                                            <small class="fw-semibold text-{{ subscription|subscription_status_color }}">
+                                                                {{ subscription|subscription_time_remaining }}
+                                                            </small>
+                                                        </div>
+                                                        
+                                                        <!-- Barra de progreso para tiempo restante -->
+                                                        {% with progress=subscription|subscription_progress %}
+                                                        <div class="progress mb-2" style="height: 8px; border-radius: 4px;">
+                                                            <div class="progress-bar bg-{{ subscription|subscription_status_color }}" 
+                                                                 role="progressbar" 
+                                                                 style="width: {{ progress }}%"
+                                                                 aria-valuenow="{{ progress }}" 
+                                                                 aria-valuemin="0" 
+                                                                 aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock me-1"></i>Progreso: {{ progress|floatformat:0 }}% transcurrido
+                                                        </small>
+                                                        {% endwith %}
+                                                    </div>
+                                                    
+                                                    <!-- Información de Uso del Plan -->
+                                                    {% if subscription.usage_stats %}
+                                                    <div class="plan-usage-section">
+                                                        <h6 class="small fw-bold text-muted mb-2">
+                                                            <i class="fas fa-chart-bar me-1"></i>Uso Actual
+                                                        </h6>
+                                                        
+                                                        <!-- Reportes/Evaluaciones -->
+                                                        {% usage_indicator subscription.usage_stats.reports_used subscription.usage_stats.reports_limit "Reportes este mes" %}
+                                                        
+                                                        <!-- Evaluaciones totales -->
+                                                        {% usage_indicator subscription.usage_stats.evaluations_count subscription.usage_stats.evaluations_limit "Evaluaciones creadas" %}
+                                                        
+                                                        <!-- Usuarios (si aplica) -->
+                                                        {% if subscription.usage_stats.users_limit > 1 %}
+                                                        {% usage_indicator subscription.usage_stats.users_count subscription.usage_stats.users_limit "Usuarios" %}
+                                                        {% endif %}
+                                                        
+                                                        <!-- Módulo específico -->
+                                                        {% if subscription.plan.module.name == 'risk_hoteles' and subscription.usage_stats.hotels_count %}
+                                                        <div class="usage-indicator mb-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <small class="text-muted fw-semibold">
+                                                                    <i class="fas fa-hotel me-1"></i>Hoteles registrados:
+                                                                </small>
+                                                                <small class="text-info fw-semibold">{{ subscription.usage_stats.hotels_count }}</small>
+                                                            </div>
+                                                        </div>
+                                                        {% elif subscription.plan.module.name == 'risk_conjuntos' and subscription.usage_stats.conjuntos_count %}
+                                                        <div class="usage-indicator mb-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <small class="text-muted fw-semibold">
+                                                                    <i class="fas fa-building me-1"></i>Conjuntos registrados:
+                                                                </small>
+                                                                <small class="text-info fw-semibold">{{ subscription.usage_stats.conjuntos_count }}</small>
+                                                            </div>
+                                                        </div>
+                                                        {% elif subscription.plan.module.name == 'security_probabilistic' and subscription.usage_stats.projects_count %}
+                                                        <div class="usage-indicator mb-2">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <small class="text-muted fw-semibold">
+                                                                    <i class="fas fa-shield-alt me-1"></i>Proyectos activos:
+                                                                </small>
+                                                                <small class="text-info fw-semibold">{{ subscription.usage_stats.projects_count }}</small>
+                                                            </div>
+                                                        </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <!-- Columna derecha: Métricas detalladas (col-xl-8 col-lg-7) -->
+                                                <div class="col-xl-8 col-lg-7 col-md-6">
+                                                    <!-- Métricas Detalladas -->
+                                                    {% get_evaluadores_stats subscription as evaluadores_stats %}
+                                                    {% get_detailed_module_stats subscription as detailed_stats %}
+                                                    
+                                                    <!-- Grid optimizado para métricas -->
+                                                    <div class="row g-3 mb-4">
+                                                        <div class="col-xl-4 col-lg-6 col-md-12">
+                                                            {% metrics_detail_card title="Evaluadores" value=evaluadores_stats.evaluadores_activos icon="users" color="primary" description="Evaluadores activos" %}
+                                                        </div>
+                                                        
+                                                        <div class="col-xl-4 col-lg-6 col-md-12">
+                                                            {% if subscription.plan.module.name == 'risk_hoteles' %}
+                                                                {% metrics_detail_card title="Hoteles" value=detailed_stats.hoteles_activos icon="hotel" color="success" description="Hoteles registrados" %}
+                                                            {% elif subscription.plan.module.name == 'risk_conjuntos' %}
+                                                                {% metrics_detail_card title="Conjuntos" value=detailed_stats.conjuntos_total icon="building" color="success" description="Conjuntos activos" %}
+                                                            {% elif subscription.plan.module.name == 'security_probabilistic' %}
+                                                                {% metrics_detail_card title="Proyectos" value=detailed_stats.proyectos_activos icon="shield-alt" color="success" description="Proyectos activos" %}
+                                                            {% endif %}
+                                                        </div>
+                                                        
+                                                        <div class="col-xl-4 col-lg-12 col-md-12">
+                                                            {% if subscription.plan.module.name == 'risk_hoteles' %}
+                                                                {% metrics_detail_card title="Evaluaciones" value=detailed_stats.evaluaciones_total icon="clipboard-check" color="info" description="Total completadas" %}
+                                                            {% elif subscription.plan.module.name == 'risk_conjuntos' %}
+                                                                {% metrics_detail_card title="Evaluaciones" value=detailed_stats.evaluaciones_total icon="clipboard-check" color="info" description="Total completadas" %}
+                                                            {% elif subscription.plan.module.name == 'security_probabilistic' %}
+                                                                {% metrics_detail_card title="Análisis" value=detailed_stats.evaluaciones_total icon="chart-line" color="info" description="Análisis realizados" %}
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Evaluadores Section (si hay evaluadores) compacta -->
+                                                    {% if evaluadores_stats.total_evaluadores > 0 %}
+                                                    <div class="evaluadores-section">
+                                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                                            <h6 class="mb-0 small fw-bold text-muted">
+                                                                <i class="fas fa-users me-2"></i>
+                                                                Equipo de Evaluadores
+                                                            </h6>
+                                                            <span class="badge bg-primary-subtle text-primary">{{ evaluadores_stats.total_evaluadores }} total</span>
+                                                        </div>
+                                                        
+                                                        <div class="row g-2">
+                                                            <div class="col-6">
+                                                                <div class="evaluador-card p-2 border rounded">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="evaluador-status active me-2"></span>
+                                                                        <div>
+                                                                            <div class="fw-semibold small">{{ evaluadores_stats.evaluadores_activos }}</div>
+                                                                            <small class="text-muted">Activos</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% if evaluadores_stats.evaluadores_inactivos > 0 %}
+                                                            <div class="col-6">
+                                                                <div class="evaluador-card p-2 border rounded">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <span class="evaluador-status inactive me-2"></span>
+                                                                        <div>
+                                                                            <div class="fw-semibold small">{{ evaluadores_stats.evaluadores_inactivos }}</div>
+                                                                            <small class="text-muted">Inactivos</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div> <!-- Fin del row interno -->
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        {% if not forloop.last %}
+                        <hr class="my-4">
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Tienes acceso completo a {{ subscriptions_by_module|length }} módulo{{ subscriptions_by_module|length|pluralize }} del sistema.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <a href="{% url 'subscriptions:my_subscriptions' %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-cog me-2"></i>Gestionar Suscripciones
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif not is_evaluador %}
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm border-warning">
+                <div class="card-body p-4 text-center">
+                    <i class="fas fa-exclamation-triangle text-warning fs-1 mb-3"></i>
+                    <h5 class="text-gray-800 mb-3">No tienes suscripciones activas</h5>
+                    <p class="text-muted mb-4">Para acceder a los módulos especializados, necesitas una suscripción activa.</p>
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-warning">
+                        <i class="fas fa-shopping-cart me-2"></i>Ver Planes Disponibles
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sección de Evaluadores (si es evaluador) -->
+    {% if evaluator.is_evaluator %}
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-user-tie text-info me-3 fs-4"></i>
+                            <h5 class="mb-0 text-gray-800">Mi Rol como Evaluador</h5>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-info-subtle text-info px-3 py-2">
+                                <i class="fas fa-users me-1"></i>{{ evaluator.main_users|length }} usuario{{ evaluator.main_users|length|pluralize }} principal{{ evaluator.main_users|length|pluralize:"es" }}
+                            </span>
+                            <span class="badge bg-success-subtle text-success px-3 py-2">
+                                <i class="fas fa-puzzle-piece me-1"></i>{{ evaluator.inherited_modules|length }} módulo{{ evaluator.inherited_modules|length|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        {% for profile_data in evaluator.evaluator_profiles|slice:":3" %}
+                        <div class="col-md-4">
+                            <div class="evaluator-profile-card p-3 bg-light rounded">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="avatar-sm bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; font-size: 12px;">
+                                        {{ profile_data.usuario_principal.first_name|first }}{{ profile_data.usuario_principal.last_name|first }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-gray-800">{{ profile_data.usuario_principal.get_full_name }}</h6>
+                                        <small class="text-muted">{{ profile_data.perfil.get_tipo_evaluador_display }}</small>
+                                    </div>
+                                </div>
+                                <div class="mb-2">
+                                    {% for modulo in profile_data.modulos_permitidos|slice:":2" %}
+                                        <span class="badge bg-primary bg-opacity-10 text-primary me-1" style="font-size: 0.7rem;">{{ modulo }}</span>
+                                    {% endfor %}
+                                    {% if profile_data.modulos_permitidos|length > 2 %}
+                                        <span class="text-muted" style="font-size: 0.7rem;">+{{ profile_data.modulos_permitidos|length|add:"-2" }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        {% if profile_data.perfil.fecha_ultimo_acceso %}
+                                            Acceso: {{ profile_data.perfil.fecha_ultimo_acceso|date:"d/m/Y H:i" }}
+                                        {% else %}
+                                            Sin acceso previo
+                                        {% endif %}
+                                    </small>
+                                    {% if profile_data.perfil.acceso_completo_dashboard %}
+                                        <a href="{% url 'evaluadores:dashboard_evaluador' profile_data.usuario_principal.id %}" class="btn btn-info btn-sm">
+                                            <i class="fas fa-external-link-alt me-1"></i>Acceder
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        
+                        {% if evaluator.evaluator_profiles|length > 3 %}
+                        <div class="col-md-4">
+                            <div class="evaluator-profile-card p-3 bg-light rounded text-center">
+                                <i class="fas fa-plus-circle text-muted fs-3 mb-2"></i>
+                                <p class="mb-0 text-muted">+{{ evaluator.evaluator_profiles|length|add:"-3" }} más</p>
+                                <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" class="btn btn-outline-info btn-sm mt-2">Ver todos</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mt-4 pt-3 border-top">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Como evaluador, heredas permisos de {{ evaluator.main_users|length }} usuario{{ evaluator.main_users|length|pluralize }} principal{{ evaluator.main_users|length|pluralize:"es" }}.
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-md-end">
+                                <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-user-tie me-2"></i>Mi Perfil de Evaluador
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sección de Gestión de Evaluadores (solo para usuarios principales con suscripciones) -->
+    {% if user_subscriptions and not evaluator.is_evaluator %}
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-users-cog text-success me-3 fs-4"></i>
+                            <h5 class="mb-0 text-gray-800">Gestión de Evaluadores</h5>
+                        </div>
+                        <a href="{% url 'evaluadores:lista' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-cog me-2"></i>Gestionar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-users fs-4"></i>
+                                </div>
+                                <h6 class="mb-1">Mis Evaluadores</h6>
+                                <p class="text-muted mb-2" style="font-size: 0.8rem;">Gestiona tu equipo de evaluadores</p>
+                                <a href="{% url 'evaluadores:lista' %}" class="btn btn-outline-success btn-sm">Ver Lista</a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user-plus fs-4"></i>
+                                </div>
+                                <h6 class="mb-1">Agregar Evaluador</h6>
+                                <p class="text-muted mb-2" style="font-size: 0.8rem;">Crea un nuevo evaluador</p>
+                                <a href="{% url 'evaluadores:crear' %}" class="btn btn-outline-primary btn-sm">Crear</a>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sección de Últimas Actividades de Evaluadores -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 py-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-clock-rotate-left text-info me-3 fs-4"></i>
+                            <h5 class="mb-0 text-gray-800">Últimas Actividades de Evaluadores</h5>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <span class="badge bg-info-subtle text-info px-3 py-2">
+                                <i class="fas fa-history me-1"></i>Últimas 24h
+                            </span>
+                            <a href="{% url 'evaluadores:lista' %}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-list me-1"></i>Ver Todos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 px-4 py-3">
+                                        <i class="fas fa-user me-2 text-muted"></i>Evaluador
+                                    </th>
+                                    <th class="border-0 px-4 py-3">
+                                        <i class="fas fa-cogs me-2 text-muted"></i>Actividad
+                                    </th>
+                                    <th class="border-0 px-4 py-3">
+                                        <i class="fas fa-building me-2 text-muted"></i>Módulo
+                                    </th>
+                                    <th class="border-0 px-4 py-3">
+                                        <i class="fas fa-clock me-2 text-muted"></i>Hora
+                                    </th>
+                                    <th class="border-0 px-4 py-3">
+                                        <i class="fas fa-signal me-2 text-muted"></i>Estado
+                                    </th>
+                                    <th class="border-0 px-4 py-3 text-center">
+                                        <i class="fas fa-tools me-2 text-muted"></i>Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if recent_evaluator_activities %}
+                                    {% for activity in recent_evaluator_activities %}
+                                    <tr class="activity-row">
+                                        <td class="px-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-{{ activity.evaluador.get_avatar_color }} text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 40px; height: 40px; font-size: 14px;">
+                                                    {{ activity.evaluador.get_initials }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold text-gray-800">{{ activity.evaluador.get_full_name }}</div>
+                                                    <small class="text-muted">{{ activity.evaluador.get_tipo_evaluador_display|default:"Evaluador" }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="activity-description">
+                                                <i class="fas {{ activity.get_icon_class }} {{ activity.get_icon_color }} me-2"></i>
+                                                <span class="fw-medium">{{ activity.get_action_display }}</span>
+                                                <div class="small text-muted mt-1">{{ activity.description|truncatechars:60 }}</div>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-{{ activity.get_module_color }}-subtle text-{{ activity.get_module_color }}">
+                                                <i class="fas {{ activity.get_module_icon }} me-1"></i>{{ activity.get_module_display }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="time-info">
+                                                <div class="fw-medium text-gray-800">{{ activity.created_at|date:"H:i" }}</div>
+                                                <small class="text-muted">{{ activity.created_at|timesince }} atrás</small>
+                                            </div>
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <span class="badge bg-{{ activity.get_status_color }}-subtle text-{{ activity.get_status_color }}">
+                                                <i class="fas {{ activity.get_status_icon }} me-1"></i>{{ activity.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <div class="btn-group" role="group">
+                                                {% if activity.detail_url %}
+                                                <a href="{{ activity.detail_url }}" class="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="Ver detalles">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                {% endif %}
+                                                {% if activity.download_url %}
+                                                <a href="{{ activity.download_url }}" class="btn btn-outline-primary btn-sm" data-bs-toggle="tooltip" title="Descargar">
+                                                    <i class="fas fa-download"></i>
+                                                </a>
+                                                {% endif %}
+                                                {% if activity.action_url %}
+                                                <a href="{{ activity.action_url }}" class="btn btn-outline-warning btn-sm" data-bs-toggle="tooltip" title="{{ activity.action_title }}">
+                                                    <i class="fas {{ activity.action_icon }}"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Mensaje cuando no hay actividades -->
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <div class="empty-state">
+                                                <i class="fas fa-inbox fs-1 text-muted mb-3"></i>
+                                                <h6 class="text-muted mb-2">No hay actividades recientes</h6>
+                                                <p class="text-muted small">Las actividades de los evaluadores aparecerán aquí cuando estén disponibles.</p>
+                                                <a href="{% url 'evaluadores:lista' %}" class="btn btn-outline-primary btn-sm mt-2">
+                                                    <i class="fas fa-users me-1"></i>Ver Evaluadores
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Footer de la tabla con estadísticas rápidas -->
+                    <div class="card-footer bg-light border-0 py-3">
+                        <div class="row text-center g-3">
+                            <div class="col-md-3">
+                                <div class="activity-stat">
+                                    <div class="fs-5 fw-bold text-primary">{{ daily_activities_count|default:0 }}</div>
+                                    <small class="text-muted">Actividades hoy</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-stat">
+                                    <div class="fs-5 fw-bold text-success">{{ completed_evaluations_today|default:0 }}</div>
+                                    <small class="text-muted">Evaluaciones completadas</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-stat">
+                                    <div class="fs-5 fw-bold text-warning">{{ in_progress_evaluations|default:0 }}</div>
+                                    <small class="text-muted">En progreso</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="activity-stat">
+                                    <div class="fs-5 fw-bold text-info">{{ active_evaluators_today|default:0 }}</div>
+                                    <small class="text-muted">Activos (últimos 7 días)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="floating-actions-container position-fixed" style="right: 30px; bottom: 30px; z-index: 1050;">
+    <div class="floating-actions-menu">
+        <!-- Botón principal toggle -->
+        <button class="btn btn-primary btn-lg rounded-circle shadow-lg floating-toggle" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#floatingActionsMenu" 
+                aria-expanded="false" 
+                aria-controls="floatingActionsMenu"
+                style="width: 65px; height: 65px; position: relative;">
+            <i class="fas fa-bolt fs-4"></i>
+        </button>
+        
+        <!-- Menú desplegable -->
+        <div class="collapse" id="floatingActionsMenu">
+            <div class="floating-actions-list mb-3 d-flex flex-column-reverse gap-3 align-items-end">
+                <!-- Editar Perfil -->
+                <div class="floating-action-item d-flex align-items-center gap-2">
+                    <span class="floating-label bg-dark text-white px-2 py-1 rounded shadow-sm small">Editar Perfil</span>
+                    <a href="{% url 'users:profile' %}" 
+                       class="btn btn-outline-primary rounded-circle shadow" 
+                       style="width: 50px; height: 50px;">
+                        <i class="fas fa-user-edit"></i>
+                    </a>
+                </div>
+                
+                <!-- Panel Admin (solo si es staff) -->
+                {% if user.is_staff %}
+                <div class="floating-action-item d-flex align-items-center gap-2">
+                    <span class="floating-label bg-dark text-white px-2 py-1 rounded shadow-sm small">Panel Admin</span>
+                    <a href="/admin/" 
+                       class="btn btn-outline-success rounded-circle shadow" 
+                       style="width: 50px; height: 50px;"
+                       target="_blank">
+                        <i class="fas fa-shield-halved"></i>
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Cerrar Sesión -->
+                <div class="floating-action-item d-flex align-items-center gap-2">
+                    <span class="floating-label bg-dark text-white px-2 py-1 rounded shadow-sm small">Cerrar Sesión</span>
+                    <form method="post" action="{% url 'users:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" 
+                                class="btn btn-outline-danger rounded-circle shadow" 
+                                style="width: 50px; height: 50px;"
+                                onclick="return confirm('¿Estás seguro que deseas cerrar sesión?')">
+                            <i class="fas fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Dashboard optimizado - Estilos consolidados en extra_css -->
+
+{% if dash_hoteles.tiene_datos and not is_evaluador %}
+
+<!-- ============================================================
+  1. MAPA DE RIESGO — Lo más urgente: hoteles en riesgo crítico
+============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-danger bg-opacity-10 text-danger rounded-3 p-2 me-2">
+                <i class="fas fa-exclamation-triangle fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Mapa de Riesgo</h5>
+            <small class="text-muted ms-2">Estado actual del portafolio</small>
+        </div>
+    </div>
+
+    <!-- Distribución por nivel de riesgo -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-shield-alt me-2 text-secondary"></i>Distribución por Nivel de Riesgo
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if dash_hoteles.riesgo_dist %}
+                {% for r in dash_hoteles.riesgo_dist %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold">
+                            <i class="fas fa-circle me-1
+                                {% if r.color == 'orange' %}text-warning{% else %}text-{{ r.color }}{% endif %}"
+                               style="font-size:.55rem;"></i>
+                            {{ r.label }}
+                        </span>
+                        <span class="badge rounded-pill
+                            {% if r.color == 'orange' %}bg-warning text-dark{% else %}bg-{{ r.color }}{% endif %}">
+                            {{ r.total }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height:10px;">
+                        <div class="progress-bar
+                            {% if r.color == 'orange' %}bg-warning{% else %}bg-{{ r.color }}{% endif %}"
+                             style="width: {% widthratio r.total dash_hoteles.riesgo_max 100 %}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-shield-alt text-muted fs-3 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">Sin evaluaciones completadas con nivel de riesgo</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Hoteles con riesgo alto / muy alto -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-fire text-danger me-2"></i>Hoteles con Riesgo Alto / Muy Alto
+                </h6>
+                {% if dash_hoteles.hoteles_alto_riesgo %}
+                <span class="badge bg-danger">{{ dash_hoteles.hoteles_alto_riesgo|length }} evaluación{{ dash_hoteles.hoteles_alto_riesgo|length|pluralize:"es" }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if dash_hoteles.hoteles_alto_riesgo %}
+                <div class="list-group list-group-flush">
+                    {% for ev in dash_hoteles.hoteles_alto_riesgo %}
+                    <a href="{% url 'risk_hoteles:hotel_detail' ev.hotel__id %}"
+                       class="list-group-item list-group-item-action px-4 py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-danger bg-opacity-10 text-danger rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:38px;height:38px;">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">{{ ev.hotel__name }}</div>
+                                <small class="text-muted">{{ ev.hotel__city }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge {% if ev.risk_level == 'muy_alto' %}bg-danger{% else %}bg-warning text-dark{% endif %} mb-1">
+                                    {{ ev.risk_level|title }}
+                                </span>
+                                {% if ev.overall_score %}
+                                <div class="small text-muted">{{ ev.overall_score|floatformat:1 }}/5</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle text-success fs-2 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">¡Sin hoteles en nivel de riesgo crítico!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+  2. ALERTAS DE SEGUIMIENTO — Acciones pendientes inmediatas
+============================================================ -->
+{% if hoteles_sin_reevaluar or pendientes_revision %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-2">
+                <i class="fas fa-bell fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Alertas de Seguimiento</h5>
+        </div>
+    </div>
+    <!-- Hoteles sin re-evaluar -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-clock text-warning me-2"></i>Hoteles sin Re-evaluar
+                </h6>
+                {% if hoteles_sin_reevaluar %}
+                <span class="badge bg-warning text-dark">+60 días sin evaluación</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if hoteles_sin_reevaluar %}
+                <div class="list-group list-group-flush">
+                    {% for hotel in hoteles_sin_reevaluar %}
+                    <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}"
+                       class="list-group-item list-group-item-action px-4 py-3 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:38px;height:38px;">
+                                <i class="fas fa-hotel"></i>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">{{ hotel.name }}</div>
+                                <small class="text-muted">{{ hotel.city }}, {{ hotel.country }}</small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-warning fw-semibold d-block">Última:</small>
+                                <small class="text-muted">{{ hotel.ultima_eval|date:"d/m/Y" }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle text-success fs-2 mb-2"></i>
+                    <p class="text-muted small mb-0">Todos los hoteles evaluados recientemente</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Evaluaciones completadas pendientes de revisión -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-hourglass-half text-info me-2"></i>Completadas Pendientes de Revisión
+                </h6>
+                {% if pendientes_revision %}
+                <span class="badge bg-info">{{ pendientes_revision|length }} evaluación{{ pendientes_revision|length|pluralize:"es" }}</span>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                {% if pendientes_revision %}
+                <div class="list-group list-group-flush">
+                    {% for eval in pendientes_revision %}
+                    <a href="{% url 'risk_hoteles:assessment_results' eval.id %}"
+                       class="list-group-item list-group-item-action px-4 py-3 text-decoration-none">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-info bg-opacity-10 text-info rounded-2 d-flex align-items-center justify-content-center flex-shrink-0"
+                                 style="width:38px;height:38px;">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">{{ eval.hotel.name }}</div>
+                                <small class="text-muted">
+                                    {{ eval.get_assessment_type_display }} &bull; {{ eval.completed_at|date:"d/m/Y" }}
+                                    {% if eval.created_by %}· Por {{ eval.created_by.get_full_name|default:eval.created_by.username }}{% endif %}
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                {% if eval.overall_score %}
+                                <div class="fw-bold text-info">{{ eval.overall_score|floatformat:1 }}/5</div>
+                                {% endif %}
+                                <span class="badge bg-success" style="font-size:.65rem;">Completada</span>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-check-double text-success fs-2 mb-2"></i>
+                    <p class="text-muted small mb-0">No hay evaluaciones esperando revisión</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ============================================================
+  3. INDICADORES CLAVE — Salud operacional del portafolio
+============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 me-2">
+                <i class="fas fa-tachometer-alt fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Indicadores Clave de Operación</h5>
+        </div>
+    </div>
+
+    <!-- Gauge cumplimiento 30 días -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-clock text-primary me-2"></i>Ciclo de Evaluación (30 días)
+                </h6>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+                <div class="position-relative mb-3" style="width:130px;height:130px;">
+                    <svg viewBox="0 0 36 36" class="w-100 h-100" style="transform:rotate(-90deg);">
+                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e9ecef" stroke-width="3"/>
+                        <circle cx="18" cy="18" r="15.9" fill="none"
+                                stroke="{% if dash_hoteles.gauge_30d >= 75 %}#198754{% elif dash_hoteles.gauge_30d >= 50 %}#0dcaf0{% elif dash_hoteles.gauge_30d >= 25 %}#ffc107{% else %}#dc3545{% endif %}"
+                                stroke-width="3"
+                                stroke-dasharray="{{ dash_hoteles.gauge_30d }} 100"
+                                stroke-linecap="round"/>
+                    </svg>
+                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                        <div class="h4 mb-0 fw-bold
+                            {% if dash_hoteles.gauge_30d >= 75 %}text-success{% elif dash_hoteles.gauge_30d >= 50 %}text-info{% elif dash_hoteles.gauge_30d >= 25 %}text-warning{% else %}text-danger{% endif %}">
+                            {{ dash_hoteles.gauge_30d }}%
+                        </div>
+                    </div>
+                </div>
+                <p class="text-muted small text-center mb-0">
+                    Hoteles evaluados en los últimos 30 días
+                    ({{ dash_hoteles.total_hoteles }} en portafolio)
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Funnel de estados -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-filter text-secondary me-2"></i>Funnel de Estados
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% for estado in dash_hoteles.funnel_estados %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold">
+                            <i class="fas fa-circle text-{{ estado.color }} me-1" style="font-size:.55rem;"></i>
+                            {{ estado.label }}
+                        </span>
+                        <span class="badge bg-{{ estado.color }} {% if estado.color == 'warning' %}text-dark{% endif %} rounded-pill">
+                            {{ estado.total }}
+                        </span>
+                    </div>
+                    <div class="progress" style="height:10px;">
+                        <div class="progress-bar bg-{{ estado.color }} {% if estado.color == 'warning' %}text-dark{% endif %}"
+                             style="width: {% widthratio estado.total dash_hoteles.funnel_estados|length 100 %}%">
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <p class="text-muted small mt-3 mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Muchas "Completadas" sin revisar indican un cuello de botella.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cobertura del portafolio -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-hotel text-success me-2"></i>Cobertura del Portafolio
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="d-flex align-items-end gap-3 mb-3">
+                    <div class="text-center">
+                        <div class="h2 fw-bold text-success mb-0">{{ dash_hoteles.total_hoteles_eval }}</div>
+                        <small class="text-muted">Con evaluación</small>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="progress mb-1" style="height:14px;">
+                            <div class="progress-bar bg-success" style="width:{{ dash_hoteles.pct_cobertura }}%">
+                                {{ dash_hoteles.pct_cobertura }}%
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="h2 fw-bold text-secondary mb-0">{{ dash_hoteles.total_hoteles }}</div>
+                        <small class="text-muted">Total</small>
+                    </div>
+                </div>
+                {% if dash_hoteles.hoteles_sin_cobertura %}
+                <p class="small text-muted fw-semibold mb-1">Hoteles sin ninguna evaluación:</p>
+                <div class="d-flex flex-wrap gap-1">
+                    {% for h in dash_hoteles.hoteles_sin_cobertura %}
+                    <span class="badge bg-secondary fw-normal">{{ h.name }}</span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-success small mb-0"><i class="fas fa-check-circle me-1"></i>¡Todos los hoteles tienen al menos una evaluación!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+  4. ANÁLISIS DE RESULTADOS — Rendimiento y tendencias
+============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-success bg-opacity-10 text-success rounded-3 p-2 me-2">
+                <i class="fas fa-chart-line fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Análisis de Resultados</h5>
+            <small class="text-muted ms-2">Todas las evaluaciones sobre tus hoteles</small>
+        </div>
+    </div>
+    <!-- Tendencia mensual -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-calendar-alt text-info me-2"></i>Tendencia Mensual
+                    <span class="badge bg-info ms-1">Últimos 6 meses</span>
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if dash_hoteles.tendencia_meses %}
+                <div class="d-flex align-items-end gap-2" style="height:120px;">
+                    {% for mes in dash_hoteles.tendencia_meses %}
+                    <div class="flex-grow-1 d-flex flex-column align-items-center gap-1">
+                        <span class="small fw-bold text-primary">{{ mes.total }}</span>
+                        <div class="w-100 bg-primary rounded-top"
+                             style="height: {% widthratio mes.total dash_hoteles.tendencia_max 100 %}px; min-height:4px;"></div>
+                        <span class="small text-muted" style="font-size:.65rem;white-space:nowrap;">{{ mes.mes_label }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-bar text-muted fs-3 mb-2"></i>
+                    <p class="text-muted small mb-0">Sin evaluaciones en los últimos 6 meses</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Mejor / peor hotel -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-trophy text-warning me-2"></i>Mejor / Peor Hotel Evaluado
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if mejor_hotel_global %}
+                <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-success bg-opacity-10 rounded-3">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:40px;height:40px;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="small text-muted fw-semibold">Mejor cumplimiento</div>
+                        <div class="fw-bold text-truncate">{{ mejor_hotel_global.name }}</div>
+                        <small class="text-muted">{{ mejor_hotel_global.city }}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="h5 mb-0 fw-bold text-success">{{ mejor_hotel_global.pct }}%</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if peor_hotel_global %}
+                <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-danger bg-opacity-10 rounded-3">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:40px;height:40px;">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="small text-muted fw-semibold">Menor cumplimiento</div>
+                        <div class="fw-bold text-truncate">{{ peor_hotel_global.name }}</div>
+                        <small class="text-muted">{{ peor_hotel_global.city }}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="h5 mb-0 fw-bold text-danger">{{ peor_hotel_global.pct }}%</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if not mejor_hotel_global and not peor_hotel_global %}
+                <div class="text-center py-4">
+                    <i class="fas fa-trophy text-muted fs-3 mb-2"></i>
+                    <p class="text-muted small mb-0">Completa evaluaciones para ver el ranking</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ranking de categorías de seguridad -->
+{% if dash_hoteles.categorias_ranking %}
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom py-3">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-layer-group text-secondary me-2"></i>Ranking de Categorías de Seguridad
+                    </h6>
+                    <div class="d-flex gap-2 flex-wrap">
+                        {% if dash_hoteles.categoria_mas_debil %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Débil: {{ dash_hoteles.categoria_mas_debil.category__name }}
+                            ({{ dash_hoteles.categoria_mas_debil.avg_pct|floatformat:1 }}%)
+                        </span>
+                        {% endif %}
+                        {% if dash_hoteles.categoria_mas_fuerte %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check me-1"></i>
+                            Fuerte: {{ dash_hoteles.categoria_mas_fuerte.category__name }}
+                            ({{ dash_hoteles.categoria_mas_fuerte.avg_pct|floatformat:1 }}%)
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    {% for cat in dash_hoteles.categorias_ranking %}
+                    <div class="col-lg-6">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="text-end" style="min-width:40px;">
+                                <span class="small fw-bold text-{% if cat.avg_pct >= 75 %}success{% elif cat.avg_pct >= 60 %}info{% elif cat.avg_pct >= 40 %}warning{% else %}danger{% endif %}">
+                                    {{ cat.avg_pct|floatformat:0 }}%
+                                </span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <small class="fw-semibold text-truncate" style="max-width:200px;">{{ cat.category__name }}</small>
+                                    <small class="text-muted">{{ cat.total }} eval.</small>
+                                </div>
+                                <div class="progress" style="height:8px;">
+                                    <div class="progress-bar bg-{% if cat.avg_pct >= 75 %}success{% elif cat.avg_pct >= 60 %}info{% elif cat.avg_pct >= 40 %}warning{% else %}danger{% endif %}"
+                                         style="width:{{ cat.avg_pct|floatformat:0 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ============================================================
+  5. RENDIMIENTO DEL EQUIPO — Evaluadores y evolución por hotel
+============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-2">
+                <i class="fas fa-users fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Rendimiento del Equipo</h5>
+        </div>
+    </div>
+
+    <!-- Rendimiento por evaluador -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-user-check text-warning me-2"></i>Rendimiento por Evaluador
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                {% if dash_hoteles.rendimiento_evaluadores %}
+                <div class="list-group list-group-flush">
+                    {% for ev in dash_hoteles.rendimiento_evaluadores %}
+                    <div class="list-group-item px-4 py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold"
+                                 style="width:36px;height:36px;font-size:.8rem;">
+                                {{ forloop.counter }}
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">{{ ev.nombre }}</div>
+                                <div class="progress mt-1" style="height:6px;">
+                                    <div class="progress-bar
+                                        {% if ev.avg_pct >= 75 %}bg-success{% elif ev.avg_pct >= 60 %}bg-info{% elif ev.avg_pct >= 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                         style="width:{{ ev.avg_pct }}%"></div>
+                                </div>
+                            </div>
+                            <div class="text-end flex-shrink-0">
+                                <div class="fw-bold
+                                    {% if ev.avg_pct >= 75 %}text-success{% elif ev.avg_pct >= 60 %}text-info{% elif ev.avg_pct >= 40 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ ev.avg_pct }}%
+                                </div>
+                                <small class="text-muted">{{ ev.total }} eval.</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-user-check text-muted fs-2 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">Sin evaluaciones completadas aún</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Evolución de score por hotel -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-chart-line text-success me-2"></i>Evolución de Cumplimiento por Hotel
+                    <span class="badge bg-secondary ms-1" style="font-size:.65rem;">≥2 evaluaciones</span>
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                {% if dash_hoteles.evolucion_hoteles %}
+                <div class="list-group list-group-flush">
+                    {% for h in dash_hoteles.evolucion_hoteles %}
+                    <div class="list-group-item px-4 py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="flex-shrink-0">
+                                {% if h.tendencia == 'up' %}
+                                <span class="text-success fw-bold fs-5"><i class="fas fa-arrow-trend-up"></i></span>
+                                {% elif h.tendencia == 'down' %}
+                                <span class="text-danger fw-bold fs-5"><i class="fas fa-arrow-trend-down"></i></span>
+                                {% else %}
+                                <span class="text-secondary fw-bold fs-5"><i class="fas fa-minus"></i></span>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="fw-semibold text-truncate">{{ h.nombre }}</div>
+                                <small class="text-muted">{{ h.ciudad }}</small>
+                            </div>
+                            <div class="text-end flex-shrink-0">
+                                <div class="small">
+                                    <span class="text-muted">{{ h.primera }}%</span>
+                                    <i class="fas fa-arrow-right text-muted mx-1" style="font-size:.6rem;"></i>
+                                    <span class="fw-bold
+                                        {% if h.tendencia == 'up' %}text-success{% elif h.tendencia == 'down' %}text-danger{% else %}text-secondary{% endif %}">
+                                        {{ h.ultima }}%
+                                    </span>
+                                </div>
+                                <small class="
+                                    {% if h.tendencia == 'up' %}text-success{% elif h.tendencia == 'down' %}text-danger{% else %}text-secondary{% endif %}">
+                                    {% if h.tendencia == 'up' %}+{% endif %}{{ h.delta|floatformat:2 }} pts
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-chart-line text-muted fs-2 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">Se necesitan al menos 2 evaluaciones por hotel para ver la evolución</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+  6. PERFIL DE CALIDAD — Histograma y tiempo de respuesta
+============================================================ -->
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 p-2 me-2">
+                <i class="fas fa-chart-bar fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Perfil de Calidad</h5>
+        </div>
+    </div>
+
+    <!-- Histograma de puntajes -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-chart-column text-secondary me-2"></i>Distribución de Puntajes (evaluaciones completadas)
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if dash_hoteles.histograma %}
+                <div class="d-flex align-items-end gap-3" style="height:140px;">
+                    {% for bucket in dash_hoteles.histograma %}
+                    <div class="flex-grow-1 d-flex flex-column align-items-center gap-1">
+                        <span class="small fw-bold text-{{ bucket.color }}">{{ bucket.total }}</span>
+                        <div class="w-100 rounded-top bg-{{ bucket.color }}"
+                             style="height: {% widthratio bucket.total dash_hoteles.histograma_max 120 %}px; min-height:{% if bucket.total > 0 %}4{% else %}0{% endif %}px;">
+                        </div>
+                        <small class="text-muted text-center" style="font-size:.65rem;">{{ bucket.label }}</small>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="text-muted small mt-3 mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Muestra el perfil de riesgo global del portafolio de hoteles.
+                </p>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-chart-bar text-muted fs-3 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">Sin evaluaciones completadas</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tiempo promedio de completar -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-stopwatch text-info me-2"></i>Tiempo Promedio de Completar
+                </h6>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center p-4">
+                {% if dash_hoteles.tiempo_promedio_dias is not None %}
+                <div class="text-center mb-3">
+                    <div class="display-5 fw-bold text-info mb-1">
+                        {% if dash_hoteles.tiempo_promedio_dias < 1 %}
+                            &lt; 1
+                        {% else %}
+                            {{ dash_hoteles.tiempo_promedio_dias|floatformat:1 }}
+                        {% endif %}
+                    </div>
+                    <div class="text-muted fw-semibold">día{{ dash_hoteles.tiempo_promedio_dias|floatformat:0|pluralize:"s" }}</div>
+                </div>
+                <p class="text-muted small text-center mb-0">
+                    Tiempo promedio entre creación y finalización de una evaluación.
+                </p>
+                <div class="mt-3 w-100">
+                    {% if dash_hoteles.tiempo_promedio_dias <= 1 %}
+                    <div class="alert alert-success py-2 px-3 small mb-0 text-center">
+                        <i class="fas fa-bolt me-1"></i>Equipo muy ágil
+                    </div>
+                    {% elif dash_hoteles.tiempo_promedio_dias <= 5 %}
+                    <div class="alert alert-info py-2 px-3 small mb-0 text-center">
+                        <i class="fas fa-thumbs-up me-1"></i>Ritmo saludable
+                    </div>
+                    {% elif dash_hoteles.tiempo_promedio_dias <= 14 %}
+                    <div class="alert alert-warning py-2 px-3 small mb-0 text-center">
+                        <i class="fas fa-hourglass-half me-1"></i>Proceso moderado
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger py-2 px-3 small mb-0 text-center">
+                        <i class="fas fa-exclamation-triangle me-1"></i>Revisar tiempos de respuesta
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="text-center py-2">
+                    <i class="fas fa-stopwatch text-muted fs-2 mb-2 d-block"></i>
+                    <p class="text-muted small mb-0">Necesita evaluaciones con fecha de finalización registrada</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+  7. DISTRIBUCIÓN DEL TRABAJO — Contexto operacional
+============================================================ -->
+<div class="row g-4 mb-5">
+    <div class="col-12">
+        <div class="d-flex align-items-center mb-3">
+            <div class="bg-info bg-opacity-10 text-info rounded-3 p-2 me-2">
+                <i class="fas fa-chart-bar fs-5"></i>
+            </div>
+            <h5 class="mb-0 fw-bold">Distribución del Trabajo</h5>
+            <small class="text-muted ms-2">Propias y de evaluadores</small>
+        </div>
+    </div>
+    <!-- Por tipo de evaluación -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-tags text-primary me-2"></i>Por Tipo de Evaluación
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if dash_hoteles.evaluaciones_por_tipo %}
+                {% for item in dash_hoteles.evaluaciones_por_tipo %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold">
+                            <i class="fas fa-circle text-{{ item.color }} me-1" style="font-size:.55rem;"></i>{{ item.label }}
+                        </span>
+                        <span class="badge bg-{{ item.color }} rounded-pill">{{ item.total }}</span>
+                    </div>
+                    <div class="progress" style="height:8px;">
+                        <div class="progress-bar bg-{{ item.color }}"
+                             style="width: {% widthratio item.total dash_hoteles.evaluaciones_por_tipo|length 100 %}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-tags text-muted fs-3 mb-2"></i>
+                    <p class="text-muted small mb-0">Sin datos</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Por categoría de hotel -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-star text-warning me-2"></i>Por Categoría de Hotel
+                </h6>
+            </div>
+            <div class="card-body p-4">
+                {% if dash_hoteles.hoteles_por_categoria %}
+                {% with total_h=dash_hoteles.total_hoteles_eval %}
+                {% for item in dash_hoteles.hoteles_por_categoria %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="small fw-semibold">{{ item.label }}</span>
+                        <span class="badge bg-warning text-dark rounded-pill">{{ item.total }}</span>
+                    </div>
+                    <div class="progress" style="height:8px;">
+                        <div class="progress-bar bg-warning"
+                             style="width: {% widthratio item.total total_h 100 %}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% endwith %}
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-star text-muted fs-3 mb-2"></i>
+                    <p class="text-muted small mb-0">Sin datos</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Distribución geográfica -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="mb-0 fw-bold">
+                    <i class="fas fa-map-marker-alt text-danger me-2"></i>Distribución Geográfica
+                </h6>
+            </div>
+            <div class="card-body p-0">
+                {% if dash_hoteles.geo_dist %}
+                <div class="list-group list-group-flush">
+                    {% for loc in dash_hoteles.geo_dist %}
+                    <div class="list-group-item px-4 py-2 d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-semibold small">{{ loc.city }}</div>
+                            <small class="text-muted">{{ loc.country }}</small>
+                        </div>
+                        <span class="badge bg-danger rounded-pill">{{ loc.total }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-map text-muted fs-3 mb-2"></i>
+                    <p class="text-muted small mb-0">Sin datos</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}{# end dash_hoteles.tiene_datos #}
+
+{% endblock %}

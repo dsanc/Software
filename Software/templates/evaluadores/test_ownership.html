@@ -1,0 +1,538 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Prueba de Sistema de Filtrado por Propietario{% endblock %}
+
+{% block extra_css %}
+<style>
+.test-module {
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.module-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.module-body {
+    padding: 20px;
+}
+
+.test-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.test-btn {
+    margin: 5px;
+    min-width: 180px;
+}
+
+.results-area {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    min-height: 100px;
+}
+
+.user-info-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+}
+
+.access-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 2px;
+}
+
+.access-admin { background-color: #28a745; color: white; }
+.access-principal { background-color: #007bff; color: white; }
+.access-evaluator { background-color: #ffc107; color: black; }
+
+.record-count {
+    font-size: 24px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.comparison-table {
+    width: 100%;
+    margin-top: 15px;
+}
+
+.comparison-table th {
+    background-color: #e9ecef;
+    padding: 10px;
+    text-align: center;
+}
+
+.comparison-table td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.alert-ownership {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    color: #0277bd;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-filter me-2"></i>Sistema de Filtrado por Propietario
+        </h1>
+        <a href="{% url 'evaluadores:test_permissions' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-shield-alt me-2"></i>Pruebas de Permisos
+        </a>
+    </div>
+
+    <!-- Información del Usuario Actual -->
+    <div class="user-info-card">
+        <h4><i class="fas fa-user-circle me-2"></i>Información del Usuario Actual</h4>
+        <p><strong>Usuario:</strong> {{ user.username }} ({{ user.get_full_name|default:user.username }})</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Tipo de Acceso:</strong> 
+            {% if user_info.is_superuser %}
+                <span class="access-badge access-admin">SUPERUSUARIO</span> - Ve todos los registros del sistema
+            {% elif user_info.is_staff %}
+                <span class="access-badge access-admin">STAFF</span> - Ve todos los registros del sistema
+            {% elif user_info.is_evaluator %}
+                <span class="access-badge access-evaluator">EVALUADOR</span> - Solo ve registros que ha creado
+            {% elif user_info.is_principal_user %}
+                <span class="access-badge access-principal">USUARIO PRINCIPAL</span> - Ve sus registros y los de sus evaluadores
+            {% else %}
+                <span class="access-badge" style="background-color: #6c757d; color: white;">USUARIO ESTÁNDAR</span>
+            {% endif %}
+        </p>
+        {% if user_info.is_evaluator and user_info.evaluator_info %}
+            <p><strong>Usuario Principal:</strong> {{ user_info.evaluator_info.usuario_principal.get_full_name|default:user_info.evaluator_info.usuario_principal.username }}</p>
+            <p><strong>Módulos Permitidos:</strong> 
+                {% for modulo in user_info.evaluator_info.modulos_permitidos %}
+                    <span class="badge bg-info me-1">{{ modulo }}</span>
+                {% endfor %}
+            </p>
+        {% endif %}
+    </div>
+
+    <!-- Explicación del Sistema -->
+    <div class="alert-ownership">
+        <h5><i class="fas fa-info-circle me-2"></i>¿Cómo funciona el filtrado por propietario?</h5>
+        <ul class="mb-0">
+            <li><strong>Evaluadores:</strong> Solo pueden ver y trabajar con registros que han creado ellos mismos</li>
+            <li><strong>Usuarios Principales:</strong> Pueden ver sus propios registros + los creados por sus evaluadores</li>
+            <li><strong>Administradores/Staff:</strong> Pueden ver todos los registros del sistema</li>
+        </ul>
+    </div>
+
+    <!-- Risk Hoteles -->
+    <div class="test-module">
+        <div class="module-header">
+            <i class="fas fa-hotel me-2"></i>Risk Hoteles
+        </div>
+        <div class="module-body">
+            <div class="test-section">
+                <h6><i class="fas fa-building me-2"></i>Hoteles Visibles</h6>
+                <p>Hoteles que puedes ver según tu nivel de acceso:</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="hoteles-count">{{ hoteles_count }}</span>
+                            <small class="d-block">Hoteles</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadHotelesData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showHotelesDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h6><i class="fas fa-clipboard-check me-2"></i>Evaluaciones de Seguridad Visibles</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="evaluaciones-hoteles-count">{{ evaluaciones_hoteles_count }}</span>
+                            <small class="d-block">Evaluaciones</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadEvaluacionesHotelesData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showEvaluacionesHotelesDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Conjuntos -->
+    <div class="test-module">
+        <div class="module-header">
+            <i class="fas fa-building me-2"></i>Risk Conjuntos
+        </div>
+        <div class="module-body">
+            <div class="test-section">
+                <h6><i class="fas fa-home me-2"></i>Conjuntos Residenciales Visibles</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="conjuntos-count">{{ conjuntos_count }}</span>
+                            <small class="d-block">Conjuntos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadConjuntosData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showConjuntosDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h6><i class="fas fa-shield-alt me-2"></i>Evaluaciones de Seguridad Visibles</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="evaluaciones-conjuntos-count">{{ evaluaciones_conjuntos_count }}</span>
+                            <small class="d-block">Evaluaciones</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadEvaluacionesConjuntosData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showEvaluacionesConjuntosDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Probabilistic -->
+    <div class="test-module">
+        <div class="module-header">
+            <i class="fas fa-chart-line me-2"></i>Security Probabilistic
+        </div>
+        <div class="module-body">
+            <div class="test-section">
+                <h6><i class="fas fa-user-shield me-2"></i>Perfiles de Seguridad Visibles</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="perfiles-count">{{ perfiles_count }}</span>
+                            <small class="d-block">Perfiles</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadPerfilesData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showPerfilesDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h6><i class="fas fa-calculator me-2"></i>Evaluaciones Probabilísticas Visibles</h6>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="record-count text-center">
+                            <span id="evaluaciones-security-count">{{ evaluaciones_security_count }}</span>
+                            <small class="d-block">Evaluaciones</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <button class="btn btn-primary test-btn" onclick="loadEvaluacionesSecurityData()">
+                            <i class="fas fa-sync-alt me-1"></i>Actualizar Datos
+                        </button>
+                        <button class="btn btn-info test-btn" onclick="showEvaluacionesSecurityDetail()">
+                            <i class="fas fa-eye me-1"></i>Ver Detalle
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resumen Comparativo -->
+    <div class="test-module">
+        <div class="module-header">
+            <i class="fas fa-chart-bar me-2"></i>Resumen Comparativo
+        </div>
+        <div class="module-body">
+            <table class="comparison-table table table-striped">
+                <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Registros Principales</th>
+                        <th>Evaluaciones</th>
+                        <th>Total Visible</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Risk Hoteles</strong></td>
+                        <td><span id="summary-hoteles">{{ hoteles_count }}</span> hoteles</td>
+                        <td><span id="summary-eval-hoteles">{{ evaluaciones_hoteles_count }}</span> evaluaciones</td>
+                        <td><span id="summary-total-hoteles">{{ hoteles_total }}</span> registros</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Risk Conjuntos</strong></td>
+                        <td><span id="summary-conjuntos">{{ conjuntos_count }}</span> conjuntos</td>
+                        <td><span id="summary-eval-conjuntos">{{ evaluaciones_conjuntos_count }}</span> evaluaciones</td>
+                        <td><span id="summary-total-conjuntos">{{ conjuntos_total }}</span> registros</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Security Probabilistic</strong></td>
+                        <td><span id="summary-perfiles">{{ perfiles_count }}</span> perfiles</td>
+                        <td><span id="summary-eval-security">{{ evaluaciones_security_count }}</span> evaluaciones</td>
+                        <td><span id="summary-total-security">{{ security_total }}</span> registros</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #e9ecef; font-weight: bold;">
+                        <td>TOTAL SISTEMA</td>
+                        <td><span id="grand-total-main">{{ total_main_records }}</span></td>
+                        <td><span id="grand-total-eval">{{ total_evaluaciones }}</span></td>
+                        <td><span id="grand-total">{{ grand_total }}</span></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <div class="results-area" id="detailed-results">
+                <p class="text-muted text-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Haz clic en "Ver Detalle" en cualquier módulo para ver información específica de los registros
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales
+let currentUserInfo = {{ user_info|safe }};
+
+// Funciones para cargar datos actualizados
+async function loadHotelesData() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=hoteles&action=count');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('hoteles-count').textContent = data.count;
+            document.getElementById('summary-hoteles').textContent = data.count;
+            showResult('success', `Hoteles actualizados: ${data.count} registros visibles`, 'Risk Hoteles');
+        }
+    } catch (error) {
+        showResult('error', `Error actualizando hoteles: ${error.message}`, 'Risk Hoteles');
+    }
+}
+
+async function loadEvaluacionesHotelesData() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=hoteles&action=count&type=evaluaciones');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('evaluaciones-hoteles-count').textContent = data.count;
+            document.getElementById('summary-eval-hoteles').textContent = data.count;
+            showResult('success', `Evaluaciones de hoteles actualizadas: ${data.count} registros visibles`, 'Risk Hoteles');
+        }
+    } catch (error) {
+        showResult('error', `Error actualizando evaluaciones de hoteles: ${error.message}`, 'Risk Hoteles');
+    }
+}
+
+async function showHotelesDetail() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=hoteles&action=detail');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayDetailedResults('Risk Hoteles - Detalle de Hoteles', data.records);
+        }
+    } catch (error) {
+        showResult('error', `Error obteniendo detalle de hoteles: ${error.message}`, 'Risk Hoteles');
+    }
+}
+
+async function showEvaluacionesHotelesDetail() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=hoteles&action=detail&type=evaluaciones');
+        const data = await response.json();
+        
+        if (data.success) {
+            displayDetailedResults('Risk Hoteles - Detalle de Evaluaciones', data.records);
+        }
+    } catch (error) {
+        showResult('error', `Error obteniendo detalle de evaluaciones: ${error.message}`, 'Risk Hoteles');
+    }
+}
+
+// Funciones similares para otros módulos (conjuntos y security)
+async function loadConjuntosData() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=conjuntos&action=count');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('conjuntos-count').textContent = data.count;
+            showResult('success', `Conjuntos actualizados: ${data.count} registros visibles`, 'Risk Conjuntos');
+        }
+    } catch (error) {
+        showResult('error', `Error actualizando conjuntos: ${error.message}`, 'Risk Conjuntos');
+    }
+}
+
+async function loadPerfilesData() {
+    try {
+        const response = await fetch('{% url "evaluadores:test_ownership" %}?module=security&action=count');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('perfiles-count').textContent = data.count;
+            showResult('success', `Perfiles actualizados: ${data.count} registros visibles`, 'Security Probabilistic');
+        }
+    } catch (error) {
+        showResult('error', `Error actualizando perfiles: ${error.message}`, 'Security Probabilistic');
+    }
+}
+
+// Función para mostrar resultados detallados
+function displayDetailedResults(title, records) {
+    const resultsArea = document.getElementById('detailed-results');
+    
+    let html = `<h6><i class="fas fa-list me-2"></i>${title}</h6>`;
+    
+    if (records && records.length > 0) {
+        html += '<div class="table-responsive"><table class="table table-sm table-bordered">';
+        html += '<thead><tr>';
+        
+        // Headers dinámicos basados en el primer registro
+        Object.keys(records[0]).forEach(key => {
+            html += `<th>${key}</th>`;
+        });
+        html += '</tr></thead><tbody>';
+        
+        // Datos
+        records.forEach(record => {
+            html += '<tr>';
+            Object.values(record).forEach(value => {
+                html += `<td>${value || '-'}</td>`;
+            });
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table></div>';
+    } else {
+        html += '<p class="text-muted"><i class="fas fa-exclamation-triangle me-2"></i>No hay registros visibles para tu nivel de acceso.</p>';
+    }
+    
+    resultsArea.innerHTML = html;
+}
+
+// Función para mostrar mensajes de resultado
+function showResult(type, message, module) {
+    const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const alert = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="fas ${icon} me-2"></i>
+            <strong>${module}:</strong> ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Insertar al inicio del contenedor principal
+    const container = document.querySelector('.container-fluid');
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = alert;
+    container.insertBefore(tempDiv.firstElementChild, container.children[1]);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        const alertElement = container.querySelector('.alert');
+        if (alertElement) {
+            alertElement.remove();
+        }
+    }, 5000);
+}
+
+// Funciones placeholder para otros módulos
+function loadEvaluacionesConjuntosData() {
+    showResult('info', 'Función en desarrollo', 'Risk Conjuntos');
+}
+
+function showConjuntosDetail() {
+    showResult('info', 'Función en desarrollo', 'Risk Conjuntos');
+}
+
+function showEvaluacionesConjuntosDetail() {
+    showResult('info', 'Función en desarrollo', 'Risk Conjuntos');
+}
+
+function loadEvaluacionesSecurityData() {
+    showResult('info', 'Función en desarrollo', 'Security Probabilistic');
+}
+
+function showPerfilesDetail() {
+    showResult('info', 'Función en desarrollo', 'Security Probabilistic');
+}
+
+function showEvaluacionesSecurityDetail() {
+    showResult('info', 'Función en desarrollo', 'Security Probabilistic');
+}
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Sistema de Filtrado por Propietario inicializado');
+    console.log('👤 Usuario actual:', currentUserInfo);
+});
+</script>
+{% endblock %}

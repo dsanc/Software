@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Avatar SVG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        .avatar-test {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 10px;
+            display: inline-block;
+        }
+        .success { border: 3px solid green; }
+        .error { border: 3px solid red; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>🧪 Test de Avatar SVG</h2>
+        
+        <h3>Test 1: Ruta relativa</h3>
+        <img src="./default-avatar.svg" alt="Test 1" class="avatar-test" 
+             onload="this.className+=' success'; console.log('✅ Test 1 OK')" 
+             onerror="this.className+=' error'; console.log('❌ Test 1 FAIL')">
+             
+        <h3>Test 2: Ruta absoluta</h3>
+        <img src="/static/images/default-avatar.svg" alt="Test 2" class="avatar-test" 
+             onload="this.className+=' success'; console.log('✅ Test 2 OK')" 
+             onerror="this.className+=' error'; console.log('❌ Test 2 FAIL')">
+             
+        <h3>Test 3: Con parámetros de caché</h3>
+        <img src="/static/images/default-avatar.svg?v=1" alt="Test 3" class="avatar-test" 
+             onload="this.className+=' success'; console.log('✅ Test 3 OK')" 
+             onerror="this.className+=' error'; console.log('❌ Test 3 FAIL')">
+    </div>
+    
+    <script>
+        console.log('🧪 Iniciando test de avatares...');
+        setTimeout(() => {
+            const imgs = document.querySelectorAll('img');
+            let loaded = 0;
+            let errors = 0;
+            imgs.forEach(img => {
+                if (img.complete) {
+                    if (img.naturalWidth > 0) loaded++;
+                    else errors++;
+                }
+            });
+            console.log(`📊 Resultado: ${loaded} exitosos, ${errors} con errores`);
+        }, 1000);
+    </script>
+</body>
+</html>

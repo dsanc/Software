@@ -1,0 +1,780 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/plans-overview-mobile.css' %}" rel="stylesheet">
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    --demo-gradient: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    --shadow-primary: 0 10px 40px rgba(102, 126, 234, 0.15);
+    --shadow-hover: 0 20px 60px rgba(102, 126, 234, 0.25);
+    --shadow-demo: 0 10px 40px rgba(40, 167, 69, 0.15);
+}
+
+/* Estilos específicos para selección inicial */
+.initial-selection-hero {
+    background: var(--primary-gradient);
+    padding: 3rem 0 2rem;
+    border-radius: 0 0 40px 40px;
+    margin-bottom: 2rem;
+    color: white;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.initial-selection-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="40" r="3" fill="rgba(255,255,255,0.08)"/><circle cx="40" cy="80" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+    background-size: 100px 100px;
+    animation: float 20s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    display: inline-block;
+    margin-bottom: 1rem;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+}
+
+.demo-plan-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-demo);
+    border: 3px solid #28a745;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.demo-plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(40, 167, 69, 0.25);
+}
+
+.demo-plan-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: var(--demo-gradient);
+}
+
+.demo-badge {
+    background: var(--demo-gradient);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.demo-plan-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.demo-plan-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.demo-plan-price {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #28a745;
+    margin-bottom: 0.5rem;
+}
+
+.demo-plan-duration {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.features-limitations-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .features-limitations-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+.features-list, .limitations-list {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 1.5rem;
+}
+
+.features-list h5 {
+    color: #28a745;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.features-list h5 i {
+    margin-right: 0.5rem;
+}
+
+.limitations-list h5 {
+    color: #dc3545;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.limitations-list h5 i {
+    margin-right: 0.5rem;
+}
+
+.feature-item, .limitation-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.feature-item i {
+    color: #28a745;
+    margin-right: 0.75rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.limitation-item i {
+    color: #dc3545;
+    margin-right: 0.75rem;
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+}
+
+.demo-activate-btn {
+    background: var(--demo-gradient);
+    border: none;
+    color: white;
+    padding: 1rem 3rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.demo-activate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+}
+
+.or-divider {
+    text-align: center;
+    margin: 3rem 0;
+    position: relative;
+}
+
+.or-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #dee2e6;
+}
+
+.or-divider span {
+    background: white;
+    padding: 0 2rem;
+    color: #6c757d;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.paid-plans-section {
+    margin-top: 3rem;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.section-title h3 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.section-title p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Estilos para las cards de planes pagos */
+.plan-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: #667eea;
+}
+
+.plan-card.featured {
+    border-color: #f093fb;
+    position: relative;
+}
+
+.plan-card.featured::before {
+    content: 'Recomendado';
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--warning-gradient);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.plan-price {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.plan-billing {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.plan-features {
+    margin-bottom: 2rem;
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    font-size: 0.95rem;
+}
+
+.plan-features li i {
+    color: #28a745;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+
+.plan-select-btn {
+    background: var(--primary-gradient);
+    border: none;
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.plan-select-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.help-section {
+    background: #f8f9fa;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 3rem;
+    text-align: center;
+}
+
+.help-section h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.help-section p {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+.help-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.help-btn:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+/* Estilos para módulos específicos */
+.module-section {
+    margin-bottom: 4rem;
+}
+
+.module-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.module-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+}
+
+.module-name {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.module-plans-section {
+    margin-top: 2rem;
+}
+
+.featured-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--warning-gradient);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.demo-badge {
+    position: absolute;
+    top: -10px;
+    right: 20px;
+    background: var(--demo-gradient);
+    color: white;
+    padding: 0.3rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    z-index: 10;
+}
+
+.plan-card {
+    position: relative;
+    border: 2px solid #dee2e6;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-features {
+    flex-grow: 1;
+}
+
+.plan-select-btn {
+    margin-top: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .initial-selection-hero {
+        padding: 2rem 0 1.5rem;
+    }
+    
+    .demo-plan-card {
+        padding: 1.5rem;
+    }
+    
+    .demo-plan-price {
+        font-size: 2.5rem;
+    }
+    
+    .plan-price {
+        font-size: 2rem;
+    }
+    
+    .module-header {
+        padding: 1rem !important;
+    }
+    
+    .module-header i {
+        font-size: 2rem !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Hero Section -->
+    <section class="initial-selection-hero">
+        <div class="hero-content">
+            <div class="container">
+                <div class="welcome-badge">
+                    <i class="fas fa-user-check"></i>
+                    ¡Bienvenido, {{ user_email }}!
+                </div>
+                <h1 class="display-4 font-weight-bold mb-3">
+                    {{ page_title }}
+                </h1>
+                <p class="lead mb-0">
+                    Para empezar a usar nuestro sistema, necesitas seleccionar un plan.<br>
+                    ¡Tenemos una opción gratuita para que explores sin compromiso!
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- Plan Demo Gratuito -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="demo-plan-card">
+                    <div class="demo-badge">
+                        <i class="fas fa-gift"></i>
+                        Gratis por 30 días
+                    </div>
+                    
+                    <div class="demo-plan-header">
+                        <h2 class="demo-plan-title">{{ demo_plan_info.name }}</h2>
+                        <div class="demo-plan-price">{{ demo_plan_info.price }}</div>
+                        <div class="demo-plan-duration">por {{ demo_plan_info.duration }}</div>
+                        <p class="text-muted mt-3">{{ demo_plan_info.description }}</p>
+                    </div>
+
+                    <div class="features-limitations-grid">
+                        <!-- Características incluidas -->
+                        <div class="features-list">
+                            <h5>
+                                <i class="fas fa-check-circle"></i>
+                                Incluye
+                            </h5>
+                            {% for feature in demo_plan_info.features %}
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>{{ feature }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Limitaciones -->
+                        <div class="limitations-list">
+                            <h5>
+                                <i class="fas fa-exclamation-circle"></i>
+                                Limitaciones
+                            </h5>
+                            {% for limitation in demo_plan_info.limitations %}
+                            <div class="limitation-item">
+                                <i class="fas fa-times"></i>
+                                <span>{{ limitation }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Botón para activar plan demo -->
+                    <form method="post" action="{% url 'subscriptions:activate_demo_plan' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="demo-activate-btn">
+                            <i class="fas fa-rocket"></i>
+                            Comenzar con Plan Demo
+                        </button>
+                    </form>
+                    
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Sin tarjeta de crédito requerida. Actívalo inmediatamente.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Divisor -->
+        <div class="or-divider">
+            <span>O elige un módulo específico</span>
+        </div>
+
+        <!-- Planes por Módulo -->
+        <section class="module-plans-section">
+            <div class="section-title">
+                <h3>Planes por Módulo</h3>
+                <p>Elige el módulo y plan que mejor se adapte a tus necesidades</p>
+            </div>
+
+            {% for module in modules %}
+            <div class="module-section mb-5">
+                <!-- Header del módulo -->
+                <div class="module-header text-center mb-4" style="background: linear-gradient(135deg, {{ module.color }}22, {{ module.color }}11); border-radius: 20px; padding: 2rem; margin-bottom: 3rem;">
+                    <i class="{{ module.icon }}" style="color: {{ module.color }}; font-size: 4rem; margin-bottom: 1rem;"></i>
+                    <h3 class="module-name" style="color: {{ module.color }}; margin: 0;">{{ module.display_name }}</h3>
+                    <p class="text-muted mt-2">{{ module.description }}</p>
+                </div>
+
+                <!-- Planes del módulo -->
+                <div class="row">
+                    {% for plan in module.all_plans %}
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="plan-card {% if plan.is_featured %}featured{% endif %}" 
+                             style="{% if plan.plan_type.name == 'Demo' %}border-color: #28a745;{% else %}border-color: {{ module.color }};{% endif %}">
+                            
+                            <!-- Etiqueta de plan destacado -->
+                            {% if plan.plan_type.name == 'Demo' %}
+                            <div class="demo-badge">
+                                <i class="fas fa-gift"></i>
+                                Gratis
+                            </div>
+                            {% elif plan.is_featured %}
+                            <div class="featured-badge">
+                                <i class="fas fa-star"></i>
+                                Recomendado
+                            </div>
+                            {% endif %}
+
+                            <!-- Header del plan -->
+                            <div class="plan-header text-center">
+                                <h5 class="plan-name">{{ plan.plan_type.name }}</h5>
+                                <div class="plan-price" style="color: {% if plan.plan_type.name == 'Demo' %}#28a745{% else %}{{ module.color }}{% endif %};">
+                                    {% if plan.yearly_price == 0 %}
+                                        GRATIS
+                                    {% else %}
+                                        ${{ plan.yearly_price|floatformat:0 }}
+                                    {% endif %}
+                                </div>
+                                <div class="plan-billing">
+                                    {% if plan.yearly_price == 0 %}
+                                        por 30 días
+                                    {% else %}
+                                        por año
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Características del plan -->
+                            <div class="plan-features">
+                                <ul>
+                                    <li>
+                                        <i class="fas fa-users"></i>
+                                        {% if plan.max_users == 1 %}
+                                            1 cliente
+                                        {% else %}
+                                            {{ plan.max_users }} clientes
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-chart-line"></i>
+                                        {% if plan.max_reports == -1 %}
+                                            Evaluaciones ilimitadas
+                                        {% else %}
+                                            {{ plan.max_reports }} evaluaciones
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-user-plus"></i>
+                                        {% if plan.limits.crear_evaluadores == 0 %}
+                                            Sin crear evaluadores
+                                        {% else %}
+                                            {{ plan.limits.crear_evaluadores }} evaluadores
+                                        {% endif %}
+                                    </li>
+                                    <li>
+                                        <i class="fas fa-headset"></i>
+                                        Soporte {{ plan.limits.tipo_soporte }}
+                                    </li>
+                                    {% if plan.features.export_excel %}
+                                    <li>
+                                        <i class="fas fa-file-excel"></i>
+                                        Exportación Excel
+                                    </li>
+                                    {% endif %}
+                                    {% if plan.features.watermark %}
+                                    <li class="text-warning">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        Reportes con marca de agua
+                                    </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+
+                            <!-- Botón de selección -->
+                            {% if plan.plan_type.name == 'Demo' %}
+                            <form method="post" action="{% url 'subscriptions:activate_module_plan' module.name %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="plan_type" value="Demo">
+                                <button type="submit" class="plan-select-btn" style="background: linear-gradient(135deg, #28a745, #20c997);">
+                                    <i class="fas fa-rocket"></i>
+                                    Comenzar Gratis
+                                </button>
+                            </form>
+                            {% else %}
+                            <form method="post" action="{% url 'subscriptions:add_to_cart' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="plan_id" value="{{ plan.id }}">
+                                <input type="hidden" name="billing_cycle" value="yearly">
+                                <button type="submit" class="plan-select-btn" style="background: linear-gradient(135deg, {{ module.color }}, {{ module.color }}dd);">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Seleccionar Plan
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </section>
+
+        <!-- Sección de Ayuda -->
+        <div class="help-section">
+            <h4>¿Necesitas ayuda para decidir?</h4>
+            <p>Nuestro equipo está listo para ayudarte a encontrar el plan perfecto para tus necesidades.</p>
+            <a href="mailto:soporte@tudominio.com" class="help-btn">
+                <i class="fas fa-envelope"></i>
+                Contactar Soporte
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Efecto de animación al cargar
+    $('.demo-plan-card').hide().fadeIn(800);
+    $('.plan-card').each(function(index) {
+        $(this).delay(200 * index).fadeIn(600);
+    });
+    
+    // Confirmación para activar plan demo
+    $('form[action*="activate-demo-plan"]').on('submit', function(e) {
+        e.preventDefault();
+        
+        Swal.fire({
+            title: '¡Perfecto!',
+            text: '¿Quieres activar el Plan Demo gratuito? Podrás explorarlo por 30 días.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Sí, activar demo',
+            cancelButtonText: 'Cancelar',
+            customClass: {
+                confirmButton: 'demo-activate-btn'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Mostrar loading
+                Swal.fire({
+                    title: 'Activando tu plan demo...',
+                    text: 'Esto solo tomará un momento',
+                    icon: 'info',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    willOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Enviar formulario
+                this.submit();
+            }
+        });
+    });
+    
+    // Animación de hover para las cards
+    $('.plan-card, .demo-plan-card').hover(
+        function() {
+            $(this).addClass('animate__animated animate__pulse');
+        },
+        function() {
+            $(this).removeClass('animate__animated animate__pulse');
+        }
+    );
+});
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+# PNG Placeholder 72x72
+# Este archivo representa un icono PNG de 72x72 píxeles
+# En producción, reemplazar con imagen real generada desde el SVG
+# 
+# Contenido del icono:
+# - Fondo azul (#1e3a8a)
+# - Edificio blanco con ventanas
+# - Texto "RH" 
+# - Punto rojo de alerta
+# - Esquinas redondeadas
+Size: 72x72
+Format: PNG
+Background: #1e3a8a
+Content: Risk Hoteles building icon

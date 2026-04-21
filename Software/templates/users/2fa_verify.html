@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verificación 2FA - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.verify-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.verify-card {
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.verify-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    text-align: center;
+    padding: 2rem;
+}
+
+.verify-body {
+    padding: 2rem;
+}
+
+.token-input {
+    font-size: 2rem !important;
+    text-align: center !important;
+    letter-spacing: 0.5rem !important;
+    height: 80px !important;
+    border: 2px solid #dee2e6 !important;
+    border-radius: 8px !important;
+}
+
+.token-input:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 20px rgba(0, 123, 255, 0.25) !important;
+}
+
+.security-tips {
+    background: #f8f9fc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    border-left: 4px solid #007bff;
+}
+
+.backup-help {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.shield-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="verify-card">
+                    <div class="verify-header">
+                        <i class="fas fa-shield-alt shield-icon"></i>
+                        <h3 class="mb-2">Verificación de Seguridad</h3>
+                        <p class="mb-0">Ingresa tu código de autenticación de dos factores</p>
+                    </div>
+                    
+                    <div class="verify-body">
+                        <form method="post" class="text-center">
+                            {% csrf_token %}
+                            
+                            <div class="mb-4">
+                                <div class="mb-3">
+                                    <input type="text" 
+                                           name="token" 
+                                           id="id_token"
+                                           class="form-control token-input"
+                                           placeholder="000000"
+                                           maxlength="8"
+                                           autocomplete="one-time-code"
+                                           autofocus
+                                           required>
+                                </div>
+                                
+                                {% if form.token.errors %}
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        {{ form.token.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                
+                                <small class="text-muted">
+                                    Abre tu aplicación autenticadora e ingresa el código de 6 dígitos
+                                </small>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mb-3">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-unlock me-2"></i>
+                                    Verificar Código
+                                </button>
+                            </div>
+                            
+                            <div class="backup-help">
+                                <small>
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>¿No tienes acceso a tu dispositivo?</strong><br>
+                                    También puedes usar uno de tus códigos de backup de 8 dígitos.
+                                </small>
+                            </div>
+                        </form>
+                        
+                        <div class="security-tips">
+                            <h6><i class="fas fa-lightbulb me-2"></i>Consejos de Seguridad:</h6>
+                            <ul class="small mb-0">
+                                <li>Los códigos cambian cada 30 segundos</li>
+                                <li>Nunca compartas tus códigos con nadie</li>
+                                <li>Si sospechas actividad sospechosa, contacta al soporte</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <a href="{% url 'users:login' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Volver al Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenInput = document.getElementById('id_token');
+    
+    if (tokenInput) {
+        // Auto-focus
+        tokenInput.focus();
+        
+        // Solo permitir números y auto-submit cuando se complete
+        tokenInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Solo números
+            
+            // Limitar longitud
+            if (value.length > 8) {
+                value = value.substring(0, 8);
+            }
+            
+            e.target.value = value;
+            
+            // Auto-submit cuando se completen 6 u 8 dígitos
+            if (value.length === 6 || value.length === 8) {
+                // Pequeño delay para mejor UX
+                setTimeout(() => {
+                    e.target.form.submit();
+                }, 500);
+            }
+        });
+        
+        // Manejar pegado de códigos
+        tokenInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            const cleaned = paste.replace(/\D/g, '');
+            
+            if (cleaned.length >= 6) {
+                e.target.value = cleaned.substring(0, 8);
+                // Auto-submit después de pegar
+                setTimeout(() => {
+                    e.target.form.submit();
+                }, 300);
+            }
+        });
+    }
+    
+    // Countdown visual para códigos TOTP (opcional)
+    function startCountdown() {
+        const now = Math.floor(Date.now() / 1000);
+        const timeLeft = 30 - (now % 30);
+        
+        // Mostrar countdown solo si queda poco tiempo
+        if (timeLeft <= 10) {
+            let countdownEl = document.getElementById('countdown');
+            if (!countdownEl) {
+                countdownEl = document.createElement('div');
+                countdownEl.id = 'countdown';
+                countdownEl.className = 'text-warning small mt-2';
+                tokenInput.parentNode.appendChild(countdownEl);
+            }
+            
+            countdownEl.innerHTML = `<i class="fas fa-clock me-1"></i>Código expira en ${timeLeft}s`;
+            
+            if (timeLeft === 1) {
+                countdownEl.className = 'text-danger small mt-2';
+                countdownEl.innerHTML = '<i class="fas fa-exclamation-triangle me-1"></i>¡Código expirado! Usa el nuevo código.';
+            }
+        }
+    }
+    
+    // Actualizar countdown cada segundo
+    setInterval(startCountdown, 1000);
+    startCountdown();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,518 @@
+/* Estilos para Reporte PDF de Evaluación de Riesgo - Modernizado */
+
+@page {
+    size: A4;
+    margin: 1cm 0.8cm 1cm 0.8cm;
+}
+
+/* Estilos Generales */
+body {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1f2937; /* Gray 800 */
+    -webkit-font-smoothing: antialiased;
+}
+
+.mb-section {
+    margin-bottom: 1.5rem;
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #111827; /* Gray 900 */
+}
+
+h4 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #374151; /* Gray 700 */
+}
+
+h6 {
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+    color: #6b7280; /* Gray 500 */
+}
+
+.card-body {
+    padding: 1rem;
+}
+
+small {
+    font-size: 0.7rem;
+    color: #6b7280;
+}
+
+.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+    max-width: 100%;
+}
+
+/* Header Principal */
+.header-principal {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); /* Indigo to Violet */
+    color: white;
+    padding: 1.5rem;
+    margin-bottom: 0;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+}
+
+.header-subtitle {
+    font-size: 0.95rem;
+    opacity: 0.95;
+    margin-bottom: 0;
+    font-weight: 500;
+}
+
+.header-meta {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    opacity: 0.9;
+}
+
+/* Información General */
+.info-general {
+    background: #f9fafb; /* Gray 50 */
+    padding: 1.5rem;
+    border-left: 4px solid #4f46e5;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.info-section {
+    background: white;
+    border-radius: 12px;
+    min-height: 350px; /* Changed from fixed height */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(229, 231, 235, 0.5); /* Gray 200 */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: auto; /* Allow growth */
+}
+
+.info-header {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: white;
+}
+
+.conjunto-header {
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+}
+
+.ubicacion-header {
+    background: linear-gradient(135deg, #059669, #10b981);
+}
+
+.evaluacion-header {
+    background: linear-gradient(135deg, #d97706, #f59e0b);
+}
+
+.header-icon-container {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.25);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    backdrop-filter: blur(4px);
+}
+
+.header-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.enhanced-grid {
+    padding: 1.25rem;
+    background: white;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.enhanced-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.enhanced-item:last-child {
+    border-bottom: none;
+}
+
+.item-icon {
+    width: 24px;
+    height: 24px;
+    background: #e0e7ff; /* Indigo 100 */
+    color: #4f46e5; /* Indigo 600 */
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.ubicacion-info .item-icon {
+    background: #d1fae5; /* Emerald 100 */
+    color: #059669; /* Emerald 600 */
+}
+
+.evaluacion-info .item-icon {
+    background: #fef3c7; /* Amber 100 */
+    color: #d97706; /* Amber 600 */
+}
+
+.item-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.info-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.1rem;
+}
+
+.info-value {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #111827;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+/* Resumen Estadístico */
+.resumen-estadistico-fix .card {
+    border: 1px solid #e5e7eb;
+    margin-bottom: 0;
+    min-height: 100px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s;
+}
+
+.resumen-estadistico-fix .card-body {
+    padding: 1rem !important;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.resumen-estadistico-fix h4 {
+    font-size: 1.25rem !important;
+    font-weight: 700;
+    margin-bottom: 0.25rem !important;
+    color: #111827;
+}
+
+.resumen-estadistico-fix small {
+    font-size: 0.65rem !important;
+    color: #6b7280;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.resumen-estadistico-fix .fa-2x {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    color: #4f46e5;
+}
+
+/* Análisis Radar */
+.chart-container-radar {
+    position: relative;
+    height: 400px;
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+}
+
+.metric-radar {
+    background: #f9fafb;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border-left: 3px solid #4f46e5;
+    font-size: 0.8rem;
+}
+
+.recommendation-item {
+    background: #fffbeb;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    border-left: 3px solid #f59e0b;
+    color: #92400e;
+}
+
+.recommendation-item.alta { background: #fef2f2; border-left-color: #ef4444; color: #b91c1c; }
+.recommendation-item.media { background: #fffbeb; border-left-color: #f59e0b; color: #92400e; }
+.recommendation-item.baja { background: #ecfdf5; border-left-color: #10b981; color: #047857; }
+
+/* IA Section */
+.ia-section {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin: 2rem 0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Riesgo Categoria */
+.riesgo-categoria {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    min-height: auto;
+    height: auto;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.riesgo-header {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.riesgo-content {
+    padding: 1.25rem;
+    background: white;
+}
+
+.semaforo-visual {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    font-size: 0.8rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Layout Helpers */
+.datos-conjunto-fix .row,
+.resumen-estadistico-fix .row,
+.analisis-detallado .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -12px;
+    margin-left: -12px;
+}
+
+.datos-conjunto-fix .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+.resumen-estadistico-fix .col-md-3 {
+    flex: 0 0 25%;
+    max-width: 25%;
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+.analisis-detallado .col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+/* MEDIA PRINT - Estilos específicos para impresión */
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+        color: black !important;
+    }
+
+    .no-print { display: none !important; }
+    .page-break { page-break-before: always; }
+    .page-break-avoid { page-break-inside: avoid !important; }
+
+    /* Layout Fixes for Print */
+    .row {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /* Modern Grid Layout for Print where supported */
+    @supports (display: grid) {
+        .datos-conjunto-fix .row {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        .datos-conjunto-fix .col-md-4 {
+            width: auto !important;
+            margin: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+        }
+
+        .resumen-estadistico-fix .row {
+            display: grid !important;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        .resumen-estadistico-fix .col-md-3 {
+            width: auto !important;
+            margin: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+        }
+
+        .analisis-detallado .row {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        .analisis-detallado .col-md-6 {
+            width: auto !important;
+            margin: 0 !important;
+            max-width: none !important;
+            flex: none !important;
+        }
+    }
+
+    /* Fallback for older print engines */
+    @supports not (display: grid) {
+        .datos-conjunto-fix .col-md-4 {
+            width: 32% !important;
+            margin-right: 2% !important;
+            flex: none !important;
+        }
+        .datos-conjunto-fix .col-md-4:last-child {
+            margin-right: 0 !important;
+        }
+
+        .resumen-estadistico-fix .col-md-3 {
+            width: 23.5% !important;
+            margin-right: 2% !important;
+            flex: none !important;
+        }
+        .resumen-estadistico-fix .col-md-3:last-child {
+            margin-right: 0 !important;
+        }
+
+        .analisis-detallado .col-md-6 {
+            width: 48% !important;
+            margin-right: 2% !important;
+            flex: none !important;
+            margin-bottom: 1.5rem !important;
+        }
+        .analisis-detallado .col-md-6:nth-child(2n) {
+            margin-right: 0 !important;
+        }
+    }
+
+    /* Backgrounds & Colors */
+    .bg-primary { background-color: #4f46e5 !important; color: white !important; }
+    .bg-success { background-color: #10b981 !important; color: white !important; }
+    .bg-warning { background-color: #f59e0b !important; color: black !important; }
+    .bg-danger { background-color: #ef4444 !important; color: white !important; }
+    
+    .header-principal {
+        background: #4f46e5 !important;
+        color: white !important;
+        box-shadow: none !important;
+    }
+    
+    .info-general {
+        background: #f9fafb !important;
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb !important;
+    }
+
+    .card, .info-section, .riesgo-categoria {
+        border: 1px solid #e5e7eb !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    /* Chart Containers */
+    .chart-container, .chart-container-radar {
+        page-break-inside: avoid !important;
+        break-inside: avoid;
+    }
+    
+    /* Ensure text is black for readability */
+    p, h1, h2, h3, h4, h5, h6, span, div {
+        color: #000;
+    }
+    
+    .text-white {
+        color: #fff !important;
+    }
+}

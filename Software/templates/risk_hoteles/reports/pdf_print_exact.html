@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 PDF Print - {{ hotel.name }} - {{ assessment.assessment_date|date:"d/m/Y" }}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <style>
+        /* Variables CSS para dimensiones de página */
+        :root {
+            --page-width: 210mm;    /* A4 width */
+            --page-height: 297mm;   /* A4 height */
+            --page-margin: 8mm;     /* Márgenes más estrechos para más contenido */
+            --content-width: calc(var(--page-width) - 2 * var(--page-margin));
+            --content-height: calc(var(--page-height) - 2 * var(--page-margin));
+        }
+        
+        /* Para usuarios que prefieren Carta US */
+        @media screen and (max-width: 8.5in) {
+            :root {
+                --page-width: 8.5in;   /* Letter width */
+                --page-height: 11in;   /* Letter height */
+            }
+        }
+        
+        /* Estilos optimizados para impresión */
+        @media print {
+            /* Configuración de página con márgenes mínimos */
+            @page {
+                margin: 6mm 5mm 6mm 5mm; /* Reducido: Superior, Derecho, Inferior, Izquierdo */
+                size: A4;
+            }
+            
+            body {
+                margin: 0;
+                padding: 0;
+                font-size: 10px; /* Reducido de 11px para más contenido */
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+            
+            .pdf-preview-container {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+                background: white;
+            }
+            
+            .pdf-page {
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .page-content {
+                padding: 5mm !important; /* Reducir padding interno */
+            }
+            
+            /* Optimizar header y secciones principales */
+            .pdf-header {
+                padding-bottom: 6px !important; /* Reducido de 10px a 6px */
+                margin-bottom: 10px !important; /* Reducido de 15px a 10px */
+            }
+            
+            .hotel-info-section {
+                padding: 8px !important; /* Reducido de 10px a 8px */
+                margin-bottom: 12px !important; /* Reducido de 15px a 12px */
+            }
+            
+            /* Estilos ultra-compactos para información del hotel - Print */
+            .hotel-info-ultra-compact {
+                padding: 6px 12px !important;
+                margin-bottom: 8px !important;
+                background: #f8f9fa !important;
+            }
+            
+            .hotel-name-compact {
+                font-size: 1.1rem !important;
+                margin-bottom: 0 !important;
+            }
+            
+            .hotel-details-inline {
+                font-size: 0.65rem !important;
+                line-height: 1.2 !important;
+                margin-top: 2px !important;
+            }
+            
+            .score-value-compact {
+                font-size: 1.4rem !important;
+                line-height: 1 !important;
+            }
+            
+            .risk-badge-compact {
+                font-size: 0.55rem !important;
+                padding: 1px 4px !important;
+            }
+            
+            .report-title {
+                font-size: 1.3rem !important; /* Reducido de 1.6rem a 1.3rem */
+                margin-bottom: 1px !important; /* Reducido de 2px a 1px */
+            }
+            
+            .report-subtitle {
+                font-size: 0.8rem !important; /* Añadido estilo específico */
+                margin-bottom: 1px !important;
+            }
+            
+            .hotel-name {
+                font-size: 1.2rem !important; /* Reducido de 1.4rem a 1.2rem */
+            }
+            
+            /* Preservar layout de columnas en impresión */
+            .row {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                margin-left: -0.25rem !important; /* Reducido de -0.5rem */
+                margin-right: -0.25rem !important; /* Reducido de -0.5rem */
+            }
+            
+            .col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, 
+            .col-7, .col-8, .col-9, .col-10, .col-11, .col-12,
+            .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6,
+            .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+                flex: 0 0 auto !important;
+                padding-left: 0.25rem !important; /* Reducido de 0.5rem */
+                padding-right: 0.25rem !important; /* Reducido de 0.5rem */
+            }
+            
+            .col-md-3 { width: 25% !important; }
+            .col-md-4 { width: 33.33333% !important; }
+            .col-md-6 { width: 50% !important; }
+            .col-md-8 { width: 66.66667% !important; }
+            .col-md-9 { width: 75% !important; }
+            .col-md-12 { width: 100% !important; }
+            
+            .col-3 { width: 25% !important; }
+            .col-4 { width: 33.33333% !important; }
+            .col-6 { width: 50% !important; }
+            .col-8 { width: 66.66667% !important; }
+            .col-9 { width: 75% !important; }
+            .col-12 { width: 100% !important; }
+            
+            /* Prevenir saltos de página en elementos importantes */
+            .card, .category-section-compact, .radar-chart-container {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            /* Asegurar que los gráficos mantengan su tamaño */
+            .chart-wrapper {
+                width: 100% !important;
+                height: 300px !important; /* Reducido de 350px */
+            }
+            
+            /* Preservar espaciado en impresión - Optimizado para más contenido */
+            .mb-4 { margin-bottom: 0.75rem !important; } /* Reducido de 1rem */
+            .mb-3 { margin-bottom: 0.5rem !important; } /* Reducido de 0.75rem */
+            .mb-2 { margin-bottom: 0.2rem !important; } /* Reducido de 0.25rem */
+            .mt-4 { margin-top: 0.75rem !important; } /* Reducido de 1rem */
+            .mt-3 { margin-top: 0.5rem !important; } /* Reducido de 0.75rem */
+            .mt-2 { margin-top: 0.2rem !important; } /* Nuevo valor reducido */
+            .p-3 { padding: 0.5rem !important; } /* Reducido de 0.75rem */
+            .p-4 { padding: 0.6rem !important; } /* Reducido de 0.75rem */
+            .py-3 { padding-top: 0.4rem !important; padding-bottom: 0.4rem !important; } /* Reducido */
+            .px-3 { padding-left: 0.4rem !important; padding-right: 0.4rem !important; } /* Reducido */
+            
+            /* Cards y elementos contenedores */
+            .card {
+                border: 1px solid #dee2e6 !important;
+                border-radius: 0.375rem !important;
+            }
+            
+            .card-header {
+                background-color: #f8f9fa !important;
+                border-bottom: 1px solid #dee2e6 !important;
+                padding: 0.375rem 0.75rem !important; /* Reducido de 0.5rem 1rem */
+            }
+            
+            .card-body {
+                padding: 0.6rem !important; /* Reducido de 0.75rem */
+            }
+            
+            /* Optimizar tablas y elementos de texto */
+            .table {
+                font-size: 0.85rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+            
+            .table td, .table th {
+                padding: 0.4rem !important; /* Reducido de 0.75rem */
+                vertical-align: top !important;
+            }
+            
+            .badge {
+                font-size: 0.7rem !important; /* Reducido */
+                padding: 0.25rem 0.4rem !important;
+            }
+            
+            .btn {
+                font-size: 0.8rem !important;
+                padding: 0.25rem 0.5rem !important;
+            }
+            
+            .overall-percentage {
+                font-size: 2.5rem !important; /* Reducido de 3rem */
+                font-weight: 900;
+                margin-bottom: 3px !important; /* Reducido de 5px */
+            }
+            
+            /* Reducir tamaños de headers para más compacidad */
+            h1 { font-size: 1.5rem !important; margin-bottom: 0.3rem !important; }
+            h2 { font-size: 1.3rem !important; margin-bottom: 0.25rem !important; }
+            h3 { font-size: 1.1rem !important; margin-bottom: 0.2rem !important; }
+            h4 { font-size: 1rem !important; margin-bottom: 0.15rem !important; }
+            h5 { font-size: 0.9rem !important; margin-bottom: 0.1rem !important; }
+            h6 { font-size: 0.8rem !important; margin-bottom: 0.1rem !important; }
+            
+            /* Colores y gradientes en impresión */
+            .bg-primary { background-color: #007bff !important; }
+            .bg-success { background-color: #28a745 !important; }
+            .bg-warning { background-color: #ffc107 !important; }
+            .bg-orange { background-color: #fd7e14 !important; }
+            .bg-danger { background-color: #dc3545 !important; }
+            .bg-info { background-color: #17a2b8 !important; }
+            
+            .text-primary { color: #007bff !important; }
+            .text-success { color: #28a745 !important; }
+            .text-warning { color: #ffc107 !important; }
+            .text-orange { color: #fd7e14 !important; }
+            .text-danger { color: #dc3545 !important; }
+            .text-info { color: #17a2b8 !important; }
+            
+            /* Estilos de puntuación en impresión */
+            .score-value {
+                font-size: 2rem !important; /* Reducir ligeramente para impresión */
+                font-weight: 900 !important;
+                line-height: 1 !important;
+            }
+            
+            .score-label {
+                font-size: 0.75rem !important;
+                color: #6c757d !important;
+            }
+            
+            /* Preservar badges y elementos de riesgo */
+            .risk-badge {
+                display: inline-flex !important;
+                align-items: center !important;
+                padding: 5px 12px !important;
+                border-radius: 15px !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                color: white !important;
+            }
+            
+            .risk-very-low { background: #28a745 !important; }
+            .risk-low { background: #17a2b8 !important; }
+            .risk-medium { background: #ffc107 !important; }
+            .risk-high { background: #dc3545 !important; }
+            
+            /* Footer - Preservar 3 columnas en impresión */
+            .pdf-footer {
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+                padding: 15px 25px !important;
+                border-top: 3px solid #007bff !important;
+                margin-top: 30px !important;
+                border-radius: 10px !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .footer-content {
+                display: flex !important;
+                flex-direction: row !important; /* Forzar dirección horizontal */
+                justify-content: space-between !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important; /* Evitar que se envuelvan */
+            }
+            
+            .footer-left, .footer-center, .footer-right {
+                flex: 1 !important;
+                text-align: center !important;
+                margin-bottom: 0 !important; /* Resetear margin-bottom del responsive */
+            }
+            
+            .footer-left {
+                text-align: left !important;
+            }
+            
+            .footer-right {
+                text-align: right !important;
+            }
+        }
+        
+        /* Estilos específicos para preview del PDF */
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .pdf-preview-container {
+            width: var(--page-width);
+            max-width: var(--page-width);
+            margin: 20px auto;
+            background: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pdf-page {
+            width: 100%;
+            min-height: var(--page-height);
+            background: white;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-content {
+            padding: var(--page-margin);
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+        }
+        
+        /* Header del reporte */
+        .pdf-header {
+            border-bottom: 1px solid #007bff; /* Reducido de 3px a 1px */
+            padding-bottom: 8px; /* Reducido de 20px a 8px */
+            margin-bottom: 12px; /* Reducido de 25px a 12px */
+        }
+        
+        .company-logo {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+        
+        /* Estilos para logo compacto */
+        .company-logo .bg-primary {
+            padding: 0.25rem !important; /* Muy compacto */
+            max-width: 120px; /* Limitar ancho */
+            margin: 0 auto; /* Centrar */
+        }
+        
+        .company-logo .fas {
+            font-size: 1rem !important; /* Icono pequeño */
+        }
+        
+        .company-logo small {
+            font-size: 0.7rem !important; /* Texto muy pequeño */
+            line-height: 1.1 !important;
+        }
+        
+        .report-title {
+            color: #007bff;
+            font-size: 1.4rem; /* Reducido de 2.2rem a 1.4rem */
+            font-weight: 700;
+            margin-bottom: 2px; /* Reducido de 5px a 2px */
+        }
+        
+        .report-subtitle {
+            color: #6c757d;
+            font-size: 0.85rem; /* Reducido de 1.1rem a 0.85rem */
+            margin-bottom: 0;
+        }
+        
+        /* Información del hotel */
+        .hotel-info-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border: 1px solid #dee2e6;
+        }
+        
+        /* Estilos ultra-compactos para información del hotel */
+        .hotel-info-ultra-compact {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .hotel-name-compact {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 0;
+        }
+        
+        .hotel-details-inline {
+            font-size: 0.75rem;
+            color: #6c757d;
+            line-height: 1.3;
+            margin-top: 3px;
+        }
+        
+        .evaluation-summary-compact {
+            min-width: 100px;
+        }
+        
+        .score-display-compact {
+            text-align: center;
+        }
+        
+        .score-value-compact {
+            font-size: 1.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        
+        .risk-badge-compact {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        
+        .hotel-name {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+        }
+        
+        .hotel-subtitle {
+            font-size: 1.1rem;
+            color: #6c757d;
+        }
+        
+        .score-container {
+            background: white;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: center;
+            margin-top: 5px;
+        }
+        
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+        
+        .risk-very-low {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .risk-low {
+            background: linear-gradient(135deg, #17a2b8, #20c997);
+        }
+        
+        .risk-medium {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+        }
+        
+        .risk-high {
+            background: linear-gradient(135deg, #dc3545, #e83e8c);
+        }
+        
+        .risk-very-low { background: #d4edda; color: #155724; }
+        .risk-low { background: #cce7ff; color: #004085; }
+        .risk-medium { background: #fff3cd; color: #856404; }
+        .risk-high { background: #f8d7da; color: #721c24; }
+        
+        /* Detail items */
+        .detail-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .detail-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .detail-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .detail-icon i {
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+        
+        .detail-value {
+            color: #212529;
+            font-size: 1rem;
+        }
+        
+        /* Cards y secciones */
+        .card {
+            border: none;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            border-radius: 12px;
+        }
+        
+        .card-header {
+            border-radius: 12px 12px 0 0 !important;
+            border-bottom: none;
+        }
+        
+        /* Estilos para categorías compactas */
+        .category-section-compact {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .category-section-compact:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transform: translateY(-1px);
+        }
+        
+        .category-title-compact {
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        
+        .progress-bar-pdf-compact {
+            height: 6px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+        
+        .bg-orange {
+            background-color: #fd7e14 !important;
+        }
+        
+        /* Colors para progreso */
+        .text-orange {
+            color: #fd7e14 !important;
+        }
+        
+        /* Estilos para la evaluación general */
+        .overall-score-display {
+            text-align: center;
+        }
+        
+        .overall-percentage {
+            font-size: 2.5rem; /* Reducido de 3rem */
+            font-weight: 900;
+            margin-bottom: 3px; /* Reducido de 5px */
+        }
+        
+        .assessment-status {
+            text-align: center;
+        }
+        
+        .risk-level-display {
+            text-align: center;
+        }
+        
+        .score-circle {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        /* Estilos para el gráfico radar */
+        .radar-chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .chart-wrapper {
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        /* Legend items */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        /* Footer */
+        .pdf-footer {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 15px 25px;
+            border-top: 3px solid #007bff;
+            margin-top: 30px;
+            border-radius: 10px;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .footer-left, .footer-center, .footer-right {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .footer-left {
+            text-align: left;
+        }
+        
+        .footer-right {
+            text-align: right;
+        }
+        
+        /* Botón de impresión flotante */
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.4);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .print-button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40,167,69,0.6);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .pdf-preview-container {
+                margin: 10px;
+                width: calc(100% - 20px);
+                max-width: none;
+            }
+            
+            .report-title {
+                font-size: 1.2rem; /* Reducido de 1.8rem a 1.2rem */
+            }
+            
+            .hotel-name {
+                font-size: 1.1rem; /* Reducido de 1.6rem a 1.1rem */
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-left, .footer-center, .footer-right {
+                text-align: center;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* Override específico para footer en impresión - debe ir después del responsive */
+        @media print {
+            .pdf-footer .footer-content {
+                display: flex !important;
+                flex-direction: row !important; /* Forzar dirección horizontal */
+                justify-content: space-between !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important; /* Evitar que se envuelvan */
+            }
+            
+            .pdf-footer .footer-left, 
+            .pdf-footer .footer-center, 
+            .pdf-footer .footer-right {
+                flex: 1 !important;
+                margin-bottom: 0 !important; /* Resetear margin-bottom del responsive */
+            }
+            
+            .pdf-footer .footer-left {
+                text-align: left !important;
+            }
+            
+            .pdf-footer .footer-center {
+                text-align: center !important;
+            }
+            
+            .pdf-footer .footer-right {
+                text-align: right !important;
+            }
+        }
+        
+        /* Prevenir problemas de impresión */
+        @media print {
+            .preview-actions {
+                display: none !important;
+            }
+            
+            .print-button {
+                display: none !important;
+            }
+            
+            body {
+                background: white !important;
+            }
+            
+            /* Adicionales para asegurar layout */
+            .container-fluid {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            /* Forzar display flex para Bootstrap grid */
+            .d-flex {
+                display: flex !important;
+            }
+            
+            .justify-content-between {
+                justify-content: space-between !important;
+            }
+            
+            .align-items-center {
+                align-items: center !important;
+            }
+            
+            .text-center {
+                text-align: center !important;
+            }
+            
+            .text-end {
+                text-align: right !important;
+            }
+            
+            /* Asegurar que las tablas mantengan su estructura */
+            .table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            
+            .table th, .table td {
+                padding: 0.75rem !important;
+                border: 1px solid #dee2e6 !important;
+            }
+            
+            /* Estilos específicos para Chart.js y gráficos */
+            .radar-chart-container, .critical-chart-container {
+                background: white !important;
+                border: 1px solid #e9ecef !important;
+                border-radius: 8px !important;
+                padding: 15px !important;
+                position: relative !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            
+            .chart-wrapper {
+                position: relative !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 100% !important;
+                height: 350px !important; /* Reducido de 400px */
+            }
+            
+            .chart-wrapper canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+            
+            .legend-item {
+                margin-bottom: 8px !important;
+                padding: 5px 0 !important;
+            }
+            
+            .legend-color {
+                width: 16px !important;
+                height: 16px !important;
+                border-radius: 50% !important;
+                display: inline-block !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Botón de impresión flotante -->
+    <button class="print-button no-print" onclick="window.print()" title="Imprimir reporte">
+        <i class="fas fa-print me-2"></i>
+        Imprimir PDF
+    </button>
+
+    <div class="container-fluid mt-4">
+        <!-- Contenido del PDF -->
+        <div class="pdf-preview-container">
+            <div class="pdf-page">
+                <div class="page-content">
+                    <div class="main-content">
+                        <!-- Encabezado del Reporte -->
+                    <div class="pdf-header">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <!-- Logo de la empresa/sistema -->
+                            <div class="company-logo">
+                                <div class="bg-primary text-white p-1 rounded text-center"> <!-- Reducido de p-3 a p-1 -->
+                                    <i class="fas fa-shield-alt"></i> <!-- Removido fa-2x para ser más pequeño -->
+                                    <div class="mt-0"><small><strong>RiskHoteles</strong></small></div> <!-- Reducido mt-2 a mt-0 y añadido small -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h2 class="report-title">{{ report_title }}</h2> <!-- Reducido de h1 a h2 -->
+                            <p class="report-subtitle">{{ report_subtitle }}</p>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div class="text-muted small"> <!-- Añadido small para reducir tamaño -->
+                                <strong>Fecha:</strong><br> <!-- Reducido "Fecha de generación" a "Fecha" -->
+                                {{ generated_date|date:"d/m/Y H:i" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información del Hotel -->
+                <div class="hotel-info-ultra-compact">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="hotel-basic-info">
+                            <h3 class="hotel-name-compact text-primary mb-0">
+                                <i class="fas fa-building me-1"></i>{{ hotel.name }}
+                            </h3>
+                            <div class="hotel-details-inline small text-muted">
+                                <i class="fas fa-star text-warning me-1"></i>{{ hotel.get_category_display }} | 
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ hotel.address }}, {{ hotel.city }}, {{ hotel.country }} | 
+                                <i class="fas fa-calendar-alt me-1"></i>{{ assessment.assessment_date|date:"d/m/Y" }} | 
+                                <i class="fas fa-clipboard-check me-1"></i>{{ assessment.get_assessment_type_display }}
+                            </div>
+                        </div>
+                        <div class="evaluation-summary-compact text-end">
+                            <div class="score-display-compact">
+                                <span class="score-value-compact {% if overall_percentage >= 80 %}text-success{% elif overall_percentage >= 60 %}text-warning{% elif overall_percentage >= 40 %}text-orange{% else %}text-danger{% endif %}">
+                                    {{ overall_percentage|floatformat:1 }}%
+                                </span>
+                                <small class="text-muted d-block">Puntuación</small>
+                            </div>
+                            <div class="risk-indicator-compact mt-1">
+                                <span class="risk-badge-compact {% if assessment.risk_level == 'muy_bajo' %}text-success{% elif assessment.risk_level == 'bajo' %}text-info{% elif assessment.risk_level == 'medio' %}text-warning{% else %}text-danger{% endif %}">
+                                    <i class="fas fa-shield-alt me-1"></i>{{ assessment.get_risk_level_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Tabla de Contenido -->
+                <div class="mb-4 mt-4">
+                    <h3 class="mb-3 text-center">
+                        <i class="fas fa-list-ul text-primary me-2"></i>
+                        Contenido del Reporte
+                    </h3>
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3" style="width: 60px;">Sección</th>
+                                        <th>Descripción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-primary">1</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-building text-primary me-2"></i>
+                                                <div>
+                                                    <strong>Información del Hotel</strong>
+                                                    <br>
+                                                    <small class="text-muted">Datos generales del establecimiento incluyendo ubicación geográfica, categoría hotelera, número de habitaciones, fecha de evaluación y tipo de análisis realizado. Proporciona el contexto básico para interpretar los resultados del reporte.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-info">2</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-chart-pie text-info me-2"></i>
+                                                <div>
+                                                    <strong>Resumen Ejecutivo</strong>
+                                                    <br>
+                                                    <small class="text-muted">Panorama general de la evaluación mostrando el total de categorías analizadas, distribución de áreas según su nivel de cumplimiento (fuertes, moderadas y críticas). Permite una comprensión rápida del estado general de seguridad.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-success">3</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-chart-radar text-success me-2"></i>
+                                                <div>
+                                                    <strong>Análisis Radial de Criterios</strong>
+                                                    <br>
+                                                    <small class="text-muted">Visualización gráfica tipo radar que muestra el perfil de cumplimiento de cada categoría de seguridad evaluada. Incluye escala de colores, estadísticas del análisis y recomendaciones estratégicas basadas en los resultados obtenidos.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-warning">4</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                                                <div>
+                                                    <strong>Análisis de Categorías Más Críticas</strong>
+                                                    <br>
+                                                    <small class="text-muted">Gráfico de barras horizontales que identifica y prioriza las categorías de seguridad con menor puntuación. Muestra las 7 áreas más críticas ordenadas de menor a mayor rendimiento, facilitando la identificación de prioridades de atención inmediata.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-secondary">5</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-clipboard-list text-secondary me-2"></i>
+                                                <div>
+                                                    <strong>Resultados Detallados por Categoría</strong>
+                                                    <br>
+                                                    <small class="text-muted">Análisis individual de cada categoría de seguridad con puntuación específica, número de preguntas evaluadas, porcentaje de cumplimiento y promedio obtenido. Permite identificar fortalezas y debilidades específicas en cada área.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="ps-3 text-center">
+                                            <span class="badge bg-dark">6</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-info-circle text-dark me-2"></i>
+                                                <div>
+                                                    <strong>Metadatos del Reporte</strong>
+                                                    <br>
+                                                    <small class="text-muted">Información técnica sobre la generación del reporte incluyendo fecha y hora de creación, fuente de los datos utilizados, versión del sistema RiskHoteles y detalles sobre el estado y tipo de evaluación realizada.</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen Ejecutivo -->
+                <div class="mb-4 mt-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0 text-center">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Resumen Ejecutivo
+                            </h3>
+                            <div class="text-center mt-2">
+                                <small class="opacity-75">Panorama general de la evaluación de seguridad</small>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Puntuación General Destacada -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="text-center p-4 bg-light rounded">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-4">
+                                                <div class="overall-score-display">
+                                                    <div class="score-circle {% if overall_percentage >= 80 %}bg-success{% elif overall_percentage >= 60 %}bg-warning{% elif overall_percentage >= 40 %}bg-orange{% else %}bg-danger{% endif %} text-white d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; border-radius: 50%; font-size: 24px; font-weight: bold;">
+                                                        {{ overall_percentage|floatformat:1 }}%
+                                                    </div>
+                                                    <div class="mt-2">
+                                                        <strong class="text-muted">Puntuación General</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="assessment-status">
+                                                    <h5 class="text-{% if overall_percentage >= 80 %}success{% elif overall_percentage >= 60 %}warning{% else %}danger{% endif %} mb-2">
+                                                        {% if overall_percentage >= 90 %}
+                                                            <i class="fas fa-star"></i> Excelente
+                                                        {% elif overall_percentage >= 80 %}
+                                                            <i class="fas fa-thumbs-up"></i> Muy Bueno
+                                                        {% elif overall_percentage >= 70 %}
+                                                            <i class="fas fa-check-circle"></i> Bueno
+                                                        {% elif overall_percentage >= 50 %}
+                                                            <i class="fas fa-exclamation-triangle"></i> Regular
+                                                        {% else %}
+                                                            <i class="fas fa-times-circle"></i> Crítico
+                                                        {% endif %}
+                                                    </h5>
+                                                    <p class="text-muted mb-0">
+                                                        {% if overall_percentage >= 80 %}
+                                                            El hotel cumple con altos estándares de seguridad.
+                                                        {% elif overall_percentage >= 60 %}
+                                                            El hotel tiene un buen nivel de seguridad con áreas de mejora.
+                                                        {% else %}
+                                                            Se requiere atención inmediata para mejorar la seguridad.
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="risk-level-display">
+                                                    <div class="mb-2">
+                                                        <span class="badge {% if assessment.risk_level == 'muy_bajo' %}bg-success{% elif assessment.risk_level == 'bajo' %}bg-info{% elif assessment.risk_level == 'medio' %}bg-warning{% else %}bg-danger{% endif %} p-2 fs-6">
+                                                            <i class="fas fa-shield-alt me-1"></i>
+                                                            {{ assessment.get_risk_level_display }}
+                                                        </span>
+                                                    </div>
+                                                    <small class="text-muted">Nivel de Riesgo Identificado</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Distribución de Categorías -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-center mb-3">
+                                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                                        Distribución de Categorías por Nivel de Cumplimiento
+                                    </h5>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-body text-center p-3">
+                                            <div class="mb-2">
+                                                <i class="fas fa-list-ul text-primary fa-2x"></i>
+                                            </div>
+                                            <h4 class="text-primary mb-1 fw-bold">{{ detailed_report.categories|length }}</h4>
+                                            <h6 class="text-muted mb-2">Total Evaluadas</h6>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block">100% completado</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-body text-center p-3">
+                                            <div class="mb-2">
+                                                <i class="fas fa-star text-success fa-2x"></i>
+                                            </div>
+                                            <h4 class="text-success mb-1 fw-bold">{{ strong_areas_count }}</h4>
+                                            <h6 class="text-muted mb-2">Áreas Fuertes</h6>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-success" style="width: {% widthratio strong_areas_count detailed_report.categories|length 100 %}%"></div>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block">≥80% cumplimiento</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-warning">
+                                        <div class="card-body text-center p-3">
+                                            <div class="mb-2">
+                                                <i class="fas fa-exclamation-triangle text-warning fa-2x"></i>
+                                            </div>
+                                            <h4 class="text-warning mb-1 fw-bold">{{ moderate_areas_count }}</h4>
+                                            <h6 class="text-muted mb-2">Áreas Moderadas</h6>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-warning" style="width: {% widthratio moderate_areas_count detailed_report.categories|length 100 %}%"></div>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block">50-79% cumplimiento</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <div class="card h-100 border-danger">
+                                        <div class="card-body text-center p-3">
+                                            <div class="mb-2">
+                                                <i class="fas fa-times-circle text-danger fa-2x"></i>
+                                            </div>
+                                            <h4 class="text-danger mb-1 fw-bold">{{ critical_areas_count }}</h4>
+                                            <h6 class="text-muted mb-2">Áreas Críticas</h6>
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar bg-danger" style="width: {% widthratio critical_areas_count detailed_report.categories|length 100 %}%"></div>
+                                            </div>
+                                            <small class="text-muted mt-1 d-block">&lt;50% cumplimiento</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recomendaciones Clave -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="alert {% if overall_percentage >= 80 %}alert-success{% elif overall_percentage >= 60 %}alert-warning{% else %}alert-danger{% endif %} border-0 shadow-sm">
+                                        <div class="d-flex align-items-start">
+                                            <div class="me-3">
+                                                <i class="fas fa-lightbulb fa-2x {% if overall_percentage >= 80 %}text-success{% elif overall_percentage >= 60 %}text-warning{% else %}text-danger{% endif %}"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="alert-heading mb-2">
+                                                    <strong>Recomendación Estratégica Principal</strong>
+                                                </h6>
+                                                <p class="mb-0">
+                                                    {% if overall_percentage >= 90 %}
+                                                        <strong>Excelente desempeño:</strong> El hotel mantiene estándares de seguridad excepcionales. Se recomienda continuar con las prácticas actuales y considerar obtener certificaciones de seguridad internacionales.
+                                                    {% elif overall_percentage >= 80 %}
+                                                        <strong>Muy buen nivel:</strong> El hotel demuestra un sólido compromiso con la seguridad. Enfocar esfuerzos en las {% if moderate_areas_count > 0 %}{{ moderate_areas_count }} área{% if moderate_areas_count > 1 %}s{% endif %} moderate{% if moderate_areas_count > 1 %}s{% endif %}{% endif %}{% if critical_areas_count > 0 %}{% if moderate_areas_count > 0 %} y {% endif %}{{ critical_areas_count }} área{% if critical_areas_count > 1 %}s{% endif %} crítica{% if critical_areas_count > 1 %}s{% endif %}{% endif %} para alcanzar la excelencia.
+                                                    {% elif overall_percentage >= 60 %}
+                                                        <strong>Nivel aceptable con mejoras necesarias:</strong> Se recomienda desarrollar un plan de acción enfocado en las {{ critical_areas_count }} área{% if critical_areas_count != 1 %}s{% endif %} crítica{% if critical_areas_count != 1 %}s{% endif %} identificadas. Priorizar inversión en capacitación y mejora de procesos.
+                                                    {% else %}
+                                                        <strong>Atención urgente requerida:</strong> Es crítico implementar un plan de mejora inmediato. Se recomienda consultoría especializada y asignación de recursos urgentes para abordar las {{ critical_areas_count }} área{% if critical_areas_count != 1 %}s{% endif %} crítica{% if critical_areas_count != 1 %}s{% endif %} identificadas.
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análisis Radial de Criterios de Seguridad -->
+                <div class="mb-3">
+                    <h3 class="mb-3">
+                        <i class="fas fa-chart-radar text-primary me-2"></i>
+                        Análisis Radial de Criterios de Seguridad
+                    </h3>
+                    
+                    <!-- Gráfico Radar Principal -->
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-12">
+                            <div class="radar-chart-container text-center">
+                                <div class="chart-wrapper" style="height: 500px; position: relative;">
+                                    <canvas id="securityRadarChart" width="350" height="350"></canvas>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Visualización del perfil de cumplimiento por categoría de seguridad
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Escala de Evaluación y Estadísticas -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-palette text-secondary me-2"></i>
+                                        Escala de Evaluación
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="legend-item mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="legend-color bg-success rounded-circle me-3" style="width: 16px; height: 16px;"></div>
+                                            <div>
+                                                <strong class="text-success">90-100%</strong>
+                                                <span class="text-muted ms-2">Excelente</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="legend-item mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="legend-color bg-info rounded-circle me-3" style="width: 16px; height: 16px;"></div>
+                                            <div>
+                                                <strong class="text-info">70-89%</strong>
+                                                <span class="text-muted ms-2">Bueno</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="legend-item mb-2">
+                                        <div class="d-flex align-items-center">
+                                            <div class="legend-color bg-warning rounded-circle me-3" style="width: 16px; height: 16px;"></div>
+                                            <div>
+                                                <strong class="text-warning">50-69%</strong>
+                                                <span class="text-muted ms-2">Regular</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="legend-item">
+                                        <div class="d-flex align-items-center">
+                                            <div class="legend-color bg-danger rounded-circle me-3" style="width: 16px; height: 16px;"></div>
+                                            <div>
+                                                <strong class="text-danger">0-49%</strong>
+                                                <span class="text-muted ms-2">Crítico</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-bar text-info me-2"></i>
+                                        Estadísticas del Análisis
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center mb-3">
+                                        <div class="col-6">
+                                            <div class="border-end pe-3">
+                                                <h4 class="text-primary mb-1 overall-percentage">{{ overall_percentage|floatformat:1 }}%</h4>
+                                                <small class="text-muted">Puntuación General</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="ps-3">
+                                                <h4 class="text-success mb-1">{{ excellent_areas_count }}</h4>
+                                                <small class="text-muted">Categorías Excelentes</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Recomendación -->
+                                    <div class="chart-recommendation p-3 rounded" style="background: {% if overall_percentage >= 80 %}#d4edda{% elif overall_percentage >= 60 %}#fff3cd{% else %}#f8d7da{% endif %}; display: none;">
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-lightbulb {% if overall_percentage >= 80 %}text-success{% elif overall_percentage >= 60 %}text-warning{% else %}text-danger{% endif %} me-1"></i>
+                                            Recomendación Estratégica
+                                        </h6>
+                                        <small>
+                                            {% if overall_percentage >= 80 %}
+                                                Excelente nivel de seguridad. Mantener estándares actuales y considerar certificaciones adicionales.
+                                            {% elif overall_percentage >= 60 %}
+                                                Buen nivel general. Enfocar recursos en áreas por debajo del 70% para optimizar la seguridad.
+                                            {% else %}
+                                                Requiere plan de mejora urgente. Priorizar categorías críticas y asignar recursos inmediatos.
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Análisis de Categorías Más Críticas -->
+                <div class="mb-4">
+                    <h4 class="mb-3 text-center">
+                        <i class="fas fa-exclamation-triangle text-danger me-2"></i>
+                        Categorías Más Críticas
+                    </h4>
+                    
+                    <!-- Gráfico de Barras -->
+                    <div class="row justify-content-center mb-4">
+                        <div class="col-12">
+                            <div class="critical-chart-container">
+                                <div class="chart-wrapper" style="height: 350px; position: relative;">
+                                    <canvas id="criticalCategoriesChart" width="700" height="350"></canvas>
+                                </div>
+                                <div class="mt-2 text-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Categorías ordenadas de menor a mayor puntuación (áreas que requieren atención prioritaria)
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Resumen de categorías críticas -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-danger text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Análisis de Prioridades
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mt-3 p-3 bg-light rounded">
+                                        <h6 class="text-danger mb-2">
+                                            <i class="fas fa-lightbulb me-1"></i>
+                                            Recomendaciones Prioritarias
+                                        </h6>
+                                        <p class="mb-0 small">
+                                            Enfocar recursos en las categorías con puntuaciones más bajas para maximizar el impacto de las mejoras.
+                                            Las categorías mostradas en el gráfico representan las áreas que requieren atención inmediata.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados por Categoría -->
+                <div class="mb-3">
+                    <h4 class="mb-3 text-center">
+                        <i class="fas fa-clipboard-list text-primary me-2"></i>
+                        Resultados Detallados por Categoría
+                    </h4>
+                    
+                    <div class="row">
+                        {% for category_code, category_data in detailed_report.categories.items %}
+                            {% if category_data.question_count > 0 %}
+                                <div class="col-md-6 mb-2">
+                                    <div class="category-section-compact">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1 me-3">
+                                                <div class="category-title-compact">
+                                                    {{ category_data.category_name|default:category_data.name }}
+                                                </div>
+                                                <div class="small text-muted mb-1" style="font-size: 10px;">
+                                                    {{ category_data.question_count }} pregunta{{ category_data.question_count|pluralize:"s" }}
+                                                </div>
+                                                <div class="progress-bar-pdf-compact">
+                                                    <div class="progress-fill {% if category_data.percentage >= 80 %}bg-success{% elif category_data.percentage >= 60 %}bg-warning{% elif category_data.percentage >= 40 %}bg-orange{% else %}bg-danger{% endif %}" 
+                                                         style="width: {{ category_data.percentage|floatformat:1|default:0 }}%;">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end flex-shrink-0">
+                                                <div class="h6 {% if category_data.percentage >= 80 %}text-success{% elif category_data.percentage >= 60 %}text-warning{% elif category_data.percentage >= 40 %}text-orange{% else %}text-danger{% endif %} mb-0 fw-bold" style="font-size: 16px;">
+                                                    {{ category_data.percentage|floatformat:1 }}%
+                                                </div>
+                                                <div class="small text-muted" style="font-size: 9px;">
+                                                    {{ category_data.average|floatformat:1 }}/5
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Salto de línea cada 2 elementos para mantener layout limpio -->
+                                {% if forloop.counter|divisibleby:2 %}
+                                    <div class="w-100"></div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Resumen rápido de distribución -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-3">
+                                    <div class="row text-center">
+                                        <div class="col-3">
+                                            <div class="small text-muted">TOTAL</div>
+                                            <div class="fw-bold text-primary">{{ detailed_report.categories|length }}</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="small text-muted">FUERTES</div>
+                                            <div class="fw-bold text-success">{{ strong_areas_count }}</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="small text-muted">MODERADAS</div>
+                                            <div class="fw-bold text-warning">{{ moderate_areas_count }}</div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="small text-muted">CRÍTICAS</div>
+                                            <div class="fw-bold text-danger">{{ critical_areas_count }}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nueva Sección: Recomendaciones IA Expandidas -->
+                <div class="mb-4">
+                    <h4 class="mb-3 text-center">
+                        <i class="fas fa-robot text-info me-2"></i>
+                        Recomendaciones IA Avanzadas
+                    </h4>
+                    
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <!-- Análisis de Riesgo Personalizado -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-primary mb-3">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        Análisis de Riesgo Personalizado
+                                    </h5>
+                                    <div class="card bg-light border-0">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="text-center">
+                                                        <div class="h2 {% if overall_percentage >= 80 %}text-success{% elif overall_percentage >= 60 %}text-warning{% else %}text-danger{% endif %}">
+                                                            {% if overall_percentage >= 80 %}🟢{% elif overall_percentage >= 60 %}🟡{% else %}🔴{% endif %}
+                                                        </div>
+                                                        <strong>Nivel de Riesgo</strong>
+                                                        <div class="small">
+                                                            {% if overall_percentage >= 80 %}BAJO{% elif overall_percentage >= 60 %}MODERADO{% else %}ALTO{% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <div class="alert {% if overall_percentage >= 80 %}alert-success{% elif overall_percentage >= 60 %}alert-warning{% else %}alert-danger{% endif %} mb-0" style="font-size: 13px;">
+                                                        {% if overall_percentage >= 80 %}
+                                                            <strong>Excelente posición de seguridad.</strong> Su hotel mantiene estándares superiores. Recomendamos continuar con las mejores prácticas actuales y considerar certificaciones internacionales de seguridad.
+                                                        {% elif overall_percentage >= 60 %}
+                                                            <strong>Seguridad en desarrollo.</strong> Su hotel tiene una base sólida pero requiere atención en áreas específicas. Un plan de mejora dirigido puede elevar significativamente el nivel de protección.
+                                                        {% else %}
+                                                            <strong>Atención urgente requerida.</strong> Su hotel presenta vulnerabilidades importantes que requieren acción inmediata. Priorice las áreas críticas para garantizar la seguridad de huéspedes y operaciones.
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recomendaciones Específicas por Categoría -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-info mb-3">
+                                        <i class="fas fa-bullseye me-2"></i>
+                                        Recomendaciones Específicas por Categoría
+                                    </h5>
+                                    <div class="row">
+                                        {% for category_code, category_data in detailed_report.categories.items %}
+                                            {% if category_data.question_count > 0 %}
+                                                <div class="col-md-6 mb-3">
+                                                    <div class="card h-100 {% if category_data.percentage < 50 %}border-danger{% elif category_data.percentage < 80 %}border-warning{% else %}border-success{% endif %}">
+                                                        <div class="card-body p-3">
+                                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                                <h6 class="card-title mb-0" style="font-size: 14px;">
+                                                                    {{ category_data.category_name|default:category_data.name }}
+                                                                </h6>
+                                                                <span class="badge {% if category_data.percentage < 50 %}bg-danger{% elif category_data.percentage < 80 %}bg-warning{% else %}bg-success{% endif %}">
+                                                                    {{ category_data.percentage|floatformat:1 }}%
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            {% if category_data.percentage < 50 %}
+                                                                <div class="text-danger small">
+                                                                    <strong>🚨 CRÍTICO:</strong>
+                                                                    <ul class="mb-1" style="font-size: 11px; padding-left: 15px;">
+                                                                        <li>Implementar medidas de emergencia inmediatas</li>
+                                                                        <li>Asignar responsable directo para esta área</li>
+                                                                        <li>Revisar y actualizar protocolos existentes</li>
+                                                                        <li>Capacitación intensiva del personal involucrado</li>
+                                                                        <li>Monitoreo diario durante las primeras 2 semanas</li>
+                                                                    </ul>
+                                                                </div>
+                                                            {% elif category_data.percentage < 80 %}
+                                                                <div class="text-warning small">
+                                                                    <strong>⚠️ MODERADO:</strong>
+                                                                    <ul class="mb-1" style="font-size: 11px; padding-left: 15px;">
+                                                                        <li>Desarrollar plan de mejora a 30 días</li>
+                                                                        <li>Identificar gaps específicos en procedimientos</li>
+                                                                        <li>Programar capacitación dirigida</li>
+                                                                        <li>Establecer métricas de seguimiento</li>
+                                                                        <li>Revisión quincenal de avances</li>
+                                                                    </ul>
+                                                                </div>
+                                                            {% else %}
+                                                                <div class="text-success small">
+                                                                    <strong>✅ FORTALEZA:</strong>
+                                                                    <ul class="mb-1" style="font-size: 11px; padding-left: 15px;">
+                                                                        <li>Mantener los estándares actuales</li>
+                                                                        <li>Documentar mejores prácticas</li>
+                                                                        <li>Compartir conocimiento con otras áreas</li>
+                                                                        <li>Considerar certificaciones especializadas</li>
+                                                                        <li>Monitoreo mensual de mantenimiento</li>
+                                                                    </ul>
+                                                                </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Plan de Acción Detallado -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-success mb-3">
+                                        <i class="fas fa-tasks me-2"></i>
+                                        Plan de Acción Detallado
+                                    </h5>
+                                    <div class="row">
+                                        <!-- Fase 1: Emergencia -->
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-danger">
+                                                <div class="card-header bg-danger text-white py-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        FASE 1: Acciones Inmediatas (1-2 semanas)
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="small">
+                                                        <strong>Objetivos:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>Eliminar riesgos críticos inmediatos</li>
+                                                            <li>Estabilizar operaciones de seguridad</li>
+                                                            <li>Implementar medidas temporales</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Acciones Específicas:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            {% if critical_areas_count > 0 %}
+                                                                <li>✅ Auditoría urgente de {{ critical_areas_count }} área(s) crítica(s)</li>
+                                                                <li>✅ Reunión diaria con responsables de seguridad</li>
+                                                                <li>✅ Implementar controles temporales</li>
+                                                                <li>✅ Comunicar a todo el personal los riesgos identificados</li>
+                                                            {% else %}
+                                                                <li>✅ Verificar mantenimiento de estándares actuales</li>
+                                                                <li>✅ Documentar procedimientos exitosos</li>
+                                                            {% endif %}
+                                                        </ul>
+                                                        
+                                                        <strong>Responsables:</strong> Gerencia General + Jefe de Seguridad
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fase 2: Estabilización -->
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-warning">
+                                                <div class="card-header bg-warning text-dark py-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-tools me-1"></i>
+                                                        FASE 2: Estabilización (1-3 meses)
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="small">
+                                                        <strong>Objetivos:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>Mejorar áreas moderadas identificadas</li>
+                                                            <li>Establecer procedimientos permanentes</li>
+                                                            <li>Capacitar al personal clave</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Acciones Específicas:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>📚 Programa de capacitación de 40 horas</li>
+                                                            <li>📋 Actualización de manuales de procedimientos</li>
+                                                            <li>🔧 Implementación de mejoras tecnológicas</li>
+                                                            <li>📊 Sistema de métricas y KPIs de seguridad</li>
+                                                            <li>👥 Formación de equipo de respuesta</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Responsables:</strong> Jefe de Seguridad + RR.HH.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fase 3: Optimización -->
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-info">
+                                                <div class="card-header bg-info text-white py-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-chart-line me-1"></i>
+                                                        FASE 3: Optimización (3-6 meses)
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="small">
+                                                        <strong>Objetivos:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>Alcanzar estándares de excelencia</li>
+                                                            <li>Implementar mejora continua</li>
+                                                            <li>Preparar para certificaciones</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Acciones Específicas:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>🎯 Programa de mejora continua</li>
+                                                            <li>📈 Análisis avanzado de datos de seguridad</li>
+                                                            <li>🤝 Alianzas con expertos en seguridad</li>
+                                                            <li>🛡️ Implementación de tecnología avanzada</li>
+                                                            <li>📜 Preparación para certificaciones ISO</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Responsables:</strong> Comité de Seguridad
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fase 4: Mantenimiento -->
+                                        <div class="col-md-6 mb-3">
+                                            <div class="card border-success">
+                                                <div class="card-header bg-success text-white py-2">
+                                                    <h6 class="mb-0">
+                                                        <i class="fas fa-sync-alt me-1"></i>
+                                                        FASE 4: Mantenimiento (Permanente)
+                                                    </h6>
+                                                </div>
+                                                <div class="card-body p-3">
+                                                    <div class="small">
+                                                        <strong>Objetivos:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>Mantener niveles de excelencia</li>
+                                                            <li>Innovación continua en seguridad</li>
+                                                            <li>Liderazgo en el sector hotelero</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Acciones Específicas:</strong>
+                                                        <ul style="font-size: 11px; margin-bottom: 10px;">
+                                                            <li>🔄 Evaluaciones trimestrales automatizadas</li>
+                                                            <li>🏆 Programa de reconocimientos internos</li>
+                                                            <li>🌟 Certificaciones y re-certificaciones</li>
+                                                            <li>🎓 Formación continua del personal</li>
+                                                            <li>📱 Monitoreo en tiempo real con IA</li>
+                                                        </ul>
+                                                        
+                                                        <strong>Responsables:</strong> Todo el equipo directivo
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Métricas de Seguimiento -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-secondary mb-3">
+                                        <i class="fas fa-tachometer-alt me-2"></i>
+                                        Métricas de Seguimiento Sugeridas
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="card text-center border-primary">
+                                                <div class="card-body p-2">
+                                                    <i class="fas fa-percentage text-primary h4"></i>
+                                                    <h6 class="mt-2 mb-1">Score General</h6>
+                                                    <small>Meta: +5% mensual</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center border-warning">
+                                                <div class="card-body p-2">
+                                                    <i class="fas fa-exclamation-triangle text-warning h4"></i>
+                                                    <h6 class="mt-2 mb-1">Incidentes</h6>
+                                                    <small>Meta: -20% mensual</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center border-info">
+                                                <div class="card-body p-2">
+                                                    <i class="fas fa-users text-info h4"></i>
+                                                    <h6 class="mt-2 mb-1">Capacitación</h6>
+                                                    <small>Meta: 100% personal</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card text-center border-success">
+                                                <div class="card-body p-2">
+                                                    <i class="fas fa-shield-alt text-success h4"></i>
+                                                    <h6 class="mt-2 mb-1">Compliance</h6>
+                                                    <small>Meta: 98%+ continuo</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Beneficios Esperados -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h5 class="text-warning mb-3">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Beneficios Esperados
+                                    </h5>
+                                    <div class="card bg-light">
+                                        <div class="card-body p-3">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <h6 class="text-info">🏆 Beneficios Operacionales</h6>
+                                                    <ul class="small" style="font-size: 11px;">
+                                                        <li><strong>Tranquilidad operativa:</strong> Menos estrés del equipo</li>
+                                                        <li><strong>Eficiencia mejorada:</strong> Procesos optimizados</li>
+                                                        <li><strong>Personal más seguro:</strong> Menor rotación</li>
+                                                        <li><strong>Huéspedes más satisfechos:</strong> Mejor experiencia</li>
+                                                        <li><strong>Preparación futura:</strong> Resistencia a crisis</li>
+                                                        <li><strong>Cumplimiento normativo:</strong> Reducción de riesgos legales</li>
+                                                        <li><strong>Imagen corporativa:</strong> Mayor confianza y credibilidad</li>
+                                                        <li><strong>Sostenibilidad:</strong> Operaciones más estables a largo plazo</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Indicador de IA Expandido -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="text-center p-3 bg-gradient" style="background: linear-gradient(45deg, #f8f9fa, #e9ecef); border-radius: 10px;">
+                                        <i class="fas fa-robot text-info h4 mb-2"></i>
+                                        <div class="small text-muted">
+                                            <strong>🤖 Análisis generado por IA avanzada</strong><br>
+                                            <em>Basado en análisis de {{ detailed_report.categories|length }} categorías de seguridad, 
+                                            mejores prácticas de la industria hotelera y algoritmos de optimización de riesgos.</em><br>
+                                            <small>Última actualización: {{ generated_date|date:"d/m/Y H:i" }} | Confiabilidad: 95%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metadatos del Reporte -->
+                <div class="metadata-section">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Información de la Evaluación:</strong></p>
+                            <p>Tipo: {{ assessment.get_assessment_type_display }}</p>
+                            <p>Estado: {{ assessment.get_status_display }}</p>
+                            <p>Fecha de evaluación: {{ assessment.assessment_date|date:"d/m/Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Información del Reporte:</strong></p>
+                            <p>Generado el: {{ generated_date|date:"d/m/Y H:i" }}</p>
+                            <p>Fuente de datos: {% if scoring_summary.source == 'saved' %}Datos guardados{% else %}Calculado en tiempo real{% endif %}</p>
+                            <p>Sistema: RiskHoteles v2.0</p>
+                        </div>
+                    </div>
+                </div>
+                    </div> <!-- Cierre de main-content -->
+                    
+                    <!-- Pie de Página -->
+                    <div class="pdf-footer">
+                        <div class="footer-content">
+                            <div class="footer-left">
+                                <i class="fas fa-shield-alt text-primary me-1"></i>
+                                <strong class="text-primary">RiskHoteles</strong>
+                                <small class="ms-2">v2.0</small>
+                            </div>
+                            <div class="footer-center">
+                                <div>
+                                    <strong>{{ hotel.name }}</strong>
+                                </div>
+                                <small>Evaluación: {{ assessment.assessment_date|date:"d/m/Y" }}</small>
+                            </div>
+                            <div class="footer-right">
+                                <div>
+                                    <strong>Página 1 de 1</strong>
+                                </div>
+                                <small>{{ generated_date|date:"d/m/Y H:i" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- Cierre de page-content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Datos JSON seguros para JavaScript (evita XSS) -->
+    {{ categories_data|json_script:"categories-data" }}
+
+    <script>
+    // Configuración y renderizado de gráficos con Chart.js
+    document.addEventListener('DOMContentLoaded', function() {
+        // Datos de categorías desde Django
+        const categoriesData = [
+            {% for category_code, category_data in detailed_report.categories.items %}
+            {
+                name: "{{ category_data.category_name|default:category_data.name|escapejs }}",
+                percentage: parseFloat("{{ category_data.percentage|default:0 }}".replace(',', '.')),
+                questions: {{ category_data.question_count|default:0 }},
+                average: parseFloat("{{ category_data.average|default:0 }}".replace(',', '.'))
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        // Filtrar y ordenar categorías para gráfico de críticas (las 7 más bajas)
+        const criticalCategories = [...categoriesData]
+            .sort((a, b) => a.percentage - b.percentage)
+            .slice(0, 7);
+
+        // Crear gráfico de barras de categorías críticas
+        const criticalCtx = document.getElementById('criticalCategoriesChart');
+        if (criticalCtx) {
+            new Chart(criticalCtx, {
+                type: 'bar',
+                data: {
+                    labels: criticalCategories.map(cat => cat.name),
+                    datasets: [{
+                        label: 'Puntuación (%)',
+                        data: criticalCategories.map(cat => cat.percentage),
+                        backgroundColor: criticalCategories.map(cat => {
+                            if (cat.percentage >= 60) return '#ffc107';
+                            if (cat.percentage >= 40) return '#fd7e14';
+                            if (cat.percentage >= 20) return '#dc3545';
+                            return '#721c24';
+                        }),
+                        borderColor: criticalCategories.map(cat => {
+                            if (cat.percentage >= 60) return '#e0a800';
+                            if (cat.percentage >= 40) return '#e66910';
+                            if (cat.percentage >= 20) return '#c82333';
+                            return '#5a1a1f';
+                        }),
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        borderSkipped: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Barras horizontales
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const category = criticalCategories[context.dataIndex];
+                                    return [
+                                        `Puntuación: ${category.percentage.toFixed(1)}%`,
+                                        `Preguntas evaluadas: ${category.questions}`,
+                                        `Promedio: ${category.average.toFixed(1)}/5`
+                                    ];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: '#e0e0e0'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                },
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10
+                                },
+                                maxRotation: 0,
+                                callback: function(value, index) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.length > 25 ? label.substring(0, 22) + '...' : label;
+                                }
+                            }
+                        }
+                    },
+                    animation: false
+                }
+            });
+        }
+    });
+
+    // Auto-impresión cuando se carga la página
+    window.addEventListener('load', function() {
+        setTimeout(function() { window.print(); }, 1000);
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Corregir formato de números (coma a punto) en barras de progreso
+        function fixNumberFormat() {
+            const allProgressBars = document.querySelectorAll('.progress-fill');
+            allProgressBars.forEach((bar) => {
+                const styleAttr = bar.getAttribute('style') || '';
+                if (styleAttr.includes(',')) {
+                    const correctedStyle = styleAttr.replace(/([0-9]+),([0-9]+)/g, '$1.$2');
+                    bar.setAttribute('style', correctedStyle);
+                    bar.style.display = 'none';
+                    bar.offsetHeight; // Force reflow
+                    bar.style.display = 'block';
+                }
+            });
+        }
+        
+        // Ejecutar múltiples veces para asegurar
+        fixNumberFormat();
+        setTimeout(fixNumberFormat, 50);
+        setTimeout(fixNumberFormat, 200);
+        
+        // Animación de las barras de progreso
+        const progressBars = document.querySelectorAll('.progress-fill');
+        progressBars.forEach((bar, index) => {
+            let originalWidth = bar.style.width;
+            if (originalWidth && originalWidth.includes(',')) {
+                originalWidth = originalWidth.replace(',', '.');
+                bar.style.width = originalWidth;
+            }
+            if (originalWidth && originalWidth !== '0%' && originalWidth !== '' && originalWidth !== '0.0%') {
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = originalWidth;
+                }, 300 + (index * 100));
+            }
+        });
+
+        // Configuración y renderizado del radar chart
+        const ctx = document.getElementById('securityRadarChart');
+        if (ctx && typeof Chart !== 'undefined') {
+            try {
+                // Datos cargados desde el servidor vía json_script (sin riesgo XSS)
+                let categoriesData = [];
+                const categoriesDataEl = document.getElementById('categories-data');
+                if (categoriesDataEl) {
+                    categoriesData = JSON.parse(categoriesDataEl.textContent);
+                }
+
+                const overallPercentage = parseFloat('{{ overall_percentage|floatformat:1 }}') || 0;
+                
+                // Verificar que tenemos datos válidos
+                if (!categoriesData || !Array.isArray(categoriesData) || categoriesData.length === 0) {
+                    document.getElementById('securityRadarChart').innerHTML = '<p class="text-center text-muted">No hay datos disponibles para mostrar el gráfico</p>';
+                    return;
+                }
+
+                // Procesar datos para el chart
+                const categories = categoriesData.map(category => {
+                    let color = '#dc3545'; // Rojo por defecto (crítico)
+                    const percentage = parseFloat(category.percentage) || 0;
+                    
+                    if (percentage >= 90) {
+                        color = '#28a745'; // Verde (excelente)
+                    } else if (percentage >= 70) {
+                        color = '#ffc107'; // Amarillo (bueno) 
+                    } else if (percentage >= 50) {
+                        color = '#fd7e14'; // Naranja (regular)
+                    }
+                    
+                    return {
+                        name: category.name || 'Sin nombre',
+                        percentage: percentage,
+                        color: color
+                    };
+                });
+                
+                // Configurar el radar chart
+                const radarChart = new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: categories.map(cat => cat.name),
+                        datasets: [{
+                            label: 'Puntuación de Seguridad (%)',
+                            data: categories.map(cat => cat.percentage),
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: categories.map(cat => cat.color),
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false // Usamos nuestra propia leyenda personalizada
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1,
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.parsed.r.toFixed(1)}%`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20,
+                                    color: '#666',
+                                    font: {
+                                        size: 11
+                                    },
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                angleLines: {
+                                    color: 'rgba(0, 0, 0, 0.1)'
+                                },
+                                pointLabels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    },
+                                    padding: 10
+                                }
+                            }
+                        },
+                        animation: false
+                    }
+                });
+
+                // Actualizar estadísticas dinámicamente
+                const overall = overallPercentage;
+                const excellentCount = categories.filter(cat => cat.percentage >= 90).length;
+
+                // Actualizar el color de la puntuación general
+                const overallElement = document.querySelector('.overall-percentage');
+                if (overallElement) {
+                    if (overall >= 90) {
+                        overallElement.style.color = '#28a745';
+                    } else if (overall >= 70) {
+                        overallElement.style.color = '#ffc107';
+                    } else if (overall >= 50) {
+                        overallElement.style.color = '#fd7e14';
+                    } else {
+                        overallElement.style.color = '#dc3545';
+                    }
+                }
+
+                // Actualizar recomendación basada en la puntuación
+                const recommendationElement = document.querySelector('.chart-recommendation');
+                if (recommendationElement && overall < 70) {
+                    let recommendation = '';
+                    if (overall >= 50) {
+                        recommendation = 'Se recomienda reforzar las áreas identificadas como críticas para mejorar la seguridad general del hotel.';
+                    } else {
+                        recommendation = 'Es urgente implementar medidas de seguridad inmediatas en múltiples áreas para garantizar la protección del hotel.';
+                    }
+                    recommendationElement.innerHTML = `<i class="fas fa-lightbulb text-warning me-2"></i>${recommendation}`;
+                    recommendationElement.style.display = 'block';
+                }
+                
+            } catch (error) {
+                document.getElementById('securityRadarChart').innerHTML = '<p class="text-center text-danger">Error al cargar el gráfico</p>';
+            }
+        }
+    });
+
+    // Manejar eventos de impresión
+    window.addEventListener('afterprint', function() {
+        // window.close(); // Opcional: cerrar la ventana tras imprimir
+    });
+
+    window.addEventListener('beforeprint', function() {
+    });
+    </script>
+</body>
+</html>

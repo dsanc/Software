@@ -1,0 +1,219 @@
+/* CSS personalizado para el proyecto Django Modular */
+
+/* Estilos generales */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Login form */
+.login-container {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+}
+
+.login-card {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+/* Form improvements */
+.form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 15px;
+    }
+    
+    .card {
+        margin: 10px;
+    }
+}
+
+/* Loading states para mejor UX */
+.btn.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Utilidades generales */
+.text-shadow {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+/* Mejoras para formularios */
+.form-control.is-valid {
+    border-color: #198754;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.8-.77 1.44-1.39'/%3e%3c/svg%3e");
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 1.4 1.4'/%3e%3c/svg%3e");
+}
+
+/* Dashboard styles */
+.dashboard-card {
+    transition: transform 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Navigation improvements */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.nav-link {
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+/* Estilos para Métricas y Estadísticas */
+.stats-cards {
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Colores específicos para diferentes tipos de métricas */
+.stat-card .text-danger {
+    color: #ff6b6b !important;
+}
+
+.stat-card .text-warning {
+    color: #ffa726 !important;
+}
+
+.stat-card .text-info {
+    color: #42a5f5 !important;
+}
+
+.stat-card .text-success {
+    color: #66bb6a !important;
+}
+
+.stat-card .text-primary {
+    color: #5c6bc0 !important;
+}
+
+.stat-card .text-secondary {
+    color: #bdbdbd !important;
+}
+
+/* Indicadores de estado mejorados */
+.status-indicator.urgent {
+    background: #ff6b6b;
+    animation: pulse-urgent 1.5s infinite;
+}
+
+.status-indicator.urgent::before {
+    background: #ff6b6b;
+}
+
+.status-indicator.overdue {
+    background: #8e24aa;
+    animation: pulse-overdue 2s infinite;
+}
+
+.status-indicator.overdue::before {
+    background: #8e24aa;
+}
+
+@keyframes pulse-urgent {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+@keyframes pulse-overdue {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Responsive para las tarjetas de estadísticas */
+@media (max-width: 768px) {
+    .stats-cards .col-lg-2 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .stat-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-cards .col-lg-2 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

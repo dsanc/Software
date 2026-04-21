@@ -1,0 +1,61 @@
+{
+    "sidebar": {
+        "brand": "Django Modular",
+        "dashboard": "Dashboard",
+        "profile": "My Profile",
+        "configuration": "Settings",
+        "appearance": "Appearance",
+        "notifications": "Notifications", 
+        "privacy": "Privacy",
+        "statistics": "Statistics",
+        "reports": "Reports",
+        "sales": "Sales",
+        "users": "Users",
+        "activity": "Activity",
+        "tools": "Tools",
+        "admin_panel": "Admin Panel",
+        "search": "Search",
+        "favorites": "Favorites", 
+        "help": "Help",
+        "logout": "Sign Out"
+    },
+    "search": {
+        "placeholder": "Search menu... (Ctrl+K)",
+        "no_results": "No results found",
+        "navigate": "navigate",
+        "select": "select",
+        "close": "close"
+    },
+    "voice": {
+        "listening": "Listening...",
+        "command_executed": "Executing: {command}",
+        "command_not_recognized": "Command not recognized",
+        "not_supported": "Voice commands not supported in this browser"
+    },
+    "help": {
+        "title": "Sidebar Shortcuts",
+        "quick_search": "Quick search",
+        "toggle_sidebar": "Toggle sidebar",
+        "show_help": "Show help", 
+        "change_theme": "Change theme",
+        "voice_command": "Voice command",
+        "close": "Close"
+    },
+    "themes": {
+        "default": "Default",
+        "dark": "Dark",
+        "light": "Light",
+        "auto": "Auto"
+    },
+    "user": {
+        "administrator": "Administrator", 
+        "user": "User",
+        "welcome": "Welcome to your personal space, {name}"
+    },
+    "notifications": {
+        "new_update": "New update available",
+        "monthly_report": "Monthly report ready",
+        "new_user": "New user registered", 
+        "view_all": "View all"
+    }
+}

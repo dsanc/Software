@@ -1,0 +1,470 @@
+{% extends 'base_with_sidebar.html' %}
+{% load humanize %}
+{% load profile_tags %}
+{% load evaluador_permissions %}
+
+{% block title %}{{ perfil.nombre_completo }} - Detalle del Perfil{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos personalizados para el detalle del perfil */
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Botones extra pequeños personalizados */
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    border-radius: 0.2rem;
+}
+
+.info-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.info-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-value {
+    color: #212529;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.risk-badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+}
+
+.risk-muy_alto { 
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+.risk-alto { 
+    background: linear-gradient(135deg, #fd7e14, #e55a00);
+    color: white;
+}
+.risk-medio { 
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+.risk-bajo { 
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.9;
+}
+
+.timeline-item {
+    border-left: 3px solid #e9ecef;
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #6c757d;
+}
+
+.timeline-item.completed::before {
+    background: #28a745;
+}
+
+.timeline-item.pending::before {
+    background: #ffc107;
+}
+
+.timeline-item.cancelled::before {
+    background: #dc3545;
+}
+
+.action-buttons .btn {
+    margin: 0.25rem;
+    min-width: 120px;
+}
+
+/* Estilos para la tabla de evaluaciones */
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+.dropdown-menu {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.dropdown-item i {
+    width: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .profile-header {
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .profile-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del Perfil -->
+    <div class="profile-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="profile-avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center">
+                    {{ perfil.iniciales }}
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="h4 mb-1">{{ perfil.nombre_completo }}</h1>
+                <p class="mb-1">
+                    <i class="fas fa-briefcase me-2"></i>{{ perfil.get_cargo_politico_display }}
+                    {% if perfil.partido_politico %}
+                        - {{ perfil.partido_politico }}
+                    {% endif %}
+                </p>
+                <p class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>{{ perfil.municipio }}, {{ perfil.departamento }}
+                    <span class="ms-3">
+                        <i class="fas fa-birthday-cake me-2"></i>{{ edad }} años
+                    </span>
+                </p>
+            </div>
+            <div class="col-auto">
+                <div class="text-end">
+                    <div class="mb-2">
+                        {% has_module_permission user 'security_probabilistic' 'update' as can_update %}
+                        {% if can_update %}
+                        <button class="btn btn-light btn-xs me-1" onclick="editarPerfil({{ perfil.pk }})">
+                            <i class="fas fa-edit me-1"></i>Editar
+                        </button>
+                        {% endif %}
+                        {% has_module_permission user 'security_probabilistic' 'create' as can_create %}
+                        {% if can_create %}
+                        <button class="btn btn-success btn-xs" onclick="nuevaEvaluacion({{ perfil.pk }})">
+                            <i class="fas fa-plus me-1"></i>Nueva
+                        </button>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex justify-content-end mb-1">
+                        <div class="risk-badge risk-{{ nivel_riesgo_calculado }}">
+                            {% if nivel_riesgo_calculado == 'muy_alto' %}
+                                <i class="fas fa-exclamation-triangle me-2"></i>Riesgo Muy Alto
+                            {% elif nivel_riesgo_calculado == 'alto' %}
+                                <i class="fas fa-exclamation me-2"></i>Riesgo Alto
+                            {% elif nivel_riesgo_calculado == 'medio' %}
+                                <i class="fas fa-minus-circle me-2"></i>Riesgo Medio
+                            {% else %}
+                                <i class="fas fa-check-circle me-2"></i>Riesgo Bajo
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <span class="badge {% if perfil.estado_perfil == 'activo' %}bg-success{% else %}bg-secondary{% endif %}">
+                            {{ perfil.get_estado_perfil_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <!-- Historial de Evaluaciones -->
+            <div class="card info-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history text-info me-2"></i>
+                        Historial de Evaluaciones
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if evaluaciones %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Tipo de Evaluación</th>
+                                        <th>Fecha</th>
+                                        <th>Evaluador</th>
+                                        <th>Estado</th>
+                                        <th>Probabilidad</th>
+                                        <th>Nivel de Riesgo</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evaluacion in evaluaciones %}
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold mb-1">{{ evaluacion.arbol.nombre }}</div>
+                                            <div class="d-flex align-items-center mb-1">
+                                                <i class="fas fa-map-marker-alt text-muted me-1" style="font-size: 0.75rem;"></i>
+                                                <small class="text-muted">
+                                                    <span class="fw-medium">{{ perfil.municipio }}</span>, {{ perfil.departamento }}
+                                                </small>
+                                            </div>
+                                            {% if evaluacion.observaciones %}
+                                                <div class="mt-1">
+                                                    <small class="text-muted fst-italic">{{ evaluacion.observaciones|truncatewords:5 }}</small>
+                                                </div>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>{{ evaluacion.creada_en|date:"d/m/Y" }}</div>
+                                            <small class="text-muted">{{ evaluacion.creada_en|date:"H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            {% if evaluacion.evaluador_nombre %}
+                                                <div>{{ evaluacion.evaluador_nombre }}</div>
+                                                {% if evaluacion.evaluador_email %}
+                                                    <small class="text-muted">{{ evaluacion.evaluador_email }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">No especificado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if evaluacion.estado == 'completada' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check-circle me-1"></i>{{ evaluacion.get_estado_display }}
+                                                </span>
+                                            {% elif evaluacion.estado == 'en_progreso' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>{{ evaluacion.get_estado_display }}
+                                                </span>
+                                            {% elif evaluacion.estado == 'cancelada' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times-circle me-1"></i>{{ evaluacion.get_estado_display }}
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-pause-circle me-1"></i>{{ evaluacion.get_estado_display }}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if evaluacion.estado == 'completada' %}
+                                                {% with promedio=evaluacion|promedio_completo_porcentaje %}
+                                                    {% if promedio %}
+                                                        <div class="fw-bold">{{ promedio|floatformat:2 }}%</div>
+                                                        <small class="text-muted">Promedio completo (con geografía)</small>
+                                                    {% else %}
+                                                        <div class="fw-bold">{{ evaluacion.probabilidad_total|floatformat:5 }}</div>
+                                                        <small class="text-muted">Solo cuestionario (decimal)</small>
+                                                    {% endif %}
+                                                {% endwith %}
+                                                {% if evaluacion.completada_en %}
+                                                    <br><small class="text-muted">{{ evaluacion.completada_en|date:"d/m/Y H:i" }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if evaluacion.estado == 'completada' and evaluacion.nivel_riesgo %}
+                                                {% if evaluacion.nivel_riesgo == 'muy_alto' %}
+                                                    <span class="badge bg-danger">Muy Alto</span>
+                                                {% elif evaluacion.nivel_riesgo == 'alto' %}
+                                                    <span class="badge bg-warning">Alto</span>
+                                                {% elif evaluacion.nivel_riesgo == 'medio' %}
+                                                    <span class="badge bg-info">Medio</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">Bajo</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex flex-wrap justify-content-center gap-1">
+                                                {% if evaluacion.estado == 'completada' %}
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="verResultados({{ evaluacion.id }})" title="Ver Resultados">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="descargarReporte({{ evaluacion.id }})" title="Descargar Reporte">
+                                                        <i class="fas fa-download"></i>
+                                                    </button>
+                                                {% elif evaluacion.estado == 'en_progreso' %}
+                                                    {% if can_update %}
+                                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="continuarEvaluacion({{ evaluacion.id }})" title="Continuar">
+                                                        <i class="fas fa-play"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelarEvaluacion({{ evaluacion.id }})" title="Cancelar">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                {% endif %}
+                                                <button type="button" class="btn btn-sm btn-outline-info" onclick="verDetalles({{ evaluacion.id }})" title="Ver Detalles">
+                                                    <i class="fas fa-info-circle"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay evaluaciones registradas para este perfil.</p>
+                            {% if can_create %}
+                            <button class="btn btn-primary" onclick="nuevaEvaluacion({{ perfil.pk }})">
+                                <i class="fas fa-plus me-2"></i>Crear Primera Evaluación
+                            </button>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones para las acciones (reutilizando las del listado)
+function nuevaEvaluacion(perfilId) {
+    // Redirigir a la página de crear evaluación
+    window.location.href = `{% url 'security_probabilistic:crear_evaluacion' 0 %}`.replace('0', perfilId);
+}
+
+function editarPerfil(perfilId) {
+    alert(`Editar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+}
+
+function verEvaluaciones(perfilId) {
+    alert(`Ver evaluaciones del perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+}
+
+function desactivarPerfil(perfilId) {
+    if (confirm('¿Está seguro de que desea desactivar este perfil?')) {
+        alert(`Desactivar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+    }
+}
+
+function activarPerfil(perfilId) {
+    if (confirm('¿Está seguro de que desea activar este perfil?')) {
+        alert(`Activar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+    }
+}
+
+// Nuevas funciones para las acciones de la tabla de evaluaciones
+function verResultados(evaluacionId) {
+    // Redirigir a la vista de detalle de la evaluación
+    window.location.href = `{% url 'security_probabilistic:detalle_evaluacion' 0 %}`.replace('0', evaluacionId);
+}
+
+function descargarReporte(evaluacionId) {
+    alert(`Descargar reporte de la evaluación ID: ${evaluacionId}\n\n(Funcionalidad pendiente de implementar)`);
+}
+
+function continuarEvaluacion(evaluacionId) {
+    // Redirigir a continuar la evaluación
+    window.location.href = `{% url 'security_probabilistic:realizar_evaluacion' 0 %}`.replace('0', evaluacionId);
+}
+
+function cancelarEvaluacion(evaluacionId) {
+    if (confirm('¿Está seguro de que desea cancelar esta evaluación?')) {
+        alert(`Cancelar evaluación ID: ${evaluacionId}\n\n(Funcionalidad pendiente de implementar)`);
+    }
+}
+
+function verDetalles(evaluacionId) {
+    // Redirigir a la vista de detalle de la evaluación
+    window.location.href = `{% url 'security_probabilistic:detalle_evaluacion' 0 %}`.replace('0', evaluacionId);
+}
+</script>
+{% endblock %}

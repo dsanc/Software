@@ -1,0 +1,188 @@
+﻿{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}Evaluación de Riesgos - {{ conjunto.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Indicador de pasos simple y profesional */
+.step-progress {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border-left: 4px solid #007bff;
+}
+
+.step-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.step-current {
+    flex: 1;
+}
+
+.step-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.step-subtitle {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin: 0.25rem 0 0 0;
+}
+
+.step-counter {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #007bff;
+    font-weight: 500;
+}
+
+.step-dots {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.step-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.step-dot.completed {
+    background: #28a745;
+}
+
+.step-dot.active {
+    background: #007bff;
+    transform: scale(1.5);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .step-nav {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .step-progress {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header de evaluación -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="h4 mb-1">Evaluación de Riesgos</h2>
+                    <p class="text-muted mb-0">{{ conjunto.nombre }}</p>
+                </div>
+                <div class="text-end">
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        {% now "d/m/Y H:i" %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de pasos simple -->
+    <div class="step-progress">
+        <div class="step-nav">
+            <div class="step-current">
+                <h3 class="step-title">
+                    {% if paso == 1 %}
+                        Paso 1: Selección de Riesgos
+                    {% elif paso == 2 %}
+                        Paso 2: Evaluación de Riesgos
+                    {% elif paso == 3 %}
+                        Paso 3: Observaciones y Recomendaciones
+                    {% elif paso == 4 %}
+                        Paso 4: Resumen Final
+                    {% endif %}
+                </h3>
+                <p class="step-subtitle">
+                    {% if paso == 1 %}
+                        Seleccione los tipos de riesgos que desea evaluar
+                    {% elif paso == 2 %}
+                        Califique cada pregunta de evaluación según su criterio
+                    {% elif paso == 3 %}
+                        Agregue observaciones, recomendaciones e imágenes de evidencia
+                    {% elif paso == 4 %}
+                        Revise los resultados y complete la evaluación
+                    {% endif %}
+                </p>
+            </div>
+            
+            <div class="step-counter">
+                <span>{{ paso }} de {{ total_pasos|default:4 }}</span>
+            </div>
+            
+            <div class="step-dots">
+                <div class="step-dot {% if paso >= 1 %}{% if paso == 1 %}active{% else %}completed{% endif %}{% endif %}"></div>
+                <div class="step-dot {% if paso >= 2 %}{% if paso == 2 %}active{% else %}completed{% endif %}{% endif %}"></div>
+                <div class="step-dot {% if paso >= 3 %}{% if paso == 3 %}active{% else %}completed{% endif %}{% endif %}"></div>
+                <div class="step-dot {% if paso >= 4 %}{% if paso == 4 %}active{% else %}completed{% endif %}{% endif %}"></div>
+            </div>
+        </div>
+    </div>
+
+    {% block evaluation_content %}
+    {% endblock %}
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between">
+                <div>
+                    {% block back_button %}{% endblock %}
+                </div>
+                <div>
+                    {% block next_button %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Animación simple para los dots
+    $('.step-dot').each(function(index) {
+        $(this).css('opacity', '0').delay(index * 100).animate({
+            opacity: 1
+        }, 300);
+    });
+    
+    // Efecto hover suave en el indicador
+    $('.step-progress').hover(
+        function() {
+            $(this).css('transform', 'translateY(-1px)');
+        },
+        function() {
+            $(this).css('transform', 'translateY(0)');
+        }
+    );
+});
+</script>
+{% endblock %}

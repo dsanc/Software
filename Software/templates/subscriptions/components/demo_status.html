@@ -1,0 +1,52 @@
+{% load static %}
+
+<!-- Componente para mostrar estado DEMO en navbar -->
+{% if active_demos %}
+<div class="demo-status-navbar">
+    {% for demo in active_demos %}
+    <div class="alert alert-warning alert-dismissible fade show mb-0" role="alert" style="border-radius: 0;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <small>
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>DEMO {{ demo.module.display_name }}:</strong>
+                        {% if demo.days_remaining <= 1 %}
+                            <span class="text-danger">Expira hoy</span>
+                        {% elif demo.days_remaining <= 3 %}
+                            <span class="text-warning">{{ demo.days_remaining }} días restantes</span>
+                        {% else %}
+                            {{ demo.days_remaining }} días restantes
+                        {% endif %}
+                    </small>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'subscriptions:plans_list' %}" 
+                       class="btn btn-sm btn-outline-warning">
+                        Suscribirse
+                    </a>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Badge para usuario en dropdown -->
+{% if user.is_authenticated %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar badge de DEMO al usuario dropdown si tiene demos activos
+    const userDropdown = document.querySelector('.user-dropdown, .nav-link[data-bs-toggle="dropdown"]');
+    if (userDropdown && {{ active_demos|length }} > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'badge bg-warning text-dark ms-2';
+        badge.textContent = 'DEMO';
+        badge.title = 'Tienes períodos DEMO activos';
+        userDropdown.appendChild(badge);
+    }
+});
+</script>
+{% endif %}

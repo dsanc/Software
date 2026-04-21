@@ -1,0 +1,148 @@
+{% extends "base_with_sidebar.html" %}
+{% load evaluador_permissions %}
+
+{% block title %}Ejemplo de Permisos CRUD{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Sistema de Permisos para Evaluadores</h1>
+    
+    <!-- Estado de permisos del usuario -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <h5>Risk Hoteles</h5>
+            {% permission_status user 'risk_hoteles' %}
+            {% get_module_permissions user 'risk_hoteles' as hoteles_perms %}
+            <div class="mt-2">
+                {% if hoteles_perms %}
+                    <small class="text-muted">
+                        Permisos: 
+                        {% if hoteles_perms.create %}Crear, {% endif %}
+                        {% if hoteles_perms.read %}Leer, {% endif %}
+                        {% if hoteles_perms.update %}Editar, {% endif %}
+                        {% if hoteles_perms.delete %}Eliminar, {% endif %}
+                        {% if hoteles_perms.export %}Exportar, {% endif %}
+                        {% if hoteles_perms.approve %}Aprobar{% endif %}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <h5>Risk Conjuntos</h5>
+            {% permission_status user 'risk_conjuntos' %}
+        </div>
+        
+        <div class="col-md-4">
+            <h5>Security Probabilistic</h5>
+            {% permission_status user 'security_probabilistic' %}
+        </div>
+    </div>
+    
+    <!-- Ejemplo de botones CRUD dinámicos -->
+    <div class="card">
+        <div class="card-header">
+            <h5>Ejemplo de Botones CRUD - Risk Hoteles</h5>
+        </div>
+        <div class="card-body">
+            <!-- Botones generales del módulo -->
+            <div class="mb-3">
+                <h6>Acciones generales:</h6>
+                {% render_crud_buttons user 'risk_hoteles' %}
+            </div>
+            
+            <!-- Botones para un objeto específico -->
+            <div class="mb-3">
+                <h6>Acciones para objeto específico (ID: 123):</h6>
+                {% render_crud_buttons user 'risk_hoteles' 123 %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Ejemplo usando template tags individuales -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Ejemplo usando Template Tags</h5>
+        </div>
+        <div class="card-body">
+            <!-- Usando has_module_permission -->
+            {% has_module_permission user 'risk_hoteles' 'create' as can_create_hoteles %}
+            {% if can_create_hoteles %}
+                <button class="btn btn-success">✓ Puede crear hoteles</button>
+            {% else %}
+                <button class="btn btn-secondary" disabled>✗ No puede crear hoteles</button>
+            {% endif %}
+            
+            <!-- Usando filtro has_permission -->
+            {% if user|has_permission:'risk_hoteles.update' %}
+                <button class="btn btn-warning">✓ Puede editar hoteles</button>
+            {% else %}
+                <button class="btn btn-secondary" disabled>✗ No puede editar hoteles</button>
+            {% endif %}
+            
+            <!-- Ejemplo condicional -->
+            {% if user|has_permission:'risk_hoteles.delete' %}
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Tienes permisos de eliminación. ¡Ten cuidado!
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Lista de ejemplo con permisos -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Lista de Elementos (ejemplo)</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Hotel Ejemplo 1</td>
+                            <td><span class="badge badge-success">Activo</span></td>
+                            <td>
+                                {% if user|has_permission:'risk_hoteles.read' %}
+                                    <a href="#" class="btn btn-sm btn-info">Ver</a>
+                                {% endif %}
+                                {% if user|has_permission:'risk_hoteles.update' %}
+                                    <a href="#" class="btn btn-sm btn-warning">Editar</a>
+                                {% endif %}
+                                {% if user|has_permission:'risk_hoteles.delete' %}
+                                    <a href="#" class="btn btn-sm btn-danger">Eliminar</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Hotel Ejemplo 2</td>
+                            <td><span class="badge badge-warning">Pendiente</span></td>
+                            <td>
+                                {% render_crud_buttons user 'risk_hoteles' 456 %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.permission-badge {
+    font-size: 0.8rem;
+}
+
+.crud-buttons .btn {
+    margin-right: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+</style>
+{% endblock %}

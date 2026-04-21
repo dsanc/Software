@@ -1,0 +1,273 @@
+<!-- Modal para Crear/Editar Conjunto -->
+<div class="modal fade" id="conjuntoModal" tabindex="-1" aria-labelledby="conjuntoModalLabel" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="conjuntoModalLabel">
+                    <i class="fas fa-building me-2"></i>
+                    <span id="modalTitle">Nuevo Conjunto</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar modal"></button>
+            </div>
+            
+            <form id="conjuntoModalForm" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="conjuntoId" name="conjunto_id" value="">
+                
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <!-- Información Básica -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <div class="section-icon me-3">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <h6 class="section-title mb-0">Información Básica</h6>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_nit" class="form-label">
+                                        NIT <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="id_nit" name="nit" required placeholder="Ej: 800123456-7">
+                                    <div class="invalid-feedback"></div>
+                                    <div class="form-text">NIT del conjunto residencial</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_nombre" class="form-label">
+                                        Nombre del Conjunto <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="id_nombre" name="nombre" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_tipo_conjunto" class="form-label">
+                                        Tipo de Conjunto <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="id_tipo_conjunto" name="tipo_conjunto" required>
+                                        <option value="">Seleccione un tipo</option>
+                                        <option value="1">Conjunto Cerrado</option>
+                                        <option value="2">Urbanización</option>
+                                        <option value="3">Condominio</option>
+                                        <option value="4">Cluster</option>
+                                        <option value="5">Edificio Residencial</option>
+                                        <option value="6">Torres Residenciales</option>
+                                    </select>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_direccion" class="form-label">Dirección</label>
+                                    <input type="text" class="form-control" id="id_direccion" name="direccion">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_ciudad" class="form-label">
+                                        Ciudad <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="id_ciudad" name="ciudad" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_departamento" class="form-label">
+                                        Departamento <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="id_departamento" name="departamento" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_numero_unidades" class="form-label">
+                                        Número de Unidades <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number" class="form-control" id="id_numero_unidades" name="numero_unidades" min="1" required>
+                                    <div class="invalid-feedback"></div>
+                                </div>
+                                
+                                <div class="col-md-3 mb-3">
+                                    <label for="id_numero_torres" class="form-label">Número de Torres</label>
+                                    <input type="number" class="form-control" id="id_numero_torres" name="numero_torres" min="1" value="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Información de Contacto -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-3">
+                                <div class="section-icon me-3">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <h6 class="section-title mb-0">Información de Contacto</h6>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_administrador_telefono" class="form-label">Teléfono Administración</label>
+                                    <input type="tel" class="form-control" id="id_administrador_telefono" name="administrador_telefono">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_administrador_email" class="form-label">Email Administración</label>
+                                    <input type="email" class="form-control" id="id_administrador_email" name="administrador_email">
+                                </div>
+                                
+                                <div class="col-md-12 mb-3">
+                                    <label for="id_administrador_nombre" class="form-label">Nombre Administrador</label>
+                                    <input type="text" class="form-control" id="id_administrador_nombre" name="administrador_nombre">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Amenidades -->
+                        <div class="form-section">
+                            <div class="section-header mb-3">
+                                <div class="section-icon me-3">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <h6 class="section-title mb-0">Amenidades Disponibles</h6>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <div class="checkbox-card">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tiene_piscina" id="tiene_piscina">
+                                        <label class="form-check-label" for="tiene_piscina">
+                                            <i class="fas fa-swimmer me-2"></i>Piscina
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-card">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tiene_gimnasio" id="tiene_gimnasio">
+                                        <label class="form-check-label" for="tiene_gimnasio">
+                                            <i class="fas fa-dumbbell me-2"></i>Gimnasio
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-card">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tiene_salon_social" id="tiene_salon_social">
+                                        <label class="form-check-label" for="tiene_salon_social">
+                                            <i class="fas fa-users me-2"></i>Salón Social
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-card">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tiene_juegos_infantiles" id="tiene_juegos_infantiles">
+                                        <label class="form-check-label" for="tiene_juegos_infantiles">
+                                            <i class="fas fa-child me-2"></i>Juegos Infantiles
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="checkbox-card">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="tiene_canchas_deportivas" id="tiene_canchas_deportivas">
+                                        <label class="form-check-label" for="tiene_canchas_deportivas">
+                                            <i class="fas fa-futbol me-2"></i>Canchas Deportivas
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save me-2"></i>
+                        <span id="submitText">Crear Conjunto</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.section-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.section-title {
+    color: #333;
+    font-weight: 600;
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.checkbox-card {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.checkbox-card:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.checkbox-card.checked {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.checkbox-card .form-check-input {
+    margin-right: 0.5rem;
+}
+
+.checkbox-card .form-check-label {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    cursor: pointer;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.modal-xl {
+    max-width: 1000px;
+}
+
+.form-section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+</style>

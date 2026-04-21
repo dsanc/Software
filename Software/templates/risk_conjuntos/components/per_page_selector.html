@@ -1,0 +1,22 @@
+<!-- Selector de elementos por página -->
+<div class="per-page-selector">
+    <div class="d-flex align-items-center">
+        <label for="perPageSelect" class="form-label me-2 mb-0 text-muted">Mostrar:</label>
+        <select id="perPageSelect" class="form-select form-select-sm" style="width: auto;" onchange="changePerPage(this.value)">
+            {% for option in per_page_options %}
+            <option value="{{ option }}" {% if option == items_per_page %}selected{% endif %}>
+                {{ option }} por página
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<script>
+function changePerPage(value) {
+    const url = new URL(window.location);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', 1); // Resetear a primera página
+    window.location.href = url.toString();
+}
+</script>

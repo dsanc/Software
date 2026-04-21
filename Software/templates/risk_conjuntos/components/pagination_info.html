@@ -1,0 +1,16 @@
+<!-- Información de paginación -->
+<div class="pagination-info">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="pagination-text">
+            <span class="text-muted">
+                Mostrando <strong>{{ start_index }}</strong> a <strong>{{ end_index }}</strong> 
+                de <strong>{{ total_items }}</strong> resultado{{ total_items|pluralize:"s" }}
+            </span>
+        </div>
+        <div class="pagination-summary">
+            <small class="text-muted">
+                Página <strong>{{ current_page }}</strong> de <strong>{{ total_pages }}</strong>
+            </small>
+        </div>
+    </div>
+</div>

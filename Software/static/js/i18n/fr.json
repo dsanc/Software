@@ -1,0 +1,61 @@
+{
+    "sidebar": {
+        "brand": "Django Modulaire",
+        "dashboard": "Tableau de bord",
+        "profile": "Mon Profil",
+        "configuration": "Configuration",
+        "appearance": "Apparence",
+        "notifications": "Notifications",
+        "privacy": "Confidentialité", 
+        "statistics": "Statistiques",
+        "reports": "Rapports",
+        "sales": "Ventes",
+        "users": "Utilisateurs",
+        "activity": "Activité",
+        "tools": "Outils",
+        "admin_panel": "Panneau Admin",
+        "search": "Recherche",
+        "favorites": "Favoris",
+        "help": "Aide",
+        "logout": "Se déconnecter"
+    },
+    "search": {
+        "placeholder": "Rechercher dans le menu... (Ctrl+K)",
+        "no_results": "Aucun résultat trouvé",
+        "navigate": "naviguer",
+        "select": "sélectionner",
+        "close": "fermer"
+    },
+    "voice": {
+        "listening": "Écoute...",
+        "command_executed": "Exécution: {command}",
+        "command_not_recognized": "Commande non reconnue",
+        "not_supported": "Commandes vocales non supportées dans ce navigateur"
+    },
+    "help": {
+        "title": "Raccourcis de la Barre Latérale",
+        "quick_search": "Recherche rapide",
+        "toggle_sidebar": "Basculer la barre latérale",
+        "show_help": "Afficher l'aide",
+        "change_theme": "Changer le thème",
+        "voice_command": "Commande vocale",
+        "close": "Fermer"
+    },
+    "themes": {
+        "default": "Par défaut",
+        "dark": "Sombre",
+        "light": "Clair",
+        "auto": "Automatique"
+    },
+    "user": {
+        "administrator": "Administrateur",
+        "user": "Utilisateur", 
+        "welcome": "Bienvenue dans votre espace personnel, {name}"
+    },
+    "notifications": {
+        "new_update": "Nouvelle mise à jour disponible",
+        "monthly_report": "Rapport mensuel prêt",
+        "new_user": "Nouvel utilisateur enregistré",
+        "view_all": "Voir tout"
+    }
+}

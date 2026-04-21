@@ -1,0 +1,1028 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Análisis de Riesgo - {{ hotel.name }} - Risk Hotels{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+<style>
+.analysis-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.hotel-info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #667eea;
+}
+
+.risk-form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.form-section {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 1.5rem;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: #374151;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.risk-level-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.badge-bajo { background: #d1fae5; color: #065f46; }
+.badge-medio { background: #fef3c7; color: #92400e; }
+.badge-alto { background: #fee2e2; color: #991b1b; }
+.badge-critico { background: #fecaca; color: #7f1d1d; }
+
+.category-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+}
+
+.category-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.category-card .form-check-input:checked + .form-check-label {
+    color: #667eea;
+}
+
+.category-card .form-check-input:checked ~ .category-content {
+    border-color: #667eea;
+}
+
+.category-content {
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.category-icon {
+    font-size: 2rem;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.category-card .form-check-input {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 20px;
+    height: 20px;
+}
+
+.category-card .form-check-label {
+    cursor: pointer;
+    margin-bottom: 0;
+}
+
+.category-card h6 {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.3;
+}
+
+.category-card small {
+    font-size: 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .analysis-header {
+        padding: 1.5rem;
+    }
+    
+    .step-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+    }
+    
+    .step-label {
+        font-size: 0.8rem;
+    }
+}
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header del análisis -->
+    <div class="analysis-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1><i class="fas fa-chart-line"></i> Análisis de Riesgo</h1>
+                <p class="mb-0">Evaluación completa del perfil de riesgo para {{ hotel.name }}</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}" class="btn btn-light">
+                    <i class="fas fa-arrow-left"></i> Volver al Hotel
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Hotel -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="hotel-info-card">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                 style="width: 60px; height: 60px;">
+                                <i class="fas fa-hotel fa-2x"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ hotel.name }}</h5>
+                                <small class="text-muted">{{ hotel.get_category_display }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Ubicación:</strong><br>
+                        <small>{{ hotel.city }}, {{ hotel.country }}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Habitaciones:</strong><br>
+                        <small>{{ hotel.total_rooms }} habitaciones</small>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Fecha de registro:</strong><br>
+                        <small>{{ hotel.created_at|date:"d M Y" }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pasos del proceso -->
+    {% include 'risk_hoteles/includes/progress_steps.html' with current_step=1 %}
+
+    <!-- Formulario de análisis -->
+    <div class="row">
+        <div class="col-12">
+            <div class="risk-form-container">
+                <form method="post" id="riskAnalysisForm">
+                    {% csrf_token %}
+                    
+                    <!-- Sección 1: Información General -->
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-info-circle text-primary"></i>
+                            Información General del Análisis
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="analysis_type" class="form-label">Tipo de Análisis</label>
+                                    <select class="form-select" id="analysis_type" name="analysis_type" required>
+                                        <option value="">Seleccionar tipo...</option>
+                                        <option value="inicial">Análisis Inicial</option>
+                                        <option value="periodico">Análisis Periódico</option>
+                                        <option value="especial">Análisis Especial</option>
+                                        <option value="auditoria">Auditoría de Riesgo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="analysis_date" class="form-label">Fecha del Análisis</label>
+                                    <input type="date" class="form-control" id="analysis_date" name="analysis_date" 
+                                           value="{{ today|date:'Y-m-d' }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Descripción del Análisis</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3"
+                                              placeholder="Describe el propósito y alcance de este análisis..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sección 2: Selección de Categorías de Seguridad -->
+                    <div class="form-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-shield-alt text-warning"></i>
+                            Selección de Categorías de Seguridad
+                        </h4>
+                        <p class="text-muted mb-4">Seleccione las categorías de seguridad que desea evaluar en este análisis. En el siguiente paso se presentará un cuestionario específico para cada categoría seleccionada.</p>
+                        
+                        <!-- Grid de categorías de seguridad -->
+                        <div class="row">
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card" role="option" aria-describedby="cat_gestion_desc">
+                                    <input class="form-check-input" type="checkbox" id="cat_gestion" name="categories" value="gestion_organizacion" 
+                                           aria-labelledby="cat_gestion_label" aria-describedby="cat_gestion_desc">
+                                    <label class="form-check-label w-100" for="cat_gestion" id="cat_gestion_label">
+                                        <div class="category-content">
+                                            <i class="fas fa-users-cog category-icon" aria-hidden="true"></i>
+                                            <h6>Gestión y Organización de la Seguridad</h6>
+                                            <small class="text-muted" id="cat_gestion_desc">Estructura organizacional y políticas</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_externa" name="categories" value="seguridad_externa">
+                                    <label class="form-check-label w-100" for="cat_externa">
+                                        <div class="category-content">
+                                            <i class="fas fa-shield-alt category-icon"></i>
+                                            <h6>Seguridad Externa</h6>
+                                            <small class="text-muted">Perímetro y accesos exteriores</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_perimetral" name="categories" value="seguridad_perimetral">
+                                    <label class="form-check-label w-100" for="cat_perimetral">
+                                        <div class="category-content">
+                                            <i class="fas fa-border-all category-icon"></i>
+                                            <h6>Seguridad Perimetral</h6>
+                                            <small class="text-muted">Límites y barreras físicas</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_internas" name="categories" value="seguridad_internas">
+                                    <label class="form-check-label w-100" for="cat_internas">
+                                        <div class="category-content">
+                                            <i class="fas fa-home category-icon"></i>
+                                            <h6>Seguridad en Áreas Internas</h6>
+                                            <small class="text-muted">Espacios comunes y operativos</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_accesos" name="categories" value="controles_accesos">
+                                    <label class="form-check-label w-100" for="cat_accesos">
+                                        <div class="category-content">
+                                            <i class="fas fa-key category-icon"></i>
+                                            <h6>Controles de Accesos al Hotel</h6>
+                                            <small class="text-muted">Sistemas de acceso y control</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_habitaciones" name="categories" value="seguridad_habitaciones">
+                                    <label class="form-check-label w-100" for="cat_habitaciones">
+                                        <div class="category-content">
+                                            <i class="fas fa-bed category-icon"></i>
+                                            <h6>Seguridad en Habitaciones</h6>
+                                            <small class="text-muted">Protección de huéspedes</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_activos" name="categories" value="seguridad_activos">
+                                    <label class="form-check-label w-100" for="cat_activos">
+                                        <div class="category-content">
+                                            <i class="fas fa-server category-icon"></i>
+                                            <h6>Seguridad de Activos Críticos</h6>
+                                            <small class="text-muted">Equipos y sistemas críticos</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_parqueo" name="categories" value="seguridad_parqueo">
+                                    <label class="form-check-label w-100" for="cat_parqueo">
+                                        <div class="category-content">
+                                            <i class="fas fa-car category-icon"></i>
+                                            <h6>Seguridad en Áreas de Parqueo</h6>
+                                            <small class="text-muted">Estacionamientos y garajes</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_rrhh" name="categories" value="gestion_humana">
+                                    <label class="form-check-label w-100" for="cat_rrhh">
+                                        <div class="category-content">
+                                            <i class="fas fa-user-tie category-icon"></i>
+                                            <h6>Seguridad en Gestión Humana</h6>
+                                            <small class="text-muted">Personal y recursos humanos</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_eventos" name="categories" value="seguridad_eventos">
+                                    <label class="form-check-label w-100" for="cat_eventos">
+                                        <div class="category-content">
+                                            <i class="fas fa-calendar-alt category-icon"></i>
+                                            <h6>Seguridad en Eventos</h6>
+                                            <small class="text-muted">Eventos y actividades especiales</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_ayb" name="categories" value="seguridad_ayb">
+                                    <label class="form-check-label w-100" for="cat_ayb">
+                                        <div class="category-content">
+                                            <i class="fas fa-utensils category-icon"></i>
+                                            <h6>Seguridad en A&B</h6>
+                                            <small class="text-muted">Alimentos y bebidas</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_reservas" name="categories" value="seguridad_reservas">
+                                    <label class="form-check-label w-100" for="cat_reservas">
+                                        <div class="category-content">
+                                            <i class="fas fa-clipboard-list category-icon"></i>
+                                            <h6>Seguridad en Reservas</h6>
+                                            <small class="text-muted">Procesos de reservación</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_compras" name="categories" value="seguridad_compras">
+                                    <label class="form-check-label w-100" for="cat_compras">
+                                        <div class="category-content">
+                                            <i class="fas fa-shopping-cart category-icon"></i>
+                                            <h6>Seguridad en Compras</h6>
+                                            <small class="text-muted">Procesos de adquisiciones</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="form-check category-card">
+                                    <input class="form-check-input" type="checkbox" id="cat_emergencias" name="categories" value="gestion_emergencias">
+                                    <label class="form-check-label w-100" for="cat_emergencias">
+                                        <div class="category-content">
+                                            <i class="fas fa-exclamation-triangle category-icon"></i>
+                                            <h6>Seguridad y Gestión de Emergencias</h6>
+                                            <small class="text-muted">Planes de emergencia</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botón para seleccionar todas -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="toggleAllCategories()">
+                                    <i class="fas fa-check-double"></i> Seleccionar Todas
+                                </button>
+                                <span class="ms-3 text-muted">
+                                    <span id="selectedCount">0</span> categorías seleccionadas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="form-section">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-outline-primary me-2" onclick="saveAsDraft()">
+                                    <i class="fas fa-save"></i> Guardar Progreso
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submitAnalysisBtn">
+                                    <i class="fas fa-chart-line"></i> Generar Análisis
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Análisis -->
+<div class="modal fade" id="confirmAnalysisModal" tabindex="-1" aria-labelledby="confirmAnalysisModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title" id="confirmAnalysisModalLabel">
+                    <i class="fas fa-chart-line me-2"></i>
+                    Confirmar Generación de Análisis
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-info border-0 mb-4">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-info-circle text-info me-2 fa-lg"></i>
+                        <strong>Resumen de la Evaluación</strong>
+                    </div>
+                    <div class="row text-center mt-3">
+                        <div class="col-4">
+                            <div class="text-muted small">Hotel</div>
+                            <div class="h6 text-primary mb-0">{{ hotel.name }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted small">Tipo</div>
+                            <div class="h6 text-primary mb-0" id="modalAnalysisType">-</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-muted small">Categorías</div>
+                            <div class="h6 text-success mb-0" id="modalCategoryCount">0</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-list-check me-2"></i>
+                        Categorías Seleccionadas para Evaluación:
+                    </h6>
+                    <div id="selectedCategoriesList" class="list-group">
+                        <!-- Las categorías se agregarán dinámicamente aquí -->
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning border-0">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-exclamation-triangle text-warning me-2 mt-1"></i>
+                        <div>
+                            <strong>Importante:</strong> Una vez iniciado el análisis, se creará una nueva evaluación que incluirá un cuestionario detallado para cada categoría seleccionada. 
+                            <div class="mt-2">
+                                <i class="fas fa-clock text-info me-1"></i>
+                                <strong>Tiempo estimado:</strong> 
+                                <span id="estimatedTime" class="text-primary">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <p class="text-muted mb-0">
+                        <strong>¿Está seguro de que desea continuar?</strong>
+                    </p>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-1"></i>
+                    Cancelar
+                </button>
+                <div>
+                    <button type="button" class="btn btn-outline-primary me-2" onclick="saveConfigurationAsDraft()">
+                        <i class="fas fa-save me-1"></i>
+                        Guardar Configuración
+                    </button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="confirmAnalysisGeneration()">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Sí, Generar Análisis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Función de throttling para optimizar rendimiento
+function throttle(func, limit) {
+    let lastFunc;
+    let lastRan;
+    return function() {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(function() {
+                if ((Date.now() - lastRan) >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - lastRan));
+        }
+    }
+}
+
+function saveAsDraft() {
+    console.log('💾 Guardando borrador...');
+    
+    // Recopilar datos del formulario
+    const formData = new FormData(document.getElementById('riskAnalysisForm'));
+    formData.append('save_as_draft', 'true');
+    
+    // Mostrar loading
+    const originalBtn = document.querySelector('button[onclick="saveAsDraft()"]');
+    if (originalBtn) {
+        originalBtn.disabled = true;
+        originalBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+    }
+    
+    // Enviar vía AJAX
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mostrar confirmación
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 350px;';
+            toast.innerHTML = `
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>Borrador guardado</strong>
+                <br><small>Configuración guardada exitosamente</small>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(toast);
+            
+            // Auto-remover
+            setTimeout(() => toast.remove(), 4000);
+        } else {
+            alert('Error al guardar: ' + (data.message || 'Error desconocido'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error de conexión al guardar el borrador');
+    })
+    .finally(() => {
+        // Restaurar botón
+        if (originalBtn) {
+            originalBtn.disabled = false;
+            originalBtn.innerHTML = '<i class="fas fa-save"></i> Guardar Borrador';
+        }
+    });
+}
+
+function toggleAllCategories() {
+    console.log('🔄 Alternando selección de categorías...');
+    
+    const checkboxes = document.querySelectorAll('input[name="categories"]');
+    const checkedCount = document.querySelectorAll('input[name="categories"]:checked').length;
+    const shouldCheck = checkedCount === 0; // Si no hay ninguna marcada, marcar todas
+    
+    // Usar requestAnimationFrame para operaciones de DOM intensivas
+    requestAnimationFrame(() => {
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked !== shouldCheck) {
+                checkbox.checked = shouldCheck;
+                
+                // Actualizar estado visual de la tarjeta
+                const card = checkbox.closest('.category-card');
+                if (card) {
+                    if (shouldCheck) {
+                        card.classList.add('selected');
+                    } else {
+                        card.classList.remove('selected');
+                    }
+                }
+            }
+        });
+        
+        updateCategoryCount();
+        console.log('✅ Selección actualizada:', shouldCheck ? 'Todas marcadas' : 'Todas desmarcadas');
+    });
+}
+
+// Función optimizada para actualizar contador
+const updateCategoryCount = throttle(function() {
+    const selectedCount = document.querySelectorAll('input[name="categories"]:checked').length;
+    const countElement = document.getElementById('selectedCount');
+    if (countElement) {
+        countElement.textContent = selectedCount;
+    }
+}, 100); // Throttle a 100ms
+
+// Usar delegación de eventos para mejor rendimiento
+function handleCategoryChange(event) {
+    if (event.target.name === 'categories') {
+        updateCategoryCount();
+        
+        // Añadir efecto visual a la tarjeta seleccionada
+        const card = event.target.closest('.category-card');
+        if (card) {
+            if (event.target.checked) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        }
+    }
+}
+
+$(document).ready(function() {
+    console.log('🎯 Inicializando formulario de análisis...');
+    
+    // Cache de elementos DOM para mejor rendimiento
+    const formElement = document.getElementById('riskAnalysisForm');
+    const countElement = document.getElementById('selectedCount');
+    const submitBtn = document.getElementById('submitAnalysisBtn');
+    
+    // Usar delegación de eventos en lugar de múltiples handlers
+    document.addEventListener('change', handleCategoryChange);
+    
+    // Inicializar contador
+    updateCategoryCount();
+    
+    // Variable para controlar si el formulario ya fue validado
+    let formValidated = false;
+    
+    // Optimización: Cache de elementos para validación
+    const requiredElements = {
+        analysisType: document.getElementById('analysis_type'),
+        analysisDate: document.getElementById('analysis_date'),
+        categoryCheckboxes: () => document.querySelectorAll('input[name="categories"]:checked')
+    };
+    
+    // Validación del formulario optimizada con cache
+    $('#riskAnalysisForm').on('submit', function(e) {
+        // Si ya fue validado, permitir el envío
+        if (formValidated) {
+            console.log('✅ Formulario ya validado, enviando...');
+            return true;
+        }
+        
+        e.preventDefault();
+        console.log('🔄 Iniciando validación del formulario...');
+        
+        // Validar usando elementos cacheados
+        const selectedCheckboxes = requiredElements.categoryCheckboxes();
+        const selectedCategories = selectedCheckboxes.length;
+        
+        if (selectedCategories === 0) {
+            showValidationError('Por favor, seleccione al menos una categoría de seguridad para evaluar.');
+            return false;
+        }
+        
+        // Validar información básica
+        if (!requiredElements.analysisType.value || !requiredElements.analysisDate.value) {
+            showValidationError('Por favor, complete la información general del análisis.');
+            return false;
+        }
+        
+        // Crear array de nombres de categorías de forma eficiente
+        const categoryNames = Array.from(selectedCheckboxes).map(checkbox => {
+            return checkbox.closest('.category-card').querySelector('h6').textContent.trim();
+        });
+        
+        console.log('✅ Validación completada, categorías seleccionadas:', selectedCategories);
+        
+        // Mostrar modal de confirmación en lugar de confirm() simple
+        showConfirmationModal(selectedCategories, categoryNames);
+        
+        return false;
+    });
+    
+    // Función para mostrar el modal de confirmación
+    function showConfirmationModal(categoryCount, categoryNames) {
+        // Actualizar contador de categorías
+        const modalCountElement = document.getElementById('modalCategoryCount');
+        if (modalCountElement) {
+            modalCountElement.textContent = categoryCount;
+        }
+        
+        // Actualizar tipo de análisis
+        const analysisType = requiredElements.analysisType.value;
+        const modalTypeElement = document.getElementById('modalAnalysisType');
+        if (modalTypeElement) {
+            const typeMap = {
+                'inicial': 'Inicial',
+                'periodico': 'Periódico', 
+                'especial': 'Especial',
+                'auditoria': 'Auditoría'
+            };
+            modalTypeElement.textContent = typeMap[analysisType] || analysisType;
+        }
+        
+        // Calcular y mostrar tiempo estimado
+        const estimatedTimeElement = document.getElementById('estimatedTime');
+        if (estimatedTimeElement) {
+            const minutesPerCategory = 8; // Promedio estimado por categoría
+            const totalMinutes = categoryCount * minutesPerCategory;
+            
+            let timeText;
+            if (totalMinutes < 60) {
+                timeText = `${totalMinutes} minutos`;
+            } else {
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                timeText = `${hours}h ${minutes}m`;
+            }
+            
+            estimatedTimeElement.innerHTML = `
+                <span class="fw-bold">${timeText}</span>
+                <small class="text-muted ms-1">(~${minutesPerCategory} min por categoría)</small>
+            `;
+        }
+        
+        // Poblar lista de categorías con animación
+        const categoriesListElement = document.getElementById('selectedCategoriesList');
+        if (categoriesListElement) {
+            categoriesListElement.innerHTML = '';
+            
+            categoryNames.forEach((name, index) => {
+                setTimeout(() => {
+                    const listItem = document.createElement('div');
+                    listItem.className = 'list-group-item border-0 bg-light mb-1 rounded';
+                    listItem.style.animationDelay = `${index * 0.1}s`;
+                    listItem.innerHTML = `
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary me-2">${index + 1}</span>
+                            <span class="fw-medium">${name}</span>
+                            <i class="fas fa-check-circle text-success ms-auto"></i>
+                        </div>
+                    `;
+                    categoriesListElement.appendChild(listItem);
+                }, index * 100); // Animación escalonada
+            });
+        }
+        
+        // Mostrar el modal con efecto de entrada
+        const modalElement = document.getElementById('confirmAnalysisModal');
+        const modal = new bootstrap.Modal(modalElement, {
+            backdrop: 'static', // No cerrar al hacer clic fuera
+            keyboard: false     // No cerrar con escape
+        });
+        modal.show();
+        
+        // Agregar efecto de sonido (opcional)
+        console.log('🔔 Modal de confirmación mostrado con', categoryCount, 'categorías');
+    }
+    
+    // Función para confirmar la generación del análisis
+    window.confirmAnalysisGeneration = function() {
+        console.log('✅ Usuario confirmó la generación del análisis');
+        
+        // Mostrar loading en el botón del modal
+        const confirmBtn = document.querySelector('#confirmAnalysisModal .btn-primary');
+        if (confirmBtn) {
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Generando Análisis...';
+        }
+        
+        // Ocultar modal después de un breve delay para mostrar el loading
+        setTimeout(() => {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmAnalysisModal'));
+            if (modal) {
+                modal.hide();
+            }
+            
+            // Deshabilitar el botón principal para evitar doble envío
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+            }
+            
+            // Marcar como validado y enviar formulario
+            formValidated = true;
+            formElement.submit();
+        }, 800); // Delay para mostrar el efecto de loading
+    };
+    
+    // Función para guardar configuración como borrador
+    window.saveConfigurationAsDraft = function() {
+        console.log('💾 Guardando configuración como borrador...');
+        
+        // Ocultar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmAnalysisModal'));
+        if (modal) {
+            modal.hide();
+        }
+        
+        // Llamar función de guardar borrador existente
+        saveAsDraft();
+    };
+    
+    // Función para mostrar errores de validación
+    function showValidationError(message) {
+        // Crear toast de error
+        const errorToast = document.createElement('div');
+        errorToast.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        errorToast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 400px;';
+        errorToast.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error de Validación</strong>
+            <br><small>${message}</small>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(errorToast);
+        setTimeout(() => errorToast.remove(), 5000);
+    }
+    
+    // Optimizar efectos hover usando delegación de eventos
+    $(document).on('mouseenter', '.category-card', function() {
+        $(this).find('.category-icon').addClass('fa-bounce');
+    }).on('mouseleave', '.category-card', function() {
+        $(this).find('.category-icon').removeClass('fa-bounce');
+    });
+    
+    console.log('✅ Formulario de análisis inicializado correctamente');
+});
+</script>
+
+<style>
+.category-card.selected {
+    border-color: #667eea !important;
+    background: linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.category-card.selected .category-content {
+    border-color: #667eea;
+}
+
+.category-card.selected .category-icon {
+    color: #5a67d8;
+}
+
+.fa-bounce {
+    animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 60%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    80% { transform: translateY(-5px); }
+}
+
+/* Estilos para el modal de confirmación */
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: none;
+    padding: 1.5rem 2rem 1rem;
+}
+
+.modal-body {
+    padding: 0 2rem 1rem;
+}
+
+.modal-footer {
+    border-top: none;
+    padding: 1rem 2rem 1.5rem;
+}
+
+.list-group-item {
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.3s ease forwards;
+}
+
+.list-group-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animación para el modal */
+.modal.fade .modal-dialog {
+    transform: scale(0.8) translateY(-50px);
+    transition: all 0.3s ease;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1) translateY(0);
+}
+
+/* Mejoras para los badges */
+.badge.bg-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* Estilos para los botones del modal */
+.modal-footer .btn {
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.modal-footer .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.modal-footer .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.modal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+</style>
+{% endblock %}

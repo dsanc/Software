@@ -1,0 +1,409 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+{% load subscription_extras %}
+
+{% block title %}Planes de Suscripción{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/plans_overview.css' %}">
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-5">Planes de Suscripción</h1>
+            
+            <!-- Navegación por pestañas de módulos -->
+            <div class="subscription-tabs-container">
+                <ul class="nav nav-pills subscription-tabs" id="modulesTabs" role="tablist">
+                    {% for module in modules %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link{% if forloop.first %} active{% endif %}" 
+                                id="tab-{{ module.name|slugify }}" 
+                                data-bs-toggle="pill" 
+                                data-bs-target="#{{ module.name|slugify }}" 
+                                type="button" 
+                                role="tab" 
+                                aria-controls="{{ module.name|slugify }}" 
+                                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                            <i class="{{ module.icon|default:'fas fa-cube' }}"></i>
+                            <span>{{ module.display_name }}</span>
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ul>
+                
+                <!-- Contenido de las pestañas -->
+                <div class="tab-content subscription-tab-content" id="modulesTabContent">
+                    {% for module in modules %}
+                    <div class="tab-pane fade{% if forloop.first %} show active{% endif %}" 
+                         id="{{ module.name|slugify }}" 
+                         role="tabpanel" 
+                         aria-labelledby="tab-{{ module.name|slugify }}">
+                        
+                        <!-- Header del módulo -->
+                        <div class="module-header">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h2 class="module-title">
+                                        <i class="{{ module.icon|default:'fas fa-cube' }}" style="color: {{ module.color }};"></i>
+                                        {{ module.display_name }}
+                                    </h2>
+                                    <p class="module-description">{{ module.description }}</p>
+                                </div>
+                                <div class="col-md-4 text-md-end">
+                                    <div class="module-stats">
+                                        <span class="badge badge-plans">
+                                            {{ module.non_demo_plans_count }} plan{{ module.non_demo_plans_count|pluralize:"es" }} disponible{{ module.non_demo_plans_count|pluralize:"s" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Planes del módulo -->
+                        <div class="module-plans">
+                            {% if module.plans.all %}
+                                <div class="row g-3">
+                                    {% for plan in module.plans.all %}
+                                    {% if plan.is_active %}
+                                    <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+                                        <div class="plan-card" data-plan-type="{{ plan.plan_type.name|lower }}">
+                                            <div class="plan-header">
+                                                <h3 class="plan-name">{{ plan.plan_type.name }}</h3>
+                                                <div class="plan-price">
+                                                    {% if plan.yearly_price > 0 %}
+                                                    <span class="currency">$</span>
+                                                    <span class="amount">{{ plan.yearly_price|currency_co }}</span>
+                                                    <span class="period">/año</span>
+                                                    {% elif plan.plan_type.name == 'Demo' %}
+                                                    <span class="amount special">GRATIS</span>
+                                                    {% else %}
+                                                    <span class="amount special">CONSULTAR</span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if plan.yearly_price > 0 %}
+                                                <div class="plan-yearly">
+                                                    <small>Pago único anual</small>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="plan-body">
+                                                <div class="plan-description">
+                                                    {{ plan.description|default:"Plan completo con todas las funcionalidades del módulo." }}
+                                                </div>
+                                                
+                                                {% if plan.features_list %}
+                                                <div class="plan-features">
+                                                    <h5>Características incluidas:</h5>
+                                                    <ul>
+                                                        {% for feature in plan.features_list %}
+                                                        <li>
+                                                            <i class="fas fa-check"></i>
+                                                            {{ feature }}
+                                                        </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                                {% endif %}
+                                                
+                                                {% if plan.trial_days > 0 %}
+                                                <div class="trial-info">
+                                                    <i class="fas fa-gift"></i>
+                                                    {{ plan.trial_days }} días de prueba gratuita
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <div class="plan-footer">
+                                                {% if plan.is_featured %}
+                                                <div class="featured-badge">
+                                                    <i class="fas fa-star"></i> Más Popular
+                                                </div>
+                                                {% endif %}
+                                                {% if plan.plan_type.name == 'Demo' %}
+                                                <button class="btn btn-plan-select demo" 
+                                                        data-plan-id="{{ plan.id }}" 
+                                                        data-module-id="{{ module.id }}"
+                                                        data-plan-type="demo"
+                                                        data-plan-name="{{ plan.plan_type.name }}">
+                                                    <i class="fas fa-play"></i> Probar Gratis
+                                                </button>
+                                                {% elif plan.yearly_price > 0 %}
+                                                <button class="btn btn-plan-select" 
+                                                        data-plan-id="{{ plan.id }}" 
+                                                        data-module-id="{{ module.id }}"
+                                                        data-plan-type="paid"
+                                                        data-plan-name="{{ plan.plan_type.name }}"
+                                                        data-plan-price="{{ plan.yearly_price }}"
+                                                        data-billing-period="yearly">
+                                                    <i class="fas fa-credit-card"></i> Agregar al Carrito
+                                                </button>
+                                                {% else %}
+                                                <button class="btn btn-plan-select contact" 
+                                                        data-plan-id="{{ plan.id }}" 
+                                                        data-module-id="{{ module.id }}"
+                                                        data-plan-type="contact"
+                                                        data-plan-name="{{ plan.plan_type.name }}">
+                                                    <i class="fas fa-envelope"></i> Solicitar Cotización
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="empty-plans">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                        <h4>No hay planes disponibles</h4>
+                                        <p class="text-muted">Este módulo no tiene planes configurados actualmente.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Carrito flotante -->
+<div class="cart-floating" id="cart-floating">
+    <button class="btn btn-primary btn-cart" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-badge badge bg-danger" id="cart-count-floating" style="display: none;">0</span>
+    </button>
+</div>
+
+<!-- Offcanvas del carrito -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="fas fa-shopping-cart me-2"></i>Mi Carrito
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div id="cart-content">
+            <!-- El contenido se carga dinámicamente -->
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Tu carrito está vacío</p>
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Explorar Planes
+                </a>
+            </div>
+        </div>
+        <div class="offcanvas-footer mt-3 pt-3 border-top">
+            <div class="d-flex justify-content-between mb-3">
+                <span class="fw-bold">Total:</span>
+                <span class="fw-bold" id="cart-total">$0</span>
+            </div>
+            <a href="{% url 'subscriptions:checkout' %}" class="btn btn-primary w-100" id="checkout-btn" style="display: none;">
+                <i class="fas fa-credit-card me-2"></i>Proceder al Checkout
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart_logic.js' %}"></script>
+<script>
+// Funciones específicas de la página de planes
+function goToRegister() {
+    window.location.href = '/users/register/';
+}
+
+function showContactModal(planId) {
+    // Crear modal de contacto si no existe
+    if (!document.getElementById('contactModal')) {
+        const modalHtml = `
+        <div class="modal fade" id="contactModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Contáctanos para este plan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Este plan requiere una cotización personalizada. Por favor contáctanos:</p>
+                        <div class="contact-info mt-4">
+                            <div><i class="fas fa-envelope text-primary"></i> ventas@software.com</div>
+                            <div><i class="fas fa-phone text-primary"></i> +57 300 123 4567</div>
+                            <div><i class="fab fa-whatsapp text-success"></i> +57 300 123 4567</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <a href="https://wa.me/573001234567" target="_blank" class="btn btn-success">
+                            <i class="fab fa-whatsapp me-2"></i>Chat WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('contactModal'));
+    modal.show();
+}
+
+function showGuestCartOptions(planId, buttonElement) {
+    const planName = buttonElement.getAttribute('data-plan-name') || 'Plan seleccionado';
+    
+    // Remover modal existente si existe
+    const existingModal = document.getElementById('guestCartModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Crear modal con opciones para usuarios no autenticados
+    const modalHtml = `
+        <div class="modal fade" id="guestCartModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-shopping-cart text-primary"></i>
+                            Agregar "${planName}" al Carrito
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-4">¡Genial elección! Para continuar, elige una opción:</p>
+                        
+                        <div class="d-grid gap-3">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="proceedAsGuest('${planId}', this)">
+                                <i class="fas fa-shopping-cart me-2"></i>
+                                Agregar como Invitado
+                                <small class="d-block text-white-50">Tu carrito se guardará durante esta sesión</small>
+                            </button>
+                            
+                            <button type="button" class="btn btn-success btn-lg" onclick="window.location.href='/users/login/?next=/subscriptions/'">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Iniciar Sesión
+                                <small class="d-block text-white-50">Accede a tu cuenta existente</small>
+                            </button>
+                            
+                            <button type="button" class="btn btn-info btn-lg" onclick="goToRegister()">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Crear Cuenta Nueva
+                                <small class="d-block text-white-50">Obtén acceso completo a tu dashboard</small>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Agregar nuevo modal
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('guestCartModal'));
+    modal.show();
+}
+
+function proceedAsGuest(planId, btn) {
+    // Cerrar modal
+    const modalEl = document.getElementById('guestCartModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    modal.hide();
+    
+    // Llamar a addToCart global
+    if (window.addToCart) {
+        window.addToCart(planId, 'yearly', 1);
+    } else {
+        console.error('Cart logic not loaded');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Navbar scroll effect
+    const navbar = document.querySelector('.navbar-professional');
+    const navLinks = document.querySelectorAll('.nav-link-professional[data-section]');
+    
+    function handleScroll() {
+        if (window.scrollY > 50) {
+            navbar?.classList.add('scrolled');
+        } else {
+            navbar?.classList.remove('scrolled');
+        }
+    }
+    
+    window.addEventListener('scroll', handleScroll);
+    handleScroll();
+    
+    // Hover effects
+    navLinks.forEach(link => {
+        link.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+        });
+        link.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Funcionalidad para selección de planes
+    const planButtons = document.querySelectorAll('.btn-plan-select');
+    planButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Prevenir comportamiento default si es necesario
+            e.preventDefault();
+            
+            const planId = this.getAttribute('data-plan-id');
+            
+            // Verificar si es botón de contacto
+            if (this.classList.contains('contact')) {
+                showContactModal(planId);
+                return;
+            }
+            
+            // Verificar autenticación (simulada por presencia de user-menu o variable global)
+            // Si el usuario no está logueado, Django no renderiza user-menu usualmente
+            const userMenu = document.querySelector('.user-menu');
+            const isAuthenticated = !!userMenu; 
+            
+            if (!isAuthenticated) {
+                showGuestCartOptions(planId, this);
+                return;
+            }
+            
+            // Si está autenticado, agregar al carrito
+            if (window.addToCart) {
+                window.addToCart(planId, 'yearly', 1);
+            }
+        });
+    });
+    
+    // Animación suave al cambiar de tab
+    const tabButtons = document.querySelectorAll('#modulesTabs button[data-bs-toggle="pill"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('shown.bs.tab', function(e) {
+            const targetPane = document.querySelector(this.getAttribute('data-bs-target'));
+            if (targetPane) {
+                targetPane.style.opacity = '0';
+                targetPane.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    targetPane.style.transition = 'all 0.3s ease';
+                    targetPane.style.opacity = '1';
+                    targetPane.style.transform = 'translateY(0)';
+                }, 50);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

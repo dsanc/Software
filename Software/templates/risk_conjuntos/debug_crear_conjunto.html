@@ -1,0 +1,136 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}DEBUG - Crear Conjunto{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1>🔍 DEBUG: Formulario Crear Conjunto</h1>
+            
+            <div class="alert alert-info">
+                <strong>Objetivo:</strong> Verificar que el cambio de tipo_conjunto NO causa envío de formulario
+            </div>
+            
+            <form method="post" id="debugForm">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-6">
+                        <label for="id_nombre" class="form-label">Nombre</label>
+                        <input type="text" name="nombre" id="id_nombre" class="form-control" placeholder="Nombre del conjunto">
+                    </div>
+                    
+                    <div class="col-6">
+                        <label for="id_tipo_conjunto" class="form-label">Tipo de Conjunto</label>
+                        <select name="tipo_conjunto" id="id_tipo_conjunto" class="form-select">
+                            <option value="">Seleccione un tipo</option>
+                            <option value="1">Conjunto Cerrado</option>
+                            <option value="2">Edificio Residencial</option>
+                            <option value="3">Casa Conjunto</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            Enviar Formulario
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="showDebugInfo()">
+                            Debug Info
+                        </button>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="mt-4">
+                <h3>📊 Log de Eventos</h3>
+                <div id="eventLog" class="border p-3" style="height: 200px; overflow-y: scroll; background: #f8f9fa;">
+                    <!-- Los eventos aparecerán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const eventLog = $('#eventLog');
+    let eventCounter = 0;
+    
+    function logEvent(message, type = 'info') {
+        eventCounter++;
+        const timestamp = new Date().toLocaleTimeString();
+        const color = type === 'error' ? 'text-danger' : type === 'warning' ? 'text-warning' : 'text-info';
+        const logEntry = `<div class="${color}">[${eventCounter}] ${timestamp}: ${message}</div>`;
+        eventLog.append(logEntry);
+        eventLog.scrollTop(eventLog[0].scrollHeight);
+        console.log(`[${eventCounter}] ${message}`);
+    }
+    
+    logEvent('🚀 Debug script iniciado');
+    
+    // Interceptar TODOS los eventos del select tipo_conjunto
+    $('#id_tipo_conjunto').on('change click focus blur keydown keyup keypress', function(e) {
+        logEvent(`🔍 Evento "${e.type}" en tipo_conjunto - Valor: "${$(this).val()}"`, 'info');
+        
+        if (e.type === 'change') {
+            logEvent(`✅ Cambio de tipo detectado - Nuevo valor: "${$(this).val()}"`, 'info');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            logEvent('🛡️ Evento change bloqueado completamente', 'warning');
+            return false;
+        }
+    });
+    
+    // Interceptar TODOS los eventos del formulario
+    $('#debugForm').on('submit', function(e) {
+        logEvent('🚨 ¡SUBMIT DETECTADO! Formulario intentando enviarse', 'error');
+        
+        // Verificar si el botón fue clickeado
+        if (!$('#submitBtn').data('clicked')) {
+            logEvent('❌ Envío NO autorizado - BLOQUEANDO', 'error');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+        } else {
+            logEvent('✅ Envío autorizado desde botón', 'info');
+            // En modo debug, también bloqueamos para no enviar datos
+            e.preventDefault();
+            logEvent('🔧 Envío bloqueado en modo debug', 'warning');
+        }
+    });
+    
+    // Marcar cuando se clickea el botón de envío
+    $('#submitBtn').on('click', function() {
+        logEvent('🎯 Botón submit clickeado - autorizando envío', 'info');
+        $(this).data('clicked', true);
+        setTimeout(() => $(this).data('clicked', false), 1000);
+    });
+    
+    // Interceptar eventos del documento
+    $(document).on('submit', function(e) {
+        if (e.target.id === 'debugForm') {
+            logEvent('🌍 Submit interceptado a nivel documento', 'warning');
+        }
+    });
+    
+    // Función de debug global
+    window.showDebugInfo = function() {
+        const formData = new FormData($('#debugForm')[0]);
+        logEvent('🔍 Estado del formulario:', 'info');
+        for (let [key, value] of formData.entries()) {
+            logEvent(`  ${key}: "${value}"`, 'info');
+        }
+    };
+    
+    logEvent('✅ Debug completamente inicializado');
+});
+</script>
+{% endblock %}

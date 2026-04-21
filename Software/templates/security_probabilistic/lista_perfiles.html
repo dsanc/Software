@@ -1,0 +1,437 @@
+{% extends 'base_with_sidebar.html' %}
+{% load humanize %}
+{% load evaluador_permissions %}
+
+{% block title %}Perfiles de Seguridad - Evaluación Probabilística{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos para los botones de acción horizontales */
+.btn-group .btn {
+    border-radius: 0.25rem;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border: 1px solid;
+    margin: 0 1px;
+}
+
+.btn-group .btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+}
+
+.btn-group .btn i {
+    font-size: 0.75rem;
+}
+
+/* Animación para las filas de la tabla */
+.table tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para los badges */
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Mejorar los avatares */
+.rounded-circle {
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Ajustar ancho de la columna de acciones para diseño horizontal */
+.table th:last-child,
+.table td:last-child {
+    width: 100px;
+    min-width: 100px;
+}
+
+/* Mejorar el espaciado en btn-group */
+.btn-group {
+    gap: 2px;
+}
+
+.btn-group .btn:first-child {
+    border-top-right-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+}
+
+.btn-group .btn:last-child {
+    border-top-left-radius: 0.25rem;
+    border-bottom-left-radius: 0.25rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="h3">
+                            <i class="fas fa-users text-primary me-3"></i>
+                            Perfiles de Seguridad
+                        </h1>
+                        <p class="text-muted">
+                            Sistema integral de gestión y evaluación de perfiles políticos para análisis de seguridad probabilística
+                        </p>
+                    </div>
+                    <div class="col-auto">
+                        {% has_module_permission user 'security_probabilistic' 'create' as can_create %}
+                        {% if can_create %}
+                        <a href="{% url 'security_probabilistic:crear_perfil' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Nuevo Perfil
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Total Perfiles</h5>
+                                    <h2 class="mb-0">{{ total_perfiles }}</h2>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="fas fa-users fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Riesgo Muy Alto</h5>
+                                    <h2 class="mb-0">{{ stats_riesgo.muy_alto }}</h2>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Riesgo Alto</h5>
+                                    <h2 class="mb-0">{{ stats_riesgo.alto }}</h2>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="fas fa-exclamation fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title">Riesgo Bajo</h5>
+                                    <h2 class="mb-0">{{ stats_riesgo.bajo }}</h2>
+                                </div>
+                                <div class="ms-3">
+                                    <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="cargo" class="form-label">Cargo Político</label>
+                            <select name="cargo" id="cargo" class="form-select">
+                                <option value="">Todos los cargos</option>
+                                <option value="alcalde" {% if filtros_actuales.cargo == 'alcalde' %}selected{% endif %}>Alcalde/Alcaldesa</option>
+                                <option value="concejal" {% if filtros_actuales.cargo == 'concejal' %}selected{% endif %}>Concejal</option>
+                                <option value="diputado" {% if filtros_actuales.cargo == 'diputado' %}selected{% endif %}>Diputado/Diputada</option>
+                                <option value="senador" {% if filtros_actuales.cargo == 'senador' %}selected{% endif %}>Senador/Senadora</option>
+                                <option value="gobernador" {% if filtros_actuales.cargo == 'gobernador' %}selected{% endif %}>Gobernador/Gobernadora</option>
+                                <option value="ministro" {% if filtros_actuales.cargo == 'ministro' %}selected{% endif %}>Ministro/Ministra</option>
+                                <option value="candidato" {% if filtros_actuales.cargo == 'candidato' %}selected{% endif %}>Candidato/Candidata</option>
+                                <option value="lider_social" {% if filtros_actuales.cargo == 'lider_social' %}selected{% endif %}>Líder Social</option>
+                                <option value="activista" {% if filtros_actuales.cargo == 'activista' %}selected{% endif %}>Activista Político</option>
+                                <option value="funcionario" {% if filtros_actuales.cargo == 'funcionario' %}selected{% endif %}>Funcionario Público</option>
+                                <option value="otro" {% if filtros_actuales.cargo == 'otro' %}selected{% endif %}>Otro</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select name="estado" id="estado" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="activo" {% if filtros_actuales.estado == 'activo' %}selected{% endif %}>Activo</option>
+                                <option value="inactivo" {% if filtros_actuales.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                                <option value="suspendido" {% if filtros_actuales.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+                                <option value="archivado" {% if filtros_actuales.estado == 'archivado' %}selected{% endif %}>Archivado</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="riesgo" class="form-label">Nivel de Riesgo</label>
+                            <select name="riesgo" id="riesgo" class="form-select">
+                                <option value="">Todos los niveles</option>
+                                <option value="muy_alto" {% if filtros_actuales.riesgo == 'muy_alto' %}selected{% endif %}>Muy Alto</option>
+                                <option value="alto" {% if filtros_actuales.riesgo == 'alto' %}selected{% endif %}>Alto</option>
+                                <option value="medio" {% if filtros_actuales.riesgo == 'medio' %}selected{% endif %}>Medio</option>
+                                <option value="bajo" {% if filtros_actuales.riesgo == 'bajo' %}selected{% endif %}>Bajo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="orden" class="form-label">Ordenar por</label>
+                            <select name="orden" id="orden" class="form-select">
+                                <option value="-creado_en" {% if filtros_actuales.orden == '-creado_en' %}selected{% endif %}>Más recientes</option>
+                                <option value="creado_en" {% if filtros_actuales.orden == 'creado_en' %}selected{% endif %}>Más antiguos</option>
+                                <option value="nombres" {% if filtros_actuales.orden == 'nombres' %}selected{% endif %}>Nombre A-Z</option>
+                                <option value="-nombres" {% if filtros_actuales.orden == '-nombres' %}selected{% endif %}>Nombre Z-A</option>
+                                <option value="cargo_politico" {% if filtros_actuales.orden == 'cargo_politico' %}selected{% endif %}>Cargo A-Z</option>
+                                <option value="-cargo_politico" {% if filtros_actuales.orden == '-cargo_politico' %}selected{% endif %}>Cargo Z-A</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter"></i> Aplicar Filtros
+                            </button>
+                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-secondary ms-2">
+                                <i class="fas fa-times"></i> Limpiar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lista de Perfiles -->
+            {% if perfiles %}
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list"></i> 
+                            Perfiles Encontrados ({{ perfiles|length }})
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Perfil</th>
+                                        <th>Cargo</th>
+                                        <th>Ubicación</th>
+                                        <th>Nivel de Riesgo</th>
+                                        <th>Estado</th>
+                                        <th>Seguridad</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perfil in perfiles %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                    {{ perfil.iniciales }}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold">{{ perfil.nombre_completo }}</div>
+                                                    <small class="text-muted">{{ perfil.get_tipo_documento_display }}: {{ perfil.numero_documento }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ perfil.get_cargo_politico_display }}</span>
+                                            {% if perfil.partido_politico %}
+                                                <br><small class="text-muted">{{ perfil.partido_politico }}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>{{ perfil.municipio }}, {{ perfil.departamento }}</div>
+                                            <small class="text-muted">Edad: {{ perfil.edad }} años</small>
+                                        </td>
+                                        <td>
+                                            {% if perfil.nivel_riesgo_perfil == 'muy_alto' %}
+                                                <span class="badge bg-danger">Muy Alto</span>
+                                            {% elif perfil.nivel_riesgo_perfil == 'alto' %}
+                                                <span class="badge bg-warning">Alto</span>
+                                            {% elif perfil.nivel_riesgo_perfil == 'medio' %}
+                                                <span class="badge bg-info">Medio</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Bajo</span>
+                                            {% endif %}
+                                            {% if perfil.amenazas_recibidas %}
+                                                <br><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Amenazas</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if perfil.estado_perfil == 'activo' %}
+                                                <span class="badge bg-success">{{ perfil.get_estado_perfil_display }}</span>
+                                            {% elif perfil.estado_perfil == 'suspendido' %}
+                                                <span class="badge bg-warning">{{ perfil.get_estado_perfil_display }}</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ perfil.get_estado_perfil_display }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if perfil.tiene_esquema_seguridad %}
+                                                <span class="text-success">
+                                                    <i class="fas fa-shield-alt"></i> Sí
+                                                </span>
+                                                {% if perfil.nivel_esquema_seguridad %}
+                                                    <br><small class="text-muted">{{ perfil.nivel_esquema_seguridad }}</small>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    <i class="fas fa-shield-alt"></i> No
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="verDetallePerfil({{ perfil.pk }})" title="Ver Detalle">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                {% has_module_permission user 'security_probabilistic' 'update' as can_update %}
+                                                {% if can_update %}
+                                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="editarPerfil({{ perfil.pk }})" title="Editar Perfil">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                {% endif %}
+                                                {% has_module_permission user 'security_probabilistic' 'delete' as can_delete %}
+                                                {% if can_delete %}
+                                                {% if perfil.estado_perfil == 'activo' %}
+                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="desactivarPerfil({{ perfil.pk }})" title="Desactivar">
+                                                    <i class="fas fa-ban"></i>
+                                                </button>
+                                                {% else %}
+                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="activarPerfil({{ perfil.pk }})" title="Activar">
+                                                    <i class="fas fa-check-circle"></i>
+                                                </button>
+                                                {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paginación -->
+                {% if is_paginated %}
+                <nav class="mt-4" aria-label="Navegación de perfiles">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i> Anterior
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                    Siguiente <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- Estado vacío -->
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-users fa-5x text-muted opacity-50"></i>
+                    </div>
+                    <h3 class="text-muted">No se encontraron perfiles</h3>
+                    <p class="text-muted">No hay perfiles que coincidan con los criterios de búsqueda actuales.</p>
+                    <div class="mt-4">
+                        <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-times"></i> Limpiar Filtros
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Funciones para manejar las acciones de los perfiles
+
+function verDetallePerfil(perfilId) {
+    // Redirigir a la vista de detalle del perfil
+    window.location.href = `/security-probabilistic/perfiles/${perfilId}/`;
+}
+
+function editarPerfil(perfilId) {
+    // Redirigir a la vista de edición
+    window.location.href = `/security-probabilistic/perfiles/${perfilId}/editar/`;
+}
+
+function desactivarPerfil(perfilId) {
+    if (confirm('¿Está seguro de que desea desactivar este perfil?')) {
+        alert(`Desactivar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+    }
+}
+
+function activarPerfil(perfilId) {
+    if (confirm('¿Está seguro de que desea activar este perfil?')) {
+        alert(`Activar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
+    }
+}
+</script>
+{% endblock %}

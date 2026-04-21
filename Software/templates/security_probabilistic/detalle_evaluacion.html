@@ -1,0 +1,1877 @@
+{% extends 'base_with_sidebar.html' %}
+{% load humanize %}
+{% load profile_tags %}
+
+{% block title %}Evaluación #{{ evaluacion.id }} - {{ evaluacion.perfil.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos personalizados para el detalle de evaluación */
+.evaluation-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.evaluation-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.detail-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+    margin-bottom: 1.5rem;
+}
+
+.detail-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.8;
+}
+
+.risk-level {
+    font-size: 1.1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.risk-muy_alto { 
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+.risk-alto { 
+    background: linear-gradient(135deg, #fd7e14, #e55a00);
+    color: white;
+}
+.risk-medio { 
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+.risk-bajo { 
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+    color: white;
+}
+
+.response-item {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.response-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+}
+
+/* Estilos para el nuevo diseño del cuestionario */
+.questionnaire-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.questionnaire-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.header-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.header-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: white;
+}
+
+.header-subtitle {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+}
+
+.header-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.header-stats .stat-item {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    backdrop-filter: blur(10px);
+    min-width: 80px;
+}
+
+.header-stats .stat-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+}
+
+.header-stats .stat-label {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filter-section {
+    margin-top: 1rem;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.filter-tab {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
+}
+
+.filter-tab:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.filter-tab.active {
+    background: white;
+    color: #667eea;
+    border-color: white;
+}
+
+.tab-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.questionnaire-body {
+    padding: 2rem;
+}
+
+/* Mejoras responsivas para el nuevo diseño */
+@media (max-width: 768px) {
+    .questionnaire-header {
+        padding: 1.5rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .header-stats {
+        flex-direction: row;
+        gap: 1rem;
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .header-stats .stat-item {
+        flex: 1;
+        min-width: 60px;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .filter-tabs {
+        justify-content: center;
+    }
+    
+    .filter-tab {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    
+    .questionnaire-body {
+        padding: 1rem;
+    }
+}
+.questions-list {
+    padding: 0;
+}
+
+.question-item {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e9ecef;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.question-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 4px;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.question-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: transparent;
+}
+
+.question-item:hover::before {
+    width: 6px;
+}
+
+.question-item.intencionalidad::before {
+    background: linear-gradient(180deg, #dc3545, #c82333);
+}
+
+.question-item.exposicion::before {
+    background: linear-gradient(180deg, #fd7e14, #e55a00);
+}
+
+.question-item.inductor::before {
+    background: linear-gradient(180deg, #ffc107, #d39e00);
+}
+
+.question-item.interes::before {
+    background: linear-gradient(180deg, #6f42c1, #5a2d91);
+}
+
+.question-item.valuabilidad::before {
+    background: linear-gradient(180deg, #20c997, #17a673);
+}
+
+.question-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.question-item.intencionalidad .question-number {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.question-item.exposicion .question-number {
+    background: linear-gradient(135deg, #fd7e14, #e55a00);
+}
+
+.question-item.inductor .question-number {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+
+.question-item.interes .question-number {
+    background: linear-gradient(135deg, #6f42c1, #5a2d91);
+}
+
+.question-item.valuabilidad .question-number {
+    background: linear-gradient(135deg, #20c997, #17a673);
+}
+
+.question-header {
+    margin-bottom: 0.5rem;
+}
+
+.question-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: #2d3748;
+    font-weight: 500;
+    margin-bottom: 0;
+}
+
+.question-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.answer-section {
+    text-align: right;
+}
+
+.answer-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.answer-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.answer-badge.si {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.answer-badge.no {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+}
+
+.answer-badge.mas-de-10-meses,
+.answer-badge.de-4-a-10-meses,
+.answer-badge.menos-de-3-meses {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    font-size: 0.8rem;
+}
+
+.debug-info {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 0.25rem;
+    border-left: 3px solid #6c757d;
+}
+
+/* Animaciones y efectos adicionales */
+.question-item {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.question-item:nth-child(1) { animation-delay: 0.1s; }
+.question-item:nth-child(2) { animation-delay: 0.2s; }
+.question-item:nth-child(3) { animation-delay: 0.3s; }
+.question-item:nth-child(4) { animation-delay: 0.4s; }
+.question-item:nth-child(5) { animation-delay: 0.5s; }
+.question-item:nth-child(6) { animation-delay: 0.6s; }
+.question-item:nth-child(7) { animation-delay: 0.7s; }
+.question-item:nth-child(8) { animation-delay: 0.8s; }
+.question-item:nth-child(9) { animation-delay: 0.9s; }
+.question-item:nth-child(10) { animation-delay: 1.0s; }
+.question-item:nth-child(n+11) { animation-delay: 1.1s; }
+
+/* Efecto de hover para badges de categoría */
+.badge-categoria {
+    transition: all 0.3s ease;
+}
+
+.badge-categoria:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Mejoras para el número de pregunta */
+.question-number {
+    transition: all 0.3s ease;
+}
+
+.question-item:hover .question-number {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para efectos de filtrado */
+.question-item {
+    transition: all 0.4s ease;
+}
+
+.question-item.filtered-out {
+    opacity: 0.3;
+    transform: scale(0.98);
+    pointer-events: none;
+}
+
+.question-item.highlighted {
+    transform: scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+}
+
+/* Mejoras para el dropdown de filtros */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border-radius: 0.25rem;
+    margin: 0 0.25rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.dropdown-item .badge {
+    font-size: 0.7rem;
+    min-width: 30px;
+    text-align: center;
+}
+
+.response-item.intencionalidad { 
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+.response-item.exposicion,
+.response-item.exposición { 
+    border-left: 4px solid #fd7e14;
+    background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+}
+.response-item.inductor { 
+    border-left: 4px solid #ffc107;
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+}
+.response-item.interes,
+.response-item.interés { 
+    border-left: 4px solid #6f42c1;
+    background: linear-gradient(135deg, #fff 0%, #f8f6ff 100%);
+}
+.response-item.valuabilidad { 
+    border-left: 4px solid #20c997;
+    background: linear-gradient(135deg, #fff 0%, #f0fdf9 100%);
+}
+
+.badge-categoria {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 0.15rem 0.4rem;
+    border-radius: 0.2rem;
+    font-weight: 600;
+    border: none;
+    display: inline-block;
+}
+
+.badge-categoria.intencionalidad { 
+    background-color: #dc3545 !important; 
+    color: white !important; 
+}
+.badge-categoria.exposicion,
+.badge-categoria.exposición { 
+    background-color: #fd7e14 !important; 
+    color: white !important; 
+}
+.badge-categoria.inductor { 
+    background-color: #ffc107 !important; 
+    color: #212529 !important; 
+}
+.badge-categoria.interes,
+.badge-categoria.interés { 
+    background-color: #6f42c1 !important; 
+    color: white !important; 
+}
+.badge-categoria.valuabilidad { 
+    background-color: #20c997 !important; 
+    color: white !important; 
+}
+.badge-categoria.sin-categoria { 
+    background-color: #6c757d !important; 
+    color: white !important; 
+}
+
+.pregunta-texto {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.respuesta-container {
+    margin: 1rem 0;
+}
+
+.respuesta-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    min-width: 50px;
+    text-align: center;
+}
+
+.respuesta-badge.si {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+    color: white !important;
+}
+
+.respuesta-badge.no {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white !important;
+}
+
+.respuesta-badge.parcialmente,
+.respuesta-badge.a_veces,
+.respuesta-badge.a-veces,
+.respuesta-badge.menos,
+.respuesta-badge.de,
+.respuesta-badge.mas {
+    background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+    color: #212529 !important;
+}
+
+/* Estilo para respuestas con múltiples palabras */
+.respuesta-badge[class*="menos"],
+.respuesta-badge[class*="mas"],
+.respuesta-badge[class*="de"],
+.respuesta-badge.menos-de-3-meses,
+.respuesta-badge.de-4-a-10-meses,
+.respuesta-badge.mas-de-10-meses {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+    color: white !important;
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+}
+
+/* Respuestas específicas comunes */
+.respuesta-badge.menos-de-3-meses,
+.respuesta-badge.de-4-a-10-meses,
+.respuesta-badge.mas-de-10-meses {
+    background: linear-gradient(135deg, #6c757d, #5a6268) !important;
+    color: white !important;
+}
+
+.response-header {
+    min-height: 30px;
+}
+
+.response-footer {
+    border-top: 1px solid #f1f3f4 !important;
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    .response-item {
+        margin: 0.5rem 0 !important;
+    }
+    
+    .question-item {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .question-item .row {
+        flex-direction: column;
+    }
+    
+    .question-item .col-md-4 {
+        text-align: left !important;
+        margin-top: 0.5rem;
+    }
+    
+    .question-text {
+        font-size: 0.8rem;
+    }
+    
+    .answer-badge {
+        padding: 0.2rem 0.6rem;
+        font-size: 0.7rem;
+    }
+    
+    .question-number {
+        width: 20px;
+        height: 20px;
+        font-size: 0.65rem;
+    }
+    
+    .question-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+    }
+    
+    .question-meta {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 576px) {
+    .question-item {
+        padding: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .question-text {
+        font-size: 0.75rem;
+        line-height: 1.3;
+    }
+    
+    .badge-categoria {
+        font-size: 0.55rem;
+        padding: 0.1rem 0.3rem;
+    }
+}
+
+.geographic-factor {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Nuevos estilos para factores geográficos mejorados */
+.geographic-summary {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef) !important;
+}
+
+.summary-stat {
+    text-align: center;
+}
+
+.summary-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.factors-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.factor-item {
+    border-bottom: 1px solid #e9ecef;
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+}
+
+.factor-item:last-child {
+    border-bottom: none;
+}
+
+.factor-item:hover {
+    background-color: #f8f9fa;
+    transform: translateX(5px);
+}
+
+.factor-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.factor-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.factor-item.residencia .factor-icon {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.factor-item.desplazamiento .factor-icon {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+
+.factor-content {
+    flex-grow: 1;
+}
+
+.factor-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.factor-subtitle {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.factor-notes {
+    font-size: 0.75rem;
+    color: #8a8a8a;
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+.factor-value {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.factor-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.factor-badge.residencia {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+}
+
+.factor-badge.desplazamiento {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+
+.factor-weight {
+    display: block;
+    font-size: 0.65rem;
+    color: #8a8a8a;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.no-factors {
+    background: #f8f9fa;
+    border-radius: 0.375rem;
+    margin: 1rem;
+}
+
+/* Gradiente para header */
+.bg-gradient-success {
+    background: linear-gradient(135deg, #28a745, #20c997) !important;
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+}
+
+/* Estilos para información del evaluador mejorada */
+.evaluator-info {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+.evaluator-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.evaluator-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.evaluator-details {
+    flex-grow: 1;
+}
+
+.evaluator-name {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.evaluator-email {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.evaluator-role {
+    font-size: 0.75rem;
+    color: #8a8a8a;
+    font-style: italic;
+}
+
+.evaluation-status {
+    background: #f8f9fa;
+}
+
+.status-item {
+    text-align: center;
+}
+
+.status-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.status-value {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.status-badge.success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+}
+
+.status-badge.warning {
+    background: linear-gradient(135deg, #ffc107, #d39e00);
+    color: #212529;
+}
+
+.duration-badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 0.375rem;
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    font-weight: 600;
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.duration-badge.pending {
+    background: linear-gradient(135deg, #fd7e14, #e55a00);
+}
+
+.evaluation-timeline {
+    background: #fefefe;
+}
+
+.timeline-header h6 {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #17a2b8, #138496);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+    margin-left: 1.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2.25rem;
+    top: 0.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    font-weight: 600;
+}
+
+.timeline-marker.created {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.timeline-marker.completed {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+}
+
+.timeline-marker.current {
+    background: linear-gradient(135deg, #6f42c1, #5a2d91);
+}
+
+.timeline-title {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.timeline-date {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.evaluation-notes {
+    background: #f0f8ff;
+    border-left: 4px solid #17a2b8;
+}
+
+.notes-header h6 {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.note-item {
+    background: white;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border-left: 3px solid #17a2b8;
+}
+
+.note-item p {
+    color: #495057;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Mejoras responsive para dos columnas */
+@media (max-width: 768px) {
+    .col-md-6 .detail-card {
+        margin-bottom: 1rem;
+    }
+    
+    .factors-list {
+        max-height: 300px;
+    }
+    
+    .summary-stat {
+        padding: 0.5rem 0;
+    }
+    
+    .evaluator-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+    
+    .timeline-item {
+        margin-left: 1rem;
+    }
+    
+    .header-stats-mini {
+        display: none;
+    }
+    
+    .header-subtitle {
+        display: none;
+    }
+}
+
+/* Estilos para headers mejorados */
+.header-background-pattern {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 1px, transparent 1px),
+        radial-gradient(circle at 60% 80%, rgba(255,255,255,0.1) 1.5px, transparent 1.5px);
+    background-size: 30px 30px, 40px 40px, 25px 25px;
+    opacity: 0.3;
+}
+
+.header-icon-container {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header-subtitle {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.3px;
+}
+
+.header-stats-mini {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 80px;
+}
+
+.stat-mini {
+    text-align: center;
+}
+
+.stat-mini-number {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.25rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.stat-mini-label {
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+.card-header.position-relative {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-step {
+    position: relative;
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-step::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #28a745;
+}
+
+.timeline-step::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1.2rem;
+    width: 2px;
+    height: calc(100% - 0.5rem);
+    background: #e9ecef;
+}
+
+.timeline-step:last-child::after {
+    display: none;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    backdrop-filter: blur(5px);
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .evaluation-header {
+        text-align: center;
+        padding: 0.75rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+}
+
+/* Efecto de resaltado temporal */
+.question-item.highlighted {
+    background: linear-gradient(45deg, rgba(167, 139, 250, 0.1), rgba(139, 92, 246, 0.1));
+    border-color: #a78bfa;
+    box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+}
+
+/* Animación de entrada */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Estados de filtro */
+.question-item[style*="opacity: 0.3"] {
+    filter: grayscale(50%);
+}
+
+/* Mejoras adicionales para los filtros */
+.filter-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+    margin-bottom: 1rem;
+}
+
+.filter-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+    border-radius: 2px 2px 0 0;
+}
+
+/* Contador de badges */
+.count-badge {
+    background: rgba(255,255,255,0.3) !important;
+    color: white !important;
+    border-radius: 50% !important;
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.7rem !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-left: 0.25rem !important;
+    font-weight: bold !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header de la Evaluación -->
+    <div class="evaluation-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="evaluation-avatar bg-white text-success rounded-circle d-flex align-items-center justify-content-center">
+                    {{ evaluacion.perfil.iniciales }}
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="h5 mb-1">{{ evaluacion.perfil.nombre_completo }}</h1>
+                <p class="mb-1 small">
+                    <i class="fas fa-clipboard-check me-2"></i>{{ evaluacion.arbol.nombre }}
+                </p>
+                <p class="mb-0 small">
+                    <i class="fas fa-calendar me-2"></i>{{ evaluacion.creada_en|date:"d/m/Y H:i" }}
+                    {% if evaluacion.completada_en %}
+                        <span class="ms-3">
+                            <i class="fas fa-check-circle me-2"></i>Completada: {{ evaluacion.completada_en|date:"d/m/Y H:i" }}
+                        </span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="col-auto">
+                <div class="text-end">
+                    <button class="btn btn-back btn-sm me-2" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left me-2"></i>Volver
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="descargarReporte({{ evaluacion.id }})">
+                        <i class="fas fa-download me-2"></i>Reporte
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Estadísticas Principales -->
+        <div class="col-12 mb-2">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="detail-card">
+                        <div class="stat-item {% if evaluacion.nivel_riesgo == 'muy_alto' %}bg-danger{% elif evaluacion.nivel_riesgo == 'alto' %}bg-warning{% elif evaluacion.nivel_riesgo == 'medio' %}bg-secondary{% else %}bg-success{% endif %} text-white">
+                            <div class="stat-number">
+                                {% if evaluacion.nivel_riesgo == 'muy_alto' %}
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                {% elif evaluacion.nivel_riesgo == 'alto' %}
+                                    <i class="fas fa-exclamation"></i>
+                                {% elif evaluacion.nivel_riesgo == 'medio' %}
+                                    <i class="fas fa-minus-circle"></i>
+                                {% else %}
+                                    <i class="fas fa-check-circle"></i>
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">
+                                {% if evaluacion.nivel_riesgo == 'muy_alto' %}
+                                    Muy Alto
+                                {% elif evaluacion.nivel_riesgo == 'alto' %}
+                                    Alto
+                                {% elif evaluacion.nivel_riesgo == 'medio' %}
+                                    Medio
+                                {% else %}
+                                    Bajo
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="detail-card">
+                        <div class="stat-item bg-success text-white">
+                            {% with promedio=evaluacion|promedio_completo_porcentaje %}
+                            <div class="stat-number">{{ promedio|floatformat:2 }}%</div>
+                            <div class="stat-label">Probabilidad Total</div>
+                            {% endwith %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="detail-card">
+                        <div class="stat-item bg-info text-white">
+                            <div class="stat-number">{{ evaluacion.respuestas_json|length }}</div>
+                            <div class="stat-label">Respuestas</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="detail-card">
+                        <div class="stat-item bg-warning text-dark">
+                            <div class="stat-number">
+                                {% with componentes=evaluacion.calcular_promedio_completo %}
+                                {{ componentes.total_ubicaciones }}
+                                {% endwith %}
+                            </div>
+                            <div class="stat-label">Factores Geográficos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Análisis Detallado -->
+        <div class="col-12">
+            <!-- Respuestas del Cuestionario -->
+            <div class="detail-card">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="header-title">
+                            <h5 class="card-title mb-1">
+                                <i class="fas fa-clipboard-list me-2"></i>
+                                Respuestas del Cuestionario
+                            </h5>
+                            <div class="header-stats">
+                                <span class="badge bg-light text-dark me-2">
+                                    <i class="fas fa-question-circle me-1"></i>
+                                    {{ evaluacion.respuestas_json|length }} preguntas respondidas
+                                </span>
+                                <span class="badge bg-light text-dark">
+                                    <i class="fas fa-chart-line me-1"></i>
+                                    {% with componentes=evaluacion.calcular_promedio_completo %}
+                                    {{ componentes.suma_respuestas|floatformat:3 }} pts base
+                                    {% endwith %}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="header-actions">
+                            <div class="dropdown">
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter me-1"></i>
+                                    Filtrar
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('all')">
+                                        <i class="fas fa-list me-2"></i>Todas las preguntas
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('intencionalidad')">
+                                        <span class="badge bg-danger me-2">INT</span>Intencionalidad
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('exposicion')">
+                                        <span class="badge bg-warning me-2">EXP</span>Exposición
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('inductor')">
+                                        <span class="badge bg-secondary me-2">IND</span>Inductor
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('interes')">
+                                        <span class="badge bg-purple me-2">INT</span>Interés
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="filterByCategory('valuabilidad')">
+                                        <span class="badge bg-success me-2">VAL</span>Valuabilidad
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="questionnaire-body">
+                    <div class="questions-list">
+                        {% for opcion_id, datos in evaluacion.respuestas_json.items %}
+                        <div class="question-item {{ datos.var_amenaza|normalize_var_amenaza }}" data-category="{{ datos.var_amenaza }}">
+                            <div class="question-header">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="question-number">{{ forloop.counter }}</span>
+                                        <span class="badge badge-categoria {{ datos.var_amenaza|normalize_var_amenaza|default:'sin-categoria' }} ms-2" 
+                                              title="Variable: {{ datos.var_amenaza|default:'No definida' }}">
+                                            {{ datos.var_amenaza|default:'Sin categoría' }}
+                                        </span>
+                                    </div>
+                                    <div class="question-meta">
+                                        <small class="text-muted">
+                                            <i class="fas fa-clock me-1"></i>
+                                            {{ datos.timestamp|date:"d/m/Y H:i" }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="question-content">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h6 class="question-text">{{ datos.pregunta_texto }}</h6>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <div class="answer-section">
+                                            <div class="answer-badge {{ datos.opcion_texto|normalize_response }}">
+                                                <i class="fas fa-check-circle me-1"></i>
+                                                {{ datos.opcion_texto }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Debug info (temporal) -->
+                            {% if debug %}
+                            <div class="debug-info mt-2">
+                                <small class="text-muted">
+                                    Debug: var_amenaza = "{{ datos.var_amenaza }}" | normalized = "{{ datos.var_amenaza|normalize_var_amenaza }}"
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección Inferior en Dos Columnas -->
+        <div class="col-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Factores Geográficos -->
+                    <div class="detail-card">
+                        <div class="card-header bg-gradient-success text-white position-relative overflow-hidden">
+                            <div class="header-background-pattern"></div>
+                            <div class="d-flex justify-content-between align-items-center position-relative">
+                                <div class="d-flex align-items-center">
+                                    <div class="header-icon-container me-3">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Factores Geográficos</h5>
+                                        <small class="header-subtitle">
+                                            Análisis de ubicaciones y desplazamientos
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="header-stats-mini">
+                                    {% with calculo=evaluacion.calcular_promedio_completo %}
+                                    <div class="stat-mini">
+                                        <div class="stat-mini-number">{{ calculo.suma_factores_geograficos|floatformat:2 }}</div>
+                                        <div class="stat-mini-label">Factor Total</div>
+                                    </div>
+                                    {% endwith %}
+                                </div>
+                            </div>
+                        </div>
+                <div class="card-body p-0">
+                    {% with calculo=evaluacion.calcular_promedio_completo %}
+                    
+                    <!-- Encabezado con Resumen -->
+                    <div class="geographic-summary p-3 bg-light border-bottom">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="summary-stat">
+                                    <div class="summary-number text-success">{{ calculo.suma_factores_geograficos|floatformat:3 }}</div>
+                                    <div class="summary-label">Factor Total</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="summary-stat">
+                                    <div class="summary-number text-primary">{{ calculo.total_ubicaciones }}</div>
+                                    <div class="summary-label">Ubicaciones</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="summary-stat">
+                                    <div class="summary-number text-info">
+                                        {% if calculo.incluye_residencia %}1{% else %}0{% endif %}
+                                        +{{ evaluacion.municipios_desplazamiento_json|length }}
+                                    </div>
+                                    <div class="summary-label">Residencia + Viajes</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Factores -->
+                    <div class="factors-list p-3">
+                        <!-- Residencia -->
+                        {% if calculo.incluye_residencia %}
+                        <div class="factor-item residencia">
+                            <div class="factor-header">
+                                <div class="factor-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="factor-content">
+                                    <div class="factor-title">Municipio de Residencia</div>
+                                    <div class="factor-subtitle">{{ evaluacion.perfil.municipio }}, {{ evaluacion.perfil.departamento }}</div>
+                                </div>
+                                <div class="factor-value">
+                                    <span class="factor-badge residencia">{{ calculo.factor_residencia|floatformat:3 }}</span>
+                                    <small class="factor-weight">30%</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Desplazamientos -->
+                        {% for desplazamiento in evaluacion.municipios_desplazamiento_json %}
+                        <div class="factor-item desplazamiento">
+                            <div class="factor-header">
+                                <div class="factor-icon">
+                                    <i class="fas fa-route"></i>
+                                </div>
+                                <div class="factor-content">
+                                    <div class="factor-title">Desplazamiento #{{ forloop.counter }}</div>
+                                    <div class="factor-subtitle">
+                                        <span class="me-3"><strong>Motivo:</strong> {{ desplazamiento.motivo|capfirst }}</span>
+                                        <span><strong>Frecuencia:</strong> {{ desplazamiento.frecuencia|capfirst }}</span>
+                                    </div>
+                                    {% if desplazamiento.observaciones %}
+                                    <div class="factor-notes">{{ desplazamiento.observaciones }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="factor-value">
+                                    <span class="factor-badge desplazamiento">
+                                        {{ calculo.factores_desplazamiento|slice:forloop.counter0|slice:":1"|first|floatformat:3 }}
+                                    </span>
+                                    <small class="factor-weight">20%</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Mensaje si no hay factores -->
+                        {% if not calculo.incluye_residencia and not evaluacion.municipios_desplazamiento_json %}
+                        <div class="no-factors text-center py-4">
+                            <i class="fas fa-map-marked-alt text-muted mb-2" style="font-size: 2rem;"></i>
+                            <p class="text-muted mb-0">No se han configurado factores geográficos para esta evaluación.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% endwith %}
+                </div>
+            </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Información del Evaluador -->
+                    <div class="detail-card">
+                        <div class="card-header bg-gradient-info text-white position-relative overflow-hidden">
+                            <div class="header-background-pattern"></div>
+                            <div class="d-flex justify-content-between align-items-center position-relative">
+                                <div class="d-flex align-items-center">
+                                    <div class="header-icon-container me-3">
+                                        <i class="fas fa-user-tie"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="card-title mb-1">Información del Evaluador</h5>
+                                        <small class="header-subtitle">
+                                            Detalles del profesional y proceso
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="header-stats-mini">
+                                    <div class="stat-mini">
+                                        <div class="stat-mini-number">
+                                            <i class="fas {% if evaluacion.estado == 'completada' %}fa-check-circle{% else %}fa-clock{% endif %}"></i>
+                                        </div>
+                                        <div class="stat-mini-label">{{ evaluacion.get_estado_display }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                <div class="card-body p-0">
+                    <!-- Información del Evaluador -->
+                    <div class="evaluator-info p-3">
+                        <div class="evaluator-card">
+                            <div class="evaluator-avatar">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="evaluator-details">
+                                <div class="evaluator-name">
+                                    {{ evaluacion.evaluador_nombre|default:"Evaluador no especificado" }}
+                                </div>
+                                {% if evaluacion.evaluador_email %}
+                                <div class="evaluator-email">
+                                    <i class="fas fa-envelope me-1"></i>
+                                    {{ evaluacion.evaluador_email }}
+                                </div>
+                                {% endif %}
+                                <div class="evaluator-role">
+                                    <i class="fas fa-id-badge me-1"></i>
+                                    Especialista en Evaluación de Seguridad
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado y Fechas -->
+                    <div class="evaluation-status p-3 border-top">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="status-item">
+                                    <div class="status-label">Estado</div>
+                                    <div class="status-value">
+                                        <span class="status-badge {% if evaluacion.estado == 'completada' %}success{% else %}warning{% endif %}">
+                                            <i class="fas {% if evaluacion.estado == 'completada' %}fa-check-circle{% else %}fa-clock{% endif %} me-1"></i>
+                                            {{ evaluacion.get_estado_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="status-item">
+                                    <div class="status-label">Duración</div>
+                                    <div class="status-value">
+                                        {% if evaluacion.completada_en %}
+                                            {% with duracion=evaluacion.completada_en|timeuntil:evaluacion.creada_en %}
+                                            <span class="duration-badge">
+                                                <i class="fas fa-stopwatch me-1"></i>
+                                                {{ duracion|default:"Menos de 1 minuto" }}
+                                            </span>
+                                            {% endwith %}
+                                        {% else %}
+                                            <span class="duration-badge pending">
+                                                <i class="fas fa-hourglass-half me-1"></i>
+                                                En proceso
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline de Eventos -->
+                    <div class="evaluation-timeline p-3 border-top">
+                        <div class="timeline-header mb-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-history me-2"></i>
+                                Cronología de la Evaluación
+                            </h6>
+                        </div>
+                        
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker created">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Evaluación Iniciada</div>
+                                    <div class="timeline-date">{{ evaluacion.creada_en|date:"d/m/Y H:i" }}</div>
+                                </div>
+                            </div>
+                            
+                            {% if evaluacion.completada_en %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker completed">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Evaluación Completada</div>
+                                    <div class="timeline-date">{{ evaluacion.completada_en|date:"d/m/Y H:i" }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="timeline-item">
+                                <div class="timeline-marker current">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-title">Revisión Actual</div>
+                                    <div class="timeline-date">{{ "now"|date:"d/m/Y H:i" }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Observaciones -->
+                    {% if evaluacion.observaciones %}
+                    <div class="evaluation-notes p-3 border-top">
+                        <div class="notes-header mb-2">
+                            <h6 class="mb-0">
+                                <i class="fas fa-sticky-note me-2"></i>
+                                Observaciones
+                            </h6>
+                        </div>
+                        <div class="notes-content">
+                            <div class="note-item">
+                                <p class="mb-0">{{ evaluacion.observaciones }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function descargarReporte(evaluacionId) {
+    alert(`Descargar reporte de la evaluación ID: ${evaluacionId}\n\n(Funcionalidad pendiente de implementar)`);
+}
+
+// Agregar funcionalidad de filtrado por categoría
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar contador de preguntas por categoría
+    const categories = {};
+    document.querySelectorAll('.question-item').forEach(item => {
+        const category = item.dataset.category;
+        if (category) {
+            categories[category] = (categories[category] || 0) + 1;
+        }
+    });
+    
+    console.log('Distribución de preguntas por categoría:', categories);
+    
+    // Agregar efecto de highlight al hacer hover sobre badges
+    document.querySelectorAll('.badge-categoria').forEach(badge => {
+        badge.addEventListener('mouseenter', function() {
+            const category = this.textContent.trim().toLowerCase();
+            document.querySelectorAll(`.question-item[data-category*="${category}"]`).forEach(item => {
+                item.style.backgroundColor = '#f8f9fa';
+            });
+        });
+        
+        badge.addEventListener('mouseleave', function() {
+            document.querySelectorAll('.question-item').forEach(item => {
+                item.style.backgroundColor = '';
+            });
+        });
+    });
+});
+
+// Función para filtrar preguntas por categoría
+function filterByCategory(category) {
+    const items = document.querySelectorAll('.question-item');
+    const tabs = document.querySelectorAll('.filter-tab');
+    
+    // Actualizar estado de las pestañas
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.category === category) {
+            tab.classList.add('active');
+        }
+    });
+    
+    items.forEach(item => {
+        if (category === 'all') {
+            item.style.display = 'block';
+            item.style.opacity = '1';
+            item.style.transform = 'scale(1)';
+        } else {
+            const itemCategory = item.dataset.category.toLowerCase();
+            const normalizedCategory = normalizeCategory(category);
+            
+            if (itemCategory.includes(normalizedCategory)) {
+                item.style.display = 'block';
+                item.style.opacity = '1';
+                item.style.transform = 'scale(1)';
+                
+                // Efecto de resaltado temporal
+                item.classList.add('highlighted');
+                setTimeout(() => {
+                    item.classList.remove('highlighted');
+                }, 600);
+            } else {
+                item.style.opacity = '0.3';
+                item.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    if (item.style.opacity === '0.3') {
+                        item.style.display = 'none';
+                    }
+                }, 300);
+            }
+        }
+    });
+    
+    // Agregar animación de entrada para elementos filtrados
+    if (category !== 'all') {
+        const visibleItems = document.querySelectorAll(`.question-item[data-category*="${normalizeCategory(category)}"]`);
+        visibleItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.animation = 'fadeInUp 0.5s ease forwards';
+            }, index * 100);
+        });
+    }
+}
+
+// Función auxiliar para normalizar nombres de categorías
+function normalizeCategory(category) {
+    const mappings = {
+        'exposicion': 'exposición',
+        'interes': 'interés'
+    };
+    return mappings[category] || category;
+}
+</script>
+{% endblock %}

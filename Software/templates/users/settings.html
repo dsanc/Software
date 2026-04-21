@@ -1,0 +1,696 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Configuraciones - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-color: #1C69A8;
+    --secondary-color: #2589DA;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --border-radius: 15px;
+    --transition: all 0.3s ease;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.settings-container {
+    background: linear-gradient(135deg, var(--light-color) 0%, #ffffff 100%);
+    min-height: calc(100vh - 60px);
+    padding: 2rem 0;
+    margin-left: 0; /* Se ajustará automáticamente por el sidebar */
+}
+
+.settings-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: var(--border-radius);
+    color: white;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.settings-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.settings-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 1.5rem;
+    border: none;
+}
+
+.card-body-custom {
+    padding: 2rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.status-active {
+    background: rgba(40, 167, 69, 0.1);
+    color: var(--success-color);
+    border: 2px solid var(--success-color);
+}
+
+.status-inactive {
+    background: rgba(220, 53, 69, 0.1);
+    color: var(--danger-color);
+    border: 2px solid var(--danger-color);
+}
+
+.status-warning {
+    background: rgba(255, 193, 7, 0.1);
+    color: var(--warning-color);
+    border: 2px solid var(--warning-color);
+}
+
+.btn-outline-custom {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-outline-custom:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-danger-custom {
+    background: linear-gradient(135deg, var(--danger-color) 0%, #c82333 100%);
+    border: none;
+    color: white;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-danger-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+    border: none;
+    color: white;
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.btn-success-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--primary-color);
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+}
+
+.security-score {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    color: white;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.progress-custom {
+    height: 10px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+}
+
+.progress-bar-custom {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50px;
+    transition: width 1s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="settings-container">
+    <div class="container-fluid">
+        <!-- Header -->
+        <div class="settings-header">
+            <div class="row align-items-center">
+                <div class="col-md-12">
+                    <h1 class="mb-2">
+                        <i class="fas fa-cog me-3"></i>Configuraciones
+                    </h1>
+                    <p class="mb-0 opacity-75">Gestiona tu cuenta, seguridad y preferencias</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{% url 'users:profile' %}" class="btn btn-light">
+                        <i class="fas fa-user me-2"></i>Ver Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Columna izquierda -->
+            <div class="col-lg-8">
+                
+                <!-- Seguridad y Autenticación -->
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h3 class="mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>Seguridad y Autenticación
+                        </h3>
+                    </div>
+                    <div class="card-body-custom">
+                        <!-- Puntuación de Seguridad -->
+                        <div class="security-score">
+                            <h4>Puntuación de Seguridad</h4>
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    {% if has_2fa and user.email %}
+                                        <div class="progress-custom mb-2">
+                                            <div class="progress-bar-custom" style="width: 85%"></div>
+                                        </div>
+                                        <strong>85/100 - Excelente</strong>
+                                    {% elif user.email %}
+                                        <div class="progress-custom mb-2">
+                                            <div class="progress-bar-custom" style="width: 60%"></div>
+                                        </div>
+                                        <strong>60/100 - Buena</strong>
+                                    {% else %}
+                                        <div class="progress-custom mb-2">
+                                            <div class="progress-bar-custom" style="width: 30%"></div>
+                                        </div>
+                                        <strong>30/100 - Necesita mejorar</strong>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <i class="fas fa-shield-check fa-3x opacity-75"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Autenticación de Dos Factores -->
+                        <div class="settings-item">
+                            <div class="d-flex align-items-center">
+                                <div class="settings-icon">
+                                    <i class="fas fa-mobile-alt"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Autenticación de Dos Factores (2FA)</h5>
+                                    <p class="mb-0 text-muted">Agrega una capa extra de seguridad a tu cuenta</p>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                {% if has_2fa %}
+                                    <span class="status-badge status-active mb-2 d-block">
+                                        <i class="fas fa-check me-1"></i>Activado
+                                    </span>
+                                    <a href="{% url 'users:2fa_manage' %}" class="btn btn-outline-custom btn-sm">
+                                        <i class="fas fa-cog me-1"></i>Gestionar
+                                    </a>
+                                {% else %}
+                                    <span class="status-badge status-inactive mb-2 d-block">
+                                        <i class="fas fa-times me-1"></i>Inactivo
+                                    </span>
+                                    <a href="{% url 'users:2fa_setup' %}" class="btn btn-success-custom btn-sm">
+                                        <i class="fas fa-plus me-1"></i>Configurar
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Cambiar Contraseña -->
+                        <div class="settings-item">
+                            <div class="d-flex align-items-center">
+                                <div class="settings-icon">
+                                    <i class="fas fa-key"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Cambiar Contraseña</h5>
+                                    <p class="mb-0 text-muted">
+                                        Última actualización: 
+                                        {% if user.last_login %}
+                                            {{ user.last_login|date:"d M Y" }}
+                                        {% else %}
+                                            Nunca
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            <div>
+                                <a href="{% url 'users:profile' %}#password-section" class="btn btn-outline-custom btn-sm">
+                                    <i class="fas fa-edit me-1"></i>Cambiar
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Sesiones Activas -->
+                        <div class="settings-item">
+                            <div class="d-flex align-items-center">
+                                <div class="settings-icon">
+                                    <i class="fas fa-desktop"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">Sesiones Activas</h5>
+                                    <p class="mb-0 text-muted">{{ user_sessions_count }} sesión(es) activa(s)</p>
+                                </div>
+                            </div>
+                            <div>
+                                <button class="btn btn-danger-custom btn-sm" onclick="alert('Funcionalidad próximamente')">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar Todas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notificaciones -->
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h3 class="mb-0">
+                            <i class="fas fa-bell me-2"></i>Notificaciones
+                        </h3>
+                    </div>
+                    <div class="card-body-custom">
+                        {% for key, value in notification_settings.items %}
+                            <div class="settings-item">
+                                <div>
+                                    {% if key == 'email_notifications' %}
+                                        <h5 class="mb-1">Notificaciones por Email</h5>
+                                        <p class="mb-0 text-muted">Recibe actualizaciones importantes por correo</p>
+                                    {% elif key == 'security_alerts' %}
+                                        <h5 class="mb-1">Alertas de Seguridad</h5>
+                                        <p class="mb-0 text-muted">Notificaciones sobre actividad sospechosa</p>
+                                    {% elif key == 'subscription_reminders' %}
+                                        <h5 class="mb-1">Recordatorios de Suscripción</h5>
+                                        <p class="mb-0 text-muted">Avisos sobre vencimiento y renovación</p>
+                                    {% elif key == 'feature_updates' %}
+                                        <h5 class="mb-1">Actualizaciones de Funciones</h5>
+                                        <p class="mb-0 text-muted">Novedades y mejoras del sistema</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label class="switch">
+                                        <input type="checkbox" {% if value %}checked{% endif %} 
+                                               onchange="toggleNotification('{{ key }}', this.checked)">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Privacidad -->
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h3 class="mb-0">
+                            <i class="fas fa-user-secret me-2"></i>Privacidad
+                        </h3>
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="settings-item">
+                            <div>
+                                <h5 class="mb-1">Perfil Público</h5>
+                                <p class="mb-0 text-muted">Permitir que otros usuarios vean tu perfil</p>
+                            </div>
+                            <div>
+                                <label class="switch">
+                                    <input type="checkbox" checked onchange="togglePrivacy('public_profile', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div>
+                                <h5 class="mb-1">Datos de Uso</h5>
+                                <p class="mb-0 text-muted">Ayudar a mejorar el servicio compartiendo datos anónimos</p>
+                            </div>
+                            <div>
+                                <label class="switch">
+                                    <input type="checkbox" onchange="togglePrivacy('usage_data', this.checked)">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Columna derecha -->
+            <div class="col-lg-4">
+                
+                <!-- Información de la Cuenta -->
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h4 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Información de la Cuenta
+                        </h4>
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="text-center mb-3">
+                            {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="Avatar" class="rounded-circle" width="80" height="80">
+                            {% else %}
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" 
+                                     style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="text-center mb-3">{{ user.get_full_name|default:user.email }}</h5>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Email:</small>
+                            <br><strong>{{ user.email }}</strong>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Miembro desde:</small>
+                            <br><strong>{{ user.date_joined|date:"d M Y" }}</strong>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <small class="text-muted">Último acceso:</small>
+                            <br><strong>
+                                {% if user.last_login %}
+                                    {{ user.last_login|date:"d M Y H:i" }}
+                                {% else %}
+                                    Nunca
+                                {% endif %}
+                            </strong>
+                        </div>
+                        
+                        {% if is_superuser %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-crown me-1"></i>
+                                <strong>Administrador</strong>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Suscripción -->
+                {% if active_subscription %}
+                    <div class="settings-card">
+                        <div class="card-header-custom">
+                            <h4 class="mb-0">
+                                <i class="fas fa-credit-card me-2"></i>Suscripción
+                            </h4>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="text-center mb-3">
+                                <span class="status-badge status-active">
+                                    <i class="fas fa-check me-1"></i>Activa
+                                </span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Plan:</small>
+                                <br><strong>{{ active_subscription.plan.name }}</strong>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">Vence:</small>
+                                <br><strong>{{ active_subscription.end_date|date:"d M Y" }}</strong>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{% url 'subscriptions:my_subscriptions' %}" class="btn btn-outline-custom btn-sm">
+                                    <i class="fas fa-cog me-1"></i>Gestionar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Acciones Rápidas -->
+                <div class="settings-card">
+                    <div class="card-header-custom">
+                        <h4 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Acciones Rápidas
+                        </h4>
+                    </div>
+                    <div class="card-body-custom">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'users:profile' %}" class="btn btn-outline-custom">
+                                <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                            </a>
+                            <a href="{% url 'users:export_profile_data' %}" class="btn btn-outline-custom">
+                                <i class="fas fa-download me-2"></i>Exportar Datos
+                            </a>
+                            <a href="#" onclick="alert('Funcionalidad próximamente')" class="btn btn-outline-custom">
+                                <i class="fas fa-life-ring me-2"></i>Soporte
+                            </a>
+                            <hr>
+                            <button class="btn btn-danger-custom" onclick="confirmAccountDeletion()">
+                                <i class="fas fa-trash-alt me-2"></i>Eliminar Cuenta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAccountModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-3">
+                    <strong>¿Estás seguro de que deseas eliminar tu cuenta?</strong>
+                </p>
+                <p class="mb-3">Esta acción:</p>
+                <ul>
+                    <li>Eliminará permanentemente todos tus datos</li>
+                    <li>Cancelará tu suscripción actual</li>
+                    <li>No se puede deshacer</li>
+                </ul>
+                <p class="text-muted">
+                    Si solo deseas cancelar tu suscripción, puedes hacerlo desde la sección de suscripciones.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="alert('Funcionalidad próximamente')">
+                    <i class="fas fa-trash-alt me-2"></i>Eliminar Cuenta
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleNotification(setting, enabled) {
+    // Aquí se puede implementar AJAX para guardar la configuración
+    console.log('Toggling notification setting:', setting, enabled);
+    
+    // Ejemplo de implementación AJAX
+    fetch('/users/ajax/update-notification-setting/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            setting: setting,
+            enabled: enabled
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Mostrar mensaje de éxito
+            showToast('Configuración actualizada', 'success');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('Error al actualizar configuración', 'error');
+    });
+}
+
+function togglePrivacy(setting, enabled) {
+    console.log('Toggling privacy setting:', setting, enabled);
+    // Similar implementación para configuraciones de privacidad
+}
+
+function confirmAccountDeletion() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteAccountModal'));
+    modal.show();
+}
+
+function showToast(message, type = 'info') {
+    // Función para mostrar notificaciones tipo toast
+    const toastContainer = document.getElementById('toast-container') || createToastContainer();
+    
+    const toastId = 'toast-' + Date.now();
+    const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-info';
+    
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center ${bgClass} text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas ${type === 'success' ? 'fa-check' : type === 'error' ? 'fa-times' : 'fa-info'} me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    `;
+    
+    toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+    
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+    toast.show();
+    
+    // Remover el toast después de que se oculte
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+function createToastContainer() {
+    const container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'position-fixed bottom-0 end-0 p-3';
+    container.style.zIndex = '9999';
+    document.body.appendChild(container);
+    return container;
+}
+
+// Animaciones de entrada
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.settings-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Animar barras de progreso
+    setTimeout(() => {
+        const progressBars = document.querySelectorAll('.progress-bar-custom');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 500);
+        });
+    }, 600);
+});
+</script>
+{% endblock %}

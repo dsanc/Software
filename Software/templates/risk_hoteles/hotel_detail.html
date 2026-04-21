@@ -1,0 +1,5736 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+{% load l10n %}
+{% load dashboard_tags %}
+{% load risk_filters %}
+
+{% block title %}{{ hotel.name }} - Detalle del Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+:root {
+    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+    --border-radius-sm: 4px;
+    --border-radius-md: 6px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 1rem;
+    --transition: all 0.2s ease;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+}
+
+/* CLASES UTILITARIAS */
+.flex-center {
+    display: flex;
+    align-items: center;
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.gap-sm { gap: var(--spacing-sm); }
+.gap-md { gap: var(--spacing-md); }
+.gap-lg { gap: var(--spacing-lg); }
+
+/* CLASES DE PERFORMANCE Y ANIMACIÓN */
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: var(--spacing-md);
+}
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    will-change: transform;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale {
+    transition: transform 0.2s ease;
+    will-change: transform;
+}
+
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Optimización para performance en dispositivos móviles */
+@media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .hover-lift:hover,
+    .hover-scale:hover {
+        transform: none !important;
+    }
+}
+
+.hotel-detail-container {
+    background: #f8fafc;
+    min-height: 100vh;
+    padding: 0.75rem;
+}
+
+/* HEADER COMPACTO OPTIMIZADO */
+.hotel-header {
+    background: var(--primary-gradient);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--card-shadow);
+}
+
+.header-top {
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.hotel-info h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.hotel-info .location {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.hotel-actions {
+    display: flex;
+    gap: 0.375rem;
+    flex-shrink: 0;
+}
+
+.action-btn {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    text-decoration: none;
+    transition: var(--transition);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.action-btn:disabled:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: none;
+}
+
+/* MÉTRICAS COMPACTAS OPTIMIZADAS */
+.metrics-compact {
+    display: flex;
+    gap: 0.375rem;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+}
+
+.metric-item {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    padding: 0.375rem 0.5rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.metric-value {
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.metric-label {
+    font-size: 0.625rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.category-stars {
+    display: inline-flex;
+    gap: 0.1rem;
+    margin-bottom: 0.125rem;
+    font-size: 0.7rem;
+}
+
+.star-filled { color: #fbbf24; }
+.star-empty { color: rgba(255, 255, 255, 0.4); }
+
+.status-active { color: var(--success-color); }
+.status-inactive { color: var(--warning-color); }
+
+/* RESPONSIVE OPTIMIZADO */
+@media (max-width: 768px) {
+    .hotel-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .hotel-info h1 {
+        font-size: 1.1rem;
+        justify-content: center;
+    }
+    
+    .hotel-actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .action-btn {
+        flex: 1;
+        min-width: 80px;
+        justify-content: center;
+        font-size: 0.7rem;
+        padding: 0.25rem 0.375rem;
+    }
+    
+    .metrics-compact {
+        justify-content: center;
+        gap: 0.25rem;
+    }
+    
+    .metric-item {
+        min-width: 60px;
+        padding: 0.25rem 0.375rem;
+    }
+    
+    .metric-value {
+        font-size: 0.7rem;
+    }
+    
+    .metric-label {
+        font-size: 0.6rem;
+    }
+    
+    .metric-item {
+        min-width: 80px;
+        padding: 0.375rem 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hotel-header {
+        padding: 0.75rem;
+    }
+    
+    .hotel-info h1 {
+        font-size: 1.25rem;
+    }
+    
+    .metrics-compact {
+        justify-content: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .metric-item {
+        min-width: 70px;
+        padding: 0.25rem 0.375rem;
+    }
+    
+    .metric-value {
+        font-size: 0.75rem;
+    }
+    
+    .metric-label {
+        font-size: 0.55rem;
+    }
+}
+
+/* ANIMACIONES SIMPLES */
+.hotel-header {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.metric-item:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+}
+
+/* SECCIÓN DE ANÁLISIS */
+.analysis-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+    overflow: visible;
+}
+
+.analysis-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: center;
+    overflow: visible;
+    width: 100%;
+}
+
+/* PROGRESO CIRCULAR */
+.circular-progress-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.circular-progress {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+
+.circular-progress svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.circular-progress circle {
+    fill: none;
+    stroke-width: 8;
+    stroke-linecap: round;
+}
+
+.circle-bg {
+    stroke: #e5e7eb;
+}
+
+.circle-progress {
+    stroke: #667eea;
+    stroke-dasharray: 314;
+    stroke-dashoffset: 314;
+    transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-percentage {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #667eea;
+    line-height: 1;
+}
+
+.progress-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+}
+
+/* EVOLUCIÓN HISTÓRICA */
+.evolution-container {
+    flex: 1;
+    overflow: visible;
+    width: 100%;
+    max-width: 100%;
+}
+
+.evolution-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.title-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comparison-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.comparison-card {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.comparison-card.first {
+    border-left: 4px solid #ef4444;
+}
+
+.comparison-card.latest {
+    border-left: 4px solid #10b981;
+}
+
+.comparison-date {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.comparison-score {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.comparison-score.first {
+    color: #ef4444;
+}
+
+.comparison-score.latest {
+    color: #10b981;
+}
+
+.comparison-percentage {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.comparison-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+.evolution-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border: 1px solid #bae6fd;
+}
+
+.evolution-icon {
+    font-size: 1.25rem;
+}
+
+.evolution-icon.positive {
+    color: #10b981;
+}
+
+.evolution-icon.negative {
+    color: #ef4444;
+}
+
+.evolution-icon.neutral {
+    color: #6b7280;
+}
+
+.evolution-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* LINE CHART COMPACTO */
+.line-chart-container {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e5e7eb;
+    position: relative;
+    overflow: hidden;
+}
+
+.line-chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 12px 12px 0 0;
+}
+
+.line-chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.line-chart-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.line-chart-label i {
+    color: #667eea;
+}
+
+.line-chart-stats {
+    display: flex;
+    align-items: center;
+}
+
+.trend-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.trend-badge.positive {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.trend-badge.negative {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.trend-badge.neutral {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.line-chart-wrapper {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+#evolutionLineChart {
+    border-radius: 6px;
+    width: 100% !important;
+    height: auto !important;
+    display: block;
+}
+
+/* RESPONSIVE PARA ANÁLISIS */
+@media (max-width: 768px) {
+    .analysis-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    
+    .circular-progress {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .progress-percentage {
+        font-size: 1rem;
+    }
+    
+    .evolution-chart-container {
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .sparkline-container {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        overflow: visible;
+        min-height: 100px;
+    }
+    
+    .line-chart-container {
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+        overflow: visible;
+        width: 100%;
+    }
+    
+    .line-chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .line-chart-wrapper {
+        padding: 0.5rem;
+        overflow: visible;
+        min-height: 160px;
+        height: 160px;
+        width: 100%;
+    }
+    
+    #evolutionLineChart {
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100%;
+        display: block;
+    }
+    
+    .svg-tooltip {
+        position: absolute;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 12px;
+        pointer-events: none;
+        z-index: 1000;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        line-height: 1.4;
+        transition: all 0.2s ease;
+        transform: scale(0.95);
+        animation: tooltipAppear 0.2s ease forwards;
+    }
+    
+    @keyframes tooltipAppear {
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    .line-chart-label {
+        font-size: 0.8rem;
+    }
+    
+    .trend-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.6rem;
+    }
+    
+    .progress-line-container {
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .progress-line-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-line-track {
+        height: 50px;
+    }
+    
+    .point-indicator {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .progress-line-label {
+        font-size: 0.8rem;
+    }
+    
+    #evolutionSparkline {
+        min-height: 80px !important;
+        height: 80px !important;
+        width: 100% !important;
+        overflow: visible !important;
+    }
+    
+    .sparkline-header {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    #evolutionMixedChart {
+        height: 180px !important;
+    }
+    
+    .comparison-cards {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .analysis-section {
+        padding: 1rem;
+    }
+    
+    .circular-progress {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .progress-percentage {
+        font-size: 0.875rem;
+    }
+    
+    .evolution-title {
+        font-size: 1.125rem;
+    }
+}
+
+/* MODAL DE EVALUACIÓN DETALLADA OPTIMIZADO */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--border-radius);
+    width: 95%;
+    max-width: 900px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.modal-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #374151;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: var(--transition);
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.chart-section {
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-section:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+    margin-bottom: 0.75rem;
+    border-bottom: 2px solid;
+    padding-bottom: 0.375rem;
+}
+
+.chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: #374151;
+    text-align: center;
+}
+
+.chart-title.first {
+    color: #ef4444;
+    border-bottom-color: #ef4444;
+}
+
+.chart-title.latest {
+    color: #10b981;
+    border-bottom-color: #10b981;
+}
+
+.chart-title i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.chart-title time {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+.chart-container {
+    flex: 1;
+    position: relative;
+    min-height: 300px;
+    max-height: 350px;
+    margin: 1rem 0;
+}
+
+.chart-container canvas {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto !important;
+    height: auto !important;
+}
+
+.chart-score {
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.375rem;
+    border-radius: var(--border-radius);
+    margin-top: auto;
+    border: 1px solid;
+    line-height: 1.1;
+}
+
+.chart-score.first {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.chart-score.latest {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.score-value {
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.score-na {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.chart-container {
+    flex: 1;
+    position: relative;
+    min-height: 350px;
+    max-height: 400px;
+    margin: 1rem 0;
+}
+
+.chart-score {
+    text-align: center;
+    font-size: 1.125rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+    border: 2px solid;
+}
+
+.chart-score.first {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.chart-score.latest {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.detail-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.detail-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* RESPONSIVE MODAL OPTIMIZADO */
+@media (max-width: 1024px) {
+    .modal-content {
+        max-width: 85%;
+        width: 85%;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 0.25rem;
+    }
+    
+    .modal-content {
+        max-height: calc(100vh - 0.5rem);
+        border-radius: 8px;
+        width: 98%;
+    }
+    
+    .modal-header {
+        padding: 0.75rem;
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .modal-title {
+        font-size: 1rem;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+    }
+    
+    .charts-container {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .chart-section {
+        padding: 0.75rem;
+    }
+    
+    .chart-title {
+        font-size: 1rem;
+    }
+    
+    .chart-container {
+        min-height: 250px;
+        max-height: 280px;
+    }
+    
+    .chart-score {
+        font-size: 0.9rem;
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-overlay {
+        padding: 0.125rem;
+    }
+    
+    .modal-content {
+        border-radius: 6px;
+        width: 99%;
+        max-height: calc(100vh - 0.25rem);
+    }
+    
+    .modal-header {
+        padding: 0.5rem;
+    }
+    
+    .modal-title {
+        font-size: 0.9rem;
+        line-height: 1.3;
+    }
+    
+    .chart-section {
+        padding: 0.5rem;
+    }
+    
+    .chart-title {
+        font-size: 0.85rem;
+    }
+    
+    .chart-title i {
+        font-size: 0.8rem;
+    }
+    
+    .chart-container {
+        min-height: 220px;
+        max-height: 250px;
+    }
+    
+    .chart-score {
+        font-size: 0.85rem;
+        padding: 0.5rem;
+    }
+    
+    .score-value {
+        font-size: 0.8rem;
+    }
+}
+
+.modal-header {
+    padding: 1rem;
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
+/* ANÁLISIS IA */
+.ai-analysis-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.section-header {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem 0;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    color: #6b7280;
+    text-align: center;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.legend-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.legend-color {
+    width: 20px;
+    height: 8px;
+    border-radius: 4px;
+}
+
+.legend-color.excellent {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.legend-color.good {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.legend-color.moderate {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.legend-color.critical {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+.categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.category-card {
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    transition: var(--transition);
+}
+
+.category-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.category-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+}
+
+.category-score {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.score-number {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.score-percentage {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.progress-bar-container {
+    background: #e5e7eb;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    width: 0%; /* Iniciar en 0% para la animación */
+}
+
+/* Colores tipo semáforo */
+.progress-bar.excellent {
+    background: linear-gradient(90deg, #10b981, #059669);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.progress-bar.good {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}
+
+.progress-bar.moderate {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
+}
+
+.progress-bar.critical {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+/* Efecto de brillo en hover */
+.category-card:hover .progress-bar {
+    filter: brightness(1.1);
+    transform: scaleY(1.1);
+}
+
+.risk-level {
+    display: flex;
+    justify-content: center;
+}
+
+.risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.risk-badge.excellent {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.risk-badge.good {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.risk-badge.moderate {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.risk-badge.critical {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.no-data-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.no-data-message h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.no-data-message p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .categories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .category-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .category-score {
+        text-align: left;
+    }
+}
+
+/* TABS SYSTEM */
+.tabs-container {
+    width: 100%;
+}
+
+.tabs-nav {
+    display: flex;
+    background: #f8fafc;
+    border-radius: 12px 12px 0 0;
+    padding: 0.5rem;
+    gap: 0.25rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.875rem 1rem;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.tab-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.tab-btn.active {
+    background: #667eea;
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.tab-content {
+    display: none;
+    padding: 2rem 1rem;
+    background: white;
+    border-radius: 0 0 12px 12px;
+    min-height: 400px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* CATEGORÍAS CRÍTICAS */
+.critical-analysis {
+    max-width: 100%;
+}
+
+.critical-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.critical-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #dc2626;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.critical-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.critical-chart-container {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.critical-chart-container canvas {
+    flex: 1;
+    width: 100% !important;
+    height: 350px !important;
+}
+
+/* RECOMENDACIONES DE IA */
+.ai-recommendations-section {
+    margin-top: 2rem;
+}
+
+.ai-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    color: white;
+}
+
+.ai-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.ai-subtitle {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+}
+
+.ai-recommendations-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.ai-recommendation-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.ai-recommendation-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #ef4444, #f59e0b, #3b82f6);
+}
+
+.ai-recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.recommendation-header {
+    margin-bottom: 1.5rem;
+}
+
+.category-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.ranking-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.ranking-badge.rank-1 { background: #ef4444; }
+.ranking-badge.rank-2 { background: #f59e0b; }
+.ranking-badge.rank-3 { background: #f97316; }
+.ranking-badge.rank-4 { background: #3b82f6; }
+.ranking-badge.rank-5 { background: #6366f1; }
+
+.category-details {
+    flex: 1;
+}
+
+.category-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.5rem 0;
+}
+
+.category-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.current-score {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.urgency-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.urgency-badge.emergency {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.urgency-badge.critical {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.urgency-badge.moderate {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.ai-insights {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.insights-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.insights-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.insight-item {
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: #4b5563;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.insight-item:last-child {
+    border-bottom: none;
+}
+
+.action-plan {
+    margin-bottom: 1.5rem;
+}
+
+.plan-section {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.plan-section.immediate {
+    background: #fef2f2;
+    border-left: 4px solid #ef4444;
+}
+
+.plan-section.short-term {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+}
+
+.plan-section.long-term {
+    background: #eff6ff;
+    border-left: 4px solid #3b82f6;
+}
+
+.plan-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plan-section.immediate .plan-title { color: #dc2626; }
+.plan-section.short-term .plan-title { color: #d97706; }
+.plan-section.long-term .plan-title { color: #1d4ed8; }
+
+.action-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.action-item {
+    padding: 0.5rem 0;
+    font-size: 0.875rem;
+    color: #374151;
+    position: relative;
+    padding-left: 1.5rem;
+}
+
+.action-item::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.predictive-metrics {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.metrics-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.metric-item {
+    text-align: center;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.metric-value {
+    display: block;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.metric-value.improvement {
+    color: #10b981;
+}
+
+.metric-value.investment {
+    color: #f59e0b;
+    font-size: 0.875rem;
+}
+
+.risk-factors {
+    margin-top: 1rem;
+}
+
+.risk-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.risk-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.risk-tag {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.no-recommendations-message {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+}
+
+.no-recommendations-message i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #667eea;
+}
+
+.critical-summary {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.summary-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.summary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.summary-item.critical {
+    border-color: #ef4444;
+    background: linear-gradient(135deg, #fef2f2, white);
+}
+
+.summary-item.moderate {
+    border-color: #f59e0b;
+    background: linear-gradient(135deg, #fffbeb, white);
+}
+
+.summary-item.warning {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff, white);
+}
+
+.summary-rank {
+    background: #667eea;
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.summary-info {
+    flex: 1;
+}
+
+.summary-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.2;
+}
+
+.summary-score {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #dc2626;
+}
+
+.summary-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.summary-indicator i {
+    font-size: 1.25rem;
+}
+
+.summary-indicator span {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.summary-item.critical .summary-indicator {
+    color: #dc2626;
+}
+
+.summary-item.moderate .summary-indicator {
+    color: #f59e0b;
+}
+
+.summary-item.warning .summary-indicator {
+    color: #3b82f6;
+}
+
+.no-critical-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.no-critical-message i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #9ca3af;
+}
+
+.no-critical-message h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #374151;
+}
+
+/* LEGACY CRITICAL STYLES */
+.critical-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.critical-card {
+    background: linear-gradient(135deg, #fef2f2, #ffffff);
+    border: 2px solid #fecaca;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.critical-card.high-priority {
+    background: linear-gradient(135deg, #fef2f2, #fde8e8);
+    border-color: #f87171;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+}
+
+.critical-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.critical-header-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.critical-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+}
+
+.critical-priority {
+    flex-shrink: 0;
+}
+
+.priority-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.priority-badge.urgent {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+.priority-badge.important {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fbbf24;
+}
+
+.critical-metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.critical-score, .critical-gap {
+    text-align: center;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+}
+
+.score-value, .gap-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.score-value {
+    color: #dc2626;
+}
+
+.gap-value {
+    color: #f59e0b;
+}
+
+.score-label, .gap-label {
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.improvement-bar {
+    position: relative;
+    height: 12px;
+    background: #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.current-level {
+    height: 100%;
+    background: linear-gradient(90deg, #dc2626, #ef4444);
+    border-radius: 6px;
+    transition: width 1s ease-in-out;
+}
+
+.target-line {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background: #10b981;
+    z-index: 2;
+}
+
+.target-label {
+    position: absolute;
+    top: -25px;
+    left: -20px;
+    font-size: 0.625rem;
+    color: #10b981;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.action-recommendations h5 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.recommendations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommendations-list li {
+    padding: 0.25rem 0;
+    font-size: 0.875rem;
+    color: #6b7280;
+    position: relative;
+    padding-left: 1rem;
+}
+
+.recommendations-list li:before {
+    content: "•";
+    color: #dc2626;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* RADAR CHART */
+.radar-analysis {
+    width: 100%;
+}
+
+.radar-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.radar-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.radar-title i {
+    color: #667eea;
+}
+
+.radar-subtitle {
+    color: #6b7280;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.radar-container {
+    width: 100%;
+    margin-bottom: 2rem;
+}
+
+.radar-chart-wrapper {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    width: 100%;
+    min-height: 650px;
+}
+
+#advancedRadarChart {
+    width: 100% !important;
+    height: 550px !important;
+}
+
+.radar-legend {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+}
+
+/* TABLA DE EVALUACIONES */
+.evaluations-table-container {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+}
+
+.table-controls {
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.filter-controls {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.filter-select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    background: white;
+    min-width: 150px;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.evaluations-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.evaluations-table th {
+    background: #f9fafb;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.evaluations-table th.sortable:hover {
+    background: #f3f4f6;
+}
+
+.evaluations-table th i:first-child {
+    margin-right: 0.5rem;
+    color: #667eea;
+}
+
+.sort-icon {
+    float: right;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+}
+
+.evaluations-table th.sorted-asc .sort-icon::before {
+    content: "\f0de";
+    color: #667eea;
+}
+
+.evaluations-table th.sorted-desc .sort-icon::before {
+    content: "\f0dd";
+    color: #667eea;
+}
+
+.evaluations-table td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    vertical-align: middle;
+}
+
+.evaluation-row:hover {
+    background: #f9fafb;
+}
+
+.date-cell .date-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-primary {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.date-secondary {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.evaluator-cell .evaluator-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.evaluator-avatar {
+    font-size: 1.5rem;
+    color: #667eea;
+}
+
+.evaluator-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.evaluator-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.evaluator-role {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.score-cell .score-display {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.score-circle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: white;
+}
+
+.score-circle.excellent { background: #10b981; }
+.score-circle.good { background: #22c55e; }
+.score-circle.moderate { background: #f59e0b; }
+.score-circle.critical { background: #ef4444; }
+.score-circle.pending { background: #6b7280; }
+
+.score-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.score-label {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.score-percentage {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.categories-cell .categories-count {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.count-badge {
+    background: #667eea;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    min-width: 2rem;
+    text-align: center;
+}
+
+.count-label {
+    color: #6b7280;
+    font-size: 0.75rem;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.completed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-badge.in-progress {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.pending {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-action {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0.375rem;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.btn-action.view {
+    background: #667eea;
+}
+
+.btn-action.view:hover {
+    background: #5a67d8;
+}
+
+.btn-action.report {
+    background: #dc2626;
+}
+
+.btn-action.report:hover {
+    background: #b91c1c;
+}
+
+.btn-action.edit {
+    background: #059669;
+}
+
+.btn-action.edit:hover {
+    background: #047857;
+}
+
+.table-pagination {
+    padding: 1rem 1.5rem;
+    background: #f8fafc;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination-info {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.pagination-btn {
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid #d1d5db;
+    background: white;
+    border-radius: 0.375rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: #f3f4f6;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-numbers {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.page-number {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.page-number.active {
+    background: #667eea;
+    color: white;
+}
+
+.page-number:not(.active):hover {
+    background: #f3f4f6;
+}
+
+.no-evaluations-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6b7280;
+}
+
+.no-evaluations-message i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1rem;
+}
+
+.no-evaluations-message h3 {
+    font-size: 1.5rem;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.no-evaluations-message p {
+    margin-bottom: 2rem;
+}
+
+.radar-legend h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.radar-legend h4 i {
+    color: #f59e0b;
+}
+
+.legend-scale {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.scale-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.scale-item span {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.scale-item small {
+    font-size: 0.75rem;
+    color: #6b7280;
+}
+
+.scale-indicator {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin-bottom: 0.25rem;
+}
+
+.scale-indicator.critical {
+    background: linear-gradient(90deg, #dc2626, #b91c1c);
+}
+
+.scale-indicator.moderate {
+    background: linear-gradient(90deg, #f59e0b, #d97706);
+}
+
+.scale-indicator.good {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.scale-indicator.excellent {
+    background: linear-gradient(90deg, #10b981, #059669);
+}
+
+/* RESPONSIVE RADAR */
+@media (max-width: 1200px) {
+    .radar-chart-wrapper {
+        padding: 1.5rem;
+        min-height: 500px;
+    }
+    
+    #advancedRadarChart {
+        height: 450px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .radar-chart-wrapper {
+        padding: 1rem;
+        min-height: 400px;
+    }
+    
+    #advancedRadarChart {
+        height: 350px !important;
+    }
+    
+    .tabs-nav {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tab-btn {
+        justify-content: flex-start;
+        padding: 1rem;
+    }
+    
+    .critical-chart-container {
+        padding: 1rem;
+    }
+    
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .summary-item {
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    .critical-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .critical-metrics {
+        grid-template-columns: 1fr;
+    }
+    
+    .radar-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .radar-controls {
+        grid-template-columns: 1fr;
+    }
+    
+    .legend-scale {
+        grid-template-columns: 1fr;
+    }
+    
+    .insights-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Responsive para recomendaciones de IA */
+    .ai-header {
+        padding: 1rem;
+    }
+    
+    .ai-title {
+        font-size: 1.125rem;
+    }
+    
+    .ai-recommendation-card {
+        padding: 1rem;
+    }
+    
+    .category-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .category-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .metrics-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .risk-tags {
+        justify-content: center;
+    }
+    
+    .plan-section {
+        padding: 0.75rem;
+    }
+    
+    /* Responsive para tabla de evaluaciones */
+    .table-controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .search-box {
+        min-width: auto;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .filter-select {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .evaluations-table {
+        font-size: 0.75rem;
+    }
+    
+    .evaluations-table th,
+    .evaluations-table td {
+        padding: 0.5rem 0.375rem;
+    }
+    
+    .score-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .score-display {
+        gap: 0.5rem;
+    }
+    
+    .evaluator-info {
+        gap: 0.5rem;
+    }
+    
+    .evaluator-avatar {
+        font-size: 1.25rem;
+    }
+    
+    .action-buttons {
+        gap: 0.25rem;
+    }
+    
+    .btn-action {
+        width: 1.75rem;
+        height: 1.75rem;
+        font-size: 0.625rem;
+    }
+    
+    .table-pagination {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .pagination-controls {
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hotel-detail-container">
+    <!-- HEADER COMPACTO DEL HOTEL -->
+    <header class="hotel-header">
+        <!-- Información Principal -->
+        <div class="header-top flex-between">
+            <div class="hotel-info">
+                <h1 class="flex-center gap-sm">
+                    <i class="fas fa-hotel"></i>
+                    {{ hotel.name }}
+                </h1>
+                <div class="location flex-center gap-sm">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ hotel.city }}, {{ hotel.country }}
+                </div>
+            </div>
+            
+            <!-- Acciones Compactas -->
+            <div class="hotel-actions">
+                {% if latest_assessment and latest_assessment.status == 'completed' %}
+                <button class="action-btn" type="button" onclick="generateGeneralReport()" title="Generar reporte general">
+                    <i class="fas fa-file-alt"></i>
+                    Reporte
+                </button>
+                {% else %}
+                <button class="action-btn" disabled title="No hay evaluaciones completadas">
+                    <i class="fas fa-file-alt"></i>
+                    Reporte
+                </button>
+                {% endif %}
+                
+                <a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" class="action-btn" title="Nueva evaluación">
+                    <i class="fas fa-plus"></i>
+                    Nueva
+                </a>
+                <a href="{% url 'risk_hoteles:hotel_list' %}" class="action-btn" title="Volver a la lista">
+                    <i class="fas fa-arrow-left"></i>
+                    Volver
+                </a>
+            </div>
+        </div>
+        
+        <!-- Métricas Compactas -->
+        <div class="metrics-compact">
+            <!-- Categoría -->
+            <div class="metric-item">
+                <div class="metric-value">
+                    {% if hotel.category %}<div class="category-stars">{% for i in "12345" %}{% if forloop.counter <= category_rating %}<i class="fas fa-star star-filled"></i>{% else %}<i class="far fa-star star-empty"></i>{% endif %}{% endfor %}</div>{{ category_label|default:hotel.category }}{% else %}Sin categoría{% endif %}
+                </div>
+                <div class="metric-label">Categoría</div>
+            </div>
+            
+            <!-- Habitaciones -->
+            <div class="metric-item">
+                <div class="metric-value">{{ hotel.total_rooms|default:"N/A" }}</div>
+                <div class="metric-label">Habitaciones</div>
+            </div>
+            
+            <!-- Última Evaluación -->
+            {% if latest_assessment %}
+            <div class="metric-item">
+                <div class="metric-value">{% if latest_assessment.overall_score %}{{ latest_assessment.overall_score|floatformat:1 }}/5{% else %}Pendiente{% endif %}</div>
+                <div class="metric-label">Evaluación</div>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- SECCIÓN DE ANÁLISIS Y EVOLUCIÓN -->
+    <section class="analysis-section">
+        <div class="analysis-grid">
+            <!-- Progreso Circular -->
+            <div class="circular-progress-container">
+                <div class="circular-progress">
+                    <svg viewBox="0 0 100 100">
+                        <circle class="circle-bg" cx="50" cy="50" r="45"></circle>
+                        <circle class="circle-progress" cx="50" cy="50" r="45" data-score="{% if hotel_average_score %}{{ hotel_average_score|js_number:1 }}{% else %}0{% endif %}"></circle>
+                    </svg>
+                    <div class="progress-text">
+                        <div class="progress-percentage">{% if hotel_average_score %}{% widthratio hotel_average_score 5 100 %}%{% else %}0%{% endif %}</div>
+                        <div class="progress-label">Promedio General</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evolución Histórica -->
+            <div class="evolution-container">
+                <h3 class="evolution-title">
+                    <div class="title-left">
+                        <i class="fas fa-chart-line"></i>
+                        Evolución Histórica
+                    </div>
+                    {% if first_assessment and latest_assessment %}
+                    <button class="detail-btn" onclick="openDetailModal()">
+                        <i class="fas fa-magnifying-glass-plus"></i>
+                        Detalle
+                    </button>
+                    {% endif %}
+                </h3>
+                
+                {% if first_assessment and latest_assessment %}
+                <!-- Line Chart Compacto -->
+                <div class="line-chart-container">
+                    <div class="line-chart-header">
+                        <span class="line-chart-label">
+                            <i class="fas fa-chart-line"></i>
+                            Evolución de Evaluaciones ({{ assessments_history|length }} evaluaciones)
+                        </span>
+                        <span class="line-chart-stats">
+                            {% with evolution_diff=latest_assessment.overall_score|subtract:first_assessment.overall_score %}
+                                {% if evolution_diff > 0.1 %}
+                                    <span class="trend-badge positive">
+                                        <i class="fas fa-arrow-up"></i>
+                                        +{{ evolution_diff|floatformat:1 }} pts
+                                    </span>
+                                {% elif evolution_diff < -0.1 %}
+                                    <span class="trend-badge negative">
+                                        <i class="fas fa-arrow-down"></i>
+                                        {{ evolution_diff|floatformat:1 }} pts
+                                    </span>
+                                {% else %}
+                                    <span class="trend-badge neutral">
+                                        <i class="fas fa-minus"></i>
+                                        Estable
+                                    </span>
+                                {% endif %}
+                            {% endwith %}
+                        </span>
+                    </div>
+                    
+                    <div class="line-chart-wrapper">
+                        <svg id="evolutionLineChart" viewBox="0 0 1000 180" preserveAspectRatio="none" style="width: 100%; height: 100%; min-width: 100%;">
+                            <!-- Fondo del gráfico -->
+                            <defs>
+                                <!-- Degradado tipo semáforo para el área -->
+                                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />   <!-- Verde arriba -->
+                                    <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:0.2" />  <!-- Amarillo medio -->
+                                    <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.1" /> <!-- Rojo abajo -->
+                                </linearGradient>
+                                
+                                <!-- Degradado dinámico para la línea basado en puntuación -->
+                                <linearGradient id="lineStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#ef4444" id="lineStart" />      <!-- Rojo inicial -->
+                                    <stop offset="50%" style="stop-color:#f59e0b" id="lineMiddle" />    <!-- Amarillo medio -->
+                                    <stop offset="100%" style="stop-color:#10b981" id="lineEnd" />      <!-- Verde final -->
+                                </linearGradient>
+                                
+                                <!-- Degradado para los puntos basado en score individual -->
+                                <radialGradient id="pointGradientLow" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#fee2e2;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ef4444;stop-opacity:1" />
+                                </radialGradient>
+                                
+                                <radialGradient id="pointGradientMedium" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                </radialGradient>
+                                
+                                <radialGradient id="pointGradientHigh" cx="50%" cy="50%" r="50%">
+                                    <stop offset="0%" style="stop-color:#d1fae5;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
+                                </radialGradient>
+                                
+                                <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+                                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
+                                </filter>
+                            </defs>
+                            
+                            <!-- Grid lines con colores semáforo sutiles -->
+                            <g class="grid-lines" stroke-width="0.5" opacity="0.4">
+                                <!-- Zona Verde (4-5 puntos) -->
+                                <line x1="100" y1="40" x2="950" y2="40" stroke="#10b981"></line>
+                                <!-- Zona Amarilla (3-4 puntos) -->  
+                                <line x1="100" y1="65" x2="950" y2="65" stroke="#f59e0b"></line>
+                                <!-- Zona Amarilla-Naranja (2-3 puntos) -->
+                                <line x1="100" y1="90" x2="950" y2="90" stroke="#f59e0b"></line>
+                                <!-- Zona Roja (1-2 puntos) -->
+                                <line x1="100" y1="115" x2="950" y2="115" stroke="#ef4444"></line>
+                                <!-- Zona Roja Crítica (0-1 puntos) -->
+                                <line x1="100" y1="140" x2="950" y2="140" stroke="#dc2626"></line>
+                            </g>
+                            
+                            <!-- Y-axis labels -->
+                            <g class="y-labels" fill="#6b7280" font-size="14" font-family="Arial, sans-serif">
+                                <text x="95" y="145" text-anchor="end">0/5</text>
+                                <text x="95" y="120" text-anchor="end">1/5</text>
+                                <text x="95" y="95" text-anchor="end">2/5</text>
+                                <text x="95" y="70" text-anchor="end">3/5</text>
+                                <text x="95" y="45" text-anchor="end">4/5</text>
+                                <text x="95" y="20" text-anchor="end">5/5</text>
+                            </g>
+                            
+                            <!-- Área del gráfico -->
+                            <path id="areaPath" fill="url(#lineGradient)" stroke="none"></path>
+                            
+                            <!-- Línea principal con degradado semáforo -->
+                            <path id="linePath" fill="none" stroke="url(#lineStroke)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+                            
+                            <!-- Puntos de datos -->
+                            <g id="dataPoints"></g>
+                            
+                            <!-- X-axis labels -->
+                            <g id="xLabels" fill="#6b7280" font-size="10" font-family="Arial, sans-serif"></g>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="comparison-cards">
+                    <!-- Primera Evaluación -->
+                    <div class="comparison-card first">
+                        <div class="comparison-date">Primera Evaluación<br>{{ first_assessment.assessment_date|date:"d/m/Y" }}</div>
+                        <div class="comparison-score first">{{ first_assessment.overall_score|floatformat:1 }}/5.0</div>
+                        <div class="comparison-percentage">{{ first_assessment.overall_score|mul:20|floatformat:1 }}%</div>
+                        <div class="comparison-label">Puntuación Inicial</div>
+                    </div>
+                    
+                    <!-- Última Evaluación -->
+                    <div class="comparison-card latest">
+                        <div class="comparison-date">Última Evaluación<br>{{ latest_assessment.assessment_date|date:"d/m/Y" }}</div>
+                        <div class="comparison-score latest">{{ latest_assessment.overall_score|floatformat:1 }}/5.0</div>
+                        <div class="comparison-percentage">{{ latest_assessment.overall_score|mul:20|floatformat:1 }}%</div>
+                        <div class="comparison-label">Puntuación Actual</div>
+                    </div>
+                </div>
+
+                <!-- Indicador de Evolución -->
+                <div class="evolution-indicator">
+                    {% with evolution_diff=latest_assessment.overall_score|subtract:first_assessment.overall_score %}
+                        {% if evolution_diff > 0.1 %}
+                            <i class="fas fa-arrow-up evolution-icon positive"></i>
+                            <span class="evolution-text">
+                                Mejora de {% widthratio evolution_diff 5 100 %}%
+                            </span>
+                        {% elif evolution_diff < -0.1 %}
+                            <i class="fas fa-arrow-down evolution-icon negative"></i>
+                            <span class="evolution-text">
+                                Disminución de {% widthratio evolution_diff|cut:"-" 5 100 %}%
+                            </span>
+                        {% else %}
+                            <i class="fas fa-minus evolution-icon neutral"></i>
+                            <span class="evolution-text">
+                                Sin cambios significativos
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: 2rem; color: #6b7280;">
+                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>No hay suficientes evaluaciones para mostrar la evolución histórica.</p>
+                    <p style="font-size: 0.875rem;">Se necesitan al menos 2 evaluaciones.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN DE ANÁLISIS IA -->
+    <section class="ai-analysis-section">
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-brain"></i>
+                Análisis IA
+            </h2>
+            <p class="section-subtitle">
+                <i class="fas fa-chart-bar"></i>
+                Evaluación por Categorías con Sistema de Semáforo
+            </p>
+            <div class="legend-container">
+                <div class="legend-item"><div class="legend-color excellent"></div><span>Excelente (≥80%)</span></div>
+                <div class="legend-item"><div class="legend-color good"></div><span>Bueno (60-79%)</span></div>
+                <div class="legend-item"><div class="legend-color moderate"></div><span>Moderado (40-59%)</span></div>
+                <div class="legend-item"><div class="legend-color critical"></div><span>Crítico (<40%)</span></div>
+            </div>
+        </div>
+
+        {% if category_averages %}
+        <!-- Tabs Navigation -->
+        <div class="tabs-container">
+            <nav class="tabs-nav">
+                <button class="tab-btn active" data-tab="evaluations">
+                    <i class="fas fa-clipboard-list"></i>
+                    Historial de Evaluaciones
+                </button>
+                <button class="tab-btn" data-tab="general">
+                    <i class="fas fa-chart-pie"></i>
+                    Resumen General
+                </button>
+                <button class="tab-btn" data-tab="critical">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Categorías Críticas
+                </button>
+                <button class="tab-btn" data-tab="heatmap">
+                    <i class="fas fa-fire"></i>
+                    Gráfica Avanzada
+                </button>
+            </nav>
+
+            <!-- Tab Content: Resumen General -->
+            <div class="tab-content" id="tab-general">
+                <div class="categories-grid">
+                    {% for code, data in category_averages.items %}
+                    <div class="category-card">
+                        <div class="category-header">
+                            <h4 class="category-name">{{ data.name }}</h4>
+                            <div class="category-score">
+                                <span class="score-number">{{ data.average_score|floatformat:1 }}/5.0</span>
+                                <span class="score-percentage">{{ data.percentage }}%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Barra de progreso -->
+                        <div class="progress-bar-container">
+                            <div class="progress-bar 
+                                {% if data.percentage >= 80 %}excellent
+                                {% elif data.percentage >= 60 %}good  
+                                {% elif data.percentage >= 40 %}moderate
+                                {% else %}critical{% endif %}" 
+                                style="width: {{ data.percentage|js_number:1 }}%"
+                                data-percentage="{{ data.percentage|js_number:1 }}">
+                            </div>
+                        </div>
+                        
+                        <!-- Nivel de riesgo -->
+                        <div class="risk-level">
+                            {% if data.percentage >= 80 %}
+                                <span class="risk-badge excellent">
+                                    <i class="fas fa-shield-alt"></i> Excelente
+                                </span>
+                            {% elif data.percentage >= 60 %}
+                                <span class="risk-badge good">
+                                    <i class="fas fa-check-circle"></i> Bueno
+                                </span>
+                            {% elif data.percentage >= 40 %}
+                                <span class="risk-badge moderate">
+                                    <i class="fas fa-exclamation-triangle"></i> Moderado
+                                </span>
+                            {% else %}
+                                <span class="risk-badge critical">
+                                    <i class="fas fa-exclamation-circle"></i> Crítico
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tab Content: Categorías Críticas -->
+            <div class="tab-content" id="tab-critical">
+                <div class="critical-analysis">
+                    <div class="critical-header">
+                        <h3 class="critical-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Top 5 Categorías Más Críticas
+                        </h3>
+                        <p class="critical-subtitle">Las 5 categorías con menor puntuación que requieren atención prioritaria</p>
+                    </div>
+                    
+                    {% if top_5_critical_categories %}
+                    <div class="critical-chart-container">
+                        <canvas id="criticalCategoriesChart" style="height: 350px; max-height: 350px;"></canvas>
+                    </div>
+
+                                        <!-- Resumen de categorías críticas -->
+                    <div class="critical-summary">
+                        <div class="summary-grid">
+                            {% for category in top_5_critical_categories %}
+                            <div class="summary-item 
+                                {% if category.percentage < 40 %}critical
+                                {% elif category.percentage < 60 %}moderate
+                                {% else %}warning{% endif %}">
+                                <div class="summary-rank">{{ forloop.counter }}</div>
+                                <div class="summary-info">
+                                    <h5 class="summary-name">{{ category.name }}</h5>
+                                    <div class="summary-score">{{ category.percentage }}%</div>
+                                </div>
+                                <div class="summary-indicator">
+                                    {% if category.percentage < 40 %}
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        <span>Crítico</span>
+                                    {% elif category.percentage < 60 %}
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>Moderado</span>
+                                    {% else %}
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Atención</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-critical-message">
+                        <i class="fas fa-chart-bar"></i>
+                        <h3>Sin Datos Suficientes</h3>
+                        <p>No hay evaluaciones disponibles para mostrar las categorías críticas.</p>
+                        <p>Realiza al menos una evaluación para ver este análisis.</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Recomendaciones de IA para Categorías Críticas -->
+                    <div class="ai-recommendations-section">
+                        <div class="ai-header">
+                            <h4 class="ai-title">
+                                <i class="fas fa-brain"></i>
+                                Recomendaciones de IA/ML
+                            </h4>
+                            <p class="ai-subtitle">Análisis inteligente y plan de acción personalizado para cada categoría crítica</p>
+                        </div>
+                        
+                        {% if ai_critical_recommendations %}
+                        <div class="ai-recommendations-grid">
+                            {% for category_code, recommendation in ai_critical_recommendations.items %}
+                            <div class="ai-recommendation-card" data-ranking="{{ recommendation.ranking }}">
+                                <div class="recommendation-header">
+                                    <div class="category-info">
+                                        <div class="ranking-badge rank-{{ recommendation.ranking }}">
+                                            #{{ recommendation.ranking }}
+                                        </div>
+                                        <div class="category-details">
+                                            <h5 class="category-title">{{ recommendation.category_name }}</h5>
+                                            <div class="category-meta">
+                                                <span class="current-score">{{ recommendation.current_score }}</span>
+                                                <span class="urgency-badge {{ recommendation.priority_level }}">
+                                                    {{ recommendation.urgency }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Insights de IA -->
+                                <div class="ai-insights">
+                                    <h6 class="insights-title">
+                                        <i class="fas fa-lightbulb"></i>
+                                        Análisis de IA
+                                    </h6>
+                                    <ul class="insights-list">
+                                        {% for insight in recommendation.ai_insights %}
+                                        <li class="insight-item">{{ insight|safe }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                
+                                <!-- Plan de Acción -->
+                                <div class="action-plan">
+                                    <div class="plan-section immediate">
+                                        <h6 class="plan-title">
+                                            <i class="fas fa-bolt"></i>
+                                            Acciones Inmediatas ({{ recommendation.timeline }})
+                                        </h6>
+                                        <ul class="action-list">
+                                            {% for action in recommendation.immediate_actions %}
+                                            <li class="action-item">{{ action }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="plan-section short-term">
+                                        <h6 class="plan-title">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            Mediano Plazo (1-3 meses)
+                                        </h6>
+                                        <ul class="action-list">
+                                            {% for action in recommendation.short_term_actions %}
+                                            <li class="action-item">{{ action }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="plan-section long-term">
+                                        <h6 class="plan-title">
+                                            <i class="fas fa-road"></i>
+                                            Largo Plazo (6+ meses)
+                                        </h6>
+                                        <ul class="action-list">
+                                            {% for action in recommendation.long_term_actions %}
+                                            <li class="action-item">{{ action }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <!-- Métricas Predictivas -->
+                                <div class="predictive-metrics">
+                                    <div class="metrics-row">
+                                        <div class="metric-item">
+                                            <span class="metric-label">Mejora Esperada (30d)</span>
+                                            <span class="metric-value improvement">{{ recommendation.expected_improvement.30_days }}</span>
+                                        </div>
+                                        <div class="metric-item">
+                                            <span class="metric-label">Inversión Estimada</span>
+                                            <span class="metric-value investment">{{ recommendation.investment_level }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    {% if recommendation.risk_factors %}
+                                    <div class="risk-factors">
+                                        <h6 class="risk-title">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Factores de Riesgo
+                                        </h6>
+                                        <div class="risk-tags">
+                                            {% for risk in recommendation.risk_factors %}
+                                            <span class="risk-tag">{{ risk }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="no-recommendations-message">
+                            <i class="fas fa-robot"></i>
+                            <h4>IA en Proceso</h4>
+                            <p>El sistema de IA está analizando los datos para generar recomendaciones personalizadas.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+
+                </div>
+            </div>
+
+            <!-- Tab Content: Historial de Evaluaciones -->
+            <div class="tab-content active" id="tab-evaluations">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h3>
+                            <i class="fas fa-clipboard-list"></i>
+                            Historial de Evaluaciones
+                        </h3>
+                    </div>
+                </div>
+
+                {% if assessments_history %}
+                <div class="evaluations-table-container">
+                    <div class="table-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="evaluationsSearch" placeholder="Buscar evaluaciones...">
+                        </div>
+                        <div class="filter-controls">
+                            <select id="statusFilter" class="filter-select">
+                                <option value="">Todos los estados</option>
+                                <option value="completed">Completadas</option>
+                                <option value="pending">Pendientes</option>
+                                <option value="in-progress">En Progreso</option>
+                            </select>
+                            <select id="dateFilter" class="filter-select">
+                                <option value="">Todas las fechas</option>
+                                <option value="last-week">Última semana</option>
+                                <option value="last-month">Último mes</option>
+                                <option value="last-quarter">Último trimestre</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table class="evaluations-table">
+                            <thead>
+                                <tr>
+                                    <th class="sortable" data-sort="date">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Fecha
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="sortable" data-sort="evaluator">
+                                        <i class="fas fa-user"></i>
+                                        Evaluador
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="sortable" data-sort="score">
+                                        <i class="fas fa-star"></i>
+                                        Puntuación
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th class="sortable" data-sort="categories">
+                                        <i class="fas fa-list"></i>
+                                        Categorías
+                                        <i class="fas fa-sort sort-icon"></i>
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-info-circle"></i>
+                                        Estado
+                                    </th>
+                                    <th>
+                                        <i class="fas fa-cogs"></i>
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="evaluationsTableBody">
+                                {% for evaluation in assessments_history %}
+                                <tr class="evaluation-row" data-evaluation-id="{{ evaluation.id }}">
+                                    <td class="date-cell">
+                                        <div class="date-info">
+                                            <span class="date-primary">{{ evaluation.assessment_date|date:"d/m/Y" }}</span>
+                                            <span class="date-secondary">{{ evaluation.assessment_date|date:"H:i" }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="evaluator-cell">
+                                        <div class="evaluator-info">
+                                            <div class="evaluator-avatar">
+                                                <i class="fas fa-user-circle"></i>
+                                            </div>
+                                            <div class="evaluator-details">
+                                                <span class="evaluator-name">{{ evaluation.created_by.get_full_name|default:evaluation.created_by.username }}</span>
+                                                <span class="evaluator-role">{{ evaluation.created_by.profile.role|default:"Evaluador" }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="score-cell">
+                                        <div class="score-display">
+                                            {% if evaluation.overall_score %}
+                                            <div class="score-circle {% if evaluation.overall_score >= 4 %}excellent{% elif evaluation.overall_score >= 3 %}good{% elif evaluation.overall_score >= 2 %}moderate{% else %}critical{% endif %}">
+                                                {{ evaluation.overall_score|floatformat:1 }}
+                                            </div>
+                                            <div class="score-details">
+                                                <span class="score-label">{{ evaluation.overall_score|floatformat:1 }}/5.0</span>
+                                                <span class="score-percentage">{{ evaluation.overall_score|mul:20|floatformat:0 }}%</span>
+                                            </div>
+                                            {% else %}
+                                            <div class="score-circle pending">
+                                                --
+                                            </div>
+                                            <div class="score-details">
+                                                <span class="score-label">Sin puntaje</span>
+                                                <span class="score-percentage">--</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td class="categories-cell">
+                                        <div class="categories-count">
+                                            <span class="count-badge">{{ evaluation.selected_categories.count }}</span>
+                                            <span class="count-label">categorías</span>
+                                        </div>
+                                    </td>
+                                    <td class="status-cell">
+                                        <span class="status-badge {% if evaluation.status == 'completed' %}completed{% elif evaluation.status == 'in_progress' %}in-progress{% else %}pending{% endif %}">
+                                            {% if evaluation.status == 'completed' %}
+                                                <i class="fas fa-check-circle"></i> Completada
+                                            {% elif evaluation.status == 'in_progress' %}
+                                                <i class="fas fa-clock"></i> En Progreso
+                                            {% elif evaluation.status == 'reviewed' %}
+                                                <i class="fas fa-circle-check"></i> Revisada
+                                            {% else %}
+                                                <i class="fas fa-hourglass-start"></i> Borrador
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <div class="action-buttons">
+                                            <button class="btn-action view" onclick="viewEvaluation('{{ evaluation.id }}')" 
+                                                    title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            {% if evaluation.status == 'completed' %}
+                                            <a href="{% url 'risk_hoteles:assessment_pdf_preview' evaluation.id %}" 
+                                               class="btn-action report" 
+                                               title="Vista previa del reporte PDF"
+                                               target="_blank">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            {% endif %}
+                                            {% if user.is_staff %}
+                                            <button class="btn-action edit" onclick="editEvaluation('{{ evaluation.id }}')" 
+                                                    title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="table-pagination">
+                        <div class="pagination-info">
+                            Mostrando <span id="showingCount">{{ assessments_history|length }}</span> de <span id="totalCount">{{ assessments_history|length }}</span> evaluaciones
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="pagination-btn" id="prevPage" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="pagination-numbers" id="paginationNumbers">
+                                <span class="page-number active">1</span>
+                            </span>
+                            <button class="pagination-btn" id="nextPage" disabled>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-evaluations-message">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>Sin Evaluaciones</h3>
+                    <p>No hay evaluaciones registradas para este hotel aún.</p>
+                    <a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Crear Primera Evaluación
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Tab Content: Gráfica Avanzada -->
+            <div class="tab-content" id="tab-heatmap">
+                <div class="radar-analysis">
+                    <div class="radar-header">
+                        <h3 class="radar-title">
+                            <i class="fas fa-chart-line"></i>
+                            Gráfica Radar - Análisis Multidimensional de Seguridad
+                        </h3>
+                        <p class="radar-subtitle">Visualización 360° del rendimiento por categorías de seguridad</p>
+                    </div>
+                    
+                    <div class="radar-container">
+                        <div class="radar-chart-wrapper">
+                            <canvas id="advancedRadarChart" style="height: 550px; width: 100%;"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="radar-legend">
+                        <h4><i class="fas fa-palette"></i> Zonas de Calor - Mapa de Rendimiento</h4>
+                        <div class="legend-scale">
+                            <div class="scale-item">
+                                <div class="scale-indicator critical"></div>
+                                <span>0-40% - Zona Crítica</span>
+                                <small>Requiere acción inmediata</small>
+                            </div>
+                            <div class="scale-item">
+                                <div class="scale-indicator moderate"></div>
+                                <span>40-60% - Zona Moderada</span>
+                                <small>Necesita mejoras graduales</small>
+                            </div>
+                            <div class="scale-item">
+                                <div class="scale-indicator good"></div>
+                                <span>60-80% - Zona Buena</span>
+                                <small>Rendimiento satisfactorio</small>
+                            </div>
+                            <div class="scale-item">
+                                <div class="scale-indicator excellent"></div>
+                                <span>80-100% - Zona Excelente</span>
+                                <small>Rendimiento óptimo</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-data-message">
+            <i class="fas fa-info-circle"></i>
+            <h3>Sin Datos de Análisis</h3>
+            <p>No hay evaluaciones disponibles para mostrar el análisis por categorías.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Aquí se pueden agregar más secciones del detalle del hotel -->
+    
+    <!-- MODAL DE EVALUACIÓN DETALLADA MEJORADO -->
+    <div id="detailModal" 
+         class="modal-overlay" 
+         role="dialog" 
+         aria-labelledby="modal-title"
+         aria-describedby="modal-description"
+         aria-hidden="true"
+         onclick="closeDetailModal(event)">
+        
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <!-- Header del Modal -->
+            <header class="modal-header">
+                <h2 id="modal-title" class="modal-title">
+                    Comparación Detallada de Evaluaciones
+                </h2>
+                <button class="modal-close" 
+                        onclick="closeDetailModal()" 
+                        aria-label="Cerrar modal"
+                        title="Cerrar ventana">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+            
+            <!-- Cuerpo del Modal -->
+            <div class="modal-body" id="modal-description">
+                <div class="charts-container">
+                    <!-- Primera Evaluación -->
+                    <section class="chart-section" aria-labelledby="first-chart-title">
+                        <header class="chart-header">
+                            <h3 id="first-chart-title" class="chart-title first">
+                                <i class="fas fa-chart-area"></i>
+                                Primera Evaluación
+                                {% if first_assessment %}
+                                <time datetime="{{ first_assessment.assessment_date|date:'Y-m-d' }}">
+                                    {{ first_assessment.assessment_date|date:"d/m/Y" }}
+                                </time>
+                                {% endif %}
+                            </h3>
+                        </header>
+                        
+                        <div class="chart-container">
+                            <canvas id="firstChart" 
+                                    aria-label="Gráfico radar de la primera evaluación"
+                                    role="img">
+                            </canvas>
+                        </div>
+                        
+                        <div class="chart-score first py-1">
+                            {% if first_assessment %}<span class="score-value">{{ first_assessment.overall_score|floatformat:1 }}/5</span>{% else %}<span class="score-na">N/A</span>{% endif %}
+                        </div>
+                    </section>
+                    
+                    <!-- Última Evaluación -->
+                    <section class="chart-section" aria-labelledby="latest-chart-title">
+                        <header class="chart-header">
+                            <h3 id="latest-chart-title" class="chart-title latest">
+                                <i class="fas fa-chart-area"></i>
+                                Última Evaluación
+                                {% if latest_assessment %}
+                                <time datetime="{{ latest_assessment.assessment_date|date:'Y-m-d' }}">
+                                    {{ latest_assessment.assessment_date|date:"d/m/Y" }}
+                                </time>
+                                {% endif %}
+                            </h3>
+                        </header>
+                        
+                        <div class="chart-container">
+                            <canvas id="latestChart" 
+                                    aria-label="Gráfico radar de la última evaluación"
+                                    role="img">
+                            </canvas>
+                        </div>
+                        
+                        <div class="chart-score latest py-1">
+                            {% if latest_assessment %}<span class="score-value">{{ latest_assessment.overall_score|floatformat:1 }}/5</span>{% else %}<span class="score-na">N/A</span>{% endif %}
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+<!-- Chart.js para las gráficas radar -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Debug condicional
+const DEBUG_MODE = {% if settings.DEBUG %}true{% else %}false{% endif %} || new URLSearchParams(window.location.search).has('debug');
+const debugLog = (message, data = null) => {
+    if (DEBUG_MODE) { data !== null ? console.log(message, data) : console.log(message); }
+};
+
+// Utils para optimizar código
+const Utils = {
+    // Cache DOM
+    elementCache: new Map(),
+    
+    // Cache mejorado para consultas DOM
+    getElement: function(selector) {
+        if (!this.elementCache.has(selector)) {
+            const element = document.querySelector(selector);
+            if (element) {
+                this.elementCache.set(selector, element);
+            }
+            debugLog(`🔍 Elemento cacheado: ${selector}`, !!element);
+        }
+        return this.elementCache.get(selector) || null;
+    },
+    
+    // Cache múltiple
+    getElements: function(selector) {
+        const cacheKey = `${selector}_all`;
+        if (!this.elementCache.has(cacheKey)) {
+            const elements = Array.from(document.querySelectorAll(selector));
+            this.elementCache.set(cacheKey, elements);
+            debugLog(`🔍 Elementos cacheados: ${selector} (${elements.length})`);
+        }
+        return this.elementCache.get(cacheKey) || [];
+    },
+    
+    // Limpiar cache cuando sea necesario
+    clearCache: function() {
+        this.elementCache.clear();
+        debugLog('🗑️ Cache DOM limpiado');
+    }
+};
+
+// Chart Utils
+const ChartUtils = {
+    destroyChart: function(chartRef) {
+        if (window[chartRef] && typeof window[chartRef].destroy === 'function') {
+            window[chartRef].destroy();
+            window[chartRef] = null;
+            debugLog(`✅ Chart destruido: ${chartRef}`);
+        }
+    },
+    
+    destroyAllCharts: function() {
+        this.destroyChart('firstChart');
+        this.destroyChart('latestChart');
+        window.chartsInitializing = false;
+        debugLog('🗑️ Todos los charts destruidos');
+    },
+    
+    safeDOMQuery: function(selector) {
+        const element = document.querySelector(selector);
+        if (!element) {
+            debugLog(`⚠️ Elemento no encontrado: ${selector}`);
+        }
+        return element;
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Hover effect para métricas
+    Utils.getElements('.metric-item').forEach(item => {
+        item.addEventListener('mouseenter', function() { this.style.transform = 'translateY(-4px) scale(1.02)'; });
+        item.addEventListener('mouseleave', function() { this.style.transform = 'translateY(0) scale(1)'; });
+    });
+    
+    // Animación progreso circular
+    const progressCircle = document.querySelector('.circle-progress');
+    if (progressCircle) {
+        const score = parseFloat(progressCircle.getAttribute('data-score')) || 0;
+        const percentage = (score / 5) * 100;
+        const circumference = 2 * Math.PI * 45;
+        const offset = circumference - (percentage / 100) * circumference;
+        
+        progressCircle.style.strokeDasharray = circumference.toString();
+        progressCircle.style.strokeDashoffset = circumference.toString();
+        
+        requestAnimationFrame(() => {
+            progressCircle.style.transition = 'stroke-dashoffset 1s ease-in-out';
+            progressCircle.style.strokeDashoffset = offset.toString();
+            
+            if (percentage >= 80) {
+                progressCircle.style.stroke = '#10b981'; // Verde
+            } else if (percentage >= 60) {
+                progressCircle.style.stroke = '#f59e0b'; // Amarillo
+            } else {
+                progressCircle.style.stroke = '#ef4444'; // Rojo
+            }
+        });
+    }
+    
+    // Animar tarjetas comparación
+    const comparisonCards = document.querySelectorAll('.comparison-card');
+    comparisonCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 200 + (index * 100)); // Reducir delay para mejor UX
+        });
+    });
+    
+    // Animar indicador de evolución
+    const evolutionIndicator = document.querySelector('.evolution-indicator');
+    if (evolutionIndicator) {
+        evolutionIndicator.style.opacity = '0';
+        evolutionIndicator.style.transform = 'scale(0.9)';
+        
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                evolutionIndicator.style.transition = 'all 0.6s ease';
+                evolutionIndicator.style.opacity = '1';
+                evolutionIndicator.style.transform = 'scale(1)';
+            }, 600); // Reducir delay
+        });
+    }
+    
+    // Animar progreso con delay
+    setTimeout(() => {
+        debugLog('⏱️ Ejecutando createEvolutionLineChart con delay...');
+        createEvolutionLineChart();
+    }, 100);
+    
+    debugLog('Hotel detail con análisis y evolución inicializado');
+    
+    // Mostrar resumen de datos cargados
+    if ({% if latest_assessment %}true{% else %}false{% endif %}) {
+        debugLog('✅ Datos reales cargados: {{ latest_assessment.selected_categories.all|length }} categorías evaluadas');
+    } else {
+        debugLog('ℹ️ No hay evaluaciones - usando interfaz de ejemplo');
+    }
+});
+
+// Line chart histórico con SVG
+function createEvolutionLineChart() {
+    debugLog('🎯 Iniciando createEvolutionLineChart...');
+    const svg = document.getElementById('evolutionLineChart');
+    if (!svg) {
+        debugLog('❌ No se encontró el elemento SVG evolutionLineChart');
+        return;
+    }
+    
+    debugLog('✅ SVG encontrado:', svg);
+    
+    // Datos de evaluaciones históricas (desde Django) - YA FILTRADO POR HOTEL EN LA VISTA
+    const chartData = {
+        labels: [
+            {% for assessment in assessments_history %}
+                "{{ assessment.assessment_date|date:'d/m/Y' }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        scores: [
+            {% for assessment in assessments_history %}
+                {% if assessment.overall_score %}{{ assessment.overall_score|floatformat:0 }}{% else %}0{% endif %}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        categories: [
+            {% for assessment in assessments_history %}
+                {{ assessment.selected_categories.count }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        assessmentIds: [
+            {% for assessment in assessments_history %}
+                "{{ assessment.id }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        hotelIds: [
+            {% for assessment in assessments_history %}
+                "{{ assessment.hotel.id }}"{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+    
+    // DEBUG: Verificar longitudes de arrays
+    debugLog('🔍 Longitudes de arrays:');
+    debugLog('  labels:', chartData.labels.length + ' (' + chartData.labels.length + ')', chartData.labels);
+    debugLog('  scores:', chartData.scores.length + ' (' + chartData.scores.length + ')', chartData.scores);
+    debugLog('  categories:', chartData.categories.length + ' (' + chartData.categories.length + ')', chartData.categories);
+    debugLog('  assessmentIds:', chartData.assessmentIds.length + ' (' + chartData.assessmentIds.length + ')', chartData.assessmentIds);
+    debugLog('  hotelIds:', chartData.hotelIds.length + ' (' + chartData.hotelIds.length + ')', chartData.hotelIds);
+    
+    // Validar que todos los scores estén en rango 0-5
+    debugLog('🔍 Validación de scores:');
+    const invalidScores = chartData.scores.filter(score => score < 0 || score > 5);
+    if (invalidScores.length > 0) {
+        debugLog('⚠️ Scores fuera de rango 0-5:', invalidScores);
+        // Corregir scores fuera de rango
+        chartData.scores = chartData.scores.map(score => Math.max(0, Math.min(5, score)));
+        debugLog('✅ Scores corregidos:', chartData.scores);
+    }
+    
+    debugLog('📊 Datos del gráfico (FILTRADOS POR HOTEL {{ hotel.id }}):', chartData);
+    debugLog('🏨 Hotel actual:', '{{ hotel.name }}', '{{ hotel.id }}');
+    debugLog('📈 Total evaluaciones del hotel:', chartData.scores.length);
+    debugLog('🔍 IDs de evaluaciones:', chartData.assessmentIds);
+    debugLog('🏨 IDs de hoteles en evaluaciones:', chartData.hotelIds);
+    
+    // Verificar si hay evaluaciones de otros hoteles
+    const otherHotels = chartData.hotelIds.filter(id => id !== '{{ hotel.id }}');
+    if (otherHotels.length > 0) {
+        debugLog('❌ ERROR: Se encontraron evaluaciones de otros hoteles:', otherHotels);
+    } else {
+        debugLog('✅ Todas las evaluaciones pertenecen al hotel correcto');
+    }
+    
+    if (chartData.scores.length === 0) {
+        debugLog('⚠️ No hay datos para mostrar en el gráfico');
+        return;
+    }
+    
+    // Verificar consistencia de arrays
+    const minLength = Math.min(
+        chartData.labels.length,
+        chartData.scores.length,
+        chartData.categories.length,
+        chartData.assessmentIds.length
+    );
+    
+    if (chartData.labels.length !== chartData.scores.length || 
+        chartData.scores.length !== chartData.categories.length) {
+        debugLog('⚠️ INCONSISTENCIA: Arrays tienen longitudes diferentes');
+        debugLog('  Usando longitud mínima:', minLength);
+        
+        // Truncar arrays al tamaño mínimo
+        chartData.labels = chartData.labels.slice(0, minLength);
+        chartData.scores = chartData.scores.slice(0, minLength);
+        chartData.categories = chartData.categories.slice(0, minLength);
+        chartData.assessmentIds = chartData.assessmentIds.slice(0, minLength);
+        chartData.hotelIds = chartData.hotelIds.slice(0, minLength);
+        
+        debugLog('✅ Arrays corregidos a longitud:', minLength);
+        debugLog('  labels corregido:', chartData.labels);
+        debugLog('  scores corregido:', chartData.scores);
+    }
+    
+    // Configuración del área del gráfico - ANCHO COMPLETO AMPLIADO
+    const width = 1000;
+    const height = 180;
+    const padding = { top: 30, right: 50, bottom: 40, left: 100 };
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+    
+    debugLog('📏 Dimensiones:', { width, height, padding, chartWidth, chartHeight });
+    
+    // Escalar datos
+    const maxScore = 5;
+    const minScore = 0;
+    const scoreRange = maxScore - minScore;
+    
+    debugLog('📊 Rango de scores:', { minScore, maxScore, scoreRange });
+    
+    // Calcular posiciones de los puntos - usando arrays corregidos
+    const points = chartData.scores.map((score, index) => {
+        if (index >= chartData.labels.length) {
+            debugLog(`⚠️ Índice ${index} fuera de rango para labels`);
+            return null;
+        }
+        
+        const x = padding.left + (index / Math.max(chartData.scores.length - 1, 1)) * chartWidth;
+        // Corregir cálculo Y: Y aumenta hacia abajo en SVG
+        const normalizedScore = Math.max(0, Math.min(5, score)); // Asegurar que esté en rango 0-5
+        const y = padding.top + chartHeight * (1 - (normalizedScore / maxScore)); // Invertir para SVG
+        
+        return { 
+            x: Math.round(x), 
+            y: Math.round(y), 
+            score: normalizedScore, 
+            label: chartData.labels[index], 
+            categories: chartData.categories[index] 
+        };
+    }).filter(point => point !== null); // Filtrar puntos nulos
+    
+    debugLog('📍 Puntos calculados (CORREGIDOS):', points);
+    
+    // Crear la línea suavizada (curva Bézier simplificada)
+    let pathData = '';
+    if (points.length > 0) {
+        pathData = `M ${points[0].x} ${points[0].y}`;
+        
+        if (points.length === 1) {
+            // Solo un punto, no necesitamos curva
+        } else if (points.length === 2) {
+            // Línea simple entre dos puntos
+            pathData += ` L ${points[1].x} ${points[1].y}`;
+        } else {
+            // Curvas suaves para múltiples puntos
+            for (let i = 1; i < points.length; i++) {
+                const curr = points[i];
+                const prev = points[i - 1];
+                
+                if (i === 1) {
+                    // Primera curva más simple
+                    const midX = (prev.x + curr.x) / 2;
+                    pathData += ` Q ${midX} ${prev.y}, ${curr.x} ${curr.y}`;
+                } else {
+                    // Curvas suaves
+                    const tension = 0.2;
+                    const cp1x = prev.x + (curr.x - prev.x) * tension;
+                    const cp1y = prev.y;
+                    const cp2x = curr.x - (curr.x - prev.x) * tension;
+                    const cp2y = curr.y;
+                    pathData += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${curr.x} ${curr.y}`;
+                }
+            }
+        }
+    }
+    
+    debugLog('📈 Path data:', pathData);
+    
+    // Crear path del área (para el relleno)
+    let areaPath = '';
+    if (points.length > 0) {
+        areaPath = pathData; // Usar el mismo path de la línea
+        const lastPoint = points[points.length - 1];
+        const firstPoint = points[0];
+        const bottomY = padding.top + chartHeight; // Línea base del gráfico
+        
+        // Cerrar el área hacia abajo
+        areaPath += ` L ${lastPoint.x} ${bottomY}`;
+        areaPath += ` L ${firstPoint.x} ${bottomY}`;
+        areaPath += ' Z';
+    }
+    
+    debugLog('🎨 Area path:', areaPath);
+    
+    // Actualizar el SVG
+    const linePathElement = svg.querySelector('#linePath');
+    const areaPathElement = svg.querySelector('#areaPath');
+    const dataPointsGroup = svg.querySelector('#dataPoints');
+    const xLabelsGroup = svg.querySelector('#xLabels');
+    
+    debugLog('🔍 Elementos encontrados:', {
+        linePathElement,
+        areaPathElement,
+        dataPointsGroup,
+        xLabelsGroup
+    });
+    
+    if (linePathElement) {
+        linePathElement.setAttribute('d', pathData);
+        debugLog('✅ Línea actualizada:', pathData);
+    
+    // Calcular degradado dinámico de la línea basado en puntuaciones
+    if (linePathElement && chartData.scores.length > 0) {
+        const avgScore = chartData.scores.reduce((sum, score) => sum + parseFloat(score), 0) / chartData.scores.length;
+        const lineGradient = svg.querySelector('#lineStroke');
+        
+        if (lineGradient) {
+            const lineStart = lineGradient.querySelector('#lineStart');
+            const lineMiddle = lineGradient.querySelector('#lineMiddle');
+            const lineEnd = lineGradient.querySelector('#lineEnd');
+            
+            // Ajustar colores basado en la progresión de scores
+            const firstScore = parseFloat(chartData.scores[0]);
+            const lastScore = parseFloat(chartData.scores[chartData.scores.length - 1]);
+            
+            // Color inicial basado en primera puntuación
+            if (firstScore <= 2) {
+                lineStart.setAttribute('style', 'stop-color:#ef4444'); // Rojo
+            } else if (firstScore <= 3.5) {
+                lineStart.setAttribute('style', 'stop-color:#f59e0b'); // Amarillo
+            } else {
+                lineStart.setAttribute('style', 'stop-color:#10b981'); // Verde
+            }
+            
+            // Color final basado en última puntuación
+            if (lastScore <= 2) {
+                lineEnd.setAttribute('style', 'stop-color:#ef4444'); // Rojo
+            } else if (lastScore <= 3.5) {
+                lineEnd.setAttribute('style', 'stop-color:#f59e0b'); // Amarillo
+            } else {
+                lineEnd.setAttribute('style', 'stop-color:#10b981'); // Verde
+            }
+            
+            // Color medio basado en promedio
+            if (avgScore <= 2) {
+                lineMiddle.setAttribute('style', 'stop-color:#f87171'); // Rojo claro
+            } else if (avgScore <= 3.5) {
+                lineMiddle.setAttribute('style', 'stop-color:#fbbf24'); // Amarillo
+            } else {
+                lineMiddle.setAttribute('style', 'stop-color:#34d399'); // Verde claro
+            }
+            
+            debugLog(`🎨 Degradado aplicado: Primera=${firstScore} Promedio=${avgScore.toFixed(1)} Última=${lastScore}`);
+        }
+    }
+    }
+    if (areaPathElement) {
+        areaPathElement.setAttribute('d', areaPath);
+        debugLog('✅ Área actualizada');
+    }
+    
+    // Limpiar puntos y etiquetas existentes
+    if (dataPointsGroup) dataPointsGroup.innerHTML = '';
+    if (xLabelsGroup) xLabelsGroup.innerHTML = '';
+    
+    // Agregar puntos de datos
+    debugLog('🔵 Agregando puntos al SVG...');
+    points.forEach((point, index) => {
+        debugLog(`Punto ${index + 1}:`, {
+            x: point.x,
+            y: point.y,
+            score: point.score,
+            label: point.label,
+            categories: point.categories
+        });
+        
+        // Punto principal con color basado en puntuación
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', point.x);
+        circle.setAttribute('cy', point.y);
+        circle.setAttribute('r', '5');
+        
+        // Determinar color y degradado basado en score
+        let fillColor, strokeColor, gradientId;
+        if (point.score <= 2) {
+            fillColor = 'url(#pointGradientLow)';
+            strokeColor = '#dc2626';
+            gradientId = 'pointGradientLow';
+        } else if (point.score <= 3.5) {
+            fillColor = 'url(#pointGradientMedium)';
+            strokeColor = '#d97706';
+            gradientId = 'pointGradientMedium';
+        } else {
+            fillColor = 'url(#pointGradientHigh)';
+            strokeColor = '#059669';
+            gradientId = 'pointGradientHigh';
+        }
+        
+        circle.setAttribute('fill', fillColor);
+        circle.setAttribute('stroke', strokeColor);
+        circle.setAttribute('stroke-width', '2');
+        circle.setAttribute('filter', 'url(#dropShadow)');
+        circle.style.cursor = 'pointer';
+        
+        // Agregar identificador para debugging
+        circle.setAttribute('data-assessment-index', index);
+        circle.setAttribute('data-score', point.score);
+        circle.setAttribute('data-label', point.label);
+        circle.setAttribute('data-gradient', gradientId);
+        
+        // Tooltip en hover con colores semáforo
+        circle.addEventListener('mouseenter', (e) => {
+            // Aumentar tamaño del punto con efecto pulsante
+            circle.setAttribute('r', '7');
+            circle.style.transition = 'r 0.2s ease';
+            
+            // Determinar color del tooltip basado en score
+            let bgColor, textColor, statusText, statusIcon;
+            if (point.score <= 2) {
+                bgColor = 'rgba(239, 68, 68, 0.95)';
+                textColor = 'white';
+                statusText = 'Riesgo Alto';
+                statusIcon = '🔴';
+            } else if (point.score <= 3.5) {
+                bgColor = 'rgba(245, 158, 11, 0.95)';
+                textColor = 'white';
+                statusText = 'Riesgo Medio';
+                statusIcon = '🟡';
+            } else {
+                bgColor = 'rgba(16, 185, 129, 0.95)';
+                textColor = 'white';
+                statusText = 'Bajo Riesgo';
+                statusIcon = '🟢';
+            }
+            
+            // Crear tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'svg-tooltip';
+            tooltip.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 4px;">
+                    ${statusIcon} ${statusText}
+                </div>
+                <div><strong>Evaluación del ${point.label}</strong></div>
+                <div>Puntuación: ${point.score}/5.0</div>
+                <div>Categorías: ${point.categories}</div>
+                <div>Porcentaje: ${Math.round(point.score * 20)}%</div>
+            `;
+            tooltip.style.cssText = `
+                position: absolute;
+                background: ${bgColor};
+                color: ${textColor};
+                padding: 10px 14px;
+                border-radius: 8px;
+                font-size: 12px;
+                pointer-events: none;
+                z-index: 1000;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                line-height: 1.4;
+            `;
+            
+            document.body.appendChild(tooltip);
+            
+            const moveTooltip = (event) => {
+                tooltip.style.left = (event.pageX + 15) + 'px';
+                tooltip.style.top = (event.pageY - tooltip.offsetHeight - 15) + 'px';
+            };
+            
+            e.target.addEventListener('mousemove', moveTooltip);
+            e.target.addEventListener('mouseleave', () => {
+                tooltip.remove();
+                circle.setAttribute('r', '5');
+                circle.style.transition = 'r 0.2s ease';
+            });
+            
+            moveTooltip(e);
+        });
+        
+        if (dataPointsGroup) dataPointsGroup.appendChild(circle);
+        
+        // Etiqueta X (solo mostrar algunas para evitar solapamiento)
+        const showLabel = chartData.labels.length <= 4 || index % Math.ceil(chartData.labels.length / 4) === 0 || index === chartData.labels.length - 1;
+        if (showLabel && xLabelsGroup) {
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', point.x);
+            text.setAttribute('y', height - 15);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#6b7280');
+            text.setAttribute('font-size', '12');
+            text.setAttribute('font-family', 'Arial, sans-serif');
+            text.textContent = point.label;
+            xLabelsGroup.appendChild(text);
+        }
+    });
+    
+    debugLog('✅ Gráfico completado');
+    debugLog(`📊 Total puntos agregados: ${points.length}`);
+    debugLog(`🎯 Elementos en dataPointsGroup: ${dataPointsGroup ? dataPointsGroup.children.length : 'N/A'}`);
+    
+    // Animación de entrada
+    if (linePathElement) {
+        const pathLength = linePathElement.getTotalLength();
+        linePathElement.style.strokeDasharray = pathLength;
+        linePathElement.style.strokeDashoffset = pathLength;
+        linePathElement.style.transition = 'stroke-dashoffset 2s ease-in-out';
+        
+        // Trigger animation
+        setTimeout(() => {
+            linePathElement.style.strokeDashoffset = '0';
+        }, 100);
+    }
+    
+    // Animación del área
+    if (areaPathElement) {
+        areaPathElement.style.opacity = '0';
+        areaPathElement.style.transition = 'opacity 1s ease-in-out 0.5s';
+        setTimeout(() => {
+            areaPathElement.style.opacity = '1';
+        }, 100);
+    }
+}
+
+// Funciones del Modal con Accesibilidad Mejorada
+function openDetailModal() {
+    const modal = Utils.getElement('#detailModal');
+    const modalTitle = Utils.getElement('#modal-title');
+    
+    if (!modal) return;
+    
+    // Guardar elemento que tenía el foco
+    window.modalPreviousFocus = document.activeElement;
+    
+    // Mostrar modal
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    
+    // Enfocar el título del modal
+    if (modalTitle) {
+        modalTitle.focus();
+    }
+    
+    // Agregar listener para ESC key
+    document.addEventListener('keydown', handleModalKeyDown);
+    
+    // Crear las gráficas con requestAnimationFrame para mejor rendimiento
+    requestAnimationFrame(() => {
+        createRadarCharts();
+    });
+    
+    debugLog('✅ Modal abierto con accesibilidad mejorada');
+}
+
+function closeDetailModal(event) {
+    // Verificar si el click es válido
+    if (event && event.target !== event.currentTarget && event.type === 'click') return;
+    
+    const modal = Utils.getElement('#detailModal');
+    if (!modal) return;
+    
+    // Ocultar modal
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    
+    // Remover listener de teclado
+    document.removeEventListener('keydown', handleModalKeyDown);
+    
+    // Restaurar foco
+    if (window.modalPreviousFocus) {
+        window.modalPreviousFocus.focus();
+        window.modalPreviousFocus = null;
+    }
+    
+    // Destruir las gráficas para evitar conflictos
+    ChartUtils.destroyAllCharts();
+    
+    debugLog('✅ Modal cerrado correctamente');
+}
+
+// Manejar teclas del modal (ESC, Tab trap)
+function handleModalKeyDown(event) {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeDetailModal();
+        return;
+    }
+    
+    // Focus trap básico
+    if (event.key === 'Tab') {
+        const modal = Utils.getElement('#detailModal');
+        if (!modal || !modal.classList.contains('show')) return;
+        
+        const focusableElements = modal.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        
+        if (focusableElements.length === 0) return;
+        
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+        
+        if (event.shiftKey) {
+            if (document.activeElement === firstElement) {
+                event.preventDefault();
+                lastElement.focus();
+            }
+        } else {
+            if (document.activeElement === lastElement) {
+                event.preventDefault();
+                firstElement.focus();
+            }
+        }
+    }
+}
+
+// Crear gráficas comparativas - Ambas Radar Charts
+function createRadarCharts() {
+    // Prevenir múltiples inicializaciones
+    if (window.chartsInitializing) {
+        debugLog('⏳ Gráficos ya se están inicializando...');
+        return;
+    }
+    window.chartsInitializing = true;
+    
+    // Datos reales de evaluaciones
+    const firstAssessmentData = {};
+    const latestAssessmentData = {};
+    const labels = [];
+    
+    {% if first_assessment and latest_assessment %}
+        // Obtener categorías de la última evaluación para los labels
+        {% if latest_assessment.category_scores.all %}
+            {% for score in latest_assessment.category_scores.all %}
+                labels.push('{{ score.category.name|escapejs }}');
+                latestAssessmentData['{{ score.category.code }}'] = {{ score.percentage|js_number:1 }}; // Usar porcentaje directo (0-100)
+            {% endfor %}
+        {% endif %}
+        
+        // Obtener datos de la primera evaluación (matching categories)
+        {% if first_assessment.category_scores.all %}
+            {% for score in first_assessment.category_scores.all %}
+                firstAssessmentData['{{ score.category.code }}'] = {{ score.percentage|js_number:1 }}; // Usar porcentaje directo (0-100)
+            {% endfor %}
+        {% endif %}
+        
+        // Asegurar que ambas evaluaciones tengan los mismos datos
+        {% if latest_assessment.category_scores.all %}
+            {% for score in latest_assessment.category_scores.all %}
+                if (!firstAssessmentData.hasOwnProperty('{{ score.category.code }}')) {
+                    firstAssessmentData['{{ score.category.code }}'] = 0; // Default para categorías no evaluadas en la primera
+                }
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+    
+    // Debug: mostrar datos en consola (optimizado)
+    if (console.groupCollapsed) {
+        console.groupCollapsed('🎯 Hotel Detail - Datos de Evaluación');
+        debugLog('📊 Labels:', labels.length, 'categorías:', labels);
+        debugLog('🔴 Primera evaluación:', Object.keys(firstAssessmentData).length, 'categorías:', firstAssessmentData);
+        debugLog('🟢 Última evaluación:', Object.keys(latestAssessmentData).length, 'categorías:', latestAssessmentData);
+        debugLog('✅ Evaluaciones disponibles:', {% if first_assessment and latest_assessment %}true{% else %}false{% endif %});
+        
+        // Agregar debugging adicional
+        debugLog('🔍 First Assessment ID:', {% if first_assessment %}'{{ first_assessment.id }}'{% else %}null{% endif %});
+        debugLog('🔍 Latest Assessment ID:', {% if latest_assessment %}'{{ latest_assessment.id }}'{% else %}null{% endif %});
+        debugLog('🔍 First Assessment Scores Count:', {% if first_assessment %}{{ first_assessment.category_scores.count }}{% else %}0{% endif %});
+        debugLog('🔍 Latest Assessment Scores Count:', {% if latest_assessment %}{{ latest_assessment.category_scores.count }}{% else %}0{% endif %});
+        
+        console.groupEnd();
+    }
+    
+    // Verificar si hay datos válidos para mostrar
+    const hasLabels = labels.length > 0;
+    const hasFirstData = Object.keys(firstAssessmentData).length > 0;
+    const hasLatestData = Object.keys(latestAssessmentData).length > 0;
+    
+    debugLog('🔍 Verificación de datos:', {
+        'Tiene labels': hasLabels,
+        'Tiene datos primera': hasFirstData,
+        'Tiene datos última': hasLatestData,
+        'Labels count': labels.length,
+        'First data keys': Object.keys(firstAssessmentData).length,
+        'Latest data keys': Object.keys(latestAssessmentData).length
+    });
+    
+    // Solo usar datos de ejemplo si NO HAY evaluaciones Django válidas
+    const shouldUseRealData = {% if first_assessment and latest_assessment %}true{% else %}false{% endif %} && hasLabels && hasLatestData;
+    
+    if (!shouldUseRealData) {
+        debugLog('⚠️ Usando datos de ejemplo - Razón:', {
+            'Django evaluations exist': {% if first_assessment and latest_assessment %}true{% else %}false{% endif %},
+            'Has labels': hasLabels,
+            'Has latest data': hasLatestData
+        });
+        
+        // Datos de ejemplo cuando no hay evaluaciones reales
+        const exampleCategories = [
+            'Seguridad Física',
+            'Procedimientos de Emergencia', 
+            'Capacitación del Personal',
+            'Infraestructura',
+            'Documentación',
+            'Mantenimiento'
+        ];
+        
+        labels.splice(0, labels.length, ...exampleCategories);
+        
+        // Limpiar datos existentes
+        for (let key in firstAssessmentData) delete firstAssessmentData[key];
+        for (let key in latestAssessmentData) delete latestAssessmentData[key];
+        
+        // Datos de ejemplo
+        exampleCategories.forEach((_, index) => {
+            firstAssessmentData[`cat_${index}`] = Math.random() * 40 + 30; // 30-70% para mostrar progreso inicial
+            latestAssessmentData[`cat_${index}`] = Math.random() * 30 + 60; // 60-90% para mostrar mejora
+        });
+    } else {
+        debugLog('✅ Usando datos REALES de evaluaciones');
+        
+        // Para la primera evaluación, si no tiene datos para alguna categoría, usar 0
+        labels.forEach((label, index) => {
+            const categoryCode = Object.keys(latestAssessmentData)[index];
+            if (!firstAssessmentData.hasOwnProperty(categoryCode)) {
+                firstAssessmentData[categoryCode] = 0;
+                debugLog(`⚠️ Categoría '${label}' no encontrada en primera evaluación, usando 0`);
+            }
+        });
+    }
+    
+    // Convertir los datos en arrays ordenados para Chart.js
+    let firstChartData = [];
+    let latestChartData = [];
+    
+    // Obtener claves ordenadas basadas en labels
+    const orderedKeys = labels.map((label, index) => {
+        // Si usamos datos reales, buscar la clave correspondiente
+        if (shouldUseRealData) {
+            const allKeys = Object.keys(latestAssessmentData);
+            return allKeys[index] || `missing_${index}`;
+        } else {
+            return `cat_${index}`;
+        }
+    });
+    
+    debugLog('🔑 Claves ordenadas para gráficos:', orderedKeys);
+    
+    // Crear arrays de datos ordenados
+    orderedKeys.forEach(key => {
+        firstChartData.push(firstAssessmentData[key] || 0);
+        latestChartData.push(latestAssessmentData[key] || 0);
+    });
+    
+    debugLog('📊 Datos finales para gráficos:', {
+        'Labels': labels,
+        'Primera evaluación': firstChartData,
+        'Última evaluación': latestChartData
+    });
+    
+    // Función para generar colores dinámicos basados en performance
+    function generatePolarColors(dataValues, baseHue) {
+        return dataValues.map(value => {
+            let opacity = 0.8;
+            let saturation = 80;
+            let lightness;
+            
+            if (value >= 80) {
+                lightness = 45; // Verde oscuro para excelente
+                return `hsla(142, ${saturation}%, ${lightness}%, ${opacity})`;
+            } else if (value >= 60) {
+                lightness = 55; // Verde claro para bueno
+                return `hsla(120, ${saturation}%, ${lightness}%, ${opacity})`;
+            } else if (value >= 40) {
+                lightness = 50; // Amarillo para moderado
+                return `hsla(45, ${saturation}%, ${lightness}%, ${opacity})`;
+            } else {
+                lightness = 50; // Rojo para crítico
+                return `hsla(0, ${saturation}%, ${lightness}%, ${opacity})`;
+            }
+        });
+    }
+    
+    // Configuración base para Radar Charts
+    const radarBaseConfig = {
+        type: 'radar',
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    stepSize: 20,
+                    ticks: {
+                        color: '#6b7280',
+                        backdropColor: 'rgba(255, 255, 255, 0.8)',
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: '#e5e7eb',
+                        lineWidth: 1
+                    },
+                    angleLines: {
+                        color: '#d1d5db',
+                        lineWidth: 1
+                    },
+                    pointLabels: {
+                        color: '#374151',
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        padding: 20,
+                        callback: function(label, index) {
+                            // Truncar etiquetas largas para radar
+                            if (label.length > 12) {
+                                return label.substring(0, 10) + '...';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#374151',
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        padding: 10,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        generateLabels: function(chart) {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const value = data.datasets[0].data[i];
+                                    const backgroundColor = data.datasets[0].backgroundColor[i];
+                                    return {
+                                        text: `${label}: ${value.toFixed(1)}%`,
+                                        fillStyle: backgroundColor,
+                                        strokeStyle: backgroundColor,
+                                        pointStyle: 'circle'
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const percentage = context.parsed.r.toFixed(1);
+                            return `Puntuación: ${percentage}%`;
+                        },
+                        afterLabel: function(context) {
+                            const percentage = context.parsed.r;
+                            let performance = '';
+                            if (percentage >= 80) performance = '🟢 Excelente';
+                            else if (percentage >= 60) performance = '🟡 Bueno';
+                            else if (percentage >= 40) performance = '🟠 Regular';
+                            else performance = '🔴 Deficiente';
+                            return performance;
+                        }
+                    }
+                }
+            },
+            elements: {
+                arc: {
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }
+            }
+        }
+    };
+    
+    // Generar colores para ambas gráficas
+    // Ya no necesitamos colores polares para gráficos radar
+    // const firstPolarColors = generatePolarColors(Object.values(firstAssessmentData), 0); // Tonos rojizos para primera
+    // const latestPolarColors = generatePolarColors(Object.values(latestAssessmentData), 120); // Tonos verdosos para última
+    
+    // Debugging específico para Primera Evaluación
+    debugLog('🔴 DEBUG - Primera Evaluación:');
+    debugLog('📊 Labels:', labels);
+    debugLog('📈 Datos Primera:', Object.values(firstAssessmentData));
+    debugLog('📉 Datos Última:', Object.values(latestAssessmentData));
+    debugLog('🎯 firstChart Canvas:', document.getElementById('firstChart'));
+    
+    // Limpiar gráficos existentes antes de crear nuevos
+    ChartUtils.destroyAllCharts();
+    
+    // Verificar que los canvas existen y están limpios
+    const firstCanvas = document.getElementById('firstChart');
+    const latestCanvas = document.getElementById('latestChart');
+    
+    if (!firstCanvas || !latestCanvas) {
+        debugLog('❌ Canvas elements not found!');
+        return;
+    }
+    
+    // Limpiar cualquier contenido previo de los canvas
+    const firstCtx = firstCanvas.getContext('2d');
+    const latestCtx = latestCanvas.getContext('2d');
+    firstCtx.clearRect(0, 0, firstCanvas.width, firstCanvas.height);
+    latestCtx.clearRect(0, 0, latestCanvas.width, latestCanvas.height);
+    
+    // Usar los datos ya procesados anteriormente
+    const firstDataArray = firstChartData;
+    const latestDataArray = latestChartData;
+    
+    debugLog('🔍 Arrays de datos construidos:', {
+        'Labels count': labels.length,
+        'First data length': firstDataArray.length,
+        'Latest data length': latestDataArray.length,
+        'First sample': firstDataArray.slice(0, 3),
+        'Latest sample': latestDataArray.slice(0, 3)
+    });
+    
+    // Test completo de diferencias
+    debugLog('📊 TEST COMPLETO - Comparacion Detallada de Evaluaciones:');
+    debugLog('============================================================');
+    
+    let totalDifferences = 0;
+    let significantDifferences = 0;
+    
+    for (let i = 0; i < Math.min(labels.length, firstDataArray.length, latestDataArray.length); i++) {
+        const categoria = labels[i];
+        const primera = firstDataArray[i];
+        const ultima = latestDataArray[i];
+        const diferencia = ultima - primera;
+        
+        totalDifferences += Math.abs(diferencia);
+        if (Math.abs(diferencia) > 5) significantDifferences++;
+        
+        debugLog(`${categoria}:`);
+        debugLog(`  Primera: ${primera.toFixed(1)}% | Ultima: ${ultima.toFixed(1)}% | Dif: ${diferencia.toFixed(1)}%`);
+    }
+    
+    debugLog('============================================================');
+    debugLog(`✅ Diferencias totales detectadas: ${totalDifferences.toFixed(1)}%`);
+    debugLog(`✅ Categorias con diferencias significativas (>5%): ${significantDifferences}`);
+    debugLog(`✅ Promedio de diferencia: ${(totalDifferences/labels.length).toFixed(1)}%`);
+    debugLog(`✅ Estado del test: ${totalDifferences > 50 ? 'PASADO - Datos diferentes detectados' : 'FALLO - Datos muy similares'}`);
+    debugLog('============================================================');
+    
+    // Primera evaluación - Radar Chart con tema rojo
+    window.firstChart = new Chart(firstCtx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Primera Evaluación',
+                data: firstDataArray,
+                backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                borderColor: 'rgba(239, 68, 68, 0.8)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    stepSize: 20,
+                    ticks: {
+                        color: '#6b7280',
+                        backdropColor: 'rgba(255, 255, 255, 0.8)',
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: '#e5e7eb',
+                        lineWidth: 1
+                    },
+                    angleLines: {
+                        color: '#d1d5db',
+                        lineWidth: 1
+                    },
+                    pointLabels: {
+                        color: '#374151',
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        padding: 20,
+                        callback: function(label, index) {
+                            if (label.length > 12) {
+                                return label.substring(0, 10) + '...';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#374151',
+                        font: { size: 12, weight: '600' },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(239, 68, 68, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const percentage = context.parsed.r.toFixed(1);
+                            return `Primera Evaluación: ${percentage}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Última evaluación - Radar Chart con tema verde
+    window.latestChart = new Chart(latestCtx, {
+        type: 'radar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Última Evaluación',
+                data: latestDataArray,
+                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                borderColor: 'rgba(16, 185, 129, 0.8)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    stepSize: 20,
+                    ticks: {
+                        color: '#6b7280',
+                        backdropColor: 'rgba(255, 255, 255, 0.8)',
+                        font: {
+                            size: 10,
+                            weight: '500'
+                        },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: '#e5e7eb',
+                        lineWidth: 1
+                    },
+                    angleLines: {
+                        color: '#d1d5db',
+                        lineWidth: 1
+                    },
+                    pointLabels: {
+                        color: '#374151',
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        padding: 20,
+                        callback: function(label, index) {
+                            if (label.length > 12) {
+                                return label.substring(0, 10) + '...';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        color: '#374151',
+                        font: { size: 12, weight: '600' },
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    padding: 12,
+                    cornerRadius: 8,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const percentage = context.parsed.r.toFixed(1);
+                            return `Última Evaluación: ${percentage}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Marcar que la inicialización ha terminado
+    window.chartsInitializing = false;
+    debugLog('✅ Gráficos radar inicializados correctamente');
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeDetailModal();
+    }
+});
+
+// Función personalizada para calcular diferencia (para el template)
+function subtract(a, b) {
+    return parseFloat(a) - parseFloat(b);
+}
+
+// Animar barras de progreso del análisis IA
+function animateProgressBars() {
+    const progressBars = document.querySelectorAll('.progress-bar[data-percentage]');
+    
+    progressBars.forEach((bar, index) => {
+        const percentage = parseFloat(bar.getAttribute('data-percentage'));
+        
+        // Iniciar con width 0
+        bar.style.width = '0%';
+        
+        // Animar después de un pequeño delay escalonado
+        setTimeout(() => {
+            bar.style.width = percentage + '%';
+        }, index * 200 + 500); // 500ms inicial + 200ms por barra
+    });
+}
+
+// SISTEMA DE TABS
+function initializeTabs() {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            
+            // Remover active de todos los botones y contenidos
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Agregar active al botón clickeado y su contenido
+            button.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            
+            // Ejecutar funciones específicas según el tab
+            if (tabId === 'heatmap') {
+                createAdvancedRadarChart();
+            } else if (tabId === 'critical') {
+                animateCriticalCards();
+            } else if (tabId === 'evaluations') {
+                handleTabChange('evaluations');
+            } else if (tabId === 'general') {
+                // Re-animar barras de progreso
+                setTimeout(() => {
+                    animateProgressBars();
+                }, 100);
+            }
+        });
+    });
+}
+
+// FUNCIONES DE LA GRÁFICA RADAR
+let advancedRadarChart = null;
+
+function createAdvancedRadarChart() {
+    const canvas = document.getElementById('advancedRadarChart');
+    if (!canvas) return;
+    
+    // Destruir gráfica existente si existe
+    if (advancedRadarChart) {
+        advancedRadarChart.destroy();
+        advancedRadarChart = null;
+    }
+    
+    // Preparar datos de todas las categorías
+    const radarData = [
+        {% if category_averages %}
+            {% for code, data in category_averages.items %}
+            {
+                name: "{{ data.name|escapejs }}",
+                percentage: {{ data.percentage|js_number:1 }},
+                score: {{ data.average_score|js_number:1 }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ];
+    
+    debugLog('🎯 Datos del radar avanzado:', radarData);
+    
+    if (radarData.length === 0) {
+        // Si no hay datos, mostrar mensaje
+        canvas.style.display = 'none';
+        const container = canvas.closest('.radar-chart-wrapper');
+        if (container) {
+            container.innerHTML = '<div style="text-align: center; padding: 3rem; color: #6b7280;"><i class="fas fa-info-circle" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i><h4>Sin Datos de Evaluación</h4><p>Complete una evaluación para ver la gráfica radar.</p></div>';
+        }
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Crear gradiente para el área
+    const gradient = ctx.createRadialGradient(
+        canvas.width / 2, canvas.height / 2, 0,
+        canvas.width / 2, canvas.height / 2, canvas.width / 2
+    );
+    gradient.addColorStop(0, 'rgba(102, 126, 234, 0.6)');
+    gradient.addColorStop(0.5, 'rgba(102, 126, 234, 0.3)');
+    gradient.addColorStop(1, 'rgba(102, 126, 234, 0.1)');
+    
+    advancedRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: radarData.map(item => {
+                // Truncar nombres largos para mejor visualización
+                if (item.name.length > 15) {
+                    return item.name.substring(0, 12) + '...';
+                }
+                return item.name;
+            }),
+            datasets: [
+                // Zona Crítica (0-40%) - Rojo
+                {
+                    label: 'Zona Crítica',
+                    data: new Array(radarData.length).fill(40),
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    borderColor: 'rgba(239, 68, 68, 0.3)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: true,
+                    order: 4
+                },
+                // Zona Moderada (40-60%) - Naranja/Amarillo
+                {
+                    label: 'Zona Moderada',
+                    data: new Array(radarData.length).fill(60),
+                    backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                    borderColor: 'rgba(245, 158, 11, 0.25)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: true,
+                    order: 3
+                },
+                // Zona Buena (60-80%) - Verde claro
+                {
+                    label: 'Zona Buena',
+                    data: new Array(radarData.length).fill(80),
+                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                    borderColor: 'rgba(34, 197, 94, 0.2)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: true,
+                    order: 2
+                },
+                // Zona Excelente (80-100%) - Verde oscuro
+                {
+                    label: 'Zona Excelente',
+                    data: new Array(radarData.length).fill(100),
+                    backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                    borderColor: 'rgba(16, 185, 129, 0.15)',
+                    borderWidth: 1,
+                    pointRadius: 0,
+                    pointHoverRadius: 0,
+                    fill: true,
+                    order: 1
+                },
+                // Datos reales - Principal
+                {
+                    label: 'Rendimiento Actual',
+                    data: radarData.map(item => item.percentage),
+                    borderColor: '#1f2937',
+                    backgroundColor: 'rgba(31, 41, 55, 0.1)',
+                    pointBackgroundColor: function(context) {
+                        const value = context.parsed.r;
+                        if (value >= 80) return '#10b981'; // Verde
+                        if (value >= 60) return '#22c55e'; // Verde claro
+                        if (value >= 40) return '#f59e0b'; // Amarillo
+                        return '#ef4444'; // Rojo
+                    },
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 3,
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    borderWidth: 4,
+                    fill: true,
+                    tension: 0.1,
+                    order: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20,
+                        color: '#6b7280',
+                        backdropColor: 'rgba(255, 255, 255, 0.9)',
+                        font: {
+                            size: 11,
+                            weight: '600'
+                        },
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(107, 114, 128, 0.3)',
+                        lineWidth: 1,
+                        circular: true
+                    },
+                    angleLines: {
+                        color: 'rgba(107, 114, 128, 0.2)',
+                        lineWidth: 1
+                    },
+                    pointLabels: {
+                        color: '#374151',
+                        font: {
+                            size: 12,
+                            weight: '700'
+                        },
+                        padding: 20,
+                        callback: function(label, index) {
+                            return label;
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        filter: function(legendItem, chartData) {
+                            // Mostrar solo el dataset principal en la leyenda
+                            return legendItem.datasetIndex === 4; // Rendimiento Actual
+                        },
+                        color: '#374151',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: '#1f2937',
+                    borderWidth: 2,
+                    titleFont: {
+                        size: 14,
+                        weight: 'bold'
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    padding: 15,
+                    cornerRadius: 12,
+                    displayColors: true,
+                    filter: function(tooltipItem) {
+                        // Mostrar tooltip solo para el dataset principal
+                        return tooltipItem.datasetIndex === 4;
+                    },
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const index = tooltipItems[0].dataIndex;
+                            return radarData[index].name;
+                        },
+                        label: function(context) {
+                            const index = context.dataIndex;
+                            const data = radarData[index];
+                            const percentage = data.percentage;
+                            let level = '';
+                            if (percentage >= 80) level = '🟢 Excelente';
+                            else if (percentage >= 60) level = '🟡 Bueno';
+                            else if (percentage >= 40) level = '🟠 Regular';
+                            else level = '🔴 Crítico';
+                            
+                            return [
+                                `Rendimiento: ${percentage}%`,
+                                `Puntuación: ${data.score}/5.0`,
+                                `Nivel: ${level}`,
+                                `Zona: ${percentage >= 80 ? 'Excelente' : percentage >= 60 ? 'Buena' : percentage >= 40 ? 'Moderada' : 'Crítica'}`
+                            ];
+                        }
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    radius: 6,
+                    hoverRadius: 8,
+                    borderWidth: 3
+                },
+                line: {
+                    borderWidth: 3,
+                    tension: 0.1
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeOutCubic'
+            },
+            interaction: {
+                intersect: false,
+                mode: 'point'
+            }
+        }
+    });
+}
+
+// FUNCIONES DE CATEGORÍAS CRÍTICAS
+function animateCriticalCards() {
+    const cards = document.querySelectorAll('.critical-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 150);
+    });
+    
+    // Animar barras de mejora
+    setTimeout(() => {
+        const improvementBars = document.querySelectorAll('.current-level');
+        improvementBars.forEach((bar, index) => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, index * 200 + 300);
+        });
+    }, 500);
+    
+    // Crear gráfica de categorías críticas
+    createCriticalCategoriesChart();
+}
+
+function createCriticalCategoriesChart() {
+    const canvas = document.getElementById('criticalCategoriesChart');
+    if (!canvas) return;
+    
+    // Destruir gráfica existente si existe
+    if (window.criticalChart) {
+        window.criticalChart.destroy();
+    }
+    
+    // Datos de las 5 categorías más críticas
+    const criticalData = [
+        {% if top_5_critical_categories %}
+            {% for category in top_5_critical_categories %}
+            {
+                name: "{{ category.name|escapejs }}",
+                percentage: {{ category.percentage|js_number:1 }},
+                score: {{ category.average_score|js_number:1 }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        {% endif %}
+    ];
+    
+    // Debug: Log de datos críticos
+    debugLog('📊 Datos de categorías críticas:', criticalData);
+    debugLog(`📈 Total categorías críticas: ${criticalData.length}`);
+    
+    if (criticalData.length === 0) {
+        // Si no hay datos, mostrar mensaje
+        canvas.style.display = 'none';
+        const container = canvas.closest('.critical-chart-container');
+        if (container) {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #6b7280;"><i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i><h4>Sin Datos Disponibles</h4><p>No hay evaluaciones para mostrar categorías críticas.</p></div>';
+        }
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Configurar colores según el nivel de criticidad
+    const colors = criticalData.map(item => {
+        if (item.percentage < 40) return '#ef4444'; // Crítico - rojo
+        if (item.percentage < 60) return '#f59e0b'; // Moderado - amarillo
+        return '#3b82f6'; // Atención - azul
+    });
+    
+    const borderColors = criticalData.map(item => {
+        if (item.percentage < 40) return '#dc2626';
+        if (item.percentage < 60) return '#d97706';
+        return '#1d4ed8';
+    });
+    
+    window.criticalChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: criticalData.map(item => {
+                // Limitar la longitud del nombre para mejor visualización
+                const maxLength = 25;
+                return item.name.length > maxLength ? 
+                    item.name.substring(0, maxLength) + '...' : item.name;
+            }),
+            datasets: [{
+                label: 'Puntuación (%)',
+                data: criticalData.map(item => item.percentage),
+                backgroundColor: colors.map(color => color + '40'), // Más opacidad para mejor visibilidad
+                borderColor: borderColors,
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+                barThickness: 'flex',
+                maxBarThickness: 50,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y', // Barras horizontales
+            layout: {
+                padding: {
+                    left: 15,
+                    right: 15,
+                    top: 15,
+                    bottom: 15
+                }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: '#e5e7eb',
+                        drawBorder: false,
+                        lineWidth: 1
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        },
+                        color: '#6b7280',
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        },
+                        stepSize: 20
+                    },
+                    title: {
+                        display: true,
+                        text: 'Puntuación (%)',
+                        color: '#374151',
+                        font: {
+                            size: 13,
+                            weight: '600'
+                        }
+                    }
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#374151',
+                        font: {
+                            size: 12,
+                            weight: '600'
+                        },
+                        padding: 12,
+                        callback: function(value, index) {
+                            // Mostrar nombres completos en el eje Y
+                            return criticalData[index] ? criticalData[index].name : '';
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Top 5 Categorías con Menor Puntuación',
+                    color: '#1f2937',
+                    font: {
+                        size: 16,
+                        weight: '700'
+                    },
+                    padding: {
+                        bottom: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#475569',
+                    borderWidth: 2,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    titleAlign: 'center',
+                    bodyAlign: 'left',
+                    titleFont: {
+                        size: 14,
+                        weight: '700'
+                    },
+                    bodyFont: {
+                        size: 12,
+                        weight: '500'
+                    },
+                    padding: 12,
+                    callbacks: {
+                        title: function(context) {
+                            return criticalData[context[0].dataIndex].name;
+                        },
+                        label: function(context) {
+                            const data = criticalData[context.dataIndex];
+                            const level = data.percentage < 40 ? 'Crítico 🔴' :
+                                         data.percentage < 60 ? 'Moderado 🟡' : 'Atención 🔵';
+                            return [
+                                `Puntuación: ${data.percentage}%`,
+                                `Score: ${data.score}/5.0`,
+                                `Nivel: ${level}`
+                            ];
+                        },
+                        labelColor: function(context) {
+                            const data = criticalData[context.dataIndex];
+                            const color = data.percentage < 40 ? '#ef4444' :
+                                         data.percentage < 60 ? '#f59e0b' : '#3b82f6';
+                            return {
+                                borderColor: color,
+                                backgroundColor: color
+                            };
+                        }
+                    }
+                }
+            },
+            animation: {
+                duration: 1800,
+                easing: 'easeOutQuart',
+                delay: function(context) {
+                    return context.dataIndex * 150;
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            }
+        }
+    });
+    
+    // Animar tarjetas de resumen después de crear la gráfica
+    setTimeout(() => {
+        animateSummaryCards();
+    }, 800);
+}
+
+// FUNCIÓN PARA ANIMAR TARJETAS DE RESUMEN
+function animateSummaryCards() {
+    const summaryItems = document.querySelectorAll('.summary-item');
+    summaryItems.forEach((item, index) => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-30px)';
+        
+        setTimeout(() => {
+            item.style.transition = 'all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            item.style.opacity = '1';
+            item.style.transform = 'translateX(0)';
+        }, index * 100);
+    });
+}
+
+// FUNCIÓN PARA ANIMAR PROGRESO CIRCULAR
+function animateCircularProgress() {
+    const progressCircle = document.querySelector('.circle-progress');
+    if (!progressCircle) return;
+    
+    const score = parseFloat(progressCircle.getAttribute('data-score')) || 0;
+    const percentage = (score / 5) * 100; // Convertir de escala 0-5 a 0-100%
+    const circumference = 2 * Math.PI * 45; // radio = 45
+    const offset = circumference - (percentage / 100) * circumference;
+    
+    // Configurar estilos iniciales
+    progressCircle.style.strokeDasharray = circumference.toString();
+    progressCircle.style.strokeDashoffset = circumference.toString();
+    
+    // Animar el progreso con requestAnimationFrame
+    requestAnimationFrame(() => {
+        progressCircle.style.transition = 'stroke-dashoffset 1s ease-in-out';
+        progressCircle.style.strokeDashoffset = offset.toString();
+        
+        // Cambiar color según el porcentaje
+        if (percentage >= 80) {
+            progressCircle.style.stroke = '#10b981'; // Verde
+        } else if (percentage >= 60) {
+            progressCircle.style.stroke = '#f59e0b'; // Amarillo
+        } else {
+            progressCircle.style.stroke = '#ef4444'; // Rojo
+        }
+    });
+}
+
+// Ejecutar animación cuando la página esté lista
+document.addEventListener('DOMContentLoaded', function() {
+    // Animar progreso circular
+    animateCircularProgress();
+    
+    // Animar barras de progreso IA
+    animateProgressBars();
+    
+    // Inicializar sistema de tabs
+    initializeTabs();
+    
+    // Calcular estadísticas del heatmap si está visible
+    if (document.querySelector('.heatmap-analysis')) {
+        calculateHeatmapStats();
+    }
+    
+    // Tooltip para celdas del heatmap
+    const heatmapCells = document.querySelectorAll('.heatmap-cell');
+    heatmapCells.forEach(cell => {
+        cell.addEventListener('mouseenter', function() {
+            const category = this.getAttribute('data-category');
+            const percentage = this.getAttribute('data-percentage');
+            this.title = `${category}: ${percentage}%`;
+        });
+    });
+
+    // FUNCIONES DE LA TABLA DE EVALUACIONES
+    function initializeEvaluationsTable() {
+        const searchInput = document.getElementById('evaluationsSearch');
+        const statusFilter = document.getElementById('statusFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const tableBody = document.getElementById('evaluationsTableBody');
+        
+        if (!tableBody) return;
+        
+        let allRows = Array.from(tableBody.querySelectorAll('.evaluation-row'));
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        
+        // Función de búsqueda
+        function filterRows() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const dateValue = dateFilter.value;
+            
+            const filteredRows = allRows.filter(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesSearch = text.includes(searchTerm);
+                
+                const statusBadge = row.querySelector('.status-badge');
+                let matchesStatus = true;
+                if (statusValue && statusBadge) {
+                    const hasClass = statusBadge.classList.contains(statusValue);
+                    matchesStatus = hasClass;
+                }
+                
+                // Filtro de fecha (simplificado)
+                let matchesDate = true;
+                if (dateValue) {
+                    const dateCell = row.querySelector('.date-primary');
+                    if (dateCell) {
+                        const rowDate = new Date(dateCell.textContent.split('/').reverse().join('-'));
+                        const now = new Date();
+                        
+                        switch(dateValue) {
+                            case 'last-week':
+                                matchesDate = (now - rowDate) <= (7 * 24 * 60 * 60 * 1000);
+                                break;
+                            case 'last-month':
+                                matchesDate = (now - rowDate) <= (30 * 24 * 60 * 60 * 1000);
+                                break;
+                            case 'last-quarter':
+                                matchesDate = (now - rowDate) <= (90 * 24 * 60 * 60 * 1000);
+                                break;
+                        }
+                    }
+                }
+                
+                return matchesSearch && matchesStatus && matchesDate;
+            });
+            
+            displayRows(filteredRows);
+        }
+        
+        // Función para mostrar filas
+        function displayRows(rows) {
+            // Ocultar todas las filas
+            allRows.forEach(row => row.style.display = 'none');
+            
+            // Mostrar filas filtradas con paginación
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedRows = rows.slice(startIndex, endIndex);
+            
+            paginatedRows.forEach(row => row.style.display = '');
+            
+            // Actualizar información de paginación
+            updatePaginationInfo(rows.length, paginatedRows.length);
+            updatePaginationControls(rows.length);
+        }
+        
+        // Actualizar información de paginación
+        function updatePaginationInfo(totalFiltered, showing) {
+            const showingCount = document.getElementById('showingCount');
+            const totalCount = document.getElementById('totalCount');
+            if (showingCount) showingCount.textContent = showing;
+            if (totalCount) totalCount.textContent = totalFiltered;
+        }
+        
+        // Actualizar controles de paginación
+        function updatePaginationControls(totalFiltered) {
+            const totalPages = Math.ceil(totalFiltered / rowsPerPage);
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            const paginationNumbers = document.getElementById('paginationNumbers');
+            
+            if (prevBtn) prevBtn.disabled = currentPage === 1;
+            if (nextBtn) nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+            
+            // Actualizar números de página
+            if (paginationNumbers) {
+                paginationNumbers.innerHTML = '';
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageSpan = document.createElement('span');
+                    pageSpan.className = `page-number ${i === currentPage ? 'active' : ''}`;
+                    pageSpan.textContent = i;
+                    pageSpan.onclick = () => {
+                        currentPage = i;
+                        filterRows();
+                    };
+                    paginationNumbers.appendChild(pageSpan);
+                }
+            }
+        }
+        
+        // Event listeners
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                currentPage = 1;
+                filterRows();
+            });
+        }
+        
+        if (statusFilter) {
+            statusFilter.addEventListener('change', () => {
+                currentPage = 1;
+                filterRows();
+            });
+        }
+        
+        if (dateFilter) {
+            dateFilter.addEventListener('change', () => {
+                currentPage = 1;
+                filterRows();
+            });
+        }
+        
+        // Paginación
+        const prevBtn = document.getElementById('prevPage');
+        const nextBtn = document.getElementById('nextPage');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    filterRows();
+                }
+            });
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                const totalPages = Math.ceil(allRows.length / rowsPerPage);
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    filterRows();
+                }
+            });
+        }
+        
+        // Ordenamiento de columnas
+        const sortableHeaders = document.querySelectorAll('.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', () => {
+                const sortBy = header.getAttribute('data-sort');
+                sortTable(sortBy, header);
+            });
+        });
+        
+        // Inicializar vista
+        filterRows();
+    }
+    
+    // Función de ordenamiento
+    function sortTable(sortBy, header) {
+        const tableBody = document.getElementById('evaluationsTableBody');
+        if (!tableBody) return;
+        
+        const rows = Array.from(tableBody.querySelectorAll('.evaluation-row'));
+        const isAscending = !header.classList.contains('sorted-asc');
+        
+        // Limpiar clases de ordenamiento
+        document.querySelectorAll('.sortable').forEach(h => {
+            h.classList.remove('sorted-asc', 'sorted-desc');
+        });
+        
+        // Agregar clase de ordenamiento
+        header.classList.add(isAscending ? 'sorted-asc' : 'sorted-desc');
+        
+        // Ordenar filas
+        rows.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch(sortBy) {
+                case 'date':
+                    aValue = new Date(a.querySelector('.date-primary').textContent.split('/').reverse().join('-'));
+                    bValue = new Date(b.querySelector('.date-primary').textContent.split('/').reverse().join('-'));
+                    break;
+                case 'evaluator':
+                    aValue = a.querySelector('.evaluator-name').textContent.toLowerCase();
+                    bValue = b.querySelector('.evaluator-name').textContent.toLowerCase();
+                    break;
+                case 'score':
+                    aValue = parseFloat(a.querySelector('.score-circle').textContent);
+                    bValue = parseFloat(b.querySelector('.score-circle').textContent);
+                    break;
+                case 'categories':
+                    aValue = parseInt(a.querySelector('.count-badge').textContent);
+                    bValue = parseInt(b.querySelector('.count-badge').textContent);
+                    break;
+                default:
+                    return 0;
+            }
+            
+            if (aValue < bValue) return isAscending ? -1 : 1;
+            if (aValue > bValue) return isAscending ? 1 : -1;
+            return 0;
+        });
+        
+        // Reorganizar filas en el DOM
+        rows.forEach(row => tableBody.appendChild(row));
+    }
+    
+    // Funciones de acciones - GLOBALES para onclick
+    function viewEvaluation(evaluationId) {
+        // Redirigir a la vista de resultados de la evaluación
+        window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/resultados/';
+    }
+    
+    function generateReport(evaluationId) {
+        // Abrir reporte PDF en nueva ventana
+        window.open('/risk-hoteles/evaluacion/' + evaluationId + '/pdf/download/', '_blank');
+    }
+    
+    function editEvaluation(evaluationId) {
+        // Redirigir al cuestionario de evaluación para editar
+        window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/cuestionario/';
+    }
+    
+    // Inicializar tabla cuando se cambie a la pestaña de evaluaciones
+    function handleTabChange(tabId) {
+        if (tabId === 'evaluations') {
+            setTimeout(() => {
+                initializeEvaluationsTable();
+            }, 100);
+        }
+    }
+});
+
+// Funciones globales para los botones de la tabla (deben estar fuera del DOMContentLoaded)
+function viewEvaluation(evaluationId) {
+    debugLog('viewEvaluation llamada con ID:', evaluationId);
+    // Redirigir a la vista de resultados de la evaluación
+    window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/resultados/';
+}
+
+function generateReport(evaluationId) {
+    debugLog('generateReport llamada con ID:', evaluationId);
+    // Abrir reporte PDF en nueva ventana
+    window.open('/risk-hoteles/evaluacion/' + evaluationId + '/pdf/download/', '_blank');
+}
+
+function editEvaluation(evaluationId) {
+    debugLog('editEvaluation llamada con ID:', evaluationId);
+    // Redirigir al cuestionario de evaluación para editar
+    window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/cuestionario/';
+}
+
+function generateGeneralReport() {
+    debugLog('generateGeneralReport llamada');
+    // Abrir preview del reporte general avanzado con IA/ML
+    const previewUrl = `{% url 'risk_hoteles:reporte_general_preview' hotel.id %}`;
+    window.open(previewUrl, '_blank');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,401 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrarse - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos para la página de registro */
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding-top: 80px; /* Espacio para el navbar fijo */
+}
+
+.register-card {
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    background: white;
+}
+
+.register-header {
+    background: linear-gradient(135deg, #0369A0 0%, #637B9C 100%);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.register-header h2 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.register-header p {
+    opacity: 0.9;
+    margin: 0;
+}
+
+.register-body {
+    padding: 2rem;
+}
+
+.form-floating {
+    margin-bottom: 1rem;
+}
+
+.form-control {
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #0369A0;
+    box-shadow: 0 0 0 0.2rem rgba(3, 105, 160, 0.15);
+    transform: translateY(-2px);
+}
+
+.btn-register {
+    background: linear-gradient(135deg, #0369A0, #637B9C);
+    border: none;
+    border-radius: 15px;
+    padding: 1rem 2rem;
+    font-weight: 600;
+    color: white;
+    width: 100%;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-register:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(3, 105, 160, 0.3);
+    color: white;
+}
+
+.btn-register:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Loading states para UX */
+.btn.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.login-link a {
+    color: #0369A0;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.strength-meter {
+    height: 4px;
+    background: #e9ecef;
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.strength-weak { background: #dc3545; width: 25%; }
+.strength-fair { background: #fd7e14; width: 50%; }
+.strength-good { background: #198754; width: 75%; }
+.strength-strong { background: #20c997; width: 100%; }
+
+.strength-text {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .register-page {
+        padding: 1rem;
+        padding-top: 80px; /* Espacio para el navbar fijo */
+    }
+    
+    .register-header,
+    .register-body {
+        padding: 1.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-page">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7 col-sm-9">
+                <div class="card register-card">
+                    <div class="register-header">
+                        <div class="mb-3">
+                            <i class="fas fa-user-plus fa-2x"></i>
+                        </div>
+                        <h2>Crear Cuenta</h2>
+                        
+                        {% if 'checkout' in request.GET.next %}
+                            <p class="text-warning fw-bold bg-white text-dark rounded px-2 py-1 d-inline-block mt-2">
+                                <i class="fas fa-shopping-cart me-1"></i>
+                                Regístrate para completar tu compra
+                            </p>
+                        {% else %}
+                            <p>Únete a Django Modular y comienza a gestionar tus riesgos con IA</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="register-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Por favor corrige los siguientes errores:</h6>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <div class="small">• {{ error }}</div>
+                                {% endfor %}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endif %}
+                        
+                        <form method="post" id="registerForm" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Email -->
+                            <div class="form-floating">
+                                {{ form.email }}
+                                <label for="{{ form.email.id_for_label }}">
+                                    <i class="fas fa-envelope me-2"></i>Correo electrónico
+                                </label>
+                                {% if form.email.help_text %}
+                                <div class="form-text">{{ form.email.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Password 1 -->
+                            <div class="form-floating">
+                                {{ form.password1 }}
+                                <label for="{{ form.password1.id_for_label }}">
+                                    <i class="fas fa-lock me-2"></i>Contraseña
+                                </label>
+                                <div class="strength-meter" id="strengthMeter" style="display: none;">
+                                    <div class="strength-bar" id="strengthBar"></div>
+                                </div>
+                                <div class="strength-text" id="strengthText"></div>
+                                {% if form.password1.help_text %}
+                                <div class="form-text mt-2">{{ form.password1.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Password 2 -->
+                            <div class="form-floating">
+                                {{ form.password2 }}
+                                <label for="{{ form.password2.id_for_label }}">
+                                    <i class="fas fa-lock me-2"></i>Confirmar contraseña
+                                </label>
+                                {% if form.password2.help_text %}
+                                <div class="form-text">{{ form.password2.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Términos y condiciones -->
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                <label class="form-check-label" for="termsCheck">
+                                    Acepto los <a href="#" target="_blank">términos y condiciones</a> y la <a href="#" target="_blank">política de privacidad</a>
+                                </label>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-register" id="registerBtn">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Crear mi cuenta
+                            </button>
+                        </form>
+                        
+                        <div class="login-link">
+                            ¿Ya tienes una cuenta? 
+                            <a href="{% url 'users:login' %}">Inicia sesión aquí</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Características -->
+                <div class="row mt-4 text-center">
+                    <div class="col-4">
+                        <div class="text-muted">
+                            <i class="fas fa-shield-alt fa-2x mb-2 text-primary"></i>
+                            <div class="small">Seguro</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted">
+                            <i class="fas fa-brain fa-2x mb-2 text-primary"></i>
+                            <div class="small">IA Avanzada</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-muted">
+                            <i class="fas fa-headset fa-2x mb-2 text-primary"></i>
+                            <div class="small">Soporte 24/7</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    const password2 = document.getElementById('{{ form.password2.id_for_label }}');
+    const strengthMeter = document.getElementById('strengthMeter');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const termsCheck = document.getElementById('termsCheck');
+    
+    // Verificación de fortaleza de contraseña
+    function checkPasswordStrength(password) {
+        let strength = 0;
+        let feedback = [];
+        
+        if (password.length >= 8) strength += 1;
+        else feedback.push('Mínimo 8 caracteres');
+        
+        if (/[A-Z]/.test(password)) strength += 1;
+        else feedback.push('Una mayúscula');
+        
+        if (/[a-z]/.test(password)) strength += 1;
+        else feedback.push('Una minúscula');
+        
+        if (/[0-9]/.test(password)) strength += 1;
+        else feedback.push('Un número');
+        
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        else feedback.push('Un carácter especial');
+        
+        return { strength, feedback };
+    }
+    
+    // Actualizar medidor de fortaleza
+    function updateStrengthMeter(password) {
+        if (!password) {
+            strengthMeter.style.display = 'none';
+            strengthText.textContent = '';
+            return;
+        }
+        
+        strengthMeter.style.display = 'block';
+        const result = checkPasswordStrength(password);
+        
+        // Actualizar barra visual
+        strengthBar.className = 'strength-bar';
+        if (result.strength >= 4) {
+            strengthBar.classList.add('strength-strong');
+            strengthText.textContent = 'Contraseña muy segura';
+            strengthText.className = 'strength-text text-success';
+        } else if (result.strength >= 3) {
+            strengthBar.classList.add('strength-good');
+            strengthText.textContent = 'Contraseña buena';
+            strengthText.className = 'strength-text text-info';
+        } else if (result.strength >= 2) {
+            strengthBar.classList.add('strength-fair');
+            strengthText.textContent = 'Contraseña regular';
+            strengthText.className = 'strength-text text-warning';
+        } else {
+            strengthBar.classList.add('strength-weak');
+            strengthText.textContent = 'Contraseña débil';
+            strengthText.className = 'strength-text text-danger';
+        }
+        
+        if (result.feedback.length > 0) {
+            strengthText.textContent += ' - Falta: ' + result.feedback.join(', ');
+        }
+    }
+    
+    // Eventos
+    password1.addEventListener('input', function() {
+        updateStrengthMeter(this.value);
+    });
+    
+    // Validación de contraseñas coincidentes
+    password2.addEventListener('input', function() {
+        if (password1.value && this.value && password1.value !== this.value) {
+            this.setCustomValidity('Las contraseñas no coinciden');
+            this.classList.add('is-invalid');
+        } else {
+            this.setCustomValidity('');
+            this.classList.remove('is-invalid');
+        }
+    });
+    
+    // Validar formulario al enviar
+    form.addEventListener('submit', function(e) {
+        if (!termsCheck.checked) {
+            e.preventDefault();
+            alert('Debes aceptar los términos y condiciones para continuar.');
+            return;
+        }
+        
+        if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+        } else {
+            // Mostrar loading
+            registerBtn.classList.add('loading');
+            registerBtn.disabled = true;
+        }
+        
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}

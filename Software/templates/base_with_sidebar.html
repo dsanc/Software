@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Risk Assessment{% endblock %}</title>
+    
+    {% load static %}
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#007cba">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Risk Hoteles">
+    <meta name="msapplication-TileColor" content="#007cba">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/pwa/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'images/pwa/icon-96x96.png' %}">
+    <link rel="icon" type="image/png" sizes="72x72" href="{% static 'images/pwa/icon-72x72.png' %}">
+    <link rel="mask-icon" href="{% static 'images/logo-sidebar.svg' %}" color="#007cba">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/Logo_R.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/Logo_R.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/Logo_R.png' %}">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS personalizado - Solo elementos básicos -->
+    <style>
+    /* =================================================================
+       CSS CUSTOM PROPERTIES PARA MEJOR MANTENIBILIDAD
+       ================================================================= */
+    :root {
+        /* Sidebar Dimensions */
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Colors and Themes */
+        --sidebar-bg-gradient: linear-gradient(145deg, #0f1419 0%, #1a202c 50%, #2d3748 100%);
+        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e0;
+        --text-muted: #6c757d;
+        
+        /* Interactive States */
+        --hover-bg: rgba(255, 255, 255, 0.08);
+        --active-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        --sidebar-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        --sidebar-border: 1px solid rgba(255, 255, 255, 0.08);
+        
+        /* Responsive Breakpoints */
+        --mobile-breakpoint: 991px;
+        
+        /* Performance */
+        --gpu-acceleration: translateZ(0);
+    }
+    
+    /* =================================================================
+       SIDEBAR PRINCIPAL - ESTILOS CRÍTICOS
+       ================================================================= */
+    .modern-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: var(--sidebar-width) !important;
+        height: 100vh !important;
+        background: var(--sidebar-bg-gradient) !important;
+        z-index: 1040 !important;
+        overflow: hidden !important;
+        transition: all var(--sidebar-transition) !important;
+        box-shadow: var(--sidebar-box-shadow) !important;
+        border-right: var(--sidebar-border) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        
+        /* Performance optimization */
+        will-change: width, transform !important;
+        transform: var(--gpu-acceleration) !important; /* Force hardware acceleration */
+        backface-visibility: hidden !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+    }
+    
+    .modern-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width) !important;
+    }
+
+    /* =================================================================
+       HOVER EFFECTS Y ESTADOS INTERACTIVOS
+       ================================================================= */
+    .modern-sidebar.collapsed:hover,
+    .modern-sidebar.collapsed.hover-expanded {
+        width: var(--sidebar-width) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Mostrar texto cuando hace hover en sidebar colapsado */
+    .modern-sidebar.collapsed .nav-text,
+    .modern-sidebar.collapsed .logo-text,
+    .modern-sidebar.collapsed .submenu-indicator,
+    .modern-sidebar.collapsed .nav-badge,
+    .modern-sidebar.collapsed .nav-shortcut {
+        display: none !important; /* FIX DEFINITIVO: Eliminar del layout */
+        opacity: 0 !important;
+        visibility: hidden !important;
+        max-width: 0 !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease, max-width 0.2s ease !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .nav-text,
+    .modern-sidebar.collapsed:hover .logo-text,
+    .modern-sidebar.collapsed:hover .submenu-indicator,
+    .modern-sidebar.collapsed:hover .nav-badge,
+    .modern-sidebar.collapsed:hover .nav-shortcut,
+    .modern-sidebar.collapsed.hover-expanded .nav-text,
+    .modern-sidebar.collapsed.hover-expanded .logo-text,
+    .modern-sidebar.collapsed.hover-expanded .submenu-indicator,
+    .modern-sidebar.collapsed.hover-expanded .nav-badge,
+    .modern-sidebar.collapsed.hover-expanded .nav-shortcut {
+        display: inline !important; /* Restaurar para hover */
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-width: 500px !important;
+        transition: opacity 0.3s ease 0.15s, visibility 0.3s ease 0.15s, max-width 0.3s ease !important;
+    }
+    
+    /* Ocultar detalles del usuario cuando está colapsado */
+    .modern-sidebar.collapsed .user-details {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        overflow: hidden !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-details,
+    .modern-sidebar.collapsed.hover-expanded .user-details {
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+        transition: opacity 0.3s ease 0.1s, visibility 0.3s ease 0.1s !important;
+    }
+    
+    /* Mejorar la animación de transición para user-details */
+    .modern-sidebar .user-details {
+        transition: all 0.3s ease !important;
+    }
+    
+    /* CENTRADO PERFECTO DEL AVATAR CUANDO ESTÁ COLAPSADO */
+    .modern-sidebar.collapsed .user-info {
+        justify-content: center !important;
+        gap: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed .user-avatar {
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+    }
+    
+    /* Centrar específicamente la imagen y las iniciales cuando está colapsado */
+    .modern-sidebar.collapsed .user-avatar .avatar-image,
+    .modern-sidebar.collapsed .user-avatar .avatar-initials {
+        margin: 0 !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-avatar,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar {
+        margin: 0 !important;
+    }
+    
+    /* Restaurar posicionamiento normal de imagen/iniciales cuando se hace hover */
+    .modern-sidebar.collapsed:hover .user-avatar .avatar-image,
+    .modern-sidebar.collapsed:hover .user-avatar .avatar-initials,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar .avatar-image,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar .avatar-initials {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Centrar iconos cuando está colapsado */
+    .modern-sidebar.collapsed .nav-link {
+        justify-content: center !important;
+        padding: 12px 8px !important;
+        gap: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .nav-link,
+    .modern-sidebar.collapsed.hover-expanded .nav-link {
+        justify-content: flex-start !important;
+        padding: 12px 16px !important;
+        gap: 12px !important;
+    }
+    
+    /* Ocultar submenús cuando está colapsado */
+    .modern-sidebar.collapsed .submenu {
+        display: none !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .submenu,
+    .modern-sidebar.collapsed.hover-expanded .submenu {
+        display: block !important;
+    }
+    
+    /* =================================================================
+       TOOLTIPS PARA NAVEGACIÓN COLAPSADA
+       ================================================================= */
+    .sidebar-tooltip {
+        position: absolute !important;
+        left: 100% !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+        color: var(--text-primary) !important;
+        padding: 6px 12px !important;
+        border-radius: 6px !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap !important;
+        margin-left: 10px !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        z-index: 1050 !important;
+        transition: opacity var(--sidebar-transition) !important;
+    }
+    
+    .modern-sidebar.collapsed .nav-link:hover .sidebar-tooltip {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* NO mostrar tooltips cuando el sidebar está expandido por hover */
+    .modern-sidebar.collapsed:hover .sidebar-tooltip,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-tooltip {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+    
+    /* Separador de navegación */
+    .nav-separator {
+        height: 1px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        margin: 12px 16px !important;
+        list-style: none !important;
+    }
+    
+    /* =================================================================
+       BADGES Y ELEMENTOS DECORATIVOS
+       ================================================================= */
+    .nav-badge {
+        background: var(--accent-gradient) !important;
+        color: var(--text-primary) !important;
+        padding: 2px 8px !important;
+        border-radius: 12px !important;
+        font-size: 0.7rem !important;
+        font-weight: 600 !important;
+        margin-left: auto !important;
+    }
+    
+    /* Shortcuts en la navegación */
+    .nav-shortcut {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: var(--text-secondary) !important;
+        padding: 2px 6px !important;
+        border-radius: 4px !important;
+        font-size: 0.7rem !important;
+        font-weight: 500 !important;
+        margin-left: auto !important;
+        border: var(--sidebar-border) !important;
+    }
+    
+    /* Header del sidebar */
+    .sidebar-header {
+        padding: 20px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 70px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Logo del sidebar */
+    .logo-icon {
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border-radius: 8px !important;
+        color: #fff !important;
+        font-size: 1.2rem !important;
+        flex-shrink: 0 !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        position: relative !important;
+    }
+
+    /* Estilos para diferentes tipos de logo */
+    .sidebar-logo-image,
+    .logo-text-alternative {
+        transition: all 0.3s ease !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .logo-text-alternative {
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 8px !important;
+        text-align: center !important;
+        line-height: 1.1 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* Hover effect para logo cuando está colapsado */
+    .modern-sidebar.collapsed .logo-icon:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    }
+
+    /* Animación para cambio de logo */
+    .logo-icon.changing {
+        transform: scale(0.9) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+    }
+
+    .logo-icon.changing .sidebar-logo-image,
+    .logo-icon.changing .logo-text-alternative {
+        opacity: 0.7 !important;
+        filter: blur(1px) !important;
+    }
+
+    /* Indicador visual de que el logo es clickeable */
+    .modern-sidebar.collapsed .logo-icon {
+        position: relative !important;
+    }
+
+    .modern-sidebar.collapsed .logo-icon::after {
+        content: '🔄' !important;
+        position: absolute !important;
+        top: -2px !important;
+        right: -2px !important;
+        font-size: 8px !important;
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+        pointer-events: none !important;
+        background: rgba(255,255,255,0.9) !important;
+        border-radius: 50% !important;
+        width: 12px !important;
+        height: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 6px !important;
+    }
+
+    .modern-sidebar.collapsed .logo-icon:hover::after {
+        opacity: 1 !important;
+    }
+
+    /* Efecto de transición suave para el logo */
+    .sidebar-logo-image,
+    .logo-text-alternative {
+        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+    }
+    
+    /* Cuando está colapsado, centrar el logo */
+    .modern-sidebar.collapsed .sidebar-header {
+        justify-content: center !important;
+        padding: 20px 10px !important;
+    }
+    
+    .modern-sidebar.collapsed .sidebar-logo {
+        justify-content: center !important;
+        gap: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-header,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-header {
+        justify-content: space-between !important;
+        padding: 20px !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-logo,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-logo {
+        gap: 12px !important;
+    }
+    
+    /* Ocultar toggle button cuando está colapsado */
+    .modern-sidebar.collapsed .sidebar-toggle {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-toggle,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-toggle {
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+        padding: 8px !important;
+    }
+    
+    .sidebar-logo {
+        color: #f8fafc !important;
+        text-decoration: none !important;
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .sidebar-toggle {
+        background: none !important;
+        border: none !important;
+        color: #cbd5e0 !important;
+        font-size: 1.2rem !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .sidebar-toggle:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #f8fafc !important;
+    }
+    
+    /* Navegación */
+    .sidebar-nav-container {
+        flex: 1 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        padding: 12px 0 !important;
+    }
+    
+    /* Scrollbar personalizado */
+    .sidebar-nav-container::-webkit-scrollbar {
+        width: 6px !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-radius: 3px !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .sidebar-nav {
+        padding: 0 !important;
+        margin: 0 !important;
+        list-style: none !important;
+    }
+    
+    .sidebar-nav .nav-item {
+        margin: 4px 12px !important;
+        position: relative !important;
+    }
+    
+    /* Cuando está colapsado, menos margen */
+    .modern-sidebar.collapsed .sidebar-nav .nav-item {
+        margin: 4px 8px !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-nav .nav-item,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-nav .nav-item {
+        margin: 4px 12px !important;
+    }
+    
+    .sidebar-nav .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 16px !important;
+        color: #cbd5e0 !important;
+        text-decoration: none !important;
+        border-radius: 12px !important;
+        transition: all 0.2s ease !important;
+        position: relative !important;
+        gap: 12px !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        /* Performance optimization for hover effects */
+        will-change: background-color, color, transform !important;
+        transform: translateZ(0) !important;
+    }
+    
+    .sidebar-nav .nav-link:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #f8fafc !important;
+        transform: translateX(4px) !important;
+    }
+    
+    .sidebar-nav .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+    
+    .nav-icon {
+        font-size: 1.1rem !important;
+        width: 20px !important;
+        min-width: 20px !important;
+        text-align: center !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Iconos siempre visibles incluso cuando está colapsado */
+    .modern-sidebar.collapsed .nav-icon,
+    .modern-sidebar.collapsed .logo-icon {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .nav-text {
+        flex: 1 !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+    }
+    
+    /* Layout principal */
+    body.sidebar-layout {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        transition: margin-left var(--sidebar-transition) !important;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width) !important;
+        min-height: 100vh !important;
+        transition: margin-left var(--sidebar-transition) !important;
+    }
+
+    body.sidebar-collapsed .main-content {
+        margin-left: var(--sidebar-collapsed-width) !important;
+    }    /* TOPBAR / NAVBAR */
+    .main-topbar {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 1rem 1.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1030 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    .topbar-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+    }
+    
+    .topbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        color: #1f2937 !important;
+    }
+    
+    .topbar-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+    
+    .topbar-actions .btn {
+        background: none !important;
+        border: none !important;
+        color: #6b7280 !important;
+        padding: 0.5rem !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        position: relative !important;
+    }
+    
+    .topbar-actions .btn:hover {
+        background: #f3f4f6 !important;
+        color: #1f2937 !important;
+    }
+    
+    .topbar-actions .btn i {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Dropdown del navbar */
+    .topbar-actions .dropdown-menu {
+        border: 1px solid #e5e7eb !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 0.5rem !important;
+        min-width: 250px !important;
+    }
+    
+    .topbar-actions .dropdown-item {
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .topbar-actions .dropdown-item:hover {
+        background: #f3f4f6 !important;
+    }
+    
+    /* Badge del navbar */
+    .topbar-actions .badge {
+        font-size: 0.65rem !important;
+        padding: 0.25em 0.5em !important;
+    }
+    
+    /* Sidebar User (footer del sidebar) */
+    .sidebar-user {
+        padding: 1rem !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        margin-top: auto !important;
+        min-height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Cuando está colapsado, centrar todo en el sidebar-user */
+    .modern-sidebar.collapsed .sidebar-user {
+        justify-content: center !important;
+        padding: 1rem 0.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-user,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-user {
+        justify-content: flex-start !important;
+        padding: 1rem !important;
+    }
+    
+    /* Cuando está colapsado, centrar el user-info */
+    .modern-sidebar.collapsed .user-info {
+        justify-content: center !important;
+        gap: 0 !important;
+        width: auto !important;
+        flex: none !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-info,
+    .modern-sidebar.collapsed.hover-expanded .user-info {
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        width: 100% !important;
+        flex: 1 !important;
+    }
+    
+    .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .user-avatar .avatar-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+    
+    .user-avatar .avatar-fallback {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+    }
+    
+    .user-avatar .avatar-initials {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 1 !important;
+    }
+    
+    .user-details {
+        flex: 1 !important;
+        overflow: hidden !important;
+        min-width: 0 !important;
+    }
+    
+    .user-name {
+        margin: 0 !important;
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .user-role {
+        margin: 0 !important;
+        color: #cbd5e0 !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Submenús */
+    .submenu {
+        list-style: none !important;
+        padding: 0 0 0 2rem !important;
+        margin: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        transition: max-height 0.3s ease !important;
+    }
+    
+    .has-submenu.active .submenu {
+        max-height: 500px !important;
+    }
+    
+    .submenu-indicator {
+        margin-left: auto !important;
+        font-size: 0.75rem !important;
+        transition: transform 0.3s ease !important;
+    }
+    
+    .has-submenu.active .submenu-indicator {
+        transform: rotate(90deg) !important;
+    }
+    
+    /* Mobile */
+    @media (max-width: 991px) {
+        .modern-sidebar {
+            transform: translateX(-100%) !important;
+        }
+        
+        .modern-sidebar.mobile-open {
+            transform: translateX(0) !important;
+        }
+        
+        .main-content {
+            margin-left: 0 !important;
+        }
+        
+        .topbar-title {
+            font-size: 1.25rem !important;
+        }
+
+        .sidebar-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            z-index: 1039 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    }
+    
+    /* Estilos mejorados para navegación simplificada */
+    .nav-external {
+        font-size: 0.75rem !important;
+        margin-left: auto !important;
+        opacity: 0.7 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    
+    .nav-link:hover .nav-external {
+        opacity: 1 !important;
+    }
+    
+    .logout-item .nav-link,
+    .logout-item button {
+        color: #f87171 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .logout-item .nav-link:hover,
+    .logout-item button:hover {
+        background: rgba(248, 113, 113, 0.1) !important;
+        color: #ef4444 !important;
+    }
+    
+    /* Estilos específicos para botones de logout */
+    .logout-item button {
+        display: flex !important;
+        align-items: center !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .logout-item button:focus {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    .nav-badge {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+        color: white !important;
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.5rem !important;
+        border-radius: 0.75rem !important;
+        font-weight: 500 !important;
+        margin-left: auto !important;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3) !important;
+        animation: pulse-subtle 2s infinite !important;
+    }
+    
+    @keyframes pulse-subtle {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    }
+    
+    .nav-shortcut {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.4rem !important;
+        border-radius: 0.375rem !important;
+        margin-left: auto !important;
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+        font-weight: 500 !important;
+    }
+    
+    .nav-separator {
+        height: 1px !important;
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%) !important;
+        margin: 0.5rem 1rem !important;
+        border: none !important;
+    }
+    
+    /* Mejoras en los iconos */
+    .nav-icon {
+        width: 1.25rem !important;
+        text-align: center !important;
+        margin-right: 0.75rem !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .nav-link:hover .nav-icon,
+    .nav-link.active .nav-icon {
+        color: #ffffff !important;
+        transform: scale(1.1) !important;
+    }
+    
+    /* Spacing mejorado para nav-items */
+    .sidebar-nav .nav-item {
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .sidebar-nav .nav-item:last-child {
+        margin-bottom: 0 !important;
+    }
+    
+    /* DEBUGGING: Asegurar visibilidad del sidebar-user */
+    .sidebar-user,
+    .sidebar-user * {
+        box-sizing: border-box !important;
+    }
+    
+    .sidebar-user .user-info,
+    .sidebar-user .user-avatar,
+    .sidebar-user .user-details {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Mejorar especificidad de estilos del sidebar-user */
+    .modern-sidebar .sidebar-user {
+        padding: 1rem !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        margin-top: auto !important;
+        min-height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .modern-sidebar .user-info {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+    
+    /* Asegurar que el avatar sea siempre visible con mayor especificidad */
+    .modern-sidebar .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        overflow: hidden !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Estilos mejorados para la imagen del avatar */
+    .modern-sidebar .user-avatar .avatar-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+    }
+    
+    /* Asegurar posicionamiento normal cuando NO está colapsado */
+    .modern-sidebar:not(.collapsed) .user-avatar .avatar-image,
+    .modern-sidebar:not(.collapsed) .user-avatar .avatar-initials {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Estilos mejorados para las iniciales del avatar */
+    .modern-sidebar .user-avatar .avatar-initials {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 1 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Mejorar especificidad de los detalles del usuario */
+    .modern-sidebar .user-details {
+        flex: 1 !important;
+        overflow: hidden !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 2px !important;
+    }
+    
+    .modern-sidebar .user-name {
+        margin: 0 !important;
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.3 !important;
+        padding: 0 !important;
+    }
+    
+    .modern-sidebar .user-role {
+        margin: 0 !important;
+        color: #cbd5e0 !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
+        padding: 0 !important;
+        font-weight: 500 !important;
+        opacity: 0.9 !important;
+    }
+    
+    /* Estilos específicos para diferentes roles de usuario (data-role) */
+    .modern-sidebar .user-role[data-role="superadmin"] {
+        color: #fbbf24 !important;
+        font-weight: 600 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="admin"] {
+        color: #60a5fa !important;
+        font-weight: 600 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="user"] {
+        color: #34d399 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="guest"] {
+        color: #9ca3af !important;
+        font-style: italic !important;
+    }
+    
+    /* Indicador visual para diferentes roles */
+    .modern-sidebar .user-role::before {
+        content: "●" !important;
+        margin-right: 4px !important;
+        font-size: 0.6rem !important;
+        opacity: 0.8 !important;
+    }
+    
+    /* Indicador de estado online */
+    .user-status-indicator {
+        display: inline-block !important;
+        width: 8px !important;
+        height: 8px !important;
+        background-color: #10b981 !important;
+        border-radius: 50% !important;
+        margin-right: 6px !important;
+        animation: pulse-online 2s infinite !important;
+        box-shadow: 0 0 3px rgba(16, 185, 129, 0.5) !important;
+    }
+    
+    @keyframes pulse-online {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Estilos para usuarios no autenticados */
+    .modern-sidebar .user-avatar .avatar-initials {
+        display: flex !important;
+    }
+    
+    /* Cuando hay imagen, ocultar iniciales */
+    .modern-sidebar .user-avatar .avatar-image + .avatar-initials {
+        display: none !important;
+    }
+    
+    /* Forzar estilos críticos para debugging */
+    .sidebar-user {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .user-avatar {
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    /* Asegurar que las imágenes SVG se rendericen correctamente */
+    .avatar-image {
+        image-rendering: auto !important;
+        image-rendering: crisp-edges !important;
+        image-rendering: -webkit-optimize-contrast !important;
+    }
+    
+    /* Hover más suave en nav-links */
+    .nav-link {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 0.5rem !important;
+        margin: 0 0.5rem !important;
+        padding: 0.75rem !important;
+    }
+    
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: translateX(4px) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Estilo para items activos */
+    .nav-link.active {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(29, 78, 216, 0.1) 100%) !important;
+        border-left: 3px solid #3b82f6 !important;
+        margin-left: 0.5rem !important;
+        padding-left: 1rem !important;
+    }
+    
+    /* Reset de main.css para forms y elementos generales */
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Login form básico */
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .login-card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+    
+    /* Contenedor del contenido principal */
+    .main-content-wrapper {
+        min-height: calc(100vh - 70px) !important;
+        background: #f9fafb !important;
+        padding: 0 !important;
+    }
+    
+    .main-content-wrapper .container-fluid {
+        background: transparent !important;
+    }
+    </style>
+    
+    {% if user.is_authenticated %}
+    <!-- SIDEBAR MODERNO CSS - Máxima prioridad -->
+    <link rel="stylesheet" href="{% static 'css/sidebar-modern.css' %}?v={% now 'U' %}">
+    {% else %}
+    <!-- CSS para páginas sin sidebar -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v={% now 'U' %}">
+    {% endif %}
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if user.is_authenticated %}sidebar-layout sidebar-collapsed{% else %}normal-layout{% endif %}">
+    {% if user.is_authenticated %}
+    <!-- SIDEBAR MODERNO 2025 -->
+    <aside class="modern-sidebar collapsed" 
+           id="modernSidebar" 
+           role="navigation" 
+           aria-label="Menú principal de navegación">
+        <!-- Header del Sidebar -->
+        <div class="sidebar-header">
+            <a href="{% url 'dashboard:home' %}" 
+               class="sidebar-logo" 
+               aria-label="Ir al inicio - {{ site_name }}">
+                <div class="logo-icon" aria-hidden="true">
+                    <!-- Logo SVG -->
+                    <img src="{% static 'images/file.svg' %}"
+                         alt="Logo del Sistema" 
+                         class="sidebar-logo-image logo-expanded"
+                         id="logoExpanded">
+                    
+                    <!-- Icono fallback -->
+                    <i class="fas fa-cube" aria-hidden="true" style="display:none;" id="logoFallback"></i>
+                </div>
+                <span class="logo-text" id="logoSiteName">{{ site_name }}</span>
+            </a>
+            <button class="sidebar-toggle" 
+                    id="sidebarToggle" 
+                    aria-label="Alternar menú lateral" 
+                    aria-expanded="false" 
+                    aria-controls="modernSidebar">
+                <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- Navegación -->
+        <div class="sidebar-nav-container">
+            <ul class="sidebar-nav" role="menubar" aria-label="Navegación principal">
+                <!-- Dashboard -->
+                <li class="nav-item" role="none">
+                    <a href="{% url 'dashboard:home' %}" 
+                       class="nav-link" 
+                       role="menuitem" 
+                       tabindex="0"
+                       aria-label="Ir al panel principal">
+                        <i class="nav-icon fas fa-home" aria-hidden="true"></i>
+                        <span class="nav-text" data-i18n="sidebar.dashboard">Inicio</span>
+                        <div class="sidebar-tooltip">Panel Principal</div>
+                    </a>
+                </li>
+                
+                <!-- Separador sutil -->
+                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                
+                <!-- Risk Hoteles -->
+                <li class="nav-item has-submenu" role="none">
+                    <a href="{% url 'risk_hoteles:dashboard' %}" 
+                       class="nav-link" 
+                       role="menuitem" 
+                       aria-expanded="false" 
+                       aria-haspopup="true"
+                       aria-label="Análisis de riesgo para hoteles">
+                        <i class="nav-icon fas fa-hotel" aria-hidden="true"></i>
+                        <span class="nav-text">Risk Hoteles</span>
+                        <i class="submenu-indicator fas fa-chevron-right" aria-hidden="true"></i>
+                        <div class="sidebar-tooltip">Análisis de riesgo para hoteles</div>
+                    </a>
+                    <ul class="submenu" role="menu" aria-label="Submenú Risk Hoteles">
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'risk_hoteles:dashboard' %}" 
+                               class="nav-link" 
+                               role="menuitem"
+                               aria-label="Panel principal de riesgos hoteleros">
+                                <i class="nav-icon fas fa-tachometer-alt" aria-hidden="true"></i>
+                                <span class="nav-text">Dashboard</span>
+                                <div class="sidebar-tooltip">Panel principal de riesgos</div>
+                            </a>
+                        </li>
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'risk_hoteles:hotel_list' %}" 
+                               class="nav-link" 
+                               role="menuitem"
+                               aria-label="Gestionar mis hoteles">
+                                <i class="nav-icon fas fa-building" aria-hidden="true"></i>
+                                <span class="nav-text">Mis Hoteles</span>
+                                <div class="sidebar-tooltip">Gestionar hoteles</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Risk Conjuntos -->
+                <li class="nav-item has-submenu">
+                    <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link">
+                        <i class="nav-icon fas fa-building"></i>
+                        <span class="nav-text">Risk Conjuntos</span>
+                        <i class="submenu-indicator fas fa-chevron-right"></i>
+                        <div class="sidebar-tooltip">Análisis de riesgo para conjuntos residenciales</div>
+                    </a>
+                    <ul class="submenu">
+                        <li class="nav-item">
+                            <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <span class="nav-text">Dashboard</span>
+                                <div class="sidebar-tooltip">Panel principal conjuntos</div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="nav-link">
+                                <i class="nav-icon fas fa-home"></i>
+                                <span class="nav-text">Mis Conjuntos</span>
+                                <div class="sidebar-tooltip">Gestionar conjuntos</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Security Probabilistic -->
+                <li class="nav-item has-submenu">
+                    <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link">
+                        <i class="nav-icon fas fa-shield-alt"></i>
+                        <span class="nav-text">Seguridad Probabilística</span>
+                        <i class="submenu-indicator fas fa-chevron-right"></i>
+                        <div class="sidebar-tooltip">Evaluación de seguridad probabilística</div>
+                    </a>
+                    <ul class="submenu">
+                        <li class="nav-item">
+                            <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <span class="nav-text">Dashboard</span>
+                                <div class="sidebar-tooltip">Panel principal de seguridad</div>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="nav-link">
+                                <i class="nav-icon fas fa-users"></i>
+                                <span class="nav-text">Perfiles</span>
+                                <div class="sidebar-tooltip">Listado de perfiles de seguridad</div>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <!-- Evaluadores -->
+                {% if evaluator.is_evaluator or user_subscriptions %}
+                <li class="nav-item has-submenu" role="none">
+                    {% if evaluator.is_evaluator %}
+                        <!-- Para evaluadores: enlace a su perfil -->
+                        <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" 
+                           class="nav-link" 
+                           role="menuitem" 
+                           aria-expanded="false" 
+                           aria-haspopup="true"
+                           aria-label="Mi información como evaluador">
+                            <i class="nav-icon fas fa-user-tie" aria-hidden="true"></i>
+                            <span class="nav-text">Mi Perfil Evaluador</span>
+                            <i class="submenu-indicator fas fa-chevron-right" aria-hidden="true"></i>
+                            <div class="sidebar-tooltip">Mi información como evaluador</div>
+                        </a>
+                    {% else %}
+                        <!-- Para usuarios principales: gestión de evaluadores -->
+                        <a href="{% url 'evaluadores:lista' %}" 
+                           class="nav-link" 
+                           role="menuitem" 
+                           aria-expanded="false" 
+                           aria-haspopup="true"
+                           aria-label="Gestión de evaluadores del sistema">
+                            <i class="nav-icon fas fa-users-cog" aria-hidden="true"></i>
+                            <span class="nav-text">Evaluadores</span>
+                            <i class="submenu-indicator fas fa-chevron-right" aria-hidden="true"></i>
+                            <div class="sidebar-tooltip">Gestión de evaluadores</div>
+                        </a>
+                    {% endif %}
+                    <ul class="submenu" role="menu" aria-label="Submenú de evaluadores">
+                        <!-- Opciones solo para evaluadores -->
+                        {% if evaluator.is_evaluator %}
+                            <li class="nav-item" role="none">
+                                <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" 
+                                   class="nav-link" 
+                                   role="menuitem"
+                                   aria-label="Ver y editar mi perfil de evaluador">
+                                    <i class="nav-icon fas fa-id-card" aria-hidden="true"></i>
+                                    <span class="nav-text">Mi Información</span>
+                                    <div class="sidebar-tooltip">Ver mi información como evaluador</div>
+                                </a>
+                            </li>
+                            {% for profile_data in evaluator.evaluator_profiles|slice:":3" %}
+                                <li class="nav-item">
+                                    <a href="{% if profile_data.perfil.acceso_completo_dashboard %}{% url 'evaluadores:dashboard_evaluador' profile_data.usuario_principal.id %}{% else %}javascript:void(0){% endif %}" class="nav-link {% if not profile_data.perfil.acceso_completo_dashboard %}disabled{% endif %}" {% if not profile_data.perfil.acceso_completo_dashboard %}aria-disabled="true" tabindex="-1"{% endif %}>
+                                        <i class="nav-icon fas fa-external-link-alt"></i>
+                                        <span class="nav-text">{{ profile_data.usuario_principal.get_full_name|truncatechars:15 }}</span>
+                                        <div class="sidebar-tooltip">Dashboard de {{ profile_data.usuario_principal.get_full_name }}</div>
+                                    </a>
+                                </li>
+                            {% endfor %}
+                            {% if evaluator.evaluator_profiles|length > 3 %}
+                                <li class="nav-item">
+                                    <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" class="nav-link">
+                                        <i class="nav-icon fas fa-ellipsis-h"></i>
+                                        <span class="nav-text">Ver todos (+{{ evaluator.evaluator_profiles|length|add:"-3" }})</span>
+                                        <div class="sidebar-tooltip">Ver todos mis perfiles de evaluador</div>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                        
+                        <!-- Opciones solo para usuarios principales (con suscripciones) -->
+                        {% if user_subscriptions and not evaluator.is_evaluator %}
+                            <li class="nav-item" role="none">
+                                <a href="{% url 'evaluadores:lista' %}" 
+                                   class="nav-link" 
+                                   role="menuitem"
+                                   aria-label="Ver lista de mis evaluadores">
+                                    <i class="nav-icon fas fa-users" aria-hidden="true"></i>
+                                    <span class="nav-text">Mis Evaluadores</span>
+                                    <div class="sidebar-tooltip">Lista de evaluadores</div>
+                                </a>
+                            </li>
+                            <li class="nav-item" role="none">
+                                <a href="{% url 'evaluadores:crear' %}" 
+                                   class="nav-link" 
+                                   role="menuitem"
+                                   aria-label="Agregar un nuevo evaluador al sistema">
+                                    <i class="nav-icon fas fa-user-plus" aria-hidden="true"></i>
+                                    <span class="nav-text">Crear Evaluador</span>
+                                    <div class="sidebar-tooltip">Agregar nuevo evaluador</div>
+                                </a>
+                            </li>
+                        {% endif %}
+                        
+                        <!-- Si no es evaluador ni tiene suscripciones, mostrar mensaje informativo -->
+                        {% if not evaluator.is_evaluator and not user_subscriptions %}
+                            <li class="nav-item">
+                                <span class="nav-link disabled" style="color: #6c757d; cursor: default;">
+                                    <i class="nav-icon fas fa-info-circle"></i>
+                                    <span class="nav-text">Requiere suscripción</span>
+                                    <div class="sidebar-tooltip">Necesitas una suscripción activa para gestionar evaluadores</div>
+                                </span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                {% if user.is_staff %}
+                <!-- Administración -->
+                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                <li class="nav-item">
+                    <a href="/admin/" class="nav-link" target="_blank">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <span class="nav-text" data-i18n="sidebar.admin_panel">Administración</span>
+                        <div class="sidebar-tooltip">Panel de administración</div>
+                    </a>
+                </li>
+                {% endif %}
+                
+                <!-- Separador -->
+                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                
+                <!-- Cerrar sesión -->
+                <li class="nav-item logout-item">
+                    <form method="post" action="{% url 'users:logout' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link" style="background: none; border: none; width: 100%; text-align: left; padding: 12px 20px; color: inherit; cursor: pointer;">
+                            <i class="nav-icon fas fa-arrow-right-from-bracket"></i>
+                            <span class="nav-text" data-i18n="sidebar.logout">Salir</span>
+                            <div class="sidebar-tooltip">Cerrar sesión</div>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+            
+            <!-- Indicador de scroll -->
+            <div class="scroll-indicator"></div>
+        </div>
+        
+        <!-- Información del usuario -->
+        <div class="sidebar-user">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {% if user.is_authenticated %}
+                        <img src="{% static 'images/default-avatar.svg' %}" 
+                             alt="Avatar de {{ user.get_full_name|default:user.username }}" 
+                             class="avatar-image" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                             onload="this.nextElementSibling.style.display='none';">
+                        <div class="avatar-initials" style="display: none;">
+                            {% if user.first_name and user.last_name %}
+                                {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                            {% elif user.first_name %}
+                                {{ user.first_name|first|upper }}{{ user.first_name|slice:"1:2"|upper }}
+                            {% else %}
+                                {{ user.username|first|upper }}{{ user.username|slice:"1:2"|upper }}
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="avatar-initials">
+                            ?
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    {% if user.is_authenticated %}
+                        <p class="user-name" title="{{ user.get_full_name|default:user.username }}">
+                            <span class="user-status-indicator"></span>
+                            {{ user.get_full_name|default:user.username|truncatechars:20 }}
+                        </p>
+                        <p class="user-role" {% if user.is_superuser %}data-role="superadmin"{% elif user.is_staff %}data-role="admin"{% else %}data-role="user"{% endif %}>
+                            {% if user.is_superuser %}Super Admin{% elif user.is_staff %}Administrador{% else %}Usuario{% endif %}
+                        </p>
+                    {% else %}
+                        <p class="user-name">No autenticado</p>
+                        <p class="user-role" data-role="guest">Invitado</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Overlay para móviles -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <!-- Contenido principal -->
+    <main class="main-content" id="mainContent">
+        <!-- Topbar -->
+        <div class="main-topbar">
+            <div class="topbar-left">
+                <button class="sidebar-toggle btn btn-link d-lg-none" type="button" id="sidebarToggleMobile">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="topbar-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="topbar-actions">
+                <!-- Notificaciones -->
+                <div class="dropdown">
+                    <button class="btn btn-link position-relative" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bell"></i>
+                        {% if notification_count %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ notification_count }}
+                        </span>
+                        {% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Notificaciones</h6></li>
+                        <li><a class="dropdown-item" href="#">Nueva actualización disponible</a></li>
+                        <li><a class="dropdown-item" href="#">Reporte mensual listo</a></li>
+                        <li><a class="dropdown-item" href="#">Nuevo usuario registrado</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-center" href="#">Ver todas</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Usuario -->
+                <div class="dropdown">
+                    <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <span class="rounded-circle me-2 d-inline-flex align-items-center justify-content-center bg-primary text-white" style="width:32px;height:32px;font-size:0.8rem;font-weight:700;">{{ user.get_full_name|default:user.username|first|upper }}</span>
+                        {{ user.get_full_name|default:user.username }}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'users:profile' %}">
+                            <i class="fas fa-user me-2"></i>Mi Perfil
+                        </a></li>
+                        <li><a class="dropdown-item" href="{% url 'users:settings' %}">
+                            <i class="fas fa-cog me-2"></i>Configuración
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form method="post" action="{% url 'users:logout' %}" style="margin: 0; padding: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left;">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido de la página -->
+        <div class="main-content-wrapper">
+            <div class="container-fluid p-4">
+                {% if messages %}
+                <div class="row">
+                    <div class="col-12">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+    
+    {% else %}
+    <!-- Layout sin sidebar para usuarios no autenticados -->
+    <!-- Navegación simple -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'dashboard:home' %}">Django Modular</a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard:home' %}">Inicio</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'users:login' %}">Iniciar Sesión</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Contenido principal -->
+    <main class="container mt-4">
+        {% if messages %}
+        <div class="row">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% block public_content %}{% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-light mt-5 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <p>&copy; 2023 Proyecto Django Modular. Todos los derechos reservados.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>Desarrollado con Django y Bootstrap</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery (antes de main.js y permission_handler.js) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Establecer datos del usuario para WebSocket -->
+    <script>
+    document.body.dataset.userIsStaff = '{% if user.is_staff %}true{% else %}false{% endif %}';
+    document.body.dataset.userId = '{% if user.is_authenticated %}{{ user.id }}{% else %}0{% endif %}';
+    </script>
+    
+    <!-- JavaScript personalizado -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Sistema de manejo de permisos -->
+    <script src="{% static 'js/permission_handler.js' %}"></script>
+    
+    <!-- Establecer usuario actual para el sistema de permisos -->
+    <meta name="current-user" content="{{ user.username|default:'Anónimo'|escapejs }}">
+    <script>
+    // Establecer variables globales para el sistema de permisos
+    window.currentUser = '{{ user.username|default:"Anónimo"|escapejs }}';
+    window.isEvaluator = {% if evaluator.is_evaluator %}true{% else %}false{% endif %};
+    </script>
+    {% if user.is_authenticated %}
+    <!-- JAVASCRIPT MODERNO PARA SIDEBAR -->
+    <script>
+    /**
+     * Modern Sidebar Controller
+     * Version: 2025 Edition
+     */
+    class ModernSidebar {
+        constructor() {
+            this.sidebar = null;
+            this.overlay = null;
+            this.toggleBtn = null;
+            this.mobileToggleBtn = null;
+            this.isCollapsed = false;
+            this.isMobile = false;
+            this.isAnimating = false;
+            
+            this.init();
+        }
+
+        init() {
+            
+            // Obtener elementos
+            this.sidebar = document.getElementById('modernSidebar');
+            this.overlay = document.getElementById('sidebarOverlay');
+            this.toggleBtn = document.getElementById('sidebarToggle');
+            this.mobileToggleBtn = document.getElementById('sidebarToggleMobile');
+            
+            if (!this.sidebar) {
+                console.error('❌ Sidebar no encontrado');
+                return;
+            }
+
+            // Configurar estado inicial
+            this.setupInitialState();
+            
+            // Configurar eventos
+            this.setupEventListeners();
+            
+            // Configurar click en logo para cambiar modo
+            this.setupLogoClickHandler();
+            
+            // Configurar navegación con teclado
+            this.initKeyboardNavigation();
+            
+            // Configurar submenús
+            this.setupSubmenus();
+            
+            // Configurar tooltips
+            this.setupTooltips();
+            
+            // Configurar gestos móviles
+            this.setupMobileGestures();
+            
+        }
+
+        setupInitialState() {
+            // Verificar estado guardado - POR DEFECTO COLAPSADO
+            const savedState = localStorage.getItem('modernSidebarCollapsed');
+            this.isCollapsed = savedState !== null ? savedState === 'true' : true; // true = colapsado por defecto
+            this.isMobile = window.innerWidth <= 991;
+            
+            // Aplicar estado inicial
+            this.updateSidebarState();
+            
+            // Inicializar logo display
+            setTimeout(() => {
+                this.updateLogoDisplay();
+            }, 100);
+            
+        }
+
+        setupEventListeners() {
+            // Toggle desktop
+            if (this.toggleBtn) {
+                this.toggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleSidebar();
+                    this.updateAriaAttributes();
+                });
+                
+                // Keyboard support for toggle
+                this.toggleBtn.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.toggleSidebar();
+                        this.updateAriaAttributes();
+                    }
+                });
+            }
+
+            // Toggle mobile
+            if (this.mobileToggleBtn) {
+                this.mobileToggleBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.toggleMobileSidebar();
+                });
+            }
+
+            // Overlay click
+            if (this.overlay) {
+                this.overlay.addEventListener('click', () => {
+                    this.closeMobileSidebar();
+                });
+            }
+
+            // Resize handler
+            window.addEventListener('resize', this.debounce(() => {
+                this.handleResize();
+            }, 250));
+
+            // Enhanced keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && this.isMobile) {
+                    this.closeMobileSidebar();
+                }
+                // Alt + M para toggle sidebar (solo desktop)
+                if (e.altKey && e.key === 'm' && !this.isMobile) {
+                    e.preventDefault();
+                    this.toggleSidebar();
+                    this.updateAriaAttributes();
+                }
+            });
+            
+            // Hover effect para expandir sidebar cuando está colapsado (solo desktop)
+            if (this.sidebar) {
+                let hoverTimeout;
+                
+                this.sidebar.addEventListener('mouseenter', () => {
+                    if (this.isCollapsed && !this.isMobile) {
+                        clearTimeout(hoverTimeout);
+                        this.sidebar.classList.add('hover-expanded');
+                    }
+                });
+                
+                this.sidebar.addEventListener('mouseleave', () => {
+                    if (this.isCollapsed && !this.isMobile) {
+                        // Pequeño delay para suavizar la transición
+                        hoverTimeout = setTimeout(() => {
+                            this.sidebar.classList.remove('hover-expanded');
+                        }, 100);
+                    }
+                });
+            }
+        }
+
+        setupSubmenus() {
+            // Configurar submenús con manejo mejorado
+            document.querySelectorAll('.has-submenu > .nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (!this.isMobile) {
+                        e.preventDefault();
+                        const item = e.target.closest('.has-submenu');
+                        this.toggleSubmenu(item);
+                        this.updateSubmenuAriaAttributes(item);
+                    }
+                });
+
+                // Enhanced keyboard navigation
+                link.addEventListener('keydown', (e) => {
+                    const item = e.target.closest('.has-submenu');
+                    
+                    switch(e.key) {
+                        case 'Enter':
+                        case ' ':
+                            e.preventDefault();
+                            this.toggleSubmenu(item);
+                            this.updateSubmenuAriaAttributes(item);
+                            break;
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            this.focusNextMenuItem(e.target);
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            this.focusPreviousMenuItem(e.target);
+                            break;
+                        case 'Home':
+                            e.preventDefault();
+                            this.focusFirstMenuItem();
+                            break;
+                        case 'End':
+                            e.preventDefault();
+                            this.focusLastMenuItem();
+                            break;
+                    }
+                });
+            });
+
+        }
+
+        // Nuevos métodos de accesibilidad
+        updateAriaAttributes() {
+            if (this.toggleBtn) {
+                this.toggleBtn.setAttribute('aria-expanded', (!this.isCollapsed).toString());
+            }
+        }
+
+        updateSubmenuAriaAttributes(item) {
+            const link = item.querySelector('.nav-link');
+            const submenu = item.querySelector('.submenu');
+            const isActive = item.classList.contains('active');
+            
+            if (link) {
+                link.setAttribute('aria-expanded', isActive.toString());
+            }
+        }
+
+        focusNextMenuItem(currentElement) {
+            const menuItems = Array.from(document.querySelectorAll('.nav-link[role="menuitem"]'));
+            const currentIndex = menuItems.indexOf(currentElement);
+            const nextIndex = (currentIndex + 1) % menuItems.length;
+            menuItems[nextIndex].focus();
+        }
+
+        focusPreviousMenuItem(currentElement) {
+            const menuItems = Array.from(document.querySelectorAll('.nav-link[role="menuitem"]'));
+            const currentIndex = menuItems.indexOf(currentElement);
+            const prevIndex = currentIndex <= 0 ? menuItems.length - 1 : currentIndex - 1;
+            menuItems[prevIndex].focus();
+        }
+
+        focusFirstMenuItem() {
+            const firstMenuItem = document.querySelector('.nav-link[role="menuitem"]');
+            if (firstMenuItem) firstMenuItem.focus();
+        }
+
+        focusLastMenuItem() {
+            const menuItems = document.querySelectorAll('.nav-link[role="menuitem"]');
+            const lastMenuItem = menuItems[menuItems.length - 1];
+            if (lastMenuItem) lastMenuItem.focus();
+        }
+
+        setupTooltips() {
+            // Los tooltips se muestran automáticamente con CSS
+            // Aquí podríamos agregar lógica adicional si es necesario
+        }
+
+        /**
+         * Gestión de foco y navegación con teclado
+         */
+        initKeyboardNavigation() {
+            // Permitir navegación con Tab y Arrow Keys
+            this.sidebar.addEventListener('keydown', (e) => this.handleKeyboardNavigation(e));
+            
+            // Gestión de foco al expandir/colapsar
+            if (this.toggleBtn) {
+                this.toggleBtn.addEventListener('focus', () => {
+                    this.toggleBtn.setAttribute('aria-describedby', 'sidebar-toggle-help');
+                });
+            }
+        }
+
+        handleKeyboardNavigation(e) {
+            const focusableElements = this.sidebar.querySelectorAll(
+                'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+            );
+            const focusableArray = Array.from(focusableElements);
+            const currentIndex = focusableArray.indexOf(document.activeElement);
+
+            switch(e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % focusableArray.length;
+                    focusableArray[nextIndex]?.focus();
+                    break;
+                
+                case 'ArrowUp':
+                    e.preventDefault();
+                    const prevIndex = currentIndex === 0 ? focusableArray.length - 1 : currentIndex - 1;
+                    focusableArray[prevIndex]?.focus();
+                    break;
+                
+                case 'Home':
+                    e.preventDefault();
+                    focusableArray[0]?.focus();
+                    break;
+                
+                case 'End':
+                    e.preventDefault();
+                    focusableArray[focusableArray.length - 1]?.focus();
+                    break;
+            }
+        }
+
+        manageFocus(element) {
+            // Asegurar que el elemento sea visible y focuseable
+            if (element && typeof element.focus === 'function') {
+                element.focus();
+                element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        setupMobileGestures() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                if (!touchStartX || !touchStartY) return;
+
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const diffX = touchStartX - touchEndX;
+                const diffY = touchStartY - touchEndY;
+
+                // Solo gestos horizontales
+                if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 100) {
+                    if (this.isMobile) {
+                        const isVisible = this.sidebar.classList.contains('mobile-open');
+                        
+                        // Swipe right para abrir
+                        if (diffX < 0 && touchStartX < 50 && !isVisible) {
+                            this.openMobileSidebar();
+                        }
+                        
+                        // Swipe left para cerrar
+                        if (diffX > 0 && isVisible) {
+                            this.closeMobileSidebar();
+                        }
+                    }
+                }
+
+                touchStartX = 0;
+                touchStartY = 0;
+            }, { passive: true });
+        }
+
+        toggleSidebar() {
+            if (this.isAnimating || this.isMobile) return;
+            
+            this.isAnimating = true;
+            const wasCollapsed = this.isCollapsed;
+            this.isCollapsed = !this.isCollapsed;
+            
+            // Animación del botón
+            this.animateToggleButton();
+            
+            // Actualizar estado
+            this.updateSidebarState();
+            
+            // Gestión de foco mejorada
+            if (wasCollapsed && !this.isCollapsed) {
+                // Sidebar se expandió - devolver foco al primer elemento navegable
+                setTimeout(() => {
+                    const firstNavLink = this.sidebar.querySelector('.nav-link:not(.dropdown-toggle)');
+                    this.manageFocus(firstNavLink);
+                }, 300);
+            }
+            
+            // Guardar estado
+            localStorage.setItem('modernSidebarCollapsed', this.isCollapsed);
+            
+            setTimeout(() => {
+                this.isAnimating = false;
+            }, 300);
+            
+        }
+        
+        setupLogoClickHandler() {
+            const logoContainer = document.querySelector('.logo-icon');
+            const logoLink = document.querySelector('.sidebar-logo');
+            
+            if (logoContainer) {
+                logoContainer.addEventListener('click', (e) => {
+                    // Solo permitir cambio si está colapsado y no es mobile
+                    if (this.isCollapsed && !this.isMobile) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        this.cycleLogo();
+                    }
+                });
+                
+                // Prevenir navegación cuando está colapsado
+                if (logoLink) {
+                    logoLink.addEventListener('click', (e) => {
+                        if (this.isCollapsed && !this.isMobile) {
+                            e.preventDefault();
+                        }
+                    });
+                }
+                
+            } else {
+                console.warn('⚠️ Logo container no encontrado');
+            }
+        }
+
+        toggleMobileSidebar() {
+            const isOpen = this.sidebar.classList.contains('mobile-open');
+            
+            if (isOpen) {
+                this.closeMobileSidebar();
+            } else {
+                this.openMobileSidebar();
+            }
+        }
+
+        openMobileSidebar() {
+            this.sidebar.classList.add('mobile-open');
+            this.overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        closeMobileSidebar() {
+            this.sidebar.classList.remove('mobile-open');
+            this.overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        toggleSubmenu(item) {
+            const isActive = item.classList.contains('active');
+            
+            // Cerrar otros submenús
+            this.sidebar.querySelectorAll('.has-submenu.active').forEach(el => {
+                if (el !== item) {
+                    el.classList.remove('active');
+                }
+            });
+            
+            // Toggle este submenú
+            if (isActive) {
+                item.classList.remove('active');
+            } else {
+                item.classList.add('active');
+            }
+        }
+
+        animateToggleButton() {
+            if (this.toggleBtn) {
+                this.toggleBtn.style.transform = 'rotate(180deg) scale(0.9)';
+                setTimeout(() => {
+                    this.toggleBtn.style.transform = '';
+                }, 200);
+            }
+        }
+
+        updateSidebarState() {
+            const body = document.body;
+            const logoContainer = document.querySelector('.logo-icon');
+            
+            if (this.isMobile) {
+                // En móvil, solo manejar overlay
+                body.classList.remove('sidebar-collapsed');
+            } else {
+                // En desktop, manejar collapsed state
+                if (this.isCollapsed) {
+                    this.sidebar.classList.add('collapsed');
+                    body.classList.add('sidebar-collapsed');
+                    
+                    // Logo clickeable cuando está colapsado
+                    if (logoContainer) {
+                        logoContainer.style.cursor = 'pointer';
+                        logoContainer.title = 'Click para cambiar logo';
+                    }
+                } else {
+                    this.sidebar.classList.remove('collapsed');
+                    body.classList.remove('sidebar-collapsed');
+                    
+                    // Logo no clickeable cuando está expandido
+                    if (logoContainer) {
+                        logoContainer.style.cursor = 'default';
+                        logoContainer.title = '';
+                    }
+                }
+            }
+            
+            // Actualizar logo según estado
+            this.updateLogoDisplay();
+        }
+        
+        updateLogoDisplay() {
+            const logoExpanded = document.getElementById('logoExpanded');
+            const logoCollapsed = document.getElementById('logoCollapsed');
+            const logoFallback = document.getElementById('logoFallback');
+            const logoSiteName = document.getElementById('logoSiteName');
+            
+            // Verificar que el elemento principal exista (logoCollapsed es opcional)
+            if (!logoExpanded) {
+                console.warn('⚠️ No se encontró el elemento logoExpanded');
+                return;
+            }
+            
+            // Obtener estado de configuración (0: logo SVG, 1: logo PNG)
+            const logoMode = parseInt(localStorage.getItem('modernSidebarLogoMode') || '0');
+            
+            // Ocultar todos los elementos primero
+            this.hideElement(logoExpanded);
+            this.hideElement(logoCollapsed);
+            if (logoFallback) this.hideElement(logoFallback);
+            
+            if (!this.isCollapsed) {
+                // Sidebar expandido - mostrar logo principal y texto del sitio
+                this.showElement(logoExpanded);
+                if (logoSiteName) this.showElement(logoSiteName);
+            } else {
+                // Sidebar colapsado - ocultar texto del sitio y rotar entre logos
+                if (logoSiteName) this.hideElement(logoSiteName);
+                
+                if (logoMode === 1) {
+                    // Modo 1: Logo colapsado (PNG)
+                    this.showElement(logoCollapsed);
+                } else {
+                    // Modo 0: Logo principal (SVG)
+                    this.showElement(logoExpanded);
+                }
+            }
+            
+        }
+        
+        getVisibleLogo() {
+            const logos = {
+                'logoExpanded': 'Logo Principal',
+                'logoCollapsed': 'Logo Colapsado',
+                'logoFallback': 'Icono Fallback'
+            };
+            
+            for (const [id, name] of Object.entries(logos)) {
+                const element = document.getElementById(id);
+                if (element && element.style.display !== 'none') {
+                    return name;
+                }
+            }
+            return 'Ninguno';
+        }
+        
+        cycleLogo() {
+            if (!this.isCollapsed) {
+                return;
+            }
+            
+            const logoContainer = document.querySelector('.logo-icon');
+            const currentMode = parseInt(localStorage.getItem('modernSidebarLogoMode') || '0');
+            const nextMode = (currentMode + 1) % 2; // Rotar entre 0 y 1 solamente
+            
+            
+            // Agregar animación de cambio
+            if (logoContainer) {
+                logoContainer.classList.add('changing');
+                
+                // Pequeña animación visual
+                logoContainer.style.transform = 'scale(0.8)';
+                
+                setTimeout(() => {
+                    localStorage.setItem('modernSidebarLogoMode', nextMode.toString());
+                    this.updateLogoDisplay();
+                    
+                    // Restaurar transformación y remover clase de animación
+                    logoContainer.style.transform = 'scale(1)';
+                    setTimeout(() => {
+                        logoContainer.classList.remove('changing');
+                    }, 150);
+                }, 150);
+            }
+            
+            const modes = ['Logo Principal (SVG)', 'Logo Colapsado (PNG)'];
+            
+            // Feedback visual temporal
+            this.showTemporaryFeedback(modes[nextMode]);
+        }
+        
+        showTemporaryFeedback(message) {
+            // Crear elemento de feedback temporal
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: rgba(0,0,0,0.8);
+                color: white;
+                padding: 10px 15px;
+                border-radius: 5px;
+                font-size: 12px;
+                z-index: 10000;
+                transition: opacity 0.3s ease;
+            `;
+            feedback.textContent = message;
+            
+            document.body.appendChild(feedback);
+            
+            // Remover después de 2 segundos
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.parentNode.removeChild(feedback);
+                    }
+                }, 300);
+            }, 2000);
+        }
+        
+        showElement(element) {
+            if (element) {
+                element.style.display = 'block';
+                element.style.opacity = '1';
+                element.style.visibility = 'visible';
+            }
+        }
+        
+        hideElement(element) {
+            if (element) {
+                element.style.display = 'none';
+                element.style.opacity = '0';
+                element.style.visibility = 'hidden';
+            }
+        }
+
+        handleResize() {
+            const wasMobile = this.isMobile;
+            this.isMobile = window.innerWidth <= 991;
+
+            if (wasMobile !== this.isMobile) {
+                
+                // Limpiar estado mobile si cambió a desktop
+                if (!this.isMobile) {
+                    this.closeMobileSidebar();
+                }
+                
+                this.updateSidebarState();
+            }
+        }
+
+        // Utility function
+        debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+    }
+
+    // Inicializar cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            const sidebar = new ModernSidebar();
+            setTimeout(() => { sidebar.updateLogoDisplay(); }, 500);
+        });
+    } else {
+        const sidebar = new ModernSidebar();
+        setTimeout(() => { sidebar.updateLogoDisplay(); }, 500);
+    }
+
+    // Bootstrap dropdowns compatibility
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(() => {
+            if (typeof bootstrap !== 'undefined') {
+                const dropdownTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
+                dropdownTriggerList.map(function (dropdownTriggerEl) {
+                    return new bootstrap.Dropdown(dropdownTriggerEl);
+                });
+            }
+        }, 100);
+    });
+    
+    // Manejo de fallback del avatar
+    document.addEventListener('DOMContentLoaded', function() {
+        function handleAvatarFallback() {
+            const avatarImage = document.querySelector('.avatar-image');
+            const avatarInitials = document.querySelector('.avatar-initials');
+            
+            if (avatarImage) {
+                if (!avatarImage.complete) {
+                    setTimeout(handleAvatarFallback, 500);
+                    return;
+                }
+                if (avatarImage.naturalWidth === 0) {
+                    avatarImage.style.display = 'none';
+                    if (avatarInitials) avatarInitials.style.display = 'flex';
+                } else {
+                    if (avatarInitials) avatarInitials.style.display = 'none';
+                }
+            }
+        }
+        setTimeout(handleAvatarFallback, 500);
+    });
+    </script>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Modal de Permisos Denegados -->
+    <div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="permissionDeniedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border-bottom: none; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title text-white" id="permissionDeniedModalLabel">
+                        <i class="fas fa-ban me-2"></i>Acceso Denegado
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding: 2rem;">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-shield-alt text-danger" style="font-size: 3rem; opacity: 0.7;"></i>
+                    </div>
+                    <div id="permissionDeniedContent">
+                        <p class="text-muted mb-3" id="permissionDeniedMessage">
+                            No tienes permisos suficientes para realizar esta acción.
+                        </p>
+                        <div class="alert alert-light border border-danger" style="border-radius: 10px;" id="permissionDeniedDetails">
+                            <small class="text-muted">
+                                <strong>Detalles:</strong><br>
+                                <span id="permissionDeniedDetailsText">Contacta al administrador para más información.</span>
+                            </small>
+                        </div>
+                        <div class="alert alert-info" style="border-radius: 10px;" id="permissionDeniedSuggestion">
+                            <i class="fas fa-lightbulb text-info me-2"></i>
+                            <small id="permissionDeniedSuggestionText">
+                                Verifica con tu administrador si necesitas permisos adicionales.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: none; padding: 1rem 2rem 2rem;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="window.history.back()" data-bs-dismiss="modal">
+                        <i class="fas fa-arrow-left me-2"></i>Regresar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript para manejo de errores de permisos -->
+    <script>
+    function showPermissionDeniedModal(module, action, errorType) {
+        // Mapeo de módulos
+        const moduleMap = {
+            'risk_hoteles': 'Risk Hoteles',
+            'risk_conjuntos': 'Risk Conjuntos', 
+            'security_probabilistic': 'Security Probabilistic'
+        };
+        
+        // Mapeo de acciones
+        const actionMap = {
+            'read': 'ver',
+            'create': 'crear',
+            'update': 'editar',
+            'delete': 'eliminar',
+            'export': 'exportar',
+            'approve': 'aprobar'
+        };
+        
+        // Sanitizar strings para evitar XSS en innerHTML
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+        
+        const moduleDisplay = escapeHtml(moduleMap[module] || module);
+        const actionDisplay = escapeHtml(actionMap[action] || action);
+        
+        let title, message, suggestion;
+        
+        if (errorType === 'module_access') {
+            title = 'Acceso Denegado al Módulo';
+            message = `No tienes permisos para acceder al módulo <strong>${moduleDisplay}</strong>.`;
+            suggestion = `Contacta a tu administrador para solicitar acceso al módulo ${moduleDisplay}.`;
+        } else {
+            title = 'Permisos Insuficientes';
+            message = `No tienes permisos para <strong>${actionDisplay}</strong> en el módulo <strong>${moduleDisplay}</strong>.`;
+            suggestion = `Solo puedes realizar las acciones para las que tienes permisos en ${moduleDisplay}.`;
+        }
+        
+        // Actualizar contenido del modal
+        document.getElementById('permissionDeniedModalLabel').innerHTML = `<i class="fas fa-ban me-2"></i>${escapeHtml(title)}`;
+        document.getElementById('permissionDeniedMessage').innerHTML = message;
+        const detailsEl = document.getElementById('permissionDeniedDetailsText');
+        detailsEl.textContent = '';
+        detailsEl.innerHTML = `Módulo: ${moduleDisplay}<br>Acción: ${actionDisplay}<br>Usuario: {{ user.username|default:"Anónimo"|escapejs }}`;
+        document.getElementById('permissionDeniedSuggestionText').innerHTML = suggestion;
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('permissionDeniedModal'));
+        modal.show();
+    }
+
+    // Interceptar errores de permisos en enlaces y formularios
+    document.addEventListener('DOMContentLoaded', function() {
+        // Interceptar clics en enlaces que pueden dar error de permisos
+        document.querySelectorAll('a[href*="/crear"], a[href*="/edit"], a[href*="/delete"]').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                // Aquí podrías añadir lógica adicional para verificar permisos antes del clic
+            });
+        });
+    });
+    </script>
+    
+    {% if 'django_browser_reload' in INSTALLED_APPS %}
+        {% load django_browser_reload %}
+        {% django_browser_reload_script %}
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!-- Modal de Login -->
+<div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="loginModalLabel">
+                    <i class="fas fa-lock me-2"></i>Iniciar Sesión
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Mensajes del sistema -->
+                <div id="modal-messages" class="mb-3" style="display: none;">
+                    <!-- Los mensajes se insertan aquí via JavaScript -->
+                </div>
+                
+                <!-- Formulario de login -->
+                <form id="modalLoginForm" method="post" action="{% url 'users:login' %}" novalidate>
+                    {% csrf_token %}
+                    
+                    <!-- Campo Email -->
+                    <div class="mb-3">
+                        <label for="modal_id_username" class="form-label">
+                            <i class="fas fa-envelope text-primary me-1"></i> Email
+                        </label>
+                        <input type="email" 
+                               class="form-control" 
+                               id="modal_id_username" 
+                               name="username" 
+                               placeholder="tu@email.com"
+                               required
+                               autocomplete="email"
+                               autofocus>
+                        <div class="invalid-feedback"></div>
+                        <div class="form-text">
+                            <small class="text-muted">Ingresa tu dirección de correo electrónico</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo Contraseña -->
+                    <div class="mb-3">
+                        <label for="modal_id_password" class="form-label">
+                            <i class="fas fa-lock text-primary me-1"></i> Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="modal_id_password" 
+                                   name="password" 
+                                   placeholder="Tu contraseña"
+                                   required
+                                   autocomplete="current-password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                    
+                    <!-- Recordarme -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               id="modal_id_remember_me" 
+                               name="remember_me">
+                        <label class="form-check-label" for="modal_id_remember_me">
+                            <i class="fas fa-check text-success me-1"></i> Recordarme
+                        </label>
+                    </div>
+                    
+                    <!-- Botón de submit -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg" id="modalSubmitBtn">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </button>
+                    </div>
+                    
+                    <!-- Enlaces adicionales -->
+                    <div class="text-center">
+                        <a href="{% url 'users:password_reset' %}" class="text-primary text-decoration-none">
+                            <i class="fas fa-key me-1"></i> ¿Olvidaste tu contraseña?
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer text-center bg-light">
+                <small class="text-muted w-100">
+                    ¿No tienes cuenta? Contacta al administrador para obtener acceso.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos específicos para el modal de login */
+#loginModal .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
+}
+
+#loginModal .modal-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom: none;
+    padding: 1.5rem;
+}
+
+#loginModal .modal-body {
+    padding: 2rem;
+}
+
+#loginModal .modal-footer {
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-top: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+}
+
+#loginModal .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#loginModal .btn-primary {
+    background: linear-gradient(135deg, #1C69A8 0%, #2589DA 100%);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+#loginModal .btn-primary:hover {
+    background: linear-gradient(135deg, #0f5a94 0%, #1a73c2 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(28, 105, 168, 0.3);
+}
+
+/* Loading state */
+#loginModal .btn.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+#loginModal .btn.loading::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animación para mostrar/ocultar contraseña */
+#togglePassword {
+    transition: color 0.3s ease;
+}
+
+#togglePassword:hover {
+    color: #1C69A8 !important;
+}
+
+/* Mensajes de error/éxito en el modal */
+#modal-messages .alert {
+    border-radius: 10px;
+    border: none;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+}
+
+#modal-messages .alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+#modal-messages .alert-success {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+/* Validación visual */
+#loginModal .form-control.is-valid {
+    border-color: #198754;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='m2.3 6.73.94-.94 2.94-2.94L7.11 1.93a.75.75 0 1 1 1.06 1.06L3.75 7.41a.75.75 0 0 1-1.06 0L.22 4.94a.75.75 0 0 1 1.06-1.06l.72.72.72.72z'/%3e%3c/svg%3e");
+}
+
+#loginModal .form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 5.8 0.4 0.4 0.4-0.4'/%3e%3cpath d='m6.2 6.2 0.4-0.4'/%3e%3c/svg%3e");
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+    #loginModal .modal-dialog {
+        margin: 1rem;
+    }
+    
+    #loginModal .modal-body {
+        padding: 1.5rem;
+    }
+    
+    #loginModal .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    #loginModal .modal-footer {
+        padding: 0.75rem 1.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginModal = document.getElementById('loginModal');
+    const modalLoginForm = document.getElementById('modalLoginForm');
+    const modalSubmitBtn = document.getElementById('modalSubmitBtn');
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('modal_id_password');
+    const emailField = document.getElementById('modal_id_username');
+    const messagesContainer = document.getElementById('modal-messages');
+
+    // Toggle password visibility
+    if (togglePassword && passwordField) {
+        togglePassword.addEventListener('click', function() {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            if (type === 'text') {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    }
+
+    // Form validation
+    if (emailField) {
+        emailField.addEventListener('input', function() {
+            const isValid = this.checkValidity();
+            this.classList.toggle('is-valid', isValid && this.value.length > 0);
+            this.classList.toggle('is-invalid', !isValid && this.value.length > 0);
+            
+            const feedback = this.nextElementSibling;
+            if (!isValid && this.value.length > 0) {
+                feedback.textContent = 'Por favor, ingresa un email válido.';
+            } else {
+                feedback.textContent = '';
+            }
+        });
+    }
+
+    if (passwordField) {
+        passwordField.addEventListener('input', function() {
+            const isValid = this.value.length >= 3;
+            this.classList.toggle('is-valid', isValid);
+            this.classList.toggle('is-invalid', !isValid && this.value.length > 0);
+            
+            const feedback = this.parentNode.nextElementSibling;
+            if (!isValid && this.value.length > 0) {
+                feedback.textContent = 'La contraseña debe tener al menos 3 caracteres.';
+            } else {
+                feedback.textContent = '';
+            }
+        });
+    }
+
+    // Form submission
+    if (modalLoginForm) {
+        modalLoginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous messages
+            messagesContainer.style.display = 'none';
+            messagesContainer.innerHTML = '';
+            
+            // Add loading state
+            if (modalSubmitBtn) {
+                modalSubmitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Iniciando sesión...';
+                modalSubmitBtn.disabled = true;
+                modalSubmitBtn.classList.add('loading');
+            }
+
+            // Submit form via AJAX
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Éxito - mostrar mensaje y redirigir a la URL correcta
+                    showMessage('success', data.message || 'Inicio de sesión exitoso. Redirigiendo...');
+                    setTimeout(() => {
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 1500);
+                } else {
+                    // Error - mostrar mensajes de error
+                    if (data.errors) {
+                        let errorMessage = '';
+                        for (const field in data.errors) {
+                            errorMessage += data.errors[field].join(' ') + ' ';
+                        }
+                        showMessage('danger', errorMessage);
+                    } else {
+                        showMessage('danger', 'Error al iniciar sesión. Verifica tus credenciales.');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage('danger', 'Error de conexión. Inténtalo de nuevo.');
+            })
+            .finally(() => {
+                // Remove loading state
+                if (modalSubmitBtn) {
+                    modalSubmitBtn.innerHTML = '<i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión';
+                    modalSubmitBtn.disabled = false;
+                    modalSubmitBtn.classList.remove('loading');
+                }
+            });
+        });
+    }
+
+    // Helper function to show messages
+    function showMessage(type, message) {
+        messagesContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        messagesContainer.style.display = 'block';
+    }
+
+    // Reset form when modal is shown
+    if (loginModal) {
+        loginModal.addEventListener('show.bs.modal', function() {
+            // Clear form
+            if (modalLoginForm) {
+                modalLoginForm.reset();
+            }
+            
+            // Clear messages
+            messagesContainer.style.display = 'none';
+            messagesContainer.innerHTML = '';
+            
+            // Clear validation classes
+            const inputs = this.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.classList.remove('is-valid', 'is-invalid');
+            });
+            
+            // Focus on email field
+            setTimeout(() => {
+                if (emailField) {
+                    emailField.focus();
+                }
+            }, 500);
+        });
+    }
+});
+</script>

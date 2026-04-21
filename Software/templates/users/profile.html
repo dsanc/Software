@@ -1,0 +1,1030 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil - {{ block.super }}{% endblock %}
+{% block page_title %}Mi Perfil{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 15px;
+    color: white;
+    margin-bottom: 2rem;
+}
+
+.profile-card .card-body {
+    padding: 2rem;
+}
+
+.avatar-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.avatar-img {
+    width: 120px;
+    height: 120px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    object-position: center;
+}
+
+.avatar-fallback {
+    width: 120px;
+    height: 120px;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.info-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-2px);
+}
+
+.info-card .card-header {
+    background: #f8f9fc;
+    border-bottom: 2px solid #e3e6f0;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.5rem;
+}
+
+.info-card .card-header h5 {
+    color: #5a5c69;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f1f1;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #5a5c69;
+    min-width: 140px;
+    margin-bottom: 0;
+}
+
+.info-value {
+    color: #6c757d;
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.progress-custom {
+    height: 12px;
+    border-radius: 8px;
+    background: #e9ecef;
+    overflow: hidden;
+}
+
+.progress-bar-custom {
+    height: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #e74a3b 0%, #f39c12 25%, #f1c40f 50%, #27ae60 75%, #2ecc71 100%);
+    transition: width 0.5s ease;
+}
+
+.badge-custom {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    background: #f8f9fc;
+}
+
+.status-item:last-child {
+    margin-bottom: 0;
+}
+
+.btn-action {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-1px);
+}
+
+/* Estilos para el modal de cambio de contraseña */
+#passwordChangeModal .modal-content {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+#passwordChangeModal .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border-bottom: none;
+    padding: 1.5rem 2rem;
+}
+
+#passwordChangeModal .modal-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+#passwordChangeModal .btn-close {
+    filter: brightness(0) invert(1);
+}
+
+#passwordChangeModal .modal-body {
+    padding: 2rem;
+}
+
+#passwordChangeModal .modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e3e6f0;
+    border-radius: 0 0 15px 15px;
+}
+
+#passwordChangeModal .form-label {
+    font-weight: 600;
+    color: #5a5c69;
+    margin-bottom: 0.5rem;
+}
+
+#passwordChangeModal .form-control {
+    border-radius: 8px;
+    border: 1px solid #d1d3e2;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+}
+
+#passwordChangeModal .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+#passwordChangeModal .strength-criteria .text-success {
+    color: #28a745 !important;
+}
+
+#passwordChangeModal .strength-criteria .text-danger {
+    color: #dc3545 !important;
+}
+
+#passwordChangeModal .strength-criteria .text-muted {
+    color: #6c757d !important;
+}
+
+#passwordChangeModal .alert {
+    border-radius: 8px;
+    border: none;
+}
+
+#passwordChangeModal .btn {
+    border-radius: 8px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+#passwordChangeModal .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+#passwordChangeModal .btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+}
+
+#passwordChangeModal .btn-secondary {
+    background: #6c757d;
+    border: none;
+}
+
+#passwordChangeModal .btn-secondary:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+/* Estilos para botones de mostrar/ocultar contraseña */
+.input-group .btn-outline-secondary {
+    border-color: #d1d3e2;
+    color: #6c757d;
+}
+
+.input-group .btn-outline-secondary:hover {
+    background-color: #f8f9fc;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.input-group .btn-outline-secondary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.input-group .form-control:focus + .btn-outline-secondary {
+    border-color: #667eea;
+}
+
+/* Estilos para validaciones de Django */
+#strengthCriteria {
+    background-color: #f8f9fa;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    min-height: 160px;
+}
+
+.django-validations {
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+}
+
+.django-validations .alert {
+    margin-bottom: 0.75rem;
+    border: none;
+    font-size: 0.875rem;
+}
+
+.strength-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Estilos para modal de éxito */
+#passwordSuccessModal .modal-content {
+    border-radius: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.success-animation {
+    position: relative;
+    margin: 0 auto;
+    width: 80px;
+    height: 80px;
+}
+
+.checkmark-circle {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    animation: scaleIn 0.6s ease-out;
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+}
+
+@keyframes scaleIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.security-tips {
+    background: rgba(23, 162, 184, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    border-left: 4px solid #17a2b8;
+}
+
+#closeSuccessModal {
+    transition: all 0.3s ease;
+    border-radius: 25px;
+}
+
+#closeSuccessModal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Columna principal -->
+    <div class="col-lg-8">
+        <!-- Perfil principal -->
+        <div class="card profile-card">
+            <div class="card-body text-center">
+                <div class="avatar-container">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="Avatar" 
+                             class="rounded-circle avatar-img">
+                    {% else %}
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center avatar-fallback" 
+                             style="font-size: 2.5rem; font-weight: 500;">
+                            {{ user.get_initials }}
+                        </div>
+                    {% endif %}
+                </div>
+                <h2 class="mb-2">{{ user.get_full_name }}</h2>
+                <p class="mb-3 opacity-75">{{ user.email }}</p>
+                {% if user.job_title %}
+                    <p class="mb-2">
+                        <i class="fas fa-briefcase me-2"></i>
+                        {{ user.job_title }}{% if user.company %} en {{ user.company }}{% endif %}
+                    </p>
+                {% endif %}
+                {% if user.city or user.country %}
+                    <p class="mb-4">
+                        <i class="fas fa-map-marker-alt me-2"></i>
+                        {% if user.city %}{{ user.city }}{% endif %}{% if user.city and user.country %}, {% endif %}{% if user.country %}{{ user.country }}{% endif %}
+                    </p>
+                {% endif %}
+                
+                <!-- Completitud del perfil -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <span class="me-3">Perfil completo</span>
+                        <span class="badge bg-light text-dark">{{ user.profile_completion }}%</span>
+                    </div>
+                    <div class="progress-custom mx-auto" style="max-width: 300px;">
+                        <div class="progress-bar-custom" style="width: {{ user.profile_completion }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{% url 'users:profile_edit' %}" class="btn btn-light btn-action">
+                        <i class="fas fa-edit me-2"></i>Editar Perfil
+                    </a>
+                    <button type="button" class="btn btn-outline-light btn-action" data-bs-toggle="modal" data-bs-target="#passwordChangeModal">
+                        <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información personal -->
+        <div class="card info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-user me-2"></i>Información Personal</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nombre:</div>
+                            <div class="info-value">{{ user.first_name|default:"No especificado" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Apellido:</div>
+                            <div class="info-value">{{ user.last_name|default:"No especificado" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Email:</div>
+                            <div class="info-value">
+                                {{ user.email }}
+                                {% if user.email_verified %}
+                                    <i class="fas fa-check-circle text-success ms-1" title="Verificado"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="No verificado"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Teléfono:</div>
+                            <div class="info-value">
+                                {{ user.phone|default:"No especificado" }}
+                                {% if user.phone and user.phone_verified %}
+                                    <i class="fas fa-check-circle text-success ms-1" title="Verificado"></i>
+                                {% elif user.phone %}
+                                    <i class="fas fa-exclamation-triangle text-warning ms-1" title="No verificado"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Ciudad:</div>
+                            <div class="info-value">{{ user.city|default:"No especificado" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">País:</div>
+                            <div class="info-value">{{ user.country|default:"No especificado" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Cargo/Puesto:</div>
+                            <div class="info-value">{{ user.job_title|default:"No especificado" }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Empresa:</div>
+                            <div class="info-value">{{ user.company|default:"No especificado" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% if user.department %}
+                <hr>
+                <div class="info-item">
+                    <div class="info-label">Departamento:</div>
+                    <div class="info-value">{{ user.department }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Estado de la cuenta -->
+        <div class="card info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle me-2"></i>Estado de la Cuenta</h5>
+            </div>
+            <div class="card-body">
+                <div class="info-item">
+                    <div class="info-label">Estado:</div>
+                    <div class="info-value">
+                        {% if user.is_active %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Miembro desde:</div>
+                    <div class="info-value">{{ user.date_joined|date:"d M Y" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Última actualización:</div>
+                    <div class="info-value">{{ user.updated_at|date:"d M Y" }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Último acceso:</div>
+                    <div class="info-value">{{ user.last_login|date:"d M Y"|default:"Nunca" }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Seguridad -->
+        <div class="card info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt me-2"></i>Seguridad</h5>
+            </div>
+            <div class="card-body">
+                <div class="status-item">
+                    {% if user.email_verified %}
+                        <i class="fas fa-check-circle text-success me-2"></i>Email verificado
+                    {% else %}
+                        <i class="fas fa-times-circle text-danger me-2"></i>Email sin verificar
+                    {% endif %}
+                </div>
+                <div class="status-item">
+                    {% if user.phone_verified %}
+                        <i class="fas fa-check-circle text-success me-2"></i>Teléfono verificado
+                    {% else %}
+                        <i class="fas fa-times-circle text-muted me-2"></i>Teléfono sin verificar
+                    {% endif %}
+                </div>
+                <div class="status-item">
+                    {% if user.two_factor_enabled %}
+                        <i class="fas fa-shield-check text-success me-2"></i>2FA habilitado
+                    {% else %}
+                        <i class="fas fa-shield text-warning me-2"></i>2FA recomendado
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Configuración de notificaciones -->
+        <div class="card info-card">
+            <div class="card-header">
+                <h5><i class="fas fa-bell me-2"></i>Notificaciones</h5>
+            </div>
+            <div class="card-body">
+                <div class="info-item">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value">
+                        {% if user.email_notifications %}
+                            <span class="badge bg-success">Activadas</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Desactivadas</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">SMS:</div>
+                    <div class="info-value">
+                        {% if user.sms_notifications %}
+                            <span class="badge bg-success">Activadas</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Desactivadas</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para cambio de contraseña -->
+<!-- Este es el único método de cambio de contraseña disponible -->
+<!-- Los templates tradicionales han sido deshabilitados para usar solo este modal AJAX -->
+<div class="modal fade" id="passwordChangeModal" tabindex="-1" aria-labelledby="passwordChangeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="passwordChangeModalLabel">
+                    <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Seguridad:</strong> Asegúrate de usar una contraseña fuerte que contenga al menos 8 caracteres, incluyendo mayúsculas, minúsculas, números y símbolos especiales.
+                </div>
+                
+                <form id="passwordChangeForm" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="oldPassword" class="form-label">
+                            <i class="fas fa-lock me-2"></i>Contraseña Actual
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="oldPassword" name="old_password" 
+                                   autocomplete="current-password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('oldPassword')">
+                                <i class="fas fa-eye" id="oldPassword-toggle-icon"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newPassword1" class="form-label">
+                            <i class="fas fa-key me-2"></i>Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="newPassword1" name="new_password1" 
+                                   autocomplete="new-password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('newPassword1')">
+                                <i class="fas fa-eye" id="newPassword1-toggle-icon"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                        
+                        <!-- Indicador de fuerza de contraseña -->
+                        <div class="password-strength mt-2" id="passwordStrength" style="display: none;">
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar" id="strengthBar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted" id="strengthText">Ingresa tu nueva contraseña</small>
+                            <div class="strength-criteria mt-2" id="strengthCriteria"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newPassword2" class="form-label">
+                            <i class="fas fa-check-double me-2"></i>Confirmar Nueva Contraseña
+                        </label>
+                        <div class="input-group">
+                            <input type="password" class="form-control" id="newPassword2" name="new_password2" 
+                                   autocomplete="new-password" required>
+                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility('newPassword2')">
+                                <i class="fas fa-eye" id="newPassword2-toggle-icon"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </button>
+                <button type="submit" class="btn btn-primary" form="passwordChangeForm" id="submitPasswordChange">
+                    <i class="fas fa-save me-2"></i>Cambiar Contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Éxito para Cambio de Contraseña -->
+<div class="modal fade" id="passwordSuccessModal" tabindex="-1" aria-labelledby="passwordSuccessModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-body text-center py-5">
+                <div class="success-animation mb-4">
+                    <div class="checkmark-circle">
+                        <i class="fas fa-check text-white"></i>
+                    </div>
+                </div>
+                
+                <h4 class="text-success fw-bold mb-3">
+                    ¡Contraseña Cambiada Exitosamente!
+                </h4>
+                
+                <p class="text-muted mb-4">
+                    Tu contraseña ha sido actualizada correctamente. 
+                    <br>
+                    Tu cuenta está ahora más segura.
+                </p>
+                
+                <div class="security-tips mb-4">
+                    <div class="row text-start">
+                        <div class="col-12">
+                            <small class="text-info">
+                                <i class="fas fa-lightbulb me-2"></i><strong>Consejos de seguridad:</strong>
+                            </small>
+                            <ul class="list-unstyled mt-2 small text-muted">
+                                <li><i class="fas fa-shield-alt text-success me-2"></i>No compartas tu contraseña con nadie</li>
+                                <li><i class="fas fa-clock text-warning me-2"></i>Cámbiala periódicamente cada 3-6 meses</li>
+                                <li><i class="fas fa-mobile-alt text-primary me-2"></i>Considera activar autenticación de dos factores</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-success btn-lg px-4" id="closeSuccessModal">
+                    <i class="fas fa-check-double me-2"></i>Entendido
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variables del modal
+    const passwordChangeModal = document.getElementById('passwordChangeModal');
+    const passwordChangeForm = document.getElementById('passwordChangeForm');
+    const newPassword1 = document.getElementById('newPassword1');
+    const newPassword2 = document.getElementById('newPassword2');
+    const strengthContainer = document.getElementById('passwordStrength');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const strengthCriteria = document.getElementById('strengthCriteria');
+    const submitBtn = document.getElementById('submitPasswordChange');
+
+    // Limpiar formulario al abrir modal
+    passwordChangeModal.addEventListener('show.bs.modal', function() {
+        passwordChangeForm.reset();
+        clearErrors();
+        if (strengthContainer) strengthContainer.style.display = 'none';
+        submitBtn.disabled = false;
+    });
+
+    // Verificador de fuerza de contraseña en tiempo real
+    if (newPassword1) {
+        newPassword1.addEventListener('input', function() {
+            const password = this.value;
+            if (password.length === 0) {
+                if (strengthContainer) strengthContainer.style.display = 'none';
+                return;
+            }
+            if (strengthContainer) strengthContainer.style.display = 'block';
+            checkPasswordStrength(password);
+        });
+    }
+
+    // Verificar coincidencia de contraseñas
+    if (newPassword2) {
+        newPassword2.addEventListener('input', validatePasswordMatch);
+    }
+
+    // Envío del formulario
+    if (passwordChangeForm) {
+        passwordChangeForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitPasswordChange();
+        });
+    }
+
+    // Configurar botón del modal de éxito
+    const closeSuccessBtn = document.getElementById('closeSuccessModal');
+    if (closeSuccessBtn) {
+        closeSuccessBtn.addEventListener('click', function() {
+            const successModal = bootstrap.Modal.getInstance(document.getElementById('passwordSuccessModal'));
+            if (successModal) {
+                successModal.hide();
+            }
+        });
+    }
+
+    function checkPasswordStrength(password) {
+        fetch('{% url "users:password_strength_check" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: new URLSearchParams({password: password})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateStrengthDisplay(data);
+            }
+        })
+        .catch(error => {
+            console.error('Error verificando fuerza:', error);
+        });
+    }
+
+    function updateStrengthDisplay(strength) {
+        const percentage = strength.score;
+        
+        strengthBar.style.width = percentage + '%';
+        strengthText.textContent = `Fuerza: ${strength.strength} (${strength.score}/100)`;
+        
+        // Colores según la fuerza usando clases de Django
+        strengthBar.className = 'progress-bar';
+        switch(strength.class) {
+            case 'success':
+                strengthBar.classList.add('bg-success');
+                strengthText.className = 'strength-text text-success';
+                break;
+            case 'info':
+                strengthBar.classList.add('bg-info');
+                strengthText.className = 'strength-text text-info';
+                break;
+            case 'warning':
+                strengthBar.classList.add('bg-warning');
+                strengthText.className = 'strength-text text-warning';
+                break;
+            case 'danger':
+                strengthBar.classList.add('bg-danger');
+                strengthText.className = 'strength-text text-danger';
+                break;
+            default:
+                strengthBar.classList.add('bg-secondary');
+                strengthText.className = 'strength-text text-muted';
+        }
+        
+        // Mostrar criterios y validaciones de Django
+        displayDjangoValidations(strength);
+    }
+    
+    function displayDjangoValidations(strength) {
+        const criteriaLabels = {
+            'length': 'Longitud mínima requerida',
+            'uppercase': 'Letra mayúscula (A-Z)',
+            'lowercase': 'Letra minúscula (a-z)',
+            'numbers': 'Al menos un número (0-9)',
+            'special': 'Símbolo especial (!@#$%^&*)',
+            'not_common': 'No es una contraseña común',
+            'not_similar': 'No es similar a información personal',
+            'not_numeric': 'No es solo numérica'
+        };
+        
+        let html = '<div class="django-validations mb-3">';
+        
+        // Mostrar estado general de validación de Django
+        if (strength.django_validation_passed) {
+            html += '<div class="alert alert-success py-2 px-3 mb-2"><i class="fas fa-check-circle me-2"></i><strong>Django Validations:</strong> Todas las validaciones pasaron</div>';
+        } else {
+            html += '<div class="alert alert-danger py-2 px-3 mb-2"><i class="fas fa-exclamation-triangle me-2"></i><strong>Django Validations:</strong> Algunas validaciones fallaron</div>';
+        }
+        
+        // Mostrar criterios específicos
+        html += '<div class="row">';
+        let count = 0;
+        
+        for (const [key, value] of Object.entries(strength.criteria)) {
+            const iconClass = value ? 'fas fa-check text-success' : 'fas fa-times text-danger';
+            const textClass = value ? 'text-success' : 'text-muted';
+            
+            html += `
+                <div class="col-6">
+                    <small class="${textClass}">
+                        <i class="${iconClass} me-1"></i>
+                        ${criteriaLabels[key] || key}
+                    </small>
+                </div>
+            `;
+            
+            count++;
+            if (count % 2 === 0 && count < Object.keys(strength.criteria).length) {
+                html += '</div><div class="row">';
+            }
+        }
+        
+        html += '</div>';
+        
+        html += '</div>';
+        strengthCriteria.innerHTML = html;
+    }    function validatePasswordMatch() {
+        const password1 = newPassword1.value;
+        const password2 = newPassword2.value;
+        
+        if (password2.length > 0) {
+            if (password1 === password2) {
+                newPassword2.classList.remove('is-invalid');
+                newPassword2.classList.add('is-valid');
+                newPassword2.nextElementSibling.textContent = '';
+            } else {
+                newPassword2.classList.remove('is-valid');
+                newPassword2.classList.add('is-invalid');
+                newPassword2.nextElementSibling.textContent = 'Las contraseñas no coinciden';
+            }
+        } else {
+            newPassword2.classList.remove('is-valid', 'is-invalid');
+            newPassword2.nextElementSibling.textContent = '';
+        }
+    }
+
+    function submitPasswordChange() {
+        console.log('🔄 Iniciando cambio de contraseña...');
+        
+        const formData = new FormData(passwordChangeForm);
+        
+        // Debug: Verificar datos del formulario
+        console.log('📝 Datos del formulario:');
+        for (let [key, value] of formData.entries()) {
+            console.log(`  ${key}: ${value ? '[VALOR PRESENTE]' : '[VALOR VACÍO]'}`);
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Cambiando...';
+        
+        fetch('{% url "users:change_password_ajax" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            console.log('🌐 Respuesta recibida:', response.status, response.statusText);
+            return response.json();
+        })
+        .then(data => {
+            console.log('📦 Datos de respuesta:', data);
+            if (data.success) {
+                console.log('✅ Contraseña cambiada exitosamente');
+                
+                // Cerrar modal de cambio de contraseña
+                const passwordModal = bootstrap.Modal.getInstance(passwordChangeModal);
+                if (passwordModal) {
+                    passwordModal.hide();
+                }
+                
+                // Mostrar modal de éxito después de un breve delay
+                setTimeout(() => {
+                    showPasswordSuccessModal();
+                }, 300);
+                
+                // Limpiar formulario
+                passwordChangeForm.reset();
+                clearErrors();
+                
+            } else {
+                console.error('❌ Error en el formulario:', data.errors);
+                console.log('🔍 Errores detallados:');
+                for (const [field, messages] of Object.entries(data.errors)) {
+                    console.log(`  ${field}:`);
+                    messages.forEach(msg => console.log(`    - ${msg}`));
+                }
+                displayErrors(data.errors);
+            }
+        })
+        .catch(error => {
+            console.error('💥 Error en la petición:', error);
+            showError('Error al cambiar la contraseña. Intenta nuevamente.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-save me-2"></i>Cambiar Contraseña';
+        });
+    }
+
+    function displayErrors(errors) {
+        console.log('🎯 Mostrando errores en formulario...');
+        clearErrors();
+        
+        for (const [field, messages] of Object.entries(errors)) {
+            console.log(`📋 Campo ${field}: ${messages.join(', ')}`);
+            
+            const input = document.getElementById(field === 'old_password' ? 'oldPassword' : 
+                                               field === 'new_password1' ? 'newPassword1' : 'newPassword2');
+            if (input) {
+                input.classList.add('is-invalid');
+                
+                // Buscar el div de feedback que está después del input-group
+                const inputGroup = input.closest('.input-group');
+                if (inputGroup) {
+                    const feedbackDiv = inputGroup.nextElementSibling;
+                    if (feedbackDiv && feedbackDiv.classList.contains('invalid-feedback')) {
+                        feedbackDiv.textContent = messages.join(', ');
+                    }
+                }
+                
+                // Mostrar alert específico para contraseña actual incorrecta
+                if (field === 'old_password') {
+                    showError('❌ Contraseña actual incorrecta. Verifica que estés ingresando tu contraseña actual correcta.');
+                }
+            }
+        }
+    }
+
+    function clearErrors() {
+        const inputs = passwordChangeForm.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.classList.remove('is-invalid', 'is-valid');
+            const feedback = input.nextElementSibling;
+            if (feedback && feedback.classList.contains('invalid-feedback')) {
+                feedback.textContent = '';
+            }
+        });
+    }
+
+    function showSuccess(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-success alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="fas fa-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const modalBody = passwordChangeModal.querySelector('.modal-body');
+        modalBody.insertBefore(alertDiv, modalBody.firstChild);
+    }
+
+    function showError(message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+        alertDiv.innerHTML = `
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const modalBody = passwordChangeModal.querySelector('.modal-body');
+        modalBody.insertBefore(alertDiv, modalBody.firstChild);
+    }
+});
+
+// Función para mostrar/ocultar contraseñas
+function togglePasswordVisibility(fieldId) {
+    const passwordField = document.getElementById(fieldId);
+    const toggleIcon = document.getElementById(fieldId + '-toggle-icon');
+    
+    if (passwordField && toggleIcon) {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.className = 'fas fa-eye-slash';
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.className = 'fas fa-eye';
+        }
+    }
+}
+
+// Función global para mostrar modal de éxito
+function showPasswordSuccessModal() {
+    const successModal = new bootstrap.Modal(document.getElementById('passwordSuccessModal'));
+    successModal.show();
+}
+
+// Función para exportar datos del perfil
+function exportProfileData() {
+    // window.open('{% url "users:export_profile_data" %}', '_blank');
+    alert('Función de exportación próximamente disponible');
+}
+</script>
+{% endblock %}

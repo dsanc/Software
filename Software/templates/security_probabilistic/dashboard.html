@@ -1,0 +1,192 @@
+{% extends 'base_with_sidebar.html' %}
+{% load humanize %}
+{% load evaluador_permissions %}
+
+{% block title %}Dashboard - Evaluación de Seguridad Probabilística{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="h3 mb-4">
+                <i class="fas fa-shield-alt text-primary"></i>
+                Evaluación de Seguridad Probabilística
+            </h1>
+        </div>
+    </div>
+
+    <!-- Información del Sistema -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-2">Sistema de Evaluación de Seguridad</h5>
+                    <p class="mb-2">Este sistema permite crear perfiles de figuras políticas y realizar evaluaciones de riesgo de seguridad basadas en metodologías probabilísticas.</p>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list"></i> Ver Perfiles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de Perfiles -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">Total Perfiles</h5>
+                            <h2 class="mb-0">{{ total_perfiles }}</h2>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">Activos</h5>
+                            <h2 class="mb-0">{{ perfiles_activos }}</h2>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-user-shield fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h5 class="card-title">Total Evaluaciones</h5>
+                            <h2 class="mb-0">{{ total_evaluaciones }}</h2>
+                        </div>
+                        <div class="ms-3">
+                            <i class="fas fa-clipboard-list fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Panel principal -->
+        <div class="col-md-8">
+            <!-- Perfiles disponibles -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-users text-primary"></i>
+                        Perfiles Disponibles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if perfiles_disponibles %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>Cargo</th>
+                                        <th>Nivel de Riesgo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for perfil in perfiles_disponibles %}
+                                    <tr>
+                                        <td>{{ perfil.nombre_completo }}</td>
+                                        <td>{{ perfil.get_cargo_politico_display }}</td>
+                                        <td>
+                                            {% if perfil.nivel_riesgo_perfil == 'muy_alto' %}
+                                                <span class="badge bg-danger">Muy Alto</span>
+                                            {% elif perfil.nivel_riesgo_perfil == 'alto' %}
+                                                <span class="badge bg-warning">Alto</span>
+                                            {% elif perfil.nivel_riesgo_perfil == 'medio' %}
+                                                <span class="badge bg-info">Medio</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Bajo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-success">{{ perfil.get_estado_perfil_display }}</span>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-list"></i> Ver Todos los Perfiles
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">No hay perfiles disponibles aún.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel lateral -->
+        <div class="col-md-4">
+            <!-- Enlaces rápidos -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-external-link-alt text-primary"></i>
+                        Enlaces Rápidos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-primary">
+                            <i class="fas fa-list"></i> Ver Perfiles
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información sobre evaluaciones -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-info-circle text-info"></i>
+                        ¿Qué es una Evaluación de Seguridad?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted">
+                        Las evaluaciones de seguridad probabilística analizan el nivel de riesgo 
+                        basado en factores como la frecuencia de desplazamiento, zonas visitadas, 
+                        y otros criterios de seguridad.
+                    </p>
+                    <p class="small text-muted">
+                        El sistema utiliza un árbol de decisiones para calcular una probabilidad 
+                        de riesgo que te ayudará a tomar mejores decisiones de seguridad.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1293 @@
+﻿{% extends 'base_with_sidebar.html' %}
+{% load static %}
+{% load l10n %}
+{% load risk_filters %}
+
+{% block title %}Detalle de Evaluación - {{ assessment.hotel.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-steps {
+        display: flex;
+        justify-content: center;
+        gap: 4rem;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .step {
+        text-align: center;
+        position: relative;
+        flex: 0 0 auto;
+    }
+
+    .step::after {
+        content: '';
+        position: absolute;
+        top: 1.5rem;
+        left: 100%;
+        width: 4rem;
+        height: 2px;
+        background: #e5e7eb;
+        z-index: 1;
+    }
+
+    .step:last-child::after {
+        display: none;
+    }
+
+    .step-circle {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background: #e5e7eb;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.5rem;
+        position: relative;
+        z-index: 2;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .step.active .step-circle {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .step.completed .step-circle {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .step-label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.9rem;
+    }
+
+    .category-card {
+        border-left: 4px solid #007bff;
+        transition: all 0.3s ease;
+    }
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .score-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        color: white;
+    }
+    .score-excellent { background: linear-gradient(135deg, #28a745, #20c997); }
+    .score-good { background: linear-gradient(135deg, #ffc107, #fd7e14); }
+    .score-moderate { background: linear-gradient(135deg, #fd7e14, #dc3545); }
+    .score-poor { background: linear-gradient(135deg, #dc3545, #6f42c1); }
+    
+    /* Clases personalizadas para Bootstrap 5 */
+    .bg-orange {
+        background-color: #fd7e14 !important;
+    }
+    .border-orange {
+        border-color: #fd7e14 !important;
+    }
+    .text-orange {
+        color: #fd7e14 !important;
+    }
+    .progress-bar.bg-orange {
+        background-color: #fd7e14 !important;
+    }
+    
+    /* Radar Chart Responsive */
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    /* Responsive breakpoints para el chart */
+    @media (max-width: 768px) {
+        .progress-steps {
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 200px;
+        }
+        
+        .step::after {
+            display: none;
+        }
+        
+        .step-circle {
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1rem;
+        }
+        
+        .step-label {
+            font-size: 0.8rem;
+        }
+        
+        .chart-wrapper {
+            height: 400px;
+            min-height: 300px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .chart-wrapper {
+            height: 350px;
+            min-height: 280px;
+        }
+    }
+    
+    /* Gradientes para headers */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+    }
+    .bg-gradient-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb800 100%) !important;
+    }
+    
+    /* Estilos para recomendaciones IA */
+    .ai-recommendation-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    .ai-recommendation-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .ai-recommendation-card.priority-high {
+        border-left-color: #dc3545;
+    }
+    .ai-recommendation-card.priority-medium {
+        border-left-color: #ffc107;
+    }
+    .ai-recommendation-card.priority-low {
+        border-left-color: #17a2b8;
+    }
+    
+    /* Pestañas de recomendaciones */
+    .nav-tabs .nav-link {
+        border: none;
+        border-radius: 0;
+        color: #6c757d;
+        font-weight: 500;
+    }
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb800 100%);
+        color: #212529;
+        border: none;
+    }
+    .nav-tabs .nav-link:hover {
+        border: none;
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    
+    /* Análisis de sentimientos */
+    .sentiment-positive {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border-left: 4px solid #28a745;
+    }
+    .sentiment-negative {
+        background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%);
+        border-left: 4px solid #dc3545;
+    }
+    .sentiment-neutral {
+        background: linear-gradient(135deg, #e2e3e5 0%, #d1d3d4 100%);
+        border-left: 4px solid #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-chart-line text-primary"></i> Detalle de Evaluación</h2>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'risk_hoteles:dashboard' %}">Dashboard</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}">{{ hotel.name }}</a></li>
+                            <li class="breadcrumb-item active">Evaluación {{ assessment.assessment_date|date:"d/m/Y" }}</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'risk_hoteles:assessment_pdf_preview' assessment.id %}" 
+                           class="btn btn-success" 
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <i class="fas fa-file-pdf"></i> Preview PDF
+                        </a>
+                        <a href="{% url 'risk_hoteles:assessment_pdf_download' assessment.id %}" 
+                           class="btn btn-primary"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            <i class="fas fa-download"></i> Descargar PDF
+                        </a>
+                        <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver al Hotel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicador de pasos -->
+    {% include 'risk_hoteles/includes/progress_steps.html' with current_step=4 %}
+
+    <!-- Resumen General -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white py-2">
+                    <h6 class="mb-0"><i class="fas fa-hotel me-2"></i>{{ hotel.name }} - {{ hotel.city }}, {{ hotel.country }}</h6>
+                </div>
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Tipo de Evaluación</small>
+                                        <span class="fw-bold">{{ assessment.get_assessment_type_display }}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Fecha</small>
+                                        <span class="fw-bold">{{ assessment.assessment_date|date:"d/m/Y H:i" }}</span>
+                                    </div>
+                                    <div class="mb-1">
+                                        <small class="text-muted d-block">Estado</small>
+                                        <span class="badge {% if assessment.status == 'completed' %}bg-success{% elif assessment.status == 'in_progress' %}bg-warning{% else %}bg-secondary{% endif %} badge-sm">
+                                            {{ assessment.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Categorías</small>
+                                        <span class="fw-bold">{{ assessment.selected_categories.count }}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted d-block">Fuente</small>
+                                        <span class="badge {% if scoring_summary.source == 'saved' %}bg-success{% else %}bg-info{% endif %} text-white badge-sm">
+                                            {% if scoring_summary.source == 'saved' %}Guardado{% else %}Calculado{% endif %}
+                                        </span>
+                                    </div>
+                                    {% if scoring_summary.last_calculated %}
+                                    <div class="mb-1">
+                                        <small class="text-muted d-block">Actualización</small>
+                                        <small class="fw-bold">{{ scoring_summary.last_calculated|date:"d/m/Y H:i" }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="score-circle mx-auto {% if scoring_summary.overall_score_percentage >= 80 %}score-excellent{% elif scoring_summary.overall_score_percentage >= 60 %}score-good{% elif scoring_summary.overall_score_percentage >= 40 %}score-moderate{% else %}score-poor{% endif %}" style="width: 60px; height: 60px; line-height: 60px; font-size: 1rem;">
+                                {{ scoring_summary.overall_score_percentage|floatformat:1 }}%
+                            </div>
+                            <small class="mt-1 d-block text-muted" style="font-size: 0.8rem;">Puntaje General</small>
+                            {% if scoring_summary.risk_level %}
+                            <span class="badge {% if scoring_summary.risk_level == 'muy_bajo' %}bg-success{% elif scoring_summary.risk_level == 'bajo' %}bg-info{% elif scoring_summary.risk_level == 'medio' %}bg-warning{% else %}bg-danger{% endif %} text-white mt-1" style="font-size: 0.7rem; padding: 0.25rem 0.5rem;">
+                                {{ assessment.get_risk_level_display }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados por Categoría -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Resultados Detallados por Categoría</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for category_code, category_data in detailed_report.categories.items %}
+                            {% if category_data.question_count > 0 %}
+                            <div class="col-lg-4 col-md-6 col-12 mb-3">
+                                <div class="card h-100 border-0 shadow-sm" style="border-left: 4px solid {% if category_data.percentage >= 80 %}#28a745{% elif category_data.percentage >= 60 %}#ffc107{% elif category_data.percentage >= 40 %}#fd7e14{% else %}#dc3545{% endif %} !important;">
+                                    <!-- Header con nombre de categoría -->
+                                    <div class="card-header bg-light border-0 text-center py-1">
+                                        <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.9rem;">{{ category_data.category_name|default:category_data.name|default:"Categoría sin nombre" }}</h6>
+                                        <small class="text-muted" style="font-size: 0.75rem;">{{ category_data.question_count }} pregunta{{ category_data.question_count|pluralize:"s" }}</small>
+                                    </div>
+                                    
+                                    <!-- Porcentaje prominente -->
+                                    <div class="card-body text-center py-2">
+                                        <div class="mb-2">
+                                            <div class="h4 fw-bold {% if category_data.percentage >= 80 %}text-success{% elif category_data.percentage >= 60 %}text-warning{% elif category_data.percentage >= 40 %}text-danger{% else %}text-danger{% endif %} mb-1">
+                                                {{ category_data.percentage|floatformat:1 }}%
+                                            </div>
+                                            <div class="progress mb-2" style="height: 4px;">
+                                                <div class="progress-bar {% if category_data.percentage >= 80 %}bg-success{% elif category_data.percentage >= 60 %}bg-warning{% elif category_data.percentage >= 40 %}bg-orange{% else %}bg-danger{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ category_data.percentage|unlocalize }}%;" 
+                                                     aria-valuenow="{{ category_data.percentage|unlocalize }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                            <span class="badge {% if category_data.percentage >= 80 %}bg-success{% elif category_data.percentage >= 60 %}bg-warning{% elif category_data.percentage >= 40 %}bg-orange{% else %}bg-danger{% endif %} text-white px-2 py-1" style="font-size: 0.7rem;">
+                                                {% if category_data.percentage >= 80 %}
+                                                    <i class="fas fa-check-circle"></i> Excelente
+                                                {% elif category_data.percentage >= 60 %}
+                                                    <i class="fas fa-thumbs-up"></i> Bueno
+                                                {% elif category_data.percentage >= 40 %}
+                                                    <i class="fas fa-exclamation-triangle"></i> Regular
+                                                {% else %}
+                                                    <i class="fas fa-times-circle"></i> Requiere Atención
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Métricas adicionales -->
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <div class="border-end">
+                                                    <small class="mb-0 text-primary d-block fw-bold">{{ category_data.average|floatformat:1 }}/5</small>
+                                                    <small class="text-muted" style="font-size: 0.7rem;">Promedio</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="mb-0 text-info d-block fw-bold">{{ category_data.score_sum }}</small>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Puntos</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> No se encontraron categorías con respuestas para mostrar.
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recomendaciones Inteligentes con IA -->
+    {% if recommendations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-warning text-dark">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">
+                                <i class="fas fa-brain me-2"></i>Recomendaciones Inteligentes con IA
+                            </h5>
+                            <small class="opacity-75">Análisis basado en puntuaciones, comentarios y patrones detectados</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if ai_analysis.confidence_metrics %}
+                            <span class="badge bg-light text-primary px-2 py-1">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Confianza: {{ ai_analysis.confidence_metrics.overall|multiply:100|floatformat:0 }}%
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Pestañas para diferentes tipos de recomendaciones -->
+                    <ul class="nav nav-tabs mb-3" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#ai-recommendations" type="button">
+                                <i class="fas fa-robot me-1"></i>IA Avanzada ({{ ai_recommendations|length }})
+                            </button>
+                        </li>
+                        {% if ai_analysis.predictive_insights %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#predictive-insights" type="button">
+                                <i class="fas fa-binoculars me-1"></i>Insights Predictivos
+                            </button>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#traditional-recommendations" type="button">
+                                <i class="fas fa-list me-1"></i>Tradicionales ({{ traditional_recommendations|length }})
+                            </button>
+                        </li>
+                        {% if ai_analysis.sentiment_analysis.category_sentiments %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#sentiment-analysis" type="button">
+                                <i class="fas fa-comments me-1"></i>Análisis de Comentarios
+                            </button>
+                        </li>
+                        {% endif %}
+                    </ul>
+
+                    <div class="tab-content">
+                        <!-- Recomendaciones IA Mejoradas -->
+                        <div class="tab-pane fade show active" id="ai-recommendations">
+                            {% if ai_analysis.analysis_version %}
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-robot me-2"></i>
+                                <strong>Análisis IA Avanzado {{ ai_analysis.analysis_version }}</strong> - 
+                                Generado con algoritmos mejorados de detección de patrones, análisis de sentimientos y predicción de riesgos.
+                            </div>
+                            {% endif %}
+                            
+                            {% for rec in ai_recommendations %}
+                            <div class="card mb-3 border-start border-{% if rec.priority == 'high' %}danger{% elif rec.priority == 'medium' %}warning{% else %}info{% endif %} border-4 shadow-sm">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <!-- Título mejorado con iconos y contexto -->
+                                            <div class="d-flex align-items-center mb-2">
+                                                <h6 class="card-title mb-0 me-2">
+                                                    {{ rec.title }}
+                                                </h6>
+                                                {% if rec.urgency_detected %}
+                                                <span class="badge bg-danger badge-sm">
+                                                    <i class="fas fa-exclamation me-1"></i>Urgente
+                                                </span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            <!-- Descripción con contexto mejorado -->
+                                            <p class="card-text text-muted mb-2">{{ rec.description }}</p>
+                                            
+                                            <!-- Timeline y nivel de impacto -->
+                                            {% if rec.timeline or rec.impact_level %}
+                                            <div class="row mb-2">
+                                                {% if rec.timeline %}
+                                                <div class="col-auto">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-clock me-1"></i>
+                                                        <strong>Timeline:</strong> {{ rec.timeline }}
+                                                    </small>
+                                                </div>
+                                                {% endif %}
+                                                {% if rec.impact_level %}
+                                                <div class="col-auto">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-bolt me-1"></i>
+                                                        <strong>Impacto:</strong> 
+                                                        <span class="text-{% if rec.impact_level == 'high' %}danger{% elif rec.impact_level == 'medium' %}warning{% else %}info{% endif %}">
+                                                            {{ rec.impact_level|title }}
+                                                        </span>
+                                                    </small>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Acciones específicas con mejor formato -->
+                                            {% if rec.action_items %}
+                                            <div class="mt-2">
+                                                <small class="text-muted fw-bold">
+                                                    <i class="fas fa-tasks me-1"></i>Plan de Acción:
+                                                </small>
+                                                <ul class="list-group list-group-flush mt-2">
+                                                    {% for action in rec.action_items %}
+                                                    <li class="list-group-item border-0 ps-0 py-1">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-chevron-right me-2 text-primary"></i>
+                                                            {{ action }}
+                                                        </small>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Información contextual adicional -->
+                                            {% if rec.keywords or rec.affected_categories %}
+                                            <div class="mt-2 p-2 bg-light rounded">
+                                                {% if rec.keywords %}
+                                                <div class="mb-1">
+                                                    <small class="text-muted fw-bold">Palabras clave detectadas:</small>
+                                                    {% for keyword in rec.keywords %}
+                                                    <span class="badge bg-secondary badge-sm me-1">{{ keyword }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                {% if rec.affected_categories %}
+                                                <div>
+                                                    <small class="text-muted fw-bold">Categorías afectadas:</small>
+                                                    {% for category in rec.affected_categories %}
+                                                    <span class="badge bg-info badge-sm me-1">{{ category }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            {% endif %}
+                                            
+                                            <!-- Previsualización de comentarios -->
+                                            {% if rec.comment_preview %}
+                                            <div class="mt-2">
+                                                <small class="text-muted fw-bold">
+                                                    <i class="fas fa-quote-left me-1"></i>Comentario relacionado:
+                                                </small>
+                                                <div class="bg-light p-2 rounded mt-1 border-start border-3 border-warning">
+                                                    <small class="text-muted fst-italic">"{{ rec.comment_preview }}"</small>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Panel lateral mejorado -->
+                                        <div class="col-md-4">
+                                            <div class="text-end">
+                                                <!-- Prioridad con mejor visualización -->
+                                                <div class="mb-2">
+                                                    <span class="badge bg-{% if rec.priority == 'high' %}danger{% elif rec.priority == 'medium' %}warning{% else %}info{% endif %} px-3 py-2">
+                                                        {% if rec.priority == 'high' %}
+                                                            <i class="fas fa-fire me-1"></i>Alta Prioridad
+                                                        {% elif rec.priority == 'medium' %}
+                                                            <i class="fas fa-exclamation-circle me-1"></i>Prioridad Media
+                                                        {% else %}
+                                                            <i class="fas fa-info-circle me-1"></i>Baja Prioridad
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                
+                                                <!-- Fuente del análisis -->
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-brain me-1"></i>
+                                                        <strong>Fuente IA:</strong>
+                                                    </small>
+                                                    <small class="text-primary">{{ rec.ai_source|default:"analysis_v2" }}</small>
+                                                </div>
+                                                
+                                                <!-- Métricas de confianza mejoradas -->
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block mb-1">
+                                                        <i class="fas fa-chart-line me-1"></i>Confianza del análisis
+                                                    </small>
+                                                    <div class="progress mb-1" style="height: 8px;">
+                                                        <div class="progress-bar bg-{% if rec.confidence > 0.8 %}success{% elif rec.confidence > 0.6 %}warning{% else %}danger{% endif %}" 
+                                                             style="width: {{ rec.confidence|multiply:100|unlocalize }}%">
+                                                        </div>
+                                                    </div>
+                                                    <small class="text-muted">
+                                                        {{ rec.confidence|multiply:100|floatformat:0 }}% 
+                                                        {% if rec.confidence > 0.8 %}
+                                                            <span class="text-success">(Alto)</span>
+                                                        {% elif rec.confidence > 0.6 %}
+                                                            <span class="text-warning">(Medio)</span>
+                                                        {% else %}
+                                                            <span class="text-danger">(Bajo)</span>
+                                                        {% endif %}
+                                                    </small>
+                                                </div>
+                                                
+                                                <!-- Indicadores adicionales -->
+                                                {% if rec.statistical_significance or rec.technical_mentions or rec.recurrence_level %}
+                                                <div class="mt-2 p-2 bg-light rounded">
+                                                    {% if rec.statistical_significance %}
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-chart-bar me-1"></i>
+                                                        Significancia: {{ rec.statistical_significance|floatformat:1 }}σ
+                                                    </small>
+                                                    {% endif %}
+                                                    {% if rec.technical_mentions %}
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-cog me-1"></i>
+                                                        Menciones técnicas: {{ rec.technical_mentions }}
+                                                    </small>
+                                                    {% endif %}
+                                                    {% if rec.recurrence_level %}
+                                                    <small class="text-muted d-block">
+                                                        <i class="fas fa-repeat me-1"></i>
+                                                        Recurrencia: {{ rec.recurrence_level }}
+                                                    </small>
+                                                    {% endif %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No se generaron recomendaciones específicas con IA para esta evaluación. 
+                                Esto puede indicar que el nivel de riesgo es bajo o que se necesitan más datos para el análisis.
+                            </div>
+                            {% endfor %}
+                            
+                            <!-- Métricas de confianza del análisis general -->
+                            {% if ai_analysis.confidence_metrics %}
+                            <div class="card border-info mt-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-bar me-2"></i>Métricas de Calidad del Análisis
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <div class="mb-1">
+                                                <strong class="text-primary">{{ ai_analysis.confidence_metrics.data_completeness|multiply:100|floatformat:0 }}%</strong>
+                                            </div>
+                                            <small class="text-muted">Completitud de Datos</small>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="mb-1">
+                                                <strong class="text-success">{{ ai_analysis.confidence_metrics.comment_richness|multiply:100|floatformat:0 }}%</strong>
+                                            </div>
+                                            <small class="text-muted">Riqueza de Comentarios</small>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="mb-1">
+                                                <strong class="text-info">{{ ai_analysis.confidence_metrics.category_coverage|multiply:100|floatformat:0 }}%</strong>
+                                            </div>
+                                            <small class="text-muted">Cobertura de Categorías</small>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="mb-1">
+                                                <span class="badge bg-{% if ai_analysis.confidence_metrics.recommendation_reliability == 'high' %}success{% elif ai_analysis.confidence_metrics.recommendation_reliability == 'medium' %}warning{% else %}danger{% endif %} px-2 py-1">
+                                                    {{ ai_analysis.confidence_metrics.recommendation_reliability|title }}
+                                                </span>
+                                            </div>
+                                            <small class="text-muted">Confiabilidad</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Insights Predictivos -->
+                        {% if ai_analysis.predictive_insights %}
+                        <div class="tab-pane fade" id="predictive-insights">
+                            <div class="row">
+                                <!-- Resumen de Tendencias -->
+                                <div class="col-md-8">
+                                    <div class="card border-primary mb-3">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-chart-line me-2"></i>Análisis Predictivo
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted">Trayectoria de Riesgo</label>
+                                                        <div class="d-flex align-items-center">
+                                                            {% if ai_analysis.predictive_insights.risk_trajectory == 'deteriorating' %}
+                                                                <i class="fas fa-arrow-trend-down text-danger fa-2x me-2"></i>
+                                                                <span class="badge bg-danger px-3 py-2">Deteriorándose</span>
+                                                            {% elif ai_analysis.predictive_insights.risk_trajectory == 'concerning' %}
+                                                                <i class="fas fa-exclamation-triangle text-warning fa-2x me-2"></i>
+                                                                <span class="badge bg-warning px-3 py-2">Preocupante</span>
+                                                            {% else %}
+                                                                <i class="fas fa-check-circle text-success fa-2x me-2"></i>
+                                                                <span class="badge bg-success px-3 py-2">Estable</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {% if ai_analysis.predictive_insights.critical_timeline %}
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted">Timeline Crítico</label>
+                                                        <div class="alert alert-warning mb-0">
+                                                            <i class="fas fa-clock me-2"></i>
+                                                            <strong>{{ ai_analysis.predictive_insights.critical_timeline }}</strong>
+                                                        </div>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted">Potencial de Mejora</label>
+                                                        <div class="progress mb-2" style="height: 20px;">
+                                                            <div class="progress-bar bg-info" style="width: {{ ai_analysis.predictive_insights.improvement_potential|unlocalize }}%">
+                                                                {{ ai_analysis.predictive_insights.improvement_potential|floatformat:1 }}%
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">Margen de mejora identificado</small>
+                                                    </div>
+                                                    
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-muted">Probabilidad de Éxito</label>
+                                                        <div class="progress mb-2" style="height: 20px;">
+                                                            <div class="progress-bar bg-{% if ai_analysis.predictive_insights.success_probability > 0.7 %}success{% elif ai_analysis.predictive_insights.success_probability > 0.5 %}warning{% else %}danger{% endif %}" 
+                                                                 style="width: {{ ai_analysis.predictive_insights.success_probability|multiply:100|unlocalize }}%">
+                                                                {{ ai_analysis.predictive_insights.success_probability|multiply:100|floatformat:0 }}%
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">Con implementación de recomendaciones</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Áreas de Enfoque Recomendadas -->
+                                    {% if ai_analysis.predictive_insights.recommended_focus_areas %}
+                                    <div class="card border-info">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-bullseye me-2"></i>Áreas de Enfoque Prioritarias
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="text-muted mb-3">
+                                                Basado en el análisis predictivo, estas son las categorías que requieren atención inmediata:
+                                            </p>
+                                            <div class="row">
+                                                {% for area in ai_analysis.predictive_insights.recommended_focus_areas %}
+                                                <div class="col-md-4 mb-2">
+                                                    <div class="alert alert-info mb-0 text-center">
+                                                        <i class="fas fa-crosshairs me-2"></i>
+                                                        <strong>{{ area|title|replace_underscore }}</strong>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Panel de Métricas Avanzadas -->
+                                <div class="col-md-4">
+                                    {% if ai_analysis.trend_analysis %}
+                                    <div class="card border-warning mb-3">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-chart-area me-2"></i>Análisis de Tendencias
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if ai_analysis.trend_analysis.score_variance %}
+                                            <div class="mb-3">
+                                                <small class="text-muted">Variabilidad de Puntuaciones</small>
+                                                <div class="mt-1">
+                                                    <strong class="text-{% if ai_analysis.trend_analysis.score_variance > 400 %}danger{% elif ai_analysis.trend_analysis.score_variance > 200 %}warning{% else %}success{% endif %}">
+                                                        {{ ai_analysis.trend_analysis.score_variance|floatformat:0 }}
+                                                    </strong>
+                                                    {% if ai_analysis.trend_analysis.score_variance > 400 %}
+                                                        <small class="text-danger d-block">Alta variabilidad</small>
+                                                    {% elif ai_analysis.trend_analysis.score_variance > 200 %}
+                                                        <small class="text-warning d-block">Variabilidad moderada</small>
+                                                    {% else %}
+                                                        <small class="text-success d-block">Variabilidad baja</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if ai_analysis.trend_analysis.outlier_categories %}
+                                            <div class="mb-3">
+                                                <small class="text-muted">Categorías Outlier</small>
+                                                {% for outlier in ai_analysis.trend_analysis.outlier_categories %}
+                                                <div class="alert alert-{% if outlier.type == 'below_average' %}danger{% else %}success{% endif %} py-1 px-2 mb-1">
+                                                    <small>
+                                                        <strong>{{ outlier.name }}</strong><br>
+                                                        {{ outlier.score|floatformat:1 }}% 
+                                                        ({{ outlier.deviation|floatformat:1 }}σ)
+                                                    </small>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <!-- Contexto del Análisis -->
+                                    {% if ai_analysis.context_analysis %}
+                                    <div class="card border-secondary">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">
+                                                <i class="fas fa-search me-2"></i>Análisis Contextual
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if ai_analysis.context_analysis.urgency_indicators %}
+                                            <div class="mb-2">
+                                                <small class="text-danger fw-bold">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                                    Indicadores de Urgencia: {{ ai_analysis.context_analysis.urgency_indicators|length }}
+                                                </small>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if ai_analysis.context_analysis.technical_issues %}
+                                            <div class="mb-2">
+                                                <small class="text-info fw-bold">
+                                                    <i class="fas fa-cog me-1"></i>
+                                                    Menciones Técnicas: {{ ai_analysis.context_analysis.technical_issues|length }}
+                                                </small>
+                                            </div>
+                                            {% endif %}
+                                            
+                                            {% if ai_analysis.context_analysis.quality_indicators %}
+                                            <div class="mb-2">
+                                                <small class="text-success fw-bold">
+                                                    <i class="fas fa-star me-1"></i>
+                                                    Indicadores de Calidad: {{ ai_analysis.context_analysis.quality_indicators|length }}
+                                                </small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Recomendaciones Tradicionales -->
+                        <div class="tab-pane fade" id="traditional-recommendations">
+                            {% for rec in traditional_recommendations %}
+                            <div class="alert alert-{{ rec.color }} mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        {% if rec.level == 'critical' %}
+                                            <i class="fas fa-exclamation-triangle fa-lg"></i>
+                                        {% elif rec.level == 'important' %}
+                                            <i class="fas fa-exclamation-circle fa-lg"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle fa-lg"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <strong>{{ rec.category }}:</strong> {{ rec.message }}
+                                    </div>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                No se encontraron áreas que requieran recomendaciones tradicionales.
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Análisis de Sentimientos -->
+                        {% if ai_analysis.sentiment_analysis.category_sentiments %}
+                        <div class="tab-pane fade" id="sentiment-analysis">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6 class="mb-3">
+                                        <i class="fas fa-comments me-2"></i>Análisis de Comentarios por Categoría
+                                    </h6>
+                                    {% for category_code, sentiment in ai_analysis.sentiment_analysis.category_sentiments.items %}
+                                    <div class="card mb-3">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-8">
+                                                    <h6 class="card-title">{{ sentiment.category_name }}</h6>
+                                                    <p class="card-text small text-muted">{{ sentiment.text }}</p>
+                                                </div>
+                                                <div class="col-md-4 text-end">
+                                                    <span class="badge bg-{% if sentiment.sentiment_label == 'positive' %}success{% elif sentiment.sentiment_label == 'negative' %}danger{% else %}secondary{% endif %}">
+                                                        {% if sentiment.sentiment_label == 'positive' %}
+                                                            <i class="fas fa-smile me-1"></i>Positivo
+                                                        {% elif sentiment.sentiment_label == 'negative' %}
+                                                            <i class="fas fa-frown me-1"></i>Negativo
+                                                        {% else %}
+                                                            <i class="fas fa-meh me-1"></i>Neutral
+                                                        {% endif %}
+                                                    </span>
+                                                    <div class="mt-2">
+                                                        <small class="text-muted">
+                                                            Score: {{ sentiment.sentiment_score|floatformat:2 }}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-4">
+                                    <!-- Resumen de sentimientos -->
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">Resumen General</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <span class="badge bg-{% if ai_analysis.sentiment_analysis.overall_sentiment == 'positive' %}success{% elif ai_analysis.sentiment_analysis.overall_sentiment == 'negative' %}danger{% else %}secondary{% endif %} w-100 py-2">
+                                                    Sentimiento General: {{ ai_analysis.sentiment_analysis.overall_sentiment|title }}
+                                                </span>
+                                            </div>
+                                            {% if ai_analysis.sentiment_analysis.keyword_frequency %}
+                                            <div>
+                                                <small class="text-muted fw-bold">Temas detectados:</small>
+                                                {% for theme, keywords in ai_analysis.sentiment_analysis.keyword_frequency.items %}
+                                                <div class="mt-1">
+                                                    <span class="badge bg-light text-dark">{{ theme|title }}</span>
+                                                    <small class="text-muted">({{ keywords|length }})</small>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Gráfico de Resultados -->
+    {% if chart_data.categories %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0"><i class="fas fa-chart-area me-2"></i> Análisis Radial de Seguridad</h5>
+                            <small class="opacity-75">Visualización completa del perfil de cumplimiento</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <span class="badge bg-light text-primary px-3 py-2">
+                                <i class="fas fa-percentage me-1"></i>
+                                {{ scoring_summary.overall_score_percentage|floatformat:1 }}% General
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <!-- Gráfica Principal - Más espacio -->
+                        <div class="col-xl-9 col-lg-8 col-md-12 mb-4">
+                            <div class="chart-wrapper position-relative" style="height: 500px; width: 100%; min-height: 400px;">
+                                <canvas id="radarChart"></canvas>
+                            </div>
+                            <div class="text-center mt-3">
+                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Área sombreada indica el perfil de seguridad actual del hotel</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Panel de Análisis - Más compacto -->
+                        <div class="col-xl-3 col-lg-4 col-md-12">
+                            <!-- Interpretación de Rangos -->
+                            <div class="card border-light mb-3">
+                                <div class="card-header bg-light border-0 py-2">
+                                    <h6 class="mb-0 text-dark"><i class="fas fa-info-circle text-primary me-2"></i>Escala de Evaluación</h6>
+                                </div>
+                                <div class="card-body py-3">
+                                    <div class="legend-item d-flex align-items-center mb-2">
+                                        <div class="legend-color bg-success rounded-circle me-3" style="width: 12px; height: 12px;"></div>
+                                        <div>
+                                            <strong class="text-success">90-100%</strong>
+                                            <br><small class="text-muted">Excelente - Cumplimiento óptimo</small>
+                                        </div>
+                                    </div>
+                                    <div class="legend-item d-flex align-items-center mb-2">
+                                        <div class="legend-color bg-info rounded-circle me-3" style="width: 12px; height: 12px;"></div>
+                                        <div>
+                                            <strong class="text-info">70-89%</strong>
+                                            <br><small class="text-muted">Bueno - Nivel satisfactorio</small>
+                                        </div>
+                                    </div>
+                                    <div class="legend-item d-flex align-items-center mb-2">
+                                        <div class="legend-color bg-warning rounded-circle me-3" style="width: 12px; height: 12px;"></div>
+                                        <div>
+                                            <strong class="text-warning">50-69%</strong>
+                                            <br><small class="text-muted">Regular - Requiere mejoras</small>
+                                        </div>
+                                    </div>
+                                    <div class="legend-item d-flex align-items-center">
+                                        <div class="legend-color bg-danger rounded-circle me-3" style="width: 12px; height: 12px;"></div>
+                                        <div>
+                                            <strong class="text-danger">0-49%</strong>
+                                            <br><small class="text-muted">Crítico - Atención inmediata</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Estadísticas Clave -->
+                            <div class="card border-light mb-2">
+                                <div class="card-header bg-light border-0 py-1">
+                                    <small class="mb-0 text-dark fw-bold"><i class="fas fa-chart-line text-success me-1"></i>Estadísticas Clave</small>
+                                </div>
+                                <div class="card-body py-2">
+                                    <div class="row text-center">
+                                        <div class="col-6 mb-2">
+                                            <div class="stat-item">
+                                                <h6 class="mb-0 {% if scoring_summary.overall_score_percentage >= 80 %}text-success{% elif scoring_summary.overall_score_percentage >= 60 %}text-warning{% elif scoring_summary.overall_score_percentage >= 40 %}text-orange{% else %}text-danger{% endif %}">
+                                                    {{ scoring_summary.overall_score_percentage|floatformat:0 }}%
+                                                </h6>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Promedio<br>General</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <div class="stat-item">
+                                                <h6 class="mb-0 text-primary">{{ detailed_report.categories|length }}</h6>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Categorías<br>Evaluadas</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h6 class="mb-0 text-success">{{ strong_count }}</h6>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Áreas<br>Fuertes</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="stat-item">
+                                                <h6 class="mb-0 text-danger">{{ weak_count }}</h6>
+                                                <small class="text-muted" style="font-size: 0.7rem;">Áreas<br>Críticas</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Recomendaciones Rápidas -->
+                            <div class="card border-light">
+                                <div class="card-header bg-light border-0 py-2">
+                                    <h6 class="mb-0 text-dark"><i class="fas fa-lightbulb text-warning me-2"></i>Recomendaciones</h6>
+                                </div>
+                                <div class="card-body py-3">
+                                    {% if scoring_summary.overall_score_percentage >= 80 %}
+                                        <div class="alert alert-success py-2 mb-2">
+                                            <small><i class="fas fa-check-circle me-2"></i><strong>Excelente trabajo:</strong> Mantener estándares actuales</small>
+                                        </div>
+                                    {% elif scoring_summary.overall_score_percentage >= 60 %}
+                                        <div class="alert alert-warning py-2 mb-2">
+                                            <small><i class="fas fa-arrow-up me-2"></i><strong>Mejorar:</strong> Enfocar en áreas debajo del 70%</small>
+                                        </div>
+                                    {% else %}
+                                        <div class="alert alert-danger py-2 mb-2">
+                                            <small><i class="fas fa-exclamation-triangle me-2"></i><strong>Acción requerida:</strong> Plan de mejora urgente</small>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="small text-muted">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Consulte la sección de categorías para análisis detallado por área.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info border-0">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5><i class="fas fa-chart-area me-2"></i>Análisis Radial de Seguridad</h5>
+                        <p class="mb-0">El gráfico se mostrará cuando haya datos de evaluación disponibles.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <i class="fas fa-spinner fa-pulse fa-2x text-muted"></i>
+                    </div>
+                </div>
+                <hr>
+                <div class="small text-muted">
+                    <strong>Estado:</strong> 
+                    {% if not chart_data %}
+                        Sin datos de gráfico en el contexto
+                    {% elif not chart_data.categories %}
+                        chart_data.categories está vacío
+                    {% elif chart_data.categories|length == 0 %}
+                        chart_data.categories tiene 0 elementos
+                    {% else %}
+                        Condición no identificada
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if chart_data.categories %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar que Chart.js esté disponible
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js no está disponible');
+        return;
+    }
+    
+    const canvas = document.getElementById('radarChart');
+    if (!canvas) {
+        console.error('Canvas radarChart no encontrado');
+        return;
+    }
+    
+    // IMPORTANTE: Destruir cualquier instancia previa
+    if (window.radarChartInstance) {
+        window.radarChartInstance.destroy();
+        window.radarChartInstance = null;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    
+    // Configuración de colores y datos
+    const categories = {{ chart_data.categories|safe }};
+    const percentages = {{ chart_data.percentages|safe }};
+    
+    // Validar datos antes de crear el gráfico
+    if (!categories || !percentages || categories.length === 0) {
+        // Mostrar mensaje en el DOM
+        const canvas = document.getElementById('radarChart');
+        if (canvas && canvas.parentElement) {
+            canvas.parentElement.innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Sin Datos</h5>
+                    <p>No hay datos suficientes para generar el gráfico.</p>
+                    <small>Complete la evaluación para ver el análisis visual.</small>
+                </div>
+            `;
+        }
+        return;
+    }
+    
+    // Configurar colores dinámicos
+    const getColorByPercentage = (percent) => {
+        if (percent >= 80) return { bg: 'rgba(40, 167, 69, 0.2)', border: 'rgba(40, 167, 69, 1)' };
+        else if (percent >= 60) return { bg: 'rgba(255, 193, 7, 0.2)', border: 'rgba(255, 193, 7, 1)' };
+        else if (percent >= 40) return { bg: 'rgba(253, 126, 20, 0.2)', border: 'rgba(253, 126, 20, 1)' };
+        else return { bg: 'rgba(220, 53, 69, 0.2)', border: 'rgba(220, 53, 69, 1)' };
+    };
+    
+    // Crear la gráfica solo una vez y guardar referencia
+    window.radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: categories,
+            datasets: [{
+                label: 'Porcentaje de Cumplimiento',
+                data: percentages,
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 3,
+                pointBackgroundColor: percentages.map(p => getColorByPercentage(p).border),
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointHoverBorderWidth: 3,
+                fill: true,
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            },
+            scales: {
+                r: {
+                    min: 0,
+                    max: 100,
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 20,
+                        callback: function(value) {
+                            return value + '%';
+                        },
+                        color: '#6c757d',
+                        font: { size: 12 }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    angleLines: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    pointLabels: {
+                        color: '#495057',
+                        font: { size: 13, weight: 'bold' },
+                        padding: 15
+                    }
+                }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    enabled: true,
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#fff',
+                    bodyColor: '#fff',
+                    callbacks: {
+                        label: function(context) {
+                            const percentage = context.parsed.r;
+                            let status = '';
+                            if (percentage >= 80) status = '🟢 Excelente';
+                            else if (percentage >= 60) status = '🟡 Bueno';
+                            else if (percentage >= 40) status = '🟠 Regular';
+                            else status = '🔴 Crítico';
+                            
+                            return [
+                                context.label + ': ' + percentage.toFixed(1) + '%',
+                                'Estado: ' + status
+                            ];
+                        }
+                    }
+                }
+            },
+            elements: {
+                line: { tension: 0.1 },
+                point: { hoverRadius: 7 }
+            }
+        }
+    });
+    
+    // Cleanup al descargar la página
+    window.addEventListener('beforeunload', function() {
+        if (window.radarChartInstance) {
+            window.radarChartInstance.destroy();
+            window.radarChartInstance = null;
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

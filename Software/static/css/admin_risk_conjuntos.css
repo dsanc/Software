@@ -1,0 +1,96 @@
+/* CSS personalizado para el admin de Risk Conjuntos */
+
+/* Estilos para badges */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.badge-primary { background-color: #007bff; color: white; }
+.badge-secondary { background-color: #6c757d; color: white; }
+.badge-success { background-color: #28a745; color: white; }
+.badge-danger { background-color: #dc3545; color: white; }
+.badge-warning { background-color: #ffc107; color: #212529; }
+.badge-info { background-color: #17a2b8; color: white; }
+.badge-dark { background-color: #343a40; color: white; }
+
+/* Mejorar botones de acción */
+.admin-actions .button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-size: 11px;
+}
+
+/* Iconos en fieldsets */
+.collapse h2 { 
+    position: relative;
+}
+
+.collapse h2:before {
+    content: "📁";
+    margin-right: 8px;
+}
+
+/* Mejorar tabla del changelist */
+.result_list th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+}
+
+.result_list tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Estilos para información adicional en campos */
+.field-amenidades_resumen div {
+    line-height: 1.6;
+}
+
+/* Mejorar filtros laterales */
+#changelist-filter h3 {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 15px;
+    margin: 0;
+    font-size: 13px;
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+    .badge {
+        font-size: 70%;
+        padding: 0.2em 0.3em;
+    }
+    
+    .admin-actions .button {
+        display: block;
+        margin: 2px 0;
+        width: 100%;
+    }
+}
+
+/* Indicadores de estado visual */
+.estado-activo { color: #28a745; font-weight: bold; }
+.estado-inactivo { color: #dc3545; font-weight: bold; }
+.evaluacion-completada { color: #28a745; }
+.evaluacion-pendiente { color: #ffc107; }
+.evaluacion-en-progreso { color: #17a2b8; }
+
+/* Mejorar spacing en fieldsets con emojis */
+.wide .form-row {
+    margin-bottom: 15px;
+}
+
+.wide fieldset h2 {
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+}

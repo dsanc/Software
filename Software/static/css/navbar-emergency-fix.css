@@ -1,0 +1,187 @@
+/* CSS de emergencia para corregir problemas del navbar */
+
+/* Asegurar que el navbar sea visible */
+.navbar-professional {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1030 !important;
+    width: 100% !important;
+}
+
+/* Corregir el espaciado del contenido principal */
+.main-content {
+    margin-top: 0 !important;
+}
+
+/* Asegurar visibilidad del brand */
+.navbar-brand-professional {
+    display: flex !important;
+    align-items: center;
+    text-decoration: none;
+}
+
+.brand-text {
+    display: inline-block !important;
+    color: white !important;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* Corregir el collapse en móviles */
+.navbar-collapse {
+    flex-basis: 100%;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.navbar-collapse.collapsing,
+.navbar-collapse.show {
+    display: block !important;
+}
+
+/* Asegurar que el toggler funcione */
+.navbar-toggler,
+.navbar-toggler-professional {
+    display: block;
+    border: none;
+    background: transparent;
+    position: relative;
+    width: 40px;
+    height: 40px;
+    padding: 0.5rem;
+}
+
+@media (min-width: 992px) {
+    .navbar-toggler,
+    .navbar-toggler-professional {
+        display: none !important;
+    }
+}
+
+/* Estilos para las líneas del hamburger */
+.navbar-toggler span,
+.navbar-toggler-icon {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: white;
+    margin: 3px 0;
+    transition: 0.3s;
+    border-radius: 2px;
+}
+
+/* Animación X cuando está abierto */
+.navbar-toggler[aria-expanded="true"] span:nth-child(1),
+.navbar-toggler-professional[aria-expanded="true"] .navbar-toggler-icon:nth-child(1) {
+    transform: rotate(-45deg) translate(-6px, 6px);
+}
+
+.navbar-toggler[aria-expanded="true"] span:nth-child(2),
+.navbar-toggler-professional[aria-expanded="true"] .navbar-toggler-icon:nth-child(2) {
+    opacity: 0;
+}
+
+.navbar-toggler[aria-expanded="true"] span:nth-child(3),
+.navbar-toggler-professional[aria-expanded="true"] .navbar-toggler-icon:nth-child(3) {
+    transform: rotate(45deg) translate(-6px, -6px);
+}
+
+/* Corregir navegación en móviles */
+@media (max-width: 991.98px) {
+    .navbar-nav-professional {
+        flex-direction: column;
+        width: 100%;
+        padding: 1rem 0;
+    }
+    
+    .nav-item-professional {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+    
+    .nav-link-professional {
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin: 0.1rem 0;
+    }
+    
+    .navbar-actions {
+        flex-direction: column;
+        width: 100%;
+        padding: 1rem 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 1rem;
+    }
+    
+    .action-item {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+    
+    .action-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        width: 100%;
+    }
+}
+
+/* Corregir dropdown del usuario */
+.dropdown-menu-professional {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    min-width: 250px;
+    z-index: 1050;
+}
+
+.dropdown-item-professional {
+    color: #333;
+    padding: 0.75rem 1.25rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.dropdown-item-professional:hover {
+    background: #f8f9fa;
+    color: #0369a0;
+}
+
+/* Fix para el carrito */
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Asegurar que todos los elementos sean visibles */
+.navbar-professional * {
+    color: white !important;
+}
+
+.navbar-professional .nav-link-professional:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-professional .action-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+}

@@ -1,0 +1,45 @@
+{% if analisis_ia.tendencias_historicas.disponible %}
+<div class="mb-section page-break">
+    <h3 class="mb-4"><i class="fas fa-chart-line text-info me-2"></i>Análisis de Tendencias</h3>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h6>Evolución Histórica del Riesgo</h6>
+                    <div class="chart-container">
+                        <canvas id="tendencias-chart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6>Estadísticas de Tendencia</h6>
+                    {% with var=analisis_ia.tendencias_historicas.variabilidad %}
+                    <p class="text-small mb-2">
+                        <strong>Tendencia:</strong> {{ analisis_ia.tendencias_historicas.tendencia_general.direccion }}<br>
+                        <strong>Período:</strong> {{ analisis_ia.tendencias_historicas.periodo_analizado_dias }} días<br>
+                        <strong>Evaluaciones:</strong> {{ analisis_ia.tendencias_historicas.total_evaluaciones }}
+                    </p>
+                    <hr>
+                    <p class="text-small mb-1">
+                        <strong>Variabilidad:</strong><br>
+                        Promedio: {{ var.score_promedio|floatformat:2 }}<br>
+                        Mínimo: {{ var.score_minimo|floatformat:2 }}<br>
+                        Máximo: {{ var.score_maximo|floatformat:2 }}<br>
+                        Desv. Est.: {{ var.desviacion_estandar|floatformat:3 }}
+                    </p>
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-3 p-3 bg-light rounded">
+        <h6>Interpretación de Tendencias</h6>
+        <p class="mb-0">{{ analisis_ia.tendencias_historicas.tendencia_general.interpretacion }}</p>
+    </div>
+</div>
+{% endif %}

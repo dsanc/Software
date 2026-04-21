@@ -1,0 +1,31 @@
+¡Hola {{ user.first_name|default:"" }}!
+
+Tu carrito te está esperando
+============================
+
+Notamos que dejaste algunos planes increíbles en tu carrito. ¡No te pierdas estas oportunidades!
+
+TUS PLANES:
+{% for item in items %}
+- {{ item.plan.plan_type.name }} ({{ item.plan.module.display_name }})
+  Precio: ${{ item.unit_price|floatformat:0 }}/{{ item.billing_cycle|default:"año" }}
+  {% if item.quantity > 1 %}Cantidad: {{ item.quantity }}{% endif %}
+
+{% endfor %}
+
+TOTAL EN TU CARRITO: ${{ total_amount|floatformat:0 }}
+
+{% if expiry_hours < 48 %}
+⏰ ATENCIÓN: Tu carrito expira en {{ expiry_hours }} horas
+¡No pierdas estos planes! Completa tu compra ahora.
+{% endif %}
+
+Para ver tu carrito completo, visita:
+{{ cart_url }}
+
+¿Necesitas ayuda?
+Contáctanos en: soporte@ejemplo.com
+
+---
+Risk Assessment Platform
+Este email fue enviado porque tienes items en tu carrito de compras.

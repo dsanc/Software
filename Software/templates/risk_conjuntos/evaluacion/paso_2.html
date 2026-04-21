@@ -1,0 +1,297 @@
+{% extends 'risk_conjuntos/evaluacion/base_evaluacion.html' %}
+{% load static %}
+
+{% block evaluation_content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Progreso del riesgo actual -->
+        <div class="progress-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-1">{{ tipo_riesgo.nombre }}</h5>
+                    <p class="mb-0 opacity-75">Evaluando riesgo {{ progreso.riesgo_actual }} de {{ progreso.total_riesgos }}</p>
+                </div>
+                <div class="text-end">
+                    <div class="h4 mb-0">{{ progreso.porcentaje }}%</div>
+                    <small>Completado</small>
+                </div>
+            </div>
+            <div class="progress mt-3" style="height: 8px; background-color: rgba(255,255,255,0.2);">
+                <div class="progress-bar bg-light" role="progressbar" 
+                     style="width: {{ progreso.porcentaje }}%"></div>
+            </div>
+        </div>
+
+        <!-- Formulario de preguntas -->
+        <form method="post" id="form-preguntas-riesgo">
+            {% csrf_token %}
+            
+            {% for item in forms_preguntas %}
+                <div class="question-card" data-pregunta-id="{{ item.pregunta.id }}">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <span class="badge bg-primary rounded-pill">{{ forloop.counter }}</span>
+                        </div>
+                        <div class="flex-grow-1">
+                            <!-- Información del escenario -->
+                            <div class="d-flex align-items-center mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-tag"></i> {{ item.pregunta.escenario.nombre }}
+                                </small>
+                            </div>
+                            
+                            <!-- Pregunta -->
+                            <h6 class="mb-3">{{ item.pregunta.texto_pregunta }}</h6>
+                            
+                            {% if item.pregunta.ayuda %}
+                                <div class="alert alert-info alert-sm mb-3">
+                                    <i class="fas fa-info-circle"></i>
+                                    <small>{{ item.pregunta.ayuda }}</small>
+                                </div>
+                            {% endif %}
+
+                            <!-- Opciones de calificación -->
+                            <div class="rating-options mb-3 d-flex flex-wrap gap-2">
+                                {% for choice in item.form.calificacion %}
+                                    <div class="rating-option flex-fill">
+                                        {{ choice.tag }}
+                                        <label for="{{ choice.id_for_label }}" class="rating-label d-block text-center">
+                                            <div class="fw-bold small">{{ choice.choice_label }}</div>
+                                        </label>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <!-- Campo oculto -->
+                            {{ item.form.pregunta_id }}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Comentario general del riesgo -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-light border-bottom-0">
+                    <h6 class="card-title mb-0 text-muted">
+                        <i class="fas fa-comment-alt me-2"></i>
+                        Comentario General para {{ tipo_riesgo.nombre }}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-0">
+                        {{ comentario_form.comentario_riesgo }}
+                        <small class="form-text text-muted">
+                            Escriba aquí sus observaciones generales sobre la evaluación de este riesgo
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block back_button %}
+{% if puede_retroceder %}
+    <a href="{% url 'risk_conjuntos:paso_2_preguntas' conjunto.id riesgo_index|add:'-1' %}" 
+       class="btn btn-outline-secondary btn-navigation">
+        <i class="fas fa-arrow-left"></i> Riesgo Anterior
+    </a>
+{% else %}
+    <a href="{% url 'risk_conjuntos:paso_1_seleccion_riesgos' conjunto.id %}" 
+       class="btn btn-outline-secondary btn-navigation">
+        <i class="fas fa-arrow-left"></i> Volver al Paso 1
+    </a>
+{% endif %}
+{% endblock %}
+
+{% block next_button %}
+<button type="submit" form="form-preguntas-riesgo" 
+        class="btn btn-primary btn-navigation" id="btn-continuar">
+    <i class="fas fa-arrow-right"></i> 
+    <span id="btn-text">Continuar</span>
+</button>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+.rating-options {
+    min-height: 40px;
+}
+
+.rating-option {
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.5rem 0.25rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    background: #fff;
+    min-width: 0;
+}
+
+.rating-option:hover {
+    border-color: #3b82f6;
+    background: #f8fafc;
+}
+
+.rating-option input[type="radio"] {
+    display: none;
+}
+
+.rating-option input[type="radio"]:checked + .rating-label {
+    color: #fff;
+}
+
+.rating-option:has(input[type="radio"]:checked) {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+.rating-label {
+    cursor: pointer;
+    margin: 0;
+    width: 100%;
+}
+
+.rating-label .fw-bold {
+    font-size: 0.8rem;
+    line-height: 1.1;
+}
+
+@media (max-width: 768px) {
+    .rating-options {
+        flex-direction: column;
+    }
+    
+    .rating-option {
+        flex: none !important;
+        text-align: left !important;
+    }
+    
+    .rating-label {
+        text-align: left !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+$(document).ready(function() {
+    const totalQuestions = {{ forms_preguntas|length }};
+    const isLastRisk = {{ progreso.riesgo_actual }} === {{ progreso.total_riesgos }};
+
+    function updateProgress() {
+        const answeredQuestions = $('.question-card input[type="radio"]:checked').length;
+        const percentage = (answeredQuestions / totalQuestions) * 100;
+        
+        // Actualizar texto del botón
+        if (answeredQuestions === totalQuestions) {
+            if (isLastRisk) {
+                $('#btn-text').text('Ir a Observaciones');
+                $('#btn-continuar i').removeClass('fa-arrow-right').addClass('fa-check');
+            } else {
+                $('#btn-text').text('Siguiente Riesgo');
+            }
+            $('#btn-continuar').removeClass('btn-outline-primary').addClass('btn-primary');
+        } else {
+            $('#btn-text').text('Continuar (' + answeredQuestions + '/' + totalQuestions + ')');
+            $('#btn-continuar').removeClass('btn-primary').addClass('btn-outline-primary');
+        }
+    }
+
+    // Event listeners para actualizar progreso
+    $('.question-card input[type="radio"]').change(function() {
+        updateProgress();
+        
+        // Scroll automático a la siguiente pregunta sin respuesta
+        const currentCard = $(this).closest('.question-card');
+        const nextCard = currentCard.nextAll('.question-card').filter(function() {
+            return $(this).find('input[type="radio"]:checked').length === 0;
+        }).first();
+        
+        if (nextCard.length > 0) {
+            setTimeout(function() {
+                $('html, body').animate({
+                    scrollTop: nextCard.offset().top - 100
+                }, 500);
+            }, 300);
+        }
+    });
+
+    // Validación del formulario
+    $('#form-preguntas-riesgo').submit(function(e) {
+        const answeredQuestions = $('.question-card input[type="radio"]:checked').length;
+        
+        console.log('Validando formulario - Preguntas respondidas:', answeredQuestions, 'de', totalQuestions);
+        
+        if (answeredQuestions < totalQuestions) {
+            e.preventDefault();
+            
+            // Encontrar primera pregunta sin respuesta
+            const firstUnanswered = $('.question-card').filter(function() {
+                return $(this).find('input[type="radio"]:checked').length === 0;
+            }).first();
+            
+            if (firstUnanswered.length > 0) {
+                $('html, body').animate({
+                    scrollTop: firstUnanswered.offset().top - 100
+                }, 500);
+                
+                firstUnanswered.addClass('border-danger').delay(2000).queue(function() {
+                    $(this).removeClass('border-danger').dequeue();
+                });
+            }
+            
+            if (typeof toastr !== 'undefined') {
+                toastr.error(`Debe responder todas las preguntas (${answeredQuestions}/${totalQuestions} completadas).`);
+            } else {
+                alert(`Debe responder todas las preguntas (${answeredQuestions}/${totalQuestions} completadas).`);
+            }
+            return false;
+        }
+
+        console.log('Formulario válido, enviando...');
+        
+        // Mostrar loading
+        $('#btn-continuar').html('<i class="fas fa-spinner fa-spin"></i> Procesando...').prop('disabled', true);
+        
+        // Permitir el envío
+        return true;
+    });
+
+    // Auto-guardar cada 30 segundos
+    setInterval(function() {
+        const answeredQuestions = $('.question-card input[type="radio"]:checked').length;
+        if (answeredQuestions > 0) {
+            console.log(`Auto-guardando progreso: ${answeredQuestions}/${totalQuestions} preguntas`);
+            // Aquí se puede implementar auto-save via AJAX
+        }
+    }, 30000);
+
+    // Atajos de teclado
+    $(document).keydown(function(e) {
+        // Números 1-5 para seleccionar calificaciones
+        if (e.which >= 49 && e.which <= 53) {
+            const questionCard = $('.question-card').filter(function() {
+                return $(this).find('input[type="radio"]:checked').length === 0;
+            }).first();
+            
+            if (questionCard.length > 0) {
+                const radioIndex = e.which - 49;
+                const radio = questionCard.find('input[type="radio"]').eq(radioIndex);
+                if (radio.length > 0) {
+                    radio.prop('checked', true).trigger('change');
+                }
+            }
+        }
+    });
+
+    // Inicializar progreso
+    updateProgress();
+});
+</script>
+{% endblock %}

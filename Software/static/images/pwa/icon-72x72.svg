@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fondo -->
+    <rect width="72" height="72" fill="#1e3a8a" rx="9"/>
+    
+    <!-- Icono de hotel/edificio -->
+    <g transform="translate(12,12)">
+        <!-- Edificio principal -->
+        <rect x="0" y="24" width="48.0" height="36" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+        
+        <!-- Ventanas -->
+        <rect x="6" y="28.0" width="9" height="9" fill="#1e3a8a"/>
+        <rect x="24" y="28.0" width="9" height="9" fill="#1e3a8a"/>
+        <rect x="42" y="28.0" width="9" height="9" fill="#1e3a8a"/>
+        
+        <rect x="6" y="36" width="9" height="9" fill="#1e3a8a"/>
+        <rect x="24" y="36" width="9" height="9" fill="#1e3a8a"/>
+        <rect x="42" y="36" width="9" height="9" fill="#1e3a8a"/>
+        
+        <!-- Puerta -->
+        <rect x="28.0" y="48.0" width="12" height="18" fill="#dc2626"/>
+        
+        <!-- Texto "RH" -->
+        <text x="24" y="39.0" font-family="Arial, sans-serif" font-size="9" font-weight="bold" fill="#1e3a8a" text-anchor="middle">RH</text>
+    </g>
+    
+    <!-- Indicador de riesgo (punto rojo) -->
+    <circle cx="60" cy="12" r="6" fill="#ef4444"/>
+</svg>

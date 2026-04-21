@@ -1,0 +1,5 @@
+-r base.txt
+
+# Desarrollo específico
+ipython>=8.15.0
+django-browser-reload>=1.11.0

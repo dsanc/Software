@@ -1,0 +1,1468 @@
+{% extends 'base_with_sidebar.html' %}
+
+{% block title %}Nueva Evaluación - {{ perfil.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos personalizados para crear evaluación */
+.form-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="20" fill="url(%23grid)"/></svg>') repeat;
+    opacity: 0.3;
+}
+
+.form-header > * {
+    position: relative;
+    z-index: 1;
+}
+
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.form-card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+}
+
+.form-section {
+    border-left: 4px solid #28a745;
+    padding-left: 1rem;
+    margin-bottom: 2rem;
+}
+
+.form-section h5 {
+    color: #28a745;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.form-floating label {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.form-control:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-select:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838, #1ea080);
+    transform: translateY(-1px);
+}
+
+.required-field::after {
+    content: " *";
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.tree-info {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #2196f3;
+}
+
+/* Estilos para selección múltiple con checkboxes */
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.form-check-input:focus {
+    border-color: #28a745;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.form-check-label {
+    cursor: pointer;
+    padding: 2px 0;
+}
+
+.form-check-label:hover {
+    color: #28a745;
+}
+
+.dept-checkbox:checked + label {
+    font-weight: 600;
+    color: #28a745;
+}
+
+.mun-checkbox:checked + label {
+    font-weight: 500;
+    color: #17a2b8;
+}
+
+/* Contenedores de checkboxes */
+#departamentos-container,
+#municipios-container {
+    scrollbar-width: thin;
+    scrollbar-color: #28a745 #e9ecef;
+}
+
+#departamentos-container::-webkit-scrollbar,
+#municipios-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+#departamentos-container::-webkit-scrollbar-track,
+#municipios-container::-webkit-scrollbar-track {
+    background: #e9ecef;
+    border-radius: 3px;
+}
+
+#departamentos-container::-webkit-scrollbar-thumb,
+#municipios-container::-webkit-scrollbar-thumb {
+    background: #28a745;
+    border-radius: 3px;
+}
+
+/* Mejoras para las cards geográficas */
+.card-header.bg-primary.bg-opacity-10 {
+    border-bottom: 1px solid rgba(13, 110, 253, 0.125);
+}
+
+.card-header.bg-info.bg-opacity-10 {
+    border-bottom: 1px solid rgba(13, 202, 240, 0.125);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-info:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-input:hover {
+    transform: scale(1.05);
+    transition: transform 0.1s ease;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+}
+
+/* Estilos para buscadores */
+.input-group-text.border-end-0 {
+    border-right: none !important;
+}
+
+.form-control.border-start-0 {
+    border-left: none !important;
+}
+
+.form-control.border-start-0:focus {
+    border-left: none !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+#buscar-departamentos:focus,
+#buscar-municipios:focus {
+    border-color: #28a745;
+}
+
+.departamento-item,
+.municipio-item {
+    transition: opacity 0.2s ease, height 0.2s ease;
+}
+
+.departamento-item.hidden,
+.municipio-item.hidden {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.no-results {
+    color: #6c757d;
+    font-style: italic;
+    padding: 1rem;
+    text-align: center;
+    background: #f8f9fa;
+    border-radius: 0.375rem;
+    margin: 0.5rem 0;
+}
+}
+
+@media (max-width: 768px) {
+    .form-header {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .form-header .row > div {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+    
+    .form-header .row .d-flex {
+        justify-content: center;
+        text-align: center;
+        flex-wrap: wrap;
+    }
+    
+    .form-header h5 {
+        font-size: 1.2rem !important;
+    }
+    
+    .form-header .col-auto {
+        text-align: center !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header Unificado: Formulario + Perfil -->
+    <div class="form-header">
+        <!-- Información del Perfil - Prioridad Principal -->
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div class="bg-white text-dark rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                     style="width: 50px; height: 50px; font-size: 1.2rem; font-weight: 700; border: 2px solid rgba(255,255,255,0.3);">
+                    {{ perfil.iniciales }}
+                </div>
+            </div>
+            <div class="col">
+                <div class="text-white-50 small mb-1">NUEVA EVALUACIÓN</div>
+                <h5 class="mb-1 fw-bold">{{ perfil.nombre_completo }}</h5>
+                <div class="d-flex flex-wrap gap-3 small">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-briefcase me-1 text-warning"></i>
+                        <span>{{ perfil.get_cargo_politico_display }}</span>
+                        {% if perfil.partido_politico %}
+                            <span class="ms-1 badge bg-light bg-opacity-25 text-white small">{{ perfil.partido_politico }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-map-marker-alt me-1 text-info"></i>
+                        <span>{{ perfil.municipio }}, {{ perfil.departamento }}</span>
+                    </div>
+                    {% if perfil.fecha_nacimiento %}
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-calendar me-1 text-success"></i>
+                        <span>{{ perfil.edad }} años</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-auto">
+                <a href="{% url 'security_probabilistic:detalle_perfil' perfil.pk %}" 
+                   class="btn btn-light btn-sm shadow-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Regresar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario -->
+    <form method="post" id="evaluacionForm">
+        {% csrf_token %}
+        
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Configuración de la Evaluación -->
+                <div class="card form-card mb-4">
+                    <div class="card-header bg-gradient" style="background: linear-gradient(135deg, #f8f9fa, #e9ecef);">
+                        <h5 class="mb-0 text-dark">
+                            <i class="fas fa-cogs me-2 text-success"></i>Configuración de la Evaluación
+                        </h5>
+                        <small class="text-muted">Configure los parámetros para la evaluación de {{ perfil.nombre_completo }}</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Tipo de Evaluación -->
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    {{ form.arbol }}
+                                    <label for="{{ form.arbol.id_for_label }}" class="required-field">Tipo de Evaluación</label>
+                                </div>
+                                {% if form.arbol.help_text %}
+                                    <div class="form-text">{{ form.arbol.help_text }}</div>
+                                {% endif %}
+                                {% if form.arbol.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.arbol.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Prioridad -->
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    {{ form.prioridad }}
+                                    <label for="{{ form.prioridad.id_for_label }}">Prioridad de la Evaluación</label>
+                                </div>
+                                {% if form.prioridad.help_text %}
+                                    <div class="form-text">{{ form.prioridad.help_text }}</div>
+                                {% endif %}
+                                {% if form.prioridad.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.prioridad.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                {{ form.observaciones }}
+                                <label for="{{ form.observaciones.id_for_label }}">Observaciones Iniciales</label>
+                            </div>
+                            {% if form.observaciones.help_text %}
+                                <div class="form-text">{{ form.observaciones.help_text }}</div>
+                            {% endif %}
+                            {% if form.observaciones.errors %}
+                                <div class="invalid-feedback d-block">{{ form.observaciones.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Selector de Ubicaciones Geográficas -->
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h6 class="text-success mb-0">
+                                    <i class="fas fa-map-marked-alt me-2"></i>Alcance Geográfico de la Evaluación
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>Opcional - Deje en blanco para análisis general
+                                </small>
+                            </div>
+                            
+                            <div class="row">
+                                <!-- Selector de Departamentos -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-primary bg-opacity-10 border-0">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <label class="form-label fw-medium mb-0">
+                                                    <i class="fas fa-map me-1 text-primary"></i>Departamentos
+                                                </label>
+                                                <span class="badge bg-primary" id="contador-departamentos">0 seleccionados</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <!-- Buscador de departamentos -->
+                                            <div class="mb-2">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light border-end-0">
+                                                        <i class="fas fa-search text-muted"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control border-start-0" 
+                                                           id="buscar-departamentos" 
+                                                           placeholder="Buscar departamento..."
+                                                           autocomplete="off">
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="limpiar-busqueda-depts" style="display: none;">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <!-- Controles de selección -->
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill" id="select-all-depts">
+                                                    <i class="fas fa-check-double me-1"></i>Todos
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="clear-all-depts">
+                                                    <i class="fas fa-times me-1"></i>Ninguno
+                                                </button>
+                                            </div>
+                                            <hr class="my-2">
+                                            <!-- Lista de departamentos -->
+                                            <div id="departamentos-container" style="max-height: 280px; overflow-y: auto;">
+                                                <div class="text-center py-3">
+                                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                        <span class="visually-hidden">Cargando...</span>
+                                                    </div>
+                                                    <div class="mt-2 text-muted small">Cargando departamentos...</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2">
+                                        <i class="fas fa-search me-1"></i>
+                                        Seleccione los departamentos para incluir en el análisis
+                                    </div>
+                                </div>
+                                
+                                <!-- Selector de Municipios -->
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-info bg-opacity-10 border-0">
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <label class="form-label fw-medium mb-0">
+                                                    <i class="fas fa-city me-1 text-info"></i>Municipios
+                                                </label>
+                                                <span class="badge bg-info" id="contador-municipios">0 seleccionados</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <!-- Buscador de municipios -->
+                                            <div class="mb-2">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light border-end-0">
+                                                        <i class="fas fa-search text-muted"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control border-start-0" 
+                                                           id="buscar-municipios" 
+                                                           placeholder="Buscar municipio..."
+                                                           autocomplete="off"
+                                                           disabled>
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm" id="limpiar-busqueda-muns" style="display: none;">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <!-- Controles de selección -->
+                                            <div class="d-flex gap-2 mb-2">
+                                                <button type="button" class="btn btn-outline-info btn-sm flex-fill" id="select-all-muns" disabled>
+                                                    <i class="fas fa-check-double me-1"></i>Todos
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm flex-fill" id="clear-all-muns" disabled>
+                                                    <i class="fas fa-times me-1"></i>Ninguno
+                                                </button>
+                                            </div>
+                                            <hr class="my-2">
+                                            <!-- Lista de municipios -->
+                                            <div id="municipios-container" style="max-height: 280px; overflow-y: auto;">
+                                                <div class="text-muted text-center py-4">
+                                                    <i class="fas fa-arrow-left me-2 text-muted"></i>
+                                                    <div class="small">Primero seleccione departamentos</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-text mt-2">
+                                        <i class="fas fa-filter me-1"></i>
+                                        Los municipios se filtran según los departamentos seleccionados
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Resumen de Selección -->
+                            <div class="alert alert-light border-0 bg-light" id="seleccion-resumen" style="display: none;">
+                                <div class="row align-items-center">
+                                    <div class="col">
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-clipboard-check me-2 text-success"></i>Selección Geográfica
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="small text-muted mb-1">Departamentos:</div>
+                                                <div id="departamentos-seleccionados" class="small"></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="small text-muted mb-1">Municipios:</div>
+                                                <div id="municipios-seleccionados" class="small"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button type="button" class="btn btn-outline-danger btn-sm" id="limpiar-selecciones">
+                                            <i class="fas fa-trash-alt me-1"></i>Limpiar Todo
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campos ocultos para datos geográficos -->
+            {{ form.departamentos_seleccionados }}
+            {{ form.municipios_seleccionados }}
+
+                <!-- Botones de Acción -->
+                <div class="card form-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Los campos marcados con <span class="text-danger">*</span> son obligatorios
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{% url 'security_probabilistic:detalle_perfil' perfil.pk %}" 
+                                   class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-play me-2"></i>Iniciar Evaluación
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <!-- Estadísticas del Perfil -->
+                {% if total_evaluaciones_previas > 0 %}
+                <div class="card form-card">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Historial de Evaluaciones
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <div class="h4 mb-0 text-warning">{{ total_evaluaciones_previas }}</div>
+                                <small class="text-muted">Total</small>
+                            </div>
+                            {% if ultima_evaluacion %}
+                            <div class="col-6">
+                                <div class="h6 mb-0">{{ ultima_evaluacion.creada_en|date:"d/m/Y" }}</div>
+                                <small class="text-muted">Última</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Variables globales para datos geográficos
+let departamentosData = {};
+let municipiosData = {};
+
+// URLs de las APIs
+const API_DEPARTAMENTOS = "{% url 'security_probabilistic:api_departamentos' %}";
+const API_MUNICIPIOS = "{% url 'security_probabilistic:api_municipios' %}";
+
+// Información de los árboles de decisión
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Script de evaluación cargado correctamente');
+    
+    const arbolSelect = document.getElementById('{{ form.arbol.id_for_label }}');
+    const treeInfoCard = document.getElementById('tree-info');
+    const treeDetails = document.getElementById('tree-details');
+    const departamentosContainer = document.getElementById('departamentos-container');
+    const municipiosContainer = document.getElementById('municipios-container');
+    const resumenDiv = document.getElementById('seleccion-resumen');
+    const departamentosSelDiv = document.getElementById('departamentos-seleccionados');
+    const municipiosSelDiv = document.getElementById('municipios-seleccionados');
+    const selectAllDepts = document.getElementById('select-all-depts');
+    const selectAllMuns = document.getElementById('select-all-muns');
+
+    console.log('📋 Elementos encontrados:', {
+        arbolSelect: !!arbolSelect,
+        departamentosContainer: !!departamentosContainer,
+        municipiosContainer: !!municipiosContainer,
+        selectAllDepts: !!selectAllDepts,
+        selectAllMuns: !!selectAllMuns,
+        treeInfoCard: !!treeInfoCard,
+        treeDetails: !!treeDetails
+    });
+
+    // Configurar buscadores
+    configurarBuscadores();
+
+    // Cargar departamentos al inicializar
+    cargarDepartamentosDesdeAPI();
+    
+    // Función para configurar los buscadores
+    function configurarBuscadores() {
+        const buscarDepts = document.getElementById('buscar-departamentos');
+        const buscarMuns = document.getElementById('buscar-municipios');
+        const limpiarDepts = document.getElementById('limpiar-busqueda-depts');
+        const limpiarMuns = document.getElementById('limpiar-busqueda-muns');
+        
+        // Buscador de departamentos
+        if (buscarDepts) {
+            buscarDepts.addEventListener('input', function() {
+                const texto = this.value.toLowerCase().trim();
+                filtrarDepartamentos(texto);
+                
+                // Mostrar/ocultar botón de limpiar
+                if (texto) {
+                    limpiarDepts.style.display = 'block';
+                } else {
+                    limpiarDepts.style.display = 'none';
+                }
+            });
+            
+            // Limpiar búsqueda de departamentos
+            if (limpiarDepts) {
+                limpiarDepts.addEventListener('click', function() {
+                    buscarDepts.value = '';
+                    filtrarDepartamentos('');
+                    this.style.display = 'none';
+                    buscarDepts.focus();
+                });
+            }
+        }
+        
+        // Buscador de municipios
+        if (buscarMuns) {
+            buscarMuns.addEventListener('input', function() {
+                const texto = this.value.toLowerCase().trim();
+                filtrarMunicipios(texto);
+                
+                // Mostrar/ocultar botón de limpiar
+                if (texto) {
+                    limpiarMuns.style.display = 'block';
+                } else {
+                    limpiarMuns.style.display = 'none';
+                }
+            });
+            
+            // Limpiar búsqueda de municipios
+            if (limpiarMuns) {
+                limpiarMuns.addEventListener('click', function() {
+                    buscarMuns.value = '';
+                    filtrarMunicipios('');
+                    this.style.display = 'none';
+                    buscarMuns.focus();
+                });
+            }
+        }
+    }
+    
+    // Función para filtrar departamentos
+    function filtrarDepartamentos(texto) {
+        const departamentos = document.querySelectorAll('.departamento-item');
+        let visibles = 0;
+        
+        departamentos.forEach(item => {
+            const nombre = item.querySelector('label').textContent.toLowerCase();
+            const coincide = nombre.includes(texto);
+            
+            if (coincide) {
+                item.style.display = 'block';
+                item.classList.remove('hidden');
+                visibles++;
+            } else {
+                item.style.display = 'none';
+                item.classList.add('hidden');
+            }
+        });
+        
+        // Mostrar mensaje si no hay resultados
+        mostrarMensajeNoResultados('departamentos', visibles, texto);
+    }
+    
+    // Función para filtrar municipios
+    function filtrarMunicipios(texto) {
+        const municipios = document.querySelectorAll('.municipio-item');
+        const titulos = document.querySelectorAll('.departamento-titulo');
+        let visibles = 0;
+        
+        // Ocultar todos los títulos de departamento inicialmente
+        titulos.forEach(titulo => {
+            titulo.style.display = 'none';
+        });
+        
+        municipios.forEach(item => {
+            const nombre = item.querySelector('label').textContent.toLowerCase();
+            const coincide = nombre.includes(texto);
+            
+            if (coincide) {
+                item.style.display = 'block';
+                item.classList.remove('hidden');
+                visibles++;
+                
+                // Mostrar el título del departamento correspondiente
+                const titulo = item.previousElementSibling;
+                if (titulo && titulo.classList.contains('departamento-titulo')) {
+                    titulo.style.display = 'block';
+                } else {
+                    // Buscar el título más cercano hacia arriba
+                    let elemento = item.previousElementSibling;
+                    while (elemento) {
+                        if (elemento.classList.contains('departamento-titulo')) {
+                            elemento.style.display = 'block';
+                            break;
+                        }
+                        elemento = elemento.previousElementSibling;
+                    }
+                }
+            } else {
+                item.style.display = 'none';
+                item.classList.add('hidden');
+            }
+        });
+        
+        // Mostrar mensaje si no hay resultados
+        mostrarMensajeNoResultados('municipios', visibles, texto);
+    }
+    
+    // Función para mostrar mensaje de no resultados
+    function mostrarMensajeNoResultados(tipo, visibles, texto) {
+        const container = tipo === 'departamentos' ? departamentosContainer : municipiosContainer;
+        const mensajeId = `no-results-${tipo}`;
+        
+        // Remover mensaje anterior si existe
+        const mensajeAnterior = container.querySelector(`#${mensajeId}`);
+        if (mensajeAnterior) {
+            mensajeAnterior.remove();
+        }
+        
+        // Mostrar mensaje si no hay resultados y hay texto de búsqueda
+        if (visibles === 0 && texto) {
+            const mensaje = document.createElement('div');
+            mensaje.id = mensajeId;
+            mensaje.className = 'no-results';
+            mensaje.innerHTML = `
+                <i class="fas fa-search me-2"></i>
+                No se encontraron ${tipo} que coincidan con "<strong>${texto}</strong>"
+            `;
+            container.appendChild(mensaje);
+        }
+    }
+    
+    // Función para cargar departamentos desde la API
+    async function cargarDepartamentosDesdeAPI() {
+        try {
+            console.log('🔄 Cargando departamentos desde API...');
+            
+            const response = await fetch(API_DEPARTAMENTOS);
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Error al cargar departamentos');
+            }
+            
+            console.log(`✅ ${data.total} departamentos cargados`);
+            
+            // Procesar datos y guardar en variable global
+            departamentosData = {};
+            data.departamentos.forEach(dept => {
+                departamentosData[dept.id] = {
+                    id: dept.id,
+                    nombre: dept.nombre,
+                    codigo_dane: dept.codigo_dane,
+                    region: dept.region,
+                    nivel_riesgo: dept.nivel_riesgo,
+                    municipios_count: dept.municipios_count
+                };
+            });
+            
+            // Renderizar checkboxes
+            renderizarDepartamentos();
+            
+        } catch (error) {
+            console.error('❌ Error al cargar departamentos:', error);
+            departamentosContainer.innerHTML = `
+                <div class="text-center py-3">
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar departamentos
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="cargarDepartamentosDesdeAPI()">
+                        <i class="fas fa-redo me-1"></i>Reintentar
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // Función para renderizar departamentos
+    function renderizarDepartamentos() {
+        departamentosContainer.innerHTML = '';
+        
+        Object.entries(departamentosData).forEach(([id, dept]) => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'form-check mb-1 departamento-item';
+            
+            checkboxDiv.innerHTML = `
+                <input class="form-check-input dept-checkbox" type="checkbox" value="${id}" id="dept-${id}">
+                <label class="form-check-label" for="dept-${id}">
+                    ${dept.nombre}
+                    <small class="text-muted">(${dept.municipios_count} municipios)</small>
+                </label>
+            `;
+            
+            departamentosContainer.appendChild(checkboxDiv);
+        });
+        
+        // Event listeners para departamentos
+        document.querySelectorAll('.dept-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                actualizarMunicipiosDesdeAPI();
+                actualizarResumen();
+            });
+        });
+        
+        // Habilitar buscador de departamentos
+        const buscarDepts = document.getElementById('buscar-departamentos');
+        if (buscarDepts) {
+            buscarDepts.disabled = false;
+        }
+    }
+    
+    // Función para actualizar municipios desde la API
+    async function actualizarMunicipiosDesdeAPI() {
+        const selectedDepts = Array.from(document.querySelectorAll('.dept-checkbox:checked')).map(cb => cb.value);
+        municipiosContainer.innerHTML = '';
+        
+        if (selectedDepts.length === 0) {
+            municipiosContainer.innerHTML = `
+                <div class="text-muted text-center py-4">
+                    <i class="fas fa-arrow-left me-2 text-muted"></i>
+                    <div class="small">Primero seleccione departamentos</div>
+                </div>
+            `;
+            selectAllMuns.disabled = true;
+            const clearAllMuns = document.getElementById('clear-all-muns');
+            if (clearAllMuns) clearAllMuns.disabled = true;
+            
+            // Deshabilitar buscador de municipios
+            const buscarMuns = document.getElementById('buscar-municipios');
+            const limpiarMuns = document.getElementById('limpiar-busqueda-muns');
+            if (buscarMuns) {
+                buscarMuns.disabled = true;
+                buscarMuns.value = '';
+            }
+            if (limpiarMuns) {
+                limpiarMuns.style.display = 'none';
+            }
+            return;
+        }
+        
+        try {
+            // Mostrar spinner de carga
+            municipiosContainer.innerHTML = `
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-info" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                    <div class="mt-2 text-muted small">Cargando municipios...</div>
+                </div>
+            `;
+            
+            // Construir URL con parámetros
+            const params = new URLSearchParams();
+            selectedDepts.forEach(id => params.append('departamentos[]', id));
+            
+            const response = await fetch(`${API_MUNICIPIOS}?${params}`);
+            const data = await response.json();
+            
+            if (!data.success) {
+                throw new Error(data.error || 'Error al cargar municipios');
+            }
+            
+            console.log(`✅ ${data.total_municipios} municipios cargados`);
+            
+            // Guardar datos en variable global
+            municipiosData = data.data;
+            
+            // Renderizar municipios
+            renderizarMunicipios();
+            
+            selectAllMuns.disabled = false;
+            const clearAllMuns = document.getElementById('clear-all-muns');
+            if (clearAllMuns) clearAllMuns.disabled = false;
+            
+        } catch (error) {
+            console.error('❌ Error al cargar municipios:', error);
+            municipiosContainer.innerHTML = `
+                <div class="text-center py-3">
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar municipios
+                    </div>
+                    <button type="button" class="btn btn-outline-info btn-sm mt-2" onclick="actualizarMunicipiosDesdeAPI()">
+                        <i class="fas fa-redo me-1"></i>Reintentar
+                    </button>
+                </div>
+            `;
+            selectAllMuns.disabled = true;
+            const clearAllMuns = document.getElementById('clear-all-muns');
+            if (clearAllMuns) clearAllMuns.disabled = true;
+        }
+    }
+    
+    // Función para renderizar municipios
+    function renderizarMunicipios() {
+        municipiosContainer.innerHTML = '';
+        
+        Object.entries(municipiosData).forEach(([deptId, deptData]) => {
+            // Título del departamento
+            const deptTitle = document.createElement('div');
+            deptTitle.className = 'fw-bold text-primary mt-2 mb-1 border-bottom departamento-titulo';
+            deptTitle.innerHTML = `<i class="fas fa-map-marker-alt me-1"></i>${deptData.departamento.nombre}`;
+            municipiosContainer.appendChild(deptTitle);
+            
+            // Municipios del departamento
+            deptData.municipios.forEach(municipio => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check mb-1 ms-3 municipio-item';
+                
+                checkboxDiv.innerHTML = `
+                    <input class="form-check-input mun-checkbox" type="checkbox" value="${municipio.id}" id="mun-${municipio.id}">
+                    <label class="form-check-label" for="mun-${municipio.id}">
+                        ${municipio.nombre}
+                    </label>
+                `;
+                
+                municipiosContainer.appendChild(checkboxDiv);
+            });
+        });
+        
+        // Event listeners para municipios
+        document.querySelectorAll('.mun-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                actualizarResumen();
+            });
+        });
+        
+        // Habilitar buscador de municipios
+        const buscarMuns = document.getElementById('buscar-municipios');
+        if (buscarMuns) {
+            buscarMuns.disabled = false;
+        }
+    }
+    
+    // Función para actualizar el resumen de selección
+    function actualizarResumen() {
+        const selectedDepts = Array.from(document.querySelectorAll('.dept-checkbox:checked'));
+        const selectedMuns = Array.from(document.querySelectorAll('.mun-checkbox:checked'));
+
+        // Actualizar contadores en los labels
+        const contadorDepts = document.getElementById('contador-departamentos');
+        const contadorMuns = document.getElementById('contador-municipios');
+        
+        if (contadorDepts) {
+            contadorDepts.textContent = `${selectedDepts.length} seleccionado${selectedDepts.length !== 1 ? 's' : ''}`;
+            contadorDepts.className = selectedDepts.length > 0 ? 'badge bg-success ms-2' : 'badge bg-secondary ms-2';
+        }
+        
+        if (contadorMuns) {
+            contadorMuns.textContent = `${selectedMuns.length} seleccionado${selectedMuns.length !== 1 ? 's' : ''}`;
+            contadorMuns.className = selectedMuns.length > 0 ? 'badge bg-success ms-2' : 'badge bg-secondary ms-2';
+        }
+
+        if (selectedDepts.length === 0 && selectedMuns.length === 0) {
+            resumenDiv.style.display = 'none';
+            return;
+        }
+
+        resumenDiv.style.display = 'block';
+
+        // Mostrar departamentos seleccionados
+        if (selectedDepts.length > 0) {
+            const deptsHtml = selectedDepts.map(checkbox => {
+                const deptId = checkbox.value;
+                const deptData = departamentosData[deptId];
+                if (deptData) {
+                    return `<span class="badge bg-primary me-1 mb-1">${deptData.nombre}</span>`;
+                }
+                return '';
+            }).filter(Boolean).join('');
+            departamentosSelDiv.innerHTML = deptsHtml;
+        } else {
+            departamentosSelDiv.innerHTML = '<span class="text-muted">Ninguno</span>';
+        }
+
+        // Mostrar municipios seleccionados
+        if (selectedMuns.length > 0) {
+            const munsHtml = selectedMuns.map(checkbox => {
+                const municipioId = checkbox.value;
+                // Buscar el municipio en los datos cargados
+                let municipioNombre = '';
+                Object.values(municipiosData).forEach(deptData => {
+                    const municipio = deptData.municipios.find(m => m.id == municipioId);
+                    if (municipio) {
+                        municipioNombre = municipio.nombre;
+                    }
+                });
+                return municipioNombre ? `<span class="badge bg-info me-1 mb-1">${municipioNombre}</span>` : '';
+            }).filter(Boolean).join('');
+            municipiosSelDiv.innerHTML = munsHtml;
+        } else {
+            municipiosSelDiv.innerHTML = '<span class="text-muted">Ninguno</span>';
+        }
+    }
+    
+    // Event listeners para botones de selección
+    selectAllDepts.addEventListener('click', function() {
+        const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+        deptCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        actualizarMunicipiosDesdeAPI();
+        actualizarResumen();
+    });
+    
+    // Agregar event listener para limpiar departamentos
+    const clearAllDepts = document.getElementById('clear-all-depts');
+    if (clearAllDepts) {
+        clearAllDepts.addEventListener('click', function() {
+            const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+            deptCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            actualizarMunicipiosDesdeAPI();
+            actualizarResumen();
+        });
+    }
+    
+    selectAllMuns.addEventListener('click', function() {
+        const munCheckboxes = document.querySelectorAll('.mun-checkbox');
+        munCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        actualizarResumen();
+    });
+    
+    // Agregar event listener para limpiar municipios
+    const clearAllMuns = document.getElementById('clear-all-muns');
+    if (clearAllMuns) {
+        clearAllMuns.addEventListener('click', function() {
+            const munCheckboxes = document.querySelectorAll('.mun-checkbox');
+            munCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            actualizarResumen();
+        });
+    }
+    
+    // Event listener para el botón de limpiar
+    const limpiarBtn = document.getElementById('limpiar-selecciones');
+    if (limpiarBtn) {
+        limpiarBtn.addEventListener('click', function() {
+            if (confirm('¿Está seguro de que desea limpiar todas las selecciones geográficas?')) {
+                // Limpiar departamentos
+                document.querySelectorAll('.dept-checkbox').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Limpiar búsquedas
+                const buscarDepts = document.getElementById('buscar-departamentos');
+                const buscarMuns = document.getElementById('buscar-municipios');
+                const limpiarDepts = document.getElementById('limpiar-busqueda-depts');
+                const limpiarMuns = document.getElementById('limpiar-busqueda-muns');
+                
+                if (buscarDepts) {
+                    buscarDepts.value = '';
+                    filtrarDepartamentos('');
+                }
+                if (buscarMuns) {
+                    buscarMuns.value = '';
+                    buscarMuns.disabled = true;
+                }
+                if (limpiarDepts) limpiarDepts.style.display = 'none';
+                if (limpiarMuns) limpiarMuns.style.display = 'none';
+                
+                // Limpiar municipios
+                municipiosContainer.innerHTML = `
+                    <div class="text-muted text-center py-4">
+                        <i class="fas fa-arrow-left me-2 text-muted"></i>
+                        <div class="small">Primero seleccione departamentos</div>
+                    </div>
+                `;
+                
+                selectAllMuns.disabled = true;
+                const clearAllMuns = document.getElementById('clear-all-muns');
+                if (clearAllMuns) clearAllMuns.disabled = true;
+                
+                actualizarResumen();
+            }
+        });
+    }
+    
+    // Manejar cambio en el selector de árbol
+    arbolSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        
+        if (this.value && selectedOption.text !== 'Seleccione un tipo de evaluación...') {
+            // Mostrar información del árbol seleccionado solo si el elemento existe
+            if (treeDetails) {
+                treeDetails.innerHTML = `
+                    <div class="mb-3">
+                        <strong>Tipo seleccionado:</strong>
+                        <div class="text-muted">${selectedOption.text}</div>
+                    </div>
+                    <div class="alert alert-info mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Una vez iniciada la evaluación, se presentarán las preguntas correspondientes 
+                        a este tipo de análisis de seguridad.
+                    </div>
+                `;
+            }
+            if (treeInfoCard) {
+                treeInfoCard.style.display = 'block';
+            }
+        } else {
+            if (treeInfoCard) {
+                treeInfoCard.style.display = 'none';
+            }
+        }
+    });
+
+    // Validación del formulario
+    document.getElementById('evaluacionForm').addEventListener('submit', function(e) {
+        const arbolValue = arbolSelect.value;
+        const selectedDepts = Array.from(document.querySelectorAll('.dept-checkbox:checked'));
+        const selectedMuns = Array.from(document.querySelectorAll('.mun-checkbox:checked'));
+        
+        // Validar tipo de evaluación
+        if (!arbolValue) {
+            e.preventDefault();
+            arbolSelect.focus();
+            arbolSelect.classList.add('is-invalid');
+            
+            // Crear o actualizar mensaje de error
+            let errorDiv = arbolSelect.parentNode.querySelector('.invalid-feedback');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback d-block';
+                arbolSelect.parentNode.appendChild(errorDiv);
+            }
+            errorDiv.textContent = 'Debe seleccionar un tipo de evaluación.';
+            
+            // Mostrar mensaje de alerta
+            alert('Por favor, seleccione un tipo de evaluación antes de continuar.');
+            return false;
+        }
+        
+        // Validar selección geográfica (opcional pero recomendado)
+        if (selectedDepts.length === 0 && selectedMuns.length === 0) {
+            const confirmacion = confirm(
+                'No ha seleccionado ningún departamento o municipio específico.\n\n' +
+                '¿Desea continuar con una evaluación general sin especificar ubicación geográfica?'
+            );
+            
+            if (!confirmacion) {
+                e.preventDefault();
+                // Hacer scroll hacia la sección geográfica
+                const geograficaSection = document.getElementById('departamentos-container') || document.querySelector('.card-header');
+                if (geograficaSection) {
+                    geograficaSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'center' 
+                    });
+                }
+                return false;
+            }
+        }
+        
+        // Remover clases de error si todo está bien
+        arbolSelect.classList.remove('is-invalid');
+        const errorDiv = arbolSelect.parentNode.querySelector('.invalid-feedback');
+        if (errorDiv) {
+            errorDiv.remove();
+        }
+        
+        // Capturar datos geográficos para los campos ocultos
+        const departamentosSeleccionados = selectedDepts.map(checkbox => {
+            const deptId = checkbox.value;
+            const deptData = departamentosData[deptId];
+            return deptData ? deptData.nombre : '';
+        }).filter(Boolean).join(', ');
+        
+        const municipiosSeleccionados = selectedMuns.map(checkbox => {
+            const municipioId = checkbox.value;
+            // Buscar el municipio en los datos cargados
+            let municipioNombre = '';
+            Object.values(municipiosData).forEach(deptData => {
+                const municipio = deptData.municipios.find(m => m.id == municipioId);
+                if (municipio) {
+                    municipioNombre = municipio.nombre;
+                }
+            });
+            return municipioNombre;
+        }).filter(Boolean).join(', ');
+        
+        // Asignar valores a los campos ocultos
+        const deptField = document.querySelector('input[name="departamentos_seleccionados"]');
+        const munField = document.querySelector('input[name="municipios_seleccionados"]');
+        
+        if (deptField) deptField.value = departamentosSeleccionados;
+        if (munField) munField.value = municipiosSeleccionados;
+    });
+
+    // Remover error cuando el usuario selecciona una opción válida
+    arbolSelect.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('is-invalid');
+            const errorDiv = this.parentNode.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.remove();
+            }
+        }
+    });
+
+    // Mejorar el auto-focus en el primer campo
+    if (arbolSelect && !arbolSelect.value) {
+        arbolSelect.focus();
+    }
+});
+
+// Hacer funciones globales para botones de reintentar
+window.cargarDepartamentosDesdeAPI = async function() {
+    // Redefinir las funciones dentro del contexto donde están definidas las variables
+    const departamentosContainer = document.getElementById('departamentos-container');
+    
+    try {
+        console.log('🔄 Cargando departamentos desde API...');
+        
+        const response = await fetch(API_DEPARTAMENTOS);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Error al cargar departamentos');
+        }
+        
+        console.log(`✅ ${data.total} departamentos cargados`);
+        
+        // Procesar datos y guardar en variable global
+        departamentosData = {};
+        data.departamentos.forEach(dept => {
+            departamentosData[dept.id] = {
+                id: dept.id,
+                nombre: dept.nombre,
+                codigo_dane: dept.codigo_dane,
+                region: dept.region,
+                nivel_riesgo: dept.nivel_riesgo,
+                municipios_count: dept.municipios_count
+            };
+        });
+        
+        // Renderizar checkboxes
+        renderizarDepartamentos();
+        
+    } catch (error) {
+        console.error('❌ Error al cargar departamentos:', error);
+        departamentosContainer.innerHTML = `
+            <div class="text-center py-3">
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error al cargar departamentos
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" onclick="cargarDepartamentosDesdeAPI()">
+                    <i class="fas fa-redo me-1"></i>Reintentar
+                </button>
+            </div>
+        `;
+    }
+    
+    function renderizarDepartamentos() {
+        departamentosContainer.innerHTML = '';
+        
+        Object.entries(departamentosData).forEach(([id, dept]) => {
+            const checkboxDiv = document.createElement('div');
+            checkboxDiv.className = 'form-check mb-1 departamento-item';
+            
+            checkboxDiv.innerHTML = `
+                <input class="form-check-input dept-checkbox" type="checkbox" value="${id}" id="dept-${id}">
+                <label class="form-check-label" for="dept-${id}">
+                    ${dept.nombre}
+                    <small class="text-muted">(${dept.municipios_count} municipios)</small>
+                </label>
+            `;
+            
+            departamentosContainer.appendChild(checkboxDiv);
+        });
+        
+        // Event listeners para departamentos
+        document.querySelectorAll('.dept-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                window.actualizarMunicipiosDesdeAPI();
+                // Llamar función de actualizar resumen si existe
+                if (typeof actualizarResumen === 'function') {
+                    actualizarResumen();
+                }
+            });
+        });
+        
+        // Habilitar buscador de departamentos
+        const buscarDepts = document.getElementById('buscar-departamentos');
+        if (buscarDepts) {
+            buscarDepts.disabled = false;
+        }
+    }
+};
+
+window.actualizarMunicipiosDesdeAPI = async function() {
+    const municipiosContainer = document.getElementById('municipios-container');
+    const selectAllMuns = document.getElementById('select-all-muns');
+    const clearAllMuns = document.getElementById('clear-all-muns');
+    
+    const selectedDepts = Array.from(document.querySelectorAll('.dept-checkbox:checked')).map(cb => cb.value);
+    municipiosContainer.innerHTML = '';
+    
+        if (selectedDepts.length === 0) {
+            municipiosContainer.innerHTML = `
+                <div class="text-muted text-center py-4">
+                    <i class="fas fa-arrow-left me-2 text-muted"></i>
+                    <div class="small">Primero seleccione departamentos</div>
+                </div>
+            `;
+            selectAllMuns.disabled = true;
+            if (clearAllMuns) clearAllMuns.disabled = true;
+            
+            // Deshabilitar buscador de municipios
+            const buscarMuns = document.getElementById('buscar-municipios');
+            const limpiarMuns = document.getElementById('limpiar-busqueda-muns');
+            if (buscarMuns) {
+                buscarMuns.disabled = true;
+                buscarMuns.value = '';
+            }
+            if (limpiarMuns) {
+                limpiarMuns.style.display = 'none';
+            }
+            return;
+        }    try {
+        // Mostrar spinner de carga
+        municipiosContainer.innerHTML = `
+            <div class="text-center py-3">
+                <div class="spinner-border spinner-border-sm text-info" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+                <div class="mt-2 text-muted small">Cargando municipios...</div>
+            </div>
+        `;
+        
+        // Construir URL con parámetros
+        const params = new URLSearchParams();
+        selectedDepts.forEach(id => params.append('departamentos[]', id));
+        
+        const response = await fetch(`${API_MUNICIPIOS}?${params}`);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Error al cargar municipios');
+        }
+        
+        console.log(`✅ ${data.total_municipios} municipios cargados`);
+        
+        // Guardar datos en variable global
+        municipiosData = data.data;
+        
+        // Renderizar municipios
+        renderizarMunicipios();
+        
+        selectAllMuns.disabled = false;
+        if (clearAllMuns) clearAllMuns.disabled = false;
+        
+    } catch (error) {
+        console.error('❌ Error al cargar municipios:', error);
+        municipiosContainer.innerHTML = `
+            <div class="text-center py-3">
+                <div class="text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error al cargar municipios
+                </div>
+                <button type="button" class="btn btn-outline-info btn-sm mt-2" onclick="actualizarMunicipiosDesdeAPI()">
+                    <i class="fas fa-redo me-1"></i>Reintentar
+                </button>
+            </div>
+        `;
+        selectAllMuns.disabled = true;
+        if (clearAllMuns) clearAllMuns.disabled = true;
+    }
+    
+    function renderizarMunicipios() {
+        municipiosContainer.innerHTML = '';
+        
+        Object.entries(municipiosData).forEach(([deptId, deptData]) => {
+            // Título del departamento
+            const deptTitle = document.createElement('div');
+            deptTitle.className = 'fw-bold text-primary mt-2 mb-1 border-bottom departamento-titulo';
+            deptTitle.innerHTML = `<i class="fas fa-map-marker-alt me-1"></i>${deptData.departamento.nombre}`;
+            municipiosContainer.appendChild(deptTitle);
+            
+            // Municipios del departamento
+            deptData.municipios.forEach(municipio => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'form-check mb-1 ms-3 municipio-item';
+                
+                checkboxDiv.innerHTML = `
+                    <input class="form-check-input mun-checkbox" type="checkbox" value="${municipio.id}" id="mun-${municipio.id}">
+                    <label class="form-check-label" for="mun-${municipio.id}">
+                        ${municipio.nombre}
+                    </label>
+                `;
+                
+                municipiosContainer.appendChild(checkboxDiv);
+            });
+        });
+        
+        // Event listeners para municipios
+        document.querySelectorAll('.mun-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Llamar función de actualizar resumen si existe
+                if (typeof actualizarResumen === 'function') {
+                    actualizarResumen();
+                }
+            });
+        });
+        
+        // Habilitar buscador de municipios
+        const buscarMuns = document.getElementById('buscar-municipios');
+        if (buscarMuns) {
+            buscarMuns.disabled = false;
+        }
+    }
+};
+
+// Función simplificada para prueba de checkboxes
+function testSelection() {
+    const deptCheckboxes = document.querySelectorAll('.dept-checkbox');
+    
+    if (deptCheckboxes.length >= 3) {
+        // Seleccionar los primeros 3 departamentos
+        deptCheckboxes[0].checked = true;
+        deptCheckboxes[1].checked = true;
+        deptCheckboxes[2].checked = true;
+        
+        // Disparar eventos
+        deptCheckboxes[0].dispatchEvent(new Event('change'));
+        
+        alert(`✅ ¡Prueba exitosa!\nSe seleccionaron 3 departamentos automáticamente.\n\nAhora puede marcar/desmarcar checkboxes individualmente.`);
+    } else {
+        alert('❌ Error: No hay departamentos cargados para probar.');
+    }
+}
+</script>
+{% endblock %}

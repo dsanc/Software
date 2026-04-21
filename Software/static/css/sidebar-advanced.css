@@ -1,0 +1,334 @@
+/* Advanced Sidebar Effects - Cargado bajo demanda */
+
+/* Selector de idioma */
+.language-selector {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.language-select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #ffffff;
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.language-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.language-select:focus {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+.language-select option {
+    background: #404E63;
+    color: #ffffff;
+    padding: 8px;
+}
+
+/* Animación de aparición para elementos con i18n */
+[data-i18n] {
+    transition: opacity 0.3s ease;
+}
+
+.language-changing [data-i18n] {
+    opacity: 0.5;
+}
+
+/* Indicador de cambio de idioma */
+.language-loading {
+    position: relative;
+}
+
+.language-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    border: 2px solid transparent;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translateY(-50%);
+}
+
+/* Búsqueda rápida */
+.quick-search-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.quick-search-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.quick-search-box {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.quick-search-overlay.active .quick-search-box {
+    transform: translateY(0);
+}
+
+.quick-search-input {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.quick-search-input:focus {
+    border-color: #007bff;
+}
+
+.quick-search-results {
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.2s ease;
+}
+
+.search-result-item:hover,
+.search-result-item.selected {
+    background: #f8f9fa;
+}
+
+.search-result-item mark {
+    background: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.search-shortcuts {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.search-shortcuts kbd {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    margin: 0 2px;
+}
+
+/* Efectos de partículas */
+.particle-effect {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+/* Comandos de voz */
+.voice-feedback {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #007bff;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    z-index: 9999;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+}
+
+.voice-feedback.listening {
+    background: #28a745;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.9; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Modal de ayuda */
+.help-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-modal .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.help-modal h3 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.help-modal ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 20px;
+}
+
+.help-modal li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.help-modal kbd {
+    background: #e9ecef;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 10px;
+}
+
+.help-modal button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.help-modal button:hover {
+    background: #0056b3;
+}
+
+/* Efectos de tema oscuro */
+@media (prefers-color-scheme: dark) {
+    .quick-search-box {
+        background: #2d3748;
+        color: white;
+    }
+    
+    .quick-search-input {
+        background: #4a5568;
+        border-color: #718096;
+        color: white;
+    }
+    
+    .search-result-item:hover,
+    .search-result-item.selected {
+        background: #4a5568;
+    }
+    
+    .help-modal .modal-content {
+        background: #2d3748;
+        color: white;
+    }
+}
+
+/* Indicador de carga para funcionalidades avanzadas */
+.sidebar-loading-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    opacity: 0.7;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Transiciones suaves para elementos lazy-loaded */
+.sidebar-advanced-feature {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.sidebar-advanced-feature.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Optimizaciones de rendimiento */
+.sidebar-wrapper.performance-mode * {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+}
+
+.sidebar-wrapper.performance-mode .particle-effect {
+    display: none !important;
+}
+
+/* Responsive para funcionalidades avanzadas */
+@media (max-width: 768px) {
+    .quick-search-box {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .help-modal .modal-content {
+        padding: 20px;
+    }
+    
+    .voice-feedback {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}

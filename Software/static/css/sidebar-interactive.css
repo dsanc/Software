@@ -1,0 +1,227 @@
+/* ============================================================ */
+/*         SIDEBAR INTERACTIVO - MEJORAS ADICIONALES          */
+/* ============================================================ */
+
+/* Tooltips para sidebar colapsado */
+.sidebar-tooltip {
+    position: absolute;
+    left: calc(100% + 15px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1001;
+    border: 1px solid #374151;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.sidebar-tooltip::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: #1f2937;
+}
+
+/* Mostrar tooltips solo cuando el sidebar está colapsado */
+.sidebar-wrapper.collapsed .nav-item:hover .sidebar-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-50%) translateX(5px);
+}
+
+/* Efectos hover mejorados */
+.nav-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+}
+
+.nav-link:hover::before {
+    transform: translateX(100%);
+}
+
+.nav-link:hover {
+    transform: translateX(4px);
+}
+
+.nav-link:hover .nav-icon {
+    transform: scale(1.2);
+    color: #3b82f6;
+}
+
+/* Efecto ripple */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 600ms linear;
+    background-color: rgba(255, 255, 255, 0.6);
+    pointer-events: none;
+}
+
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Indicadores de progreso para elementos especiales */
+.nav-item.with-progress .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: #3b82f6;
+    width: var(--progress, 0%);
+    transition: width 0.3s ease;
+}
+
+/* Micro-interacciones en iconos */
+.nav-icon {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-icon::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: rgba(59, 130, 246, 0.3);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: -1;
+}
+
+.nav-link:hover .nav-icon::before {
+    width: 30px;
+    height: 30px;
+}
+
+/* Animaciones de carga progresiva */
+.sidebar-nav .nav-item {
+    animation: slideInFromLeft 0.3s ease forwards;
+    opacity: 0;
+}
+
+.sidebar-nav .nav-item:nth-child(1) { animation-delay: 0.1s; }
+.sidebar-nav .nav-item:nth-child(2) { animation-delay: 0.2s; }
+.sidebar-nav .nav-item:nth-child(3) { animation-delay: 0.3s; }
+.sidebar-nav .nav-item:nth-child(4) { animation-delay: 0.4s; }
+.sidebar-nav .nav-item:nth-child(5) { animation-delay: 0.5s; }
+.sidebar-nav .nav-item:nth-child(6) { animation-delay: 0.6s; }
+.sidebar-nav .nav-item:nth-child(7) { animation-delay: 0.7s; }
+.sidebar-nav .nav-item:nth-child(8) { animation-delay: 0.8s; }
+.sidebar-nav .nav-item:nth-child(9) { animation-delay: 0.9s; }
+.sidebar-nav .nav-item:nth-child(10) { animation-delay: 1.0s; }
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Efectos especiales para badges */
+.nav-badge {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+/* Estados de focus para accesibilidad */
+.nav-link:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Separadores animados */
+.nav-separator::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 4px;
+    background: #3b82f6;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+/* Mejoras para dispositivos móviles */
+@media (max-width: 991px) {
+    .sidebar-tooltip {
+        display: none;
+    }
+    
+    .nav-link:hover {
+        transform: none;
+    }
+}
+
+/* Transiciones suaves para submenús */
+.submenu {
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.has-submenu.active .submenu {
+    opacity: 1;
+}
+
+/* Efectos glow para elementos activos */
+.nav-item.active .nav-link,
+.nav-item.special .nav-link:hover {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+/* Mejora visual del toggle button */
+.sidebar-toggle:hover {
+    transform: scale(1.1);
+}
+
+.sidebar-toggle:active {
+    transform: scale(0.95);
+}

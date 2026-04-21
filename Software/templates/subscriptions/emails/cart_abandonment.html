@@ -1,0 +1,166 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu carrito te está esperando</title>
+    <style>
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .email-content {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0369A0;
+            margin-bottom: 10px;
+        }
+        .title {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .cart-item {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+        }
+        .plan-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+        .module-name {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .plan-price {
+            color: #0369A0;
+            font-weight: bold;
+            font-size: 18px;
+            float: right;
+        }
+        .total-section {
+            border-top: 2px solid #0369A0;
+            padding-top: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .total-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0369A0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #0369A0 0%, #637B9C 100%);
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 20px 0;
+        }
+        .urgency {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .urgency-text {
+            color: #856404;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-content">
+            <div class="header">
+                <div class="logo">🛒 Risk Assessment Platform</div>
+                <div class="title">¡Hola {{ user.first_name|default:"" }}! Tu carrito te está esperando</div>
+            </div>
+
+            <p>Notamos que dejaste algunos planes increíbles en tu carrito. ¡No te pierdas estas oportunidades!</p>
+
+            <div class="cart-items">
+                {% for item in items %}
+                <div class="cart-item">
+                    <div class="plan-name">{{ item.plan.plan_type.name }}</div>
+                    <div class="module-name">{{ item.plan.module.display_name }}</div>
+                    <div class="plan-price">${{ item.unit_price|floatformat:0 }}/{{ item.billing_cycle|default:"año" }}</div>
+                    <div style="clear: both;"></div>
+                    {% if item.quantity > 1 %}
+                    <small style="color: #6c757d;">Cantidad: {{ item.quantity }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="total-section">
+                <div>Total en tu carrito:</div>
+                <div class="total-amount">${{ total_amount|floatformat:0 }}</div>
+            </div>
+
+            {% if expiry_hours < 48 %}
+            <div class="urgency">
+                <div class="urgency-text">
+                    ⏰ Tu carrito expira en {{ expiry_hours }} horas
+                </div>
+                <div style="color: #856404; font-size: 14px; margin-top: 5px;">
+                    ¡No pierdas estos planes! Completa tu compra ahora.
+                </div>
+            </div>
+            {% endif %}
+
+            <div style="text-align: center;">
+                <a href="{{ cart_url }}" class="cta-button">
+                    Ver Mi Carrito →
+                </a>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <p style="color: #6c757d; font-size: 14px;">
+                    ¿Necesitas ayuda? <a href="mailto:soporte@ejemplo.com" style="color: #0369A0;">Contáctanos</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>
+                Este email fue enviado porque tienes items en tu carrito de compras.<br>
+                Si no deseas recibir estos recordatorios, puedes 
+                <a href="#" style="color: #6c757d;">darte de baja aquí</a>.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

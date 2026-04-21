@@ -1,0 +1,187 @@
+{% comment %}
+Indicador de progreso unificado para el proceso de evaluación de riesgo
+Parámetros:
+- current_step: Número del paso actual (1-4)
+- show_step_3: Boolean para mostrar el paso 3 (Observaciones) - por defecto True
+{% endcomment %}
+
+<!-- Indicador de pasos del proceso de evaluación -->
+<div class="progress-steps">
+    <!-- Paso 1: Configuración -->
+    <div class="step {% if current_step == 1 %}active{% elif current_step > 1 %}completed{% endif %}" id="step-1">
+        <div class="step-circle">
+            {% if current_step > 1 %}
+                <i class="fas fa-check"></i>
+            {% else %}
+                1
+            {% endif %}
+        </div>
+        <div class="step-label">Configuración</div>
+    </div>
+    
+    <!-- Paso 2: Cuestionario -->
+    <div class="step {% if current_step == 2 %}active{% elif current_step > 2 %}completed{% endif %}" id="step-2">
+        <div class="step-circle">
+            {% if current_step > 2 %}
+                <i class="fas fa-check"></i>
+            {% else %}
+                2
+            {% endif %}
+        </div>
+        <div class="step-label">Cuestionario</div>
+    </div>
+    
+    <!-- Paso 3: Observaciones (opcional) -->
+    {% if show_step_3|default:True %}
+    <div class="step {% if current_step == 3 %}active{% elif current_step > 3 %}completed{% endif %}" id="step-3">
+        <div class="step-circle">
+            {% if current_step > 3 %}
+                <i class="fas fa-check"></i>
+            {% else %}
+                3
+            {% endif %}
+        </div>
+        <div class="step-label">Observaciones</div>
+    </div>
+    {% endif %}
+    
+    <!-- Paso 4: Resultados -->
+    <div class="step {% if current_step == 4 %}active{% elif current_step > 4 %}completed{% endif %}" id="step-4">
+        <div class="step-circle">
+            {% if current_step > 4 %}
+                <i class="fas fa-check"></i>
+            {% else %}
+                {% if show_step_3|default:True %}4{% else %}3{% endif %}
+            {% endif %}
+        </div>
+        <div class="step-label">Resultados</div>
+    </div>
+</div>
+
+<style>
+/* Estilos para el indicador de progreso unificado */
+.progress-steps {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step {
+    text-align: center;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.step::after {
+    content: '';
+    position: absolute;
+    top: 1.5rem;
+    left: 100%;
+    width: 4rem;
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 1;
+}
+
+.step:last-child::after {
+    display: none;
+}
+
+.step.completed::after {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.step.active::after {
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 2rem; /* Línea más corta para el paso activo */
+}
+
+.step-circle {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.5rem;
+    position: relative;
+    z-index: 2;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.step.active .step-circle {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transform: scale(1.1);
+}
+
+.step.completed .step-circle {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.step-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.step.active .step-label {
+    color: #667eea;
+    font-weight: 700;
+}
+
+.step.completed .step-label {
+    color: #059669;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .progress-steps {
+        flex-direction: column;
+        gap: 2rem;
+        max-width: 200px;
+    }
+    
+    .step::after {
+        display: none;
+    }
+    
+    .step-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1rem;
+    }
+    
+    .step-label {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-steps {
+        gap: 1.5rem;
+    }
+    
+    .step-circle {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.9rem;
+    }
+    
+    .step-label {
+        font-size: 0.75rem;
+    }
+}
+</style>

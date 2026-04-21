@@ -1,0 +1,743 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Editar Perfil - {{ block.super }}{% endblock %}
+{% block page_title %}Editar Perfil{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Aquí irán los estilos personalizados del perfil */
+.profile-container {
+    background: #f8f9fc;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border: 0;
+    margin-bottom: 1.5rem;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px 15px 0 0;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.profile-body {
+    padding: 2rem;
+}
+
+/* Estilos mejorados para el avatar */
+.avatar-container {
+    transition: transform 0.3s ease;
+}
+
+.avatar-container:hover {
+    transform: translateY(-2px);
+}
+
+.avatar-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.avatar-image {
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.avatar-container:hover .avatar-image {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+
+.avatar-container:hover .avatar-overlay {
+    opacity: 1 !important;
+}
+
+.avatar-btn {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(78, 115, 223, 0.3);
+}
+
+.avatar-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.5);
+}
+
+/* Animación para el progreso de subida */
+.upload-success {
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Estilos para mensajes de estado */
+.status-success {
+    color: #28a745;
+    font-weight: 500;
+}
+
+.status-error {
+    color: #dc3545;
+    font-weight: 500;
+}
+
+.status-info {
+    color: #17a2b8;
+    font-weight: 500;
+}
+
+/* Mejoras adicionales */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+/* Efecto hover para cards */
+.card:hover {
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Estilo para inputs con validación en tiempo real */
+.form-control.is-valid {
+    border-color: #28a745;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2328a745' d='m2.3 6.73.75-.04-.76.72V6.4z'/%3e%3c/svg%3e");
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23dc3545' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 4.6 2.4 2.4m0-2.4-2.4 2.4'/%3e%3c/svg%3e");
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'users:profile' %}">Mi Perfil</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Editar Perfil</li>
+                </ol>
+            </nav>
+            
+            <!-- Título de página -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0 text-gray-800">
+                    <i class="fas fa-user-edit me-2"></i>Editar Perfil
+                </h1>
+                <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Volver al Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <!-- Card principal del formulario -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-cog me-2"></i>
+                        Información del Perfil
+                    </h4>
+                    <p class="mb-0 mt-2 opacity-75">
+                        Actualiza tu información personal y configuraciones
+                    </p>
+                </div>
+                
+                <div class="profile-body">
+                    <!-- Aquí irá el formulario -->
+                    <form method="post" enctype="multipart/form-data" id="profileForm">
+                        {% csrf_token %}
+                        
+                        <!-- Mostrar errores del formulario -->
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <h6><i class="fas fa-exclamation-triangle me-2"></i>Por favor corrige los siguientes errores:</h6>
+                                <ul class="mb-0">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>
+                                                {% if field == '__all__' %}
+                                                    {{ error }}
+                                                {% else %}
+                                                    <strong>{{ field|capfirst }}:</strong> {{ error }}
+                                                {% endif %}
+                                            </li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Mensaje de éxito -->
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <!-- Información Básica -->
+                                <h5 class="mb-3"><i class="fas fa-user me-2"></i>Información Personal</h5>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                                <i class="fas fa-user me-1"></i>{{ form.first_name.label }}
+                                            </label>
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                                <i class="fas fa-user me-1"></i>{{ form.last_name.label }}
+                                            </label>
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>{{ form.email.label }}
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if form.phone %}
+                                <div class="mb-3">
+                                    <label for="{{ form.phone.id_for_label }}" class="form-label">
+                                        <i class="fas fa-phone me-1"></i>{{ form.phone.label }}
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.phone.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <!-- Información de Ubicación -->
+                                <hr class="my-4">
+                                <h5 class="mb-3"><i class="fas fa-map-marker-alt me-2"></i>Ubicación</h5>
+                                
+                                <div class="row">
+                                    {% if form.country %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.country.id_for_label }}" class="form-label">
+                                                <i class="fas fa-flag me-1"></i>{{ form.country.label }}
+                                            </label>
+                                            {{ form.country }}
+                                            {% if form.country.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.country.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if form.city %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.city.id_for_label }}" class="form-label">
+                                                <i class="fas fa-city me-1"></i>{{ form.city.label }}
+                                            </label>
+                                            {{ form.city }}
+                                            {% if form.city.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.city.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Información Profesional -->
+                                <hr class="my-4">
+                                <h5 class="mb-3"><i class="fas fa-briefcase me-2"></i>Información Profesional</h5>
+                                
+                                {% if form.job_title %}
+                                <div class="mb-3">
+                                    <label for="{{ form.job_title.id_for_label }}" class="form-label">
+                                        <i class="fas fa-id-badge me-1"></i>{{ form.job_title.label }}
+                                    </label>
+                                    {{ form.job_title }}
+                                    {% if form.job_title.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.job_title.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                
+                                <div class="row">
+                                    {% if form.company %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.company.id_for_label }}" class="form-label">
+                                                <i class="fas fa-building me-1"></i>{{ form.company.label }}
+                                            </label>
+                                            {{ form.company }}
+                                            {% if form.company.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.company.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if form.department %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.department.id_for_label }}" class="form-label">
+                                                <i class="fas fa-users me-1"></i>{{ form.department.label }}
+                                            </label>
+                                            {{ form.department }}
+                                            {% if form.department.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.department.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Configuración de Notificaciones -->
+                                <hr class="my-4">
+                                <h5 class="mb-3"><i class="fas fa-bell me-2"></i>Configuración de Notificaciones</h5>
+                                
+                                <div class="row">
+                                    {% if form.email_notifications %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                {{ form.email_notifications }}
+                                                <label class="form-check-label" for="{{ form.email_notifications.id_for_label }}">
+                                                    <i class="fas fa-envelope me-2"></i>{{ form.email_notifications.label }}
+                                                </label>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Recibir notificaciones importantes por correo electrónico
+                                            </div>
+                                            {% if form.email_notifications.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.email_notifications.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if form.sms_notifications %}
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                {{ form.sms_notifications }}
+                                                <label class="form-check-label" for="{{ form.sms_notifications.id_for_label }}">
+                                                    <i class="fas fa-mobile-alt me-2"></i>{{ form.sms_notifications.label }}
+                                                </label>
+                                            </div>
+                                            <div class="form-text">
+                                                <i class="fas fa-info-circle me-1"></i>
+                                                Recibir notificaciones por mensaje de texto (SMS)
+                                            </div>
+                                            {% if form.sms_notifications.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.sms_notifications.errors %}{{ error }}{% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <!-- Avatar y información adicional -->
+                                <h5 class="mb-3"><i class="fas fa-image me-2"></i>Foto de Perfil</h5>
+                                <!-- Avatar -->
+                                <div class="text-center mb-4">
+
+                                    
+                                    <!-- Avatar container con efecto hover -->
+                                    <div class="position-relative d-inline-block avatar-container">
+                                        <div class="avatar-wrapper">
+                                            <img src="{{ user.get_avatar_url }}" 
+                                                 alt="Avatar de {{ user.get_full_name }}" 
+                                                 class="avatar-image rounded-circle border border-4 border-primary shadow-lg"
+                                                 style="width: 140px; height: 140px; object-fit: cover; transition: all 0.3s ease;"
+                                                 id="avatarPreview">
+                                            
+                                            <!-- Overlay con efecto hover -->
+                                            <div class="avatar-overlay rounded-circle d-flex align-items-center justify-content-center"
+                                                 style="position: absolute; top: 0; left: 0; width: 140px; height: 140px; 
+                                                        background: rgba(0,0,0,0.6); opacity: 0; transition: all 0.3s ease;
+                                                        cursor: pointer;"
+                                                 onclick="document.getElementById('id_avatar').click()">
+                                                <div class="text-white text-center">
+                                                    <i class="fas fa-camera fa-2x mb-1"></i>
+                                                    <div class="small">Cambiar Foto</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Botón flotante mejorado -->
+                                        <button type="button" 
+                                                class="btn btn-primary rounded-circle position-absolute avatar-btn shadow-lg"
+                                                style="width: 40px; height: 40px; bottom: 5px; right: 5px; 
+                                                       border: 3px solid white; transition: all 0.3s ease;"
+                                                onclick="document.getElementById('id_avatar').click()"
+                                                title="Cambiar foto de perfil">
+                                            <i class="fas fa-camera"></i>
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Input de archivo oculto -->
+                                    {% if form.avatar %}
+                                    {{ form.avatar }}
+                                    {% endif %}
+                                    
+                                    <!-- Información y progreso -->
+                                    <div class="mt-3">
+                                        <div class="small text-muted mb-2">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Formatos: JPG, PNG • Tamaño máximo: 5MB
+                                        </div>
+                                        
+                                        <!-- Barra de progreso para subida (oculta inicialmente) -->
+                                        <div class="progress mt-2" id="uploadProgress" style="display: none; height: 4px;">
+                                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        
+                                        <!-- Mensaje de estado -->
+                                        <div id="uploadStatus" class="small mt-2" style="display: none;"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Progreso del perfil -->
+                                <div class="card border-left-primary">
+                                    <div class="card-body">
+                                        <div class="text-center">
+                                            <h6 class="text-primary">
+                                                <i class="fas fa-chart-pie me-1"></i>
+                                                Progreso del Perfil
+                                            </h6>
+                                            <div class="h4 text-gray-800 mb-2">{{ user.profile_completion }}%</div>
+                                            <div class="progress mb-2">
+                                                <div class="progress-bar bg-primary" 
+                                                     style="width: {{ user.profile_completion }}%"></div>
+                                            </div>
+                                            <small class="text-muted">Completado</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i>Guardar Cambios
+                                </button>
+                            </div>
+                            <div>
+                                <a href="{% url 'users:profile' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-1"></i>Cancelar
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejo de vista previa de avatar mejorado
+    const avatarInput = document.getElementById('id_avatar');
+    const avatarPreview = document.getElementById('avatarPreview');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const uploadStatus = document.getElementById('uploadStatus');
+    
+    if (avatarInput && avatarPreview) {
+        avatarInput.style.display = 'none'; // Ocultar el input de archivo
+        
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Mostrar progreso
+                showUploadStatus('Validando archivo...', 'info');
+                
+                // Validar tipo de archivo
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    showUploadStatus('❌ Formato no válido. Solo JPG y PNG permitidos.', 'error');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validar tamaño (5MB máximo)
+                const maxSize = 5 * 1024 * 1024;
+                if (file.size > maxSize) {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    showUploadStatus(`❌ Archivo muy grande (${sizeMB}MB). Máximo: 5MB.`, 'error');
+                    e.target.value = '';
+                    return;
+                }
+                
+                // Validar dimensiones mínimas
+                validateImageDimensions(file).then(isValid => {
+                    if (!isValid) {
+                        showUploadStatus('❌ Imagen muy pequeña. Mínimo: 100x100 píxeles.', 'error');
+                        e.target.value = '';
+                        return;
+                    }
+                    
+                    // Si todo está bien, mostrar preview
+                    showUploadProgress();
+                    showUploadStatus('📷 Procesando imagen...', 'info');
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Simular progreso de carga
+                        simulateUploadProgress(() => {
+                            avatarPreview.src = e.target.result;
+                            avatarPreview.classList.add('upload-success');
+                            hideUploadProgress();
+                            showUploadStatus('✅ ¡Imagen cargada! Recuerda guardar los cambios.', 'success');
+                            
+                            // Remover clase de animación después de un tiempo
+                            setTimeout(() => {
+                                avatarPreview.classList.remove('upload-success');
+                            }, 600);
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }).catch(() => {
+                    showUploadStatus('❌ Error al procesar la imagen.', 'error');
+                    e.target.value = '';
+                });
+            }
+        });
+    }
+    
+    // Funciones auxiliares para el avatar
+    function validateImageDimensions(file) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                const minSize = 100;
+                resolve(this.width >= minSize && this.height >= minSize);
+            };
+            img.onerror = () => resolve(false);
+            img.src = URL.createObjectURL(file);
+        });
+    }
+    
+    function showUploadProgress() {
+        if (uploadProgress) {
+            uploadProgress.style.display = 'block';
+            uploadProgress.querySelector('.progress-bar').style.width = '0%';
+        }
+    }
+    
+    function hideUploadProgress() {
+        if (uploadProgress) {
+            setTimeout(() => {
+                uploadProgress.style.display = 'none';
+            }, 500);
+        }
+    }
+    
+    function simulateUploadProgress(callback) {
+        if (!uploadProgress) return callback();
+        
+        const progressBar = uploadProgress.querySelector('.progress-bar');
+        let progress = 0;
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 30;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                setTimeout(callback, 300);
+            } else {
+                progressBar.style.width = progress + '%';
+            }
+        }, 100);
+    }
+    
+    function showUploadStatus(message, type) {
+        if (uploadStatus) {
+            uploadStatus.style.display = 'block';
+            uploadStatus.textContent = message;
+            uploadStatus.className = `small mt-2 status-${type}`;
+            
+            // Auto-hide success/error messages
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    uploadStatus.style.display = 'none';
+                }, 4000);
+            }
+        }
+    }
+    
+    // Añadir clases de Bootstrap a los campos del formulario
+    const formControls = document.querySelectorAll('#profileForm input[type="text"], #profileForm input[type="email"], #profileForm input[type="tel"], #profileForm select, #profileForm textarea');
+    formControls.forEach(function(control) {
+        control.classList.add('form-control');
+    });
+    
+    // Asegurar que los checkboxes tengan las clases correctas
+    const checkboxes = document.querySelectorAll('#profileForm input[type="checkbox"]');
+    checkboxes.forEach(function(checkbox) {
+        checkbox.classList.add('form-check-input');
+    });
+    
+    // Validación en tiempo real para email
+    const emailInput = document.getElementById('id_email');
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const email = this.value;
+            if (email && !isValidEmail(email)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (email) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    }
+    
+    // Validación en tiempo real para teléfono
+    const phoneInput = document.getElementById('id_phone');
+    if (phoneInput) {
+        phoneInput.addEventListener('input', function() {
+            const phone = this.value;
+            if (phone && !isValidPhone(phone)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (phone) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+            } else {
+                this.classList.remove('is-valid', 'is-invalid');
+            }
+        });
+    }
+    
+    // Funciones de validación
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+    
+    function isValidPhone(phone) {
+        // Regex para formato de teléfono internacional
+        const re = /^\+?1?\d{9,15}$/;
+        return re.test(phone.replace(/[\s\-\(\)]/g, ''));
+    }
+    
+    // Mensaje de confirmación antes de salir si hay cambios sin guardar
+    let formModified = false;
+    const formElements = document.querySelectorAll('#profileForm input, #profileForm select, #profileForm textarea');
+    
+    formElements.forEach(function(element) {
+        element.addEventListener('change', function() {
+            formModified = true;
+        });
+    });
+    
+    window.addEventListener('beforeunload', function(e) {
+        if (formModified) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+    
+    // Resetear flag cuando se envía el formulario
+    document.getElementById('profileForm').addEventListener('submit', function() {
+        formModified = false;
+    });
+    
+    // Animación del botón de guardar
+    const saveButton = document.querySelector('button[type="submit"]');
+    if (saveButton) {
+        saveButton.addEventListener('click', function(e) {
+            if (!this.disabled) {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Guardando...';
+                this.disabled = true;
+                
+                // Re-habilitar después de 3 segundos como fallback
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Cambios';
+                    this.disabled = false;
+                }, 3000);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

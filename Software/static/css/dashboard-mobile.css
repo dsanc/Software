@@ -1,0 +1,290 @@
+/* CSS específico para optimizaciones móviles del Dashboard */
+
+/* Mejoras de rendimiento para móviles */
+@media (max-width: 768px) {
+    /* Reducir animaciones en dispositivos móviles para mejor rendimiento */
+    .dashboard-card,
+    .user-info-card,
+    .quick-actions-card {
+        animation-duration: 0.3s;
+    }
+    
+    /* Optimizar hover effects para touch devices */
+    @media (hover: none) {
+        .dashboard-card:hover {
+            transform: none;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .dashboard-card:hover .card-icon {
+            transform: none;
+        }
+    }
+    
+    /* Mejorar área de toque para botones */
+    .btn-dashboard,
+    .quick-actions-list .btn {
+        min-height: 44px;
+        min-width: 44px;
+        touch-action: manipulation;
+    }
+    
+    /* Scroll suave en contenedores */
+    .dashboard-container {
+        -webkit-overflow-scrolling: touch;
+        scroll-behavior: smooth;
+    }
+    
+    /* Optimizar fuentes para pantallas pequeñas */
+    .dashboard-header h2 {
+        font-weight: 400;
+        text-rendering: optimizeLegibility;
+    }
+    
+    /* Reducir sombras en móviles para mejor rendimiento */
+    .dashboard-card,
+    .user-info-card,
+    .quick-actions-card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Gestión de espaciado en pantallas muy pequeñas */
+    .container-fluid {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+}
+
+/* Mejoras específicas para dispositivos con orientación landscape */
+@media (max-width: 768px) and (orientation: landscape) {
+    .dashboard-header {
+        padding: var(--spacing-sm);
+        margin-bottom: var(--spacing-md);
+    }
+    
+    .dashboard-header h2 {
+        font-size: 1.8rem;
+    }
+    
+    .dashboard-card .card-body {
+        min-height: 120px;
+    }
+    
+    .dashboard-card .card-icon {
+        font-size: 1.8rem;
+        margin-bottom: var(--spacing-xs);
+    }
+}
+
+/* Mejoras para tablets en modo portrait */
+@media (min-width: 768px) and (max-width: 991px) and (orientation: portrait) {
+    .dashboard-card .card-body {
+        min-height: 200px;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 2.5rem;
+    }
+    
+    .user-info-table td {
+        padding: var(--spacing-md);
+    }
+}
+
+/* Optimizaciones para pantallas de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .dashboard-card,
+    .user-info-card,
+    .quick-actions-card {
+        border: 0.5px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .dashboard-header {
+        border-radius: calc(var(--border-radius) * 0.8);
+    }
+}
+
+/* Estados de carga y feedback visual */
+.loading-state {
+    opacity: 0.6;
+    pointer-events: none;
+    position: relative;
+}
+
+.loading-state::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mejoras de accesibilidad para móviles */
+@media (max-width: 768px) {
+    /* Aumentar contraste en pantallas pequeñas */
+    .card-text {
+        color: #495057;
+    }
+    
+    /* Mejorar legibilidad de enlaces */
+    .btn-dashboard,
+    .quick-actions-list .btn {
+        font-weight: 600;
+        letter-spacing: 0.025em;
+    }
+    
+    /* Focus states más visibles en móviles */
+    .btn-dashboard:focus,
+    .dashboard-card:focus-within {
+        outline: 3px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+}
+
+/* Optimizaciones para modo oscuro del sistema */
+@media (prefers-color-scheme: dark) {
+    .dashboard-container {
+        background-color: #1a1a1a;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #1e3a5f, #0d2d4a);
+    }
+    
+    .dashboard-card,
+    .user-info-card,
+    .quick-actions-card {
+        background: #2d2d2d;
+        border: 1px solid #404040;
+    }
+    
+    .dashboard-card .card-title,
+    .user-info-card .card-header h5,
+    .quick-actions-card .card-header h5 {
+        color: #ffffff;
+    }
+    
+    .card-text,
+    .user-info-table td {
+        color: #cccccc;
+    }
+    
+    .user-info-table td:first-child {
+        color: #aaaaaa;
+    }
+    
+    .user-info-table tr:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
+/* Mejoras para reducir movimiento (prefers-reduced-motion) */
+@media (prefers-reduced-motion: reduce) {
+    .dashboard-card,
+    .user-info-card,
+    .quick-actions-card {
+        animation: none;
+    }
+    
+    .dashboard-card:hover {
+        transform: none;
+        transition: box-shadow 0.3s ease;
+    }
+    
+    .dashboard-card:hover .card-icon {
+        transform: none;
+    }
+    
+    .btn-dashboard {
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+}
+
+/* Utilidades para gestión de contenido */
+.text-truncate-mobile {
+    @media (max-width: 768px) {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+.hide-mobile {
+    @media (max-width: 768px) {
+        display: none !important;
+    }
+}
+
+.show-mobile-only {
+    display: none !important;
+    
+    @media (max-width: 768px) {
+        display: block !important;
+    }
+}
+
+/* Mejoras de espaciado específicas para el contenido */
+@media (max-width: 575px) {
+    .dashboard-card .card-title {
+        line-height: 1.3;
+        margin-bottom: var(--spacing-sm);
+    }
+    
+    .dashboard-card .card-text {
+        line-height: 1.4;
+        font-size: 0.9rem;
+    }
+    
+    .user-info-table {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    
+    .quick-actions-list .btn {
+        font-size: 0.9rem;
+        line-height: 1.4;
+        padding: 0.6rem 0.8rem;
+    }
+}
+
+/* Grid de emergencia para casos extremos */
+@media (max-width: 350px) {
+    .row {
+        margin: 0;
+    }
+    
+    .col-12,
+    .col-lg-3,
+    .col-md-6,
+    .col-sm-6 {
+        padding: 2px;
+    }
+    
+    .dashboard-container {
+        padding: var(--spacing-xs);
+    }
+    
+    .dashboard-card .card-body {
+        padding: 0.75rem;
+        min-height: 120px;
+    }
+    
+    .dashboard-header {
+        padding: 0.75rem;
+    }
+    
+    .dashboard-header h2 {
+        font-size: 1.5rem;
+    }
+}

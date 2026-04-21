@@ -1,0 +1,276 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Configurar 2FA - {{ block.super }}{% endblock %}
+{% block page_title %}Configurar Autenticación de Dos Factores{% endblock %}
+
+{% block extra_css %}
+<style>
+.setup-step {
+    background: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.setup-step.active {
+    border-color: #007bff;
+    background: #f0f7ff;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 1rem;
+}
+
+.qr-code-container {
+    text-align: center;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.backup-tokens {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-top: 2rem;
+}
+
+.backup-tokens .token {
+    font-family: 'Courier New', monospace;
+    background: white;
+    padding: 0.5rem;
+    margin: 0.25rem;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    display: inline-block;
+    min-width: 120px;
+    text-align: center;
+}
+
+.app-recommendations {
+    background: #e7f3ff;
+    border: 1px solid #b3d7ff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+}
+
+.security-notice {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% if setup_complete %}
+        <!-- Configuración completada -->
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ¡Autenticación de Dos Factores Configurada!
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Tu cuenta ahora está protegida con autenticación de dos factores.</p>
+                
+                <div class="backup-tokens">
+                    <h5><i class="fas fa-key me-2"></i>Códigos de Backup</h5>
+                    <p>Guarda estos códigos en un lugar seguro. Puedes usarlos para acceder a tu cuenta si pierdes tu dispositivo autenticador:</p>
+                    
+                    <div class="row">
+                        {% for token in backup_tokens %}
+                        <div class="col-md-6 mb-2">
+                            <div class="token">{{ token }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            Cada código solo puede usarse una vez. Imprime o guarda esta página de forma segura.
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <a href="{% url 'users:profile' %}" class="btn btn-primary">
+                        <i class="fas fa-user me-2"></i>Ir a Mi Perfil
+                    </a>
+                    <a href="{% url 'users:2fa_manage' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-2"></i>Gestionar 2FA
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        {% else %}
+        <!-- Proceso de configuración -->
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-shield-alt me-2"></i>
+                    Configurar Autenticación de Dos Factores
+                </h4>
+            </div>
+            <div class="card-body">
+                
+                <!-- Paso 1: Instalar aplicación -->
+                <div class="setup-step">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="step-number">1</div>
+                        <h5 class="mb-0">Instala una aplicación autenticadora</h5>
+                    </div>
+                    
+                    <p>Necesitas una aplicación autenticadora en tu teléfono para generar códigos de seguridad.</p>
+                    
+                    <div class="app-recommendations">
+                        <h6><i class="fas fa-mobile-alt me-2"></i>Aplicaciones recomendadas:</h6>
+                        <ul class="mb-0">
+                            <li><strong>Google Authenticator</strong> - Disponible para iOS y Android</li>
+                            <li><strong>Microsoft Authenticator</strong> - Incluye backup en la nube</li>
+                            <li><strong>Authy</strong> - Sincronización entre dispositivos</li>
+                            <li><strong>1Password</strong> - Integrado con el gestor de contraseñas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Paso 2: Escanear código QR -->
+                <div class="setup-step active">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="step-number">2</div>
+                        <h5 class="mb-0">Escanea el código QR</h5>
+                    </div>
+                    
+                    <p>Abre tu aplicación autenticadora y escanea este código QR:</p>
+                    
+                    <div class="qr-code-container">
+                        {% if qr_code_data %}
+                            <img src="data:image/png;base64,{{ qr_code_data }}" 
+                                 alt="Código QR para 2FA" 
+                                 class="img-fluid mb-3"
+                                 style="max-width: 256px;">
+                        {% endif %}
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>¿No puedes escanear?</strong><br>
+                                Copia manualmente esta clave en tu app:<br>
+                                <code>{{ device.bin_key|default:"" }}</code>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Paso 3: Verificar código -->
+                <div class="setup-step">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="step-number">3</div>
+                        <h5 class="mb-0">Verifica el código</h5>
+                    </div>
+                    
+                    <p>Ingresa el código de 6 dígitos que aparece en tu aplicación autenticadora:</p>
+                    
+                    <form method="post" class="mt-3">
+                        {% csrf_token %}
+                        
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.token.label_tag }}
+                                    {{ form.token }}
+                                    {% if form.token.help_text %}
+                                        <div class="form-text">{{ form.token.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.token.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.token.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-check me-2"></i>
+                                        Verificar y Activar 2FA
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="security-notice">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Importante:</h6>
+                    <ul class="mb-0">
+                        <li>Guarda los códigos de backup en un lugar seguro</li>
+                        <li>No compartas nunca tus códigos de autenticación</li>
+                        <li>Si pierdes tu dispositivo, usa un código de backup para acceder</li>
+                        <li>Puedes regenerar códigos de backup desde tu perfil</li>
+                    </ul>
+                </div>
+                
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-focus en el campo de token
+    const tokenInput = document.getElementById('id_token');
+    if (tokenInput) {
+        tokenInput.focus();
+        
+        // Auto-format: agregar espacios cada 3 dígitos
+        tokenInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, ''); // Solo números
+            if (value.length > 6) {
+                value = value.substring(0, 6);
+            }
+            e.target.value = value;
+        });
+    }
+    
+    // Función para copiar códigos de backup
+    window.copyBackupCode = function(code) {
+        navigator.clipboard.writeText(code).then(function() {
+            // Mostrar feedback visual
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = '¡Copiado!';
+            btn.classList.add('text-success');
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.classList.remove('text-success');
+            }, 2000);
+        });
+    };
+});
+</script>
+{% endblock %}

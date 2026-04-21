@@ -1,0 +1,954 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header Principal con información del conjunto y evaluación -->
+            <div class="card mb-4 shadow-sm">
+                <!-- Header Superior con título y resultado -->
+                <div class="card-header text-white" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%); border: none;">
+                    <div class="row align-items-center py-1">
+                        <!-- Información principal del conjunto -->
+                        <div class="col-lg-8 col-md-7">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="rounded-circle p-2" style="background-color: rgba(255,255,255,0.25);">
+                                        <i class="fas fa-building fa-lg text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="text-white">
+                                    <h4 class="mb-1 fw-bold">{{ conjunto.nombre }}</h4>
+                                    <div class="d-flex flex-wrap align-items-center" style="gap: 0.7rem;">
+                                        <span class="badge text-white px-2 py-1" style="background-color: rgba(255,255,255,0.25); font-size: 0.8rem;">
+                                            <i class="fas fa-id-card me-1"></i>NIT: {{ conjunto.nit }}
+                                        </span>
+                                        <span style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ conjunto.direccion|default:"Sin dirección" }}
+                                        </span>
+                                        <span style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">
+                                            <i class="fas fa-tag me-1"></i>{{ conjunto.get_tipo_conjunto_display|default:"Sin tipo" }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Resultado de la evaluación destacado -->
+                        <div class="col-lg-4 col-md-5">
+                            <div class="text-center text-md-end">
+                                <div class="d-inline-flex align-items-center rounded-pill px-3 py-2" style="background-color: rgba(255,255,255,0.15);">
+                                    <div class="me-2" 
+                                         style="width: 40px; height: 40px; border-radius: 50%; background-color: {{ evaluacion.get_color_semaforo }}; 
+                                                border: 2px solid #fff; box-shadow: 0 0 15px rgba(0,0,0,0.2); position: relative; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-shield-alt text-white"></i>
+                                    </div>
+                                    <div class="text-white">
+                                        <div class="mb-0 fw-bold" style="font-size: 2rem; line-height: 1;">{{ evaluacion.get_promedio_porcentaje|floatformat:1 }}%</div>
+                                        <div style="font-size: 0.8rem; opacity: 0.8;">{{ evaluacion.get_texto_nivel_riesgo }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resumen por Nivel de Riesgo -->
+            <div class="row mb-4">
+                <!-- Riesgos Bajos -->
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e8 100%); border-left: 4px solid #28a745 !important;">
+                        <div class="card-body text-center p-3">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <div class="bg-success bg-opacity-25 rounded-circle p-2 me-2">
+                                    <i class="fas fa-check-circle fa-lg text-success"></i>
+                                </div>
+                                <div class="display-6 fw-bold text-success mb-0">{{ riesgos_aceptables }}</div>
+                            </div>
+                            <h6 class="text-success fw-bold mb-1">Riesgos Bajos</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="fas fa-check-circle me-1 text-success"></i>
+                                Nivel de seguridad aceptable
+                            </p>
+                            <small class="text-success mt-1 d-block fw-semibold">0-30% de riesgo</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Riesgos Moderados -->
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #fff3cd 100%); border-left: 4px solid #ffc107 !important;">
+                        <div class="card-body text-center p-3">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <div class="bg-warning bg-opacity-25 rounded-circle p-2 me-2">
+                                    <i class="fas fa-exclamation-triangle fa-lg text-warning"></i>
+                                </div>
+                                <div class="display-6 fw-bold text-warning mb-0">{{ riesgos_moderados }}</div>
+                            </div>
+                            <h6 class="text-warning fw-bold mb-1">Riesgos Moderados</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="fas fa-tools me-1 text-warning"></i>
+                                Requieren mejoras
+                            </p>
+                            <small class="text-warning mt-1 d-block fw-semibold">31-60% de riesgo</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Riesgos Altos -->
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #f8d7da 100%); border-left: 4px solid #dc3545 !important;">
+                        <div class="card-body text-center p-3">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <div class="bg-danger bg-opacity-25 rounded-circle p-2 me-2">
+                                    <i class="fas fa-times-circle fa-lg text-danger"></i>
+                                </div>
+                                <div class="display-6 fw-bold text-danger mb-0">{{ riesgos_criticos }}</div>
+                            </div>
+                            <h6 class="text-danger fw-bold mb-1">Riesgos Altos</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="fas fa-bolt me-1 text-danger"></i>
+                                Requieren atención inmediata
+                            </p>
+                            <small class="text-danger mt-1 d-block fw-semibold">61-100% de riesgo</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total de Tipos Evaluados -->
+                <div class="col-lg-3 col-md-6 mb-3">
+                    <div class="card h-100 border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e2e6ea 100%); border-left: 4px solid #6c757d !important;">
+                        <div class="card-body text-center p-3">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <div class="bg-secondary bg-opacity-25 rounded-circle p-2 me-2">
+                                    <i class="fas fa-clipboard-list fa-lg text-secondary"></i>
+                                </div>
+                                <div class="display-6 fw-bold text-secondary mb-0">{{ riesgos_data|length }}</div>
+                            </div>
+                            <h6 class="text-secondary fw-bold mb-1">Total Tipos</h6>
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="fas fa-clipboard-list me-1 text-secondary"></i>
+                                Categorías evaluadas
+                            </p>
+                            <small class="text-secondary mt-1 d-block fw-semibold">{{ total_respuestas }} respuestas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficas de Análisis de Riesgos -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header" style="background: #ffffff; border-bottom: 1px solid #dee2e6;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-chart-pie fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Análisis Gráfico de Riesgos</h5>
+                            <small class="text-muted">Visualización interactiva de los resultados de evaluación</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Tabs Navigation Mejorados -->
+                    <div class="nav-tabs-modern mb-4">
+                        <ul class="nav nav-pills nav-justified" id="chartTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="pie-chart-tab" data-bs-toggle="pill" 
+                                        data-bs-target="#pie-chart" type="button" role="tab" aria-controls="pie-chart" aria-selected="true">
+                                    <div class="tab-content-wrapper">
+                                        <div class="tab-icon">
+                                            <i class="fas fa-chart-pie"></i>
+                                        </div>
+                                        <div class="tab-text">
+                                            <span class="tab-title">Distribución</span>
+                                            <small class="tab-subtitle">Por Nivel de Riesgo</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="bar-chart-tab" data-bs-toggle="pill" 
+                                        data-bs-target="#bar-chart" type="button" role="tab" aria-controls="bar-chart" aria-selected="false">
+                                    <div class="tab-content-wrapper">
+                                        <div class="tab-icon">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                        <div class="tab-text">
+                                            <span class="tab-title">Comparación</span>
+                                            <small class="tab-subtitle">Por Tipo de Riesgo</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="radar-chart-tab" data-bs-toggle="pill" 
+                                        data-bs-target="#radar-chart" type="button" role="tab" aria-controls="radar-chart" aria-selected="false">
+                                    <div class="tab-content-wrapper">
+                                        <div class="tab-icon">
+                                            <i class="fas fa-chart-area"></i>
+                                        </div>
+                                        <div class="tab-text">
+                                            <span class="tab-title">Análisis Radar</span>
+                                            <small class="tab-subtitle">Vista Multidimensional</small>
+                                        </div>
+                                    </div>
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="chartTabsContent">
+                        <!-- Gráfica de Pastel - Distribución por Nivel de Riesgo -->
+                        <div class="tab-pane fade show active" id="pie-chart" role="tabpanel" aria-labelledby="pie-chart-tab">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="text-center mb-3">
+                                        <h6 class="text-muted fw-semibold mb-3">Distribución de Riesgos por Nivel</h6>
+                                        <div class="chart-container pie-chart-container">
+                                            <canvas id="riskLevelPieChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="h-100 d-flex flex-column justify-content-center">
+                                        <h6 class="text-muted fw-semibold mb-3">Resumen Estadístico</h6>
+                                        <div class="mb-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="d-flex align-items-center">
+                                                    <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #28a745;"></div>
+                                                    Riesgos Bajos
+                                                </span>
+                                                <span class="fw-bold text-success">{{ riesgos_aceptables }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="d-flex align-items-center">
+                                                    <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #ffc107;"></div>
+                                                    Riesgos Moderados
+                                                </span>
+                                                <span class="fw-bold text-warning">{{ riesgos_moderados }}</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="d-flex align-items-center">
+                                                    <div class="rounded-circle me-2" style="width: 12px; height: 12px; background-color: #dc3545;"></div>
+                                                    Riesgos Altos
+                                                </span>
+                                                <span class="fw-bold text-danger">{{ riesgos_criticos }}</span>
+                                            </div>
+                                            <hr class="my-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-semibold">Total Evaluado:</span>
+                                                <span class="fw-bold text-primary">{{ riesgos_data|length }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gráfica de Barras - Comparación por Tipo de Riesgo -->
+                        <div class="tab-pane fade" id="bar-chart" role="tabpanel" aria-labelledby="bar-chart-tab">
+                            <div class="text-center mb-3">
+                                <h6 class="text-muted fw-semibold mb-3">Porcentaje de Riesgo por Categoría</h6>
+                                <div class="chart-container bar-chart-container">
+                                    <canvas id="riskTypeBarChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="alert alert-info border-0" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-info-circle me-3 text-info"></i>
+                                            <div>
+                                                <small class="text-info fw-semibold">Interpretación:</small>
+                                                <small class="d-block text-muted">
+                                                    Las barras muestran el porcentaje de riesgo de cada categoría evaluada. 
+                                                    Los colores indican el nivel: verde (0-30%), amarillo (31-60%), rojo (61-100%).
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Gráfica Radar - Análisis Multidimensional -->
+                        <div class="tab-pane fade" id="radar-chart" role="tabpanel" aria-labelledby="radar-chart-tab">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="text-center mb-3">
+                                        <h6 class="text-muted fw-semibold mb-3">Análisis Radar de Riesgos</h6>
+                                        <div class="chart-container radar-chart-container">
+                                            <canvas id="riskRadarChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="h-100 d-flex flex-column justify-content-center">
+                                        <h6 class="text-muted fw-semibold mb-3">Análisis de Perfil</h6>
+                                        <div class="mb-3">
+                                            <div class="alert alert-light border-0 mb-3">
+                                                <small class="text-muted d-block mb-2">
+                                                    <strong>Promedio General:</strong>
+                                                </small>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-grow-1">
+                                                        <div class="progress" style="height: 8px;">
+                                                            <div class="progress-bar" 
+                                                                 style="width: {{ evaluacion.get_promedio_porcentaje|floatformat:0 }}%; background-color: {{ evaluacion.get_color_semaforo }};"></div>
+                                                        </div>
+                                                    </div>
+                                                    <span class="ms-2 fw-bold" style="color: {{ evaluacion.get_color_semaforo }};">
+                                                        {{ evaluacion.get_promedio_porcentaje|floatformat:1 }}%
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                                <strong>Interpretación:</strong><br>
+                                                El gráfico radar muestra el perfil de riesgo del conjunto. 
+                                                Las áreas más alejadas del centro indican mayor riesgo en esa categoría.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resultados por tipo de riesgo -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header" style="background: #ffffff; border-bottom: 1px solid #dee2e6;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="fas fa-chart-bar fa-lg text-primary"></i>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Resultados por Tipo de Riesgo</h5>
+                            <small class="text-muted">Análisis detallado de cada categoría evaluada</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    {% if riesgos_data %}
+                        <div class="row">
+                            {% for riesgo_data in riesgos_data %}
+                            <div class="col-xl-3 col-lg-4 col-md-6 mb-3">
+                                <div class="card h-100 border-0 shadow-sm" style="border-left: 3px solid {{ riesgo_data.semaforo_color }} !important;">
+                                    <div class="card-body p-3">
+                                        <!-- Header con nombre y badges -->
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <h6 class="card-title mb-0 fw-bold text-dark" style="font-size: 0.9rem;">{{ riesgo_data.tipo.nombre }}</h6>
+                                            <div class="d-flex flex-column gap-1" style="min-width: fit-content;">
+                                                <span class="badge bg-info text-white px-2 py-1" style="font-size: 0.65rem;">
+                                                    {{ riesgo_data.respuestas|length }} resp.
+                                                </span>
+                                                <span class="badge text-white px-2 py-1" 
+                                                      style="background-color: {{ riesgo_data.semaforo_color }}; font-size: 0.65rem;">
+                                                    {{ riesgo_data.promedio|floatformat:2 }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        {% if riesgo_data.porcentaje %}
+                                            <!-- Resultado principal con semáforo -->
+                                            <div class="d-flex align-items-center mb-2 p-2 rounded" style="background-color: rgba({{ riesgo_data.semaforo_color|slice:'1:' }}, 0.1);">
+                                                <div class="me-2" 
+                                                     style="width: 28px; height: 28px; border-radius: 50%; background-color: {{ riesgo_data.semaforo_color }}; 
+                                                            border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; 
+                                                            align-items: center; justify-content: center;">
+                                                    <i class="fas fa-shield-alt text-white" style="font-size: 0.7rem;"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex align-items-baseline">
+                                                        <span class="fw-bold" style="font-size: 1.4rem; color: {{ riesgo_data.semaforo_color }};">
+                                                            {{ riesgo_data.porcentaje|floatformat:1 }}%
+                                                        </span>
+                                                        <span class="ms-1 text-muted" style="font-size: 0.75rem;">riesgo</span>
+                                                    </div>
+                                                    <div class="fw-semibold" style="color: {{ riesgo_data.semaforo_color }}; font-size: 0.75rem;">
+                                                        {{ riesgo_data.semaforo_texto }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Barra de progreso compacta -->
+                                            <div class="progress mb-2" style="height: 12px; background-color: #f8f9fa;">
+                                                <div class="progress-bar position-relative" 
+                                                     style="width: {{ riesgo_data.porcentaje|floatformat:0 }}%; 
+                                                            background: linear-gradient(90deg, {{ riesgo_data.semaforo_color }} 0%, 
+                                                                      {{ riesgo_data.semaforo_color }}aa 100%);
+                                                            transition: width 0.8s ease-in-out;">
+                                                    {% if riesgo_data.porcentaje > 20 %}
+                                                    <span class="position-absolute text-white fw-bold" 
+                                                          style="top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.6rem;">
+                                                        {{ riesgo_data.porcentaje|floatformat:0 }}%
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Descripción del tipo de riesgo -->
+                                        {% if riesgo_data.tipo.descripcion %}
+                                        <div class="mt-2 pt-2" style="border-top: 1px solid #e9ecef;">
+                                            <small class="text-muted d-block" style="line-height: 1.3; font-size: 0.75rem;">
+                                                <i class="fas fa-info-circle me-1" style="opacity: 0.7;"></i>
+                                                {{ riesgo_data.tipo.descripcion|truncatewords:12 }}
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-chart-bar fa-3x text-muted" style="opacity: 0.3;"></i>
+                            </div>
+                            <h6 class="text-muted">No hay datos de riesgo disponibles</h6>
+                            <p class="text-muted mb-0">Los resultados aparecerán una vez completada la evaluación.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Observaciones y Recomendaciones Mejoradas -->
+            {% if evaluacion.observaciones_generales or evaluacion.recomendaciones_generales %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header" style="background: #ffffff; border-bottom: 1px solid #dee2e6;">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="rounded-circle p-2" style="background-color: #e3f2fd;">
+                                <i class="fas fa-clipboard-list fa-lg text-primary"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Observaciones y Recomendaciones</h5>
+                            <small class="text-muted">Análisis cualitativo de la evaluación</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        {% if evaluacion.observaciones_generales %}
+                        <div class="col-lg-6 mb-4">
+                            <div class="h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle p-2 me-3" style="background-color: #fff3cd;">
+                                        <i class="fas fa-eye text-warning"></i>
+                                    </div>
+                                    <h6 class="mb-0 fw-bold text-dark">Observaciones Generales</h6>
+                                </div>
+                                <div class="card border-0" style="background: linear-gradient(135deg, #fff9c4 0%, #ffeaa7 100%); border-left: 4px solid #ffc107 !important;">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-quote-left text-warning me-2 mt-1" style="font-size: 0.8rem; opacity: 0.7;"></i>
+                                            <p class="mb-0 text-dark" style="line-height: 1.6; font-size: 0.95rem;">
+                                                {{ evaluacion.observaciones_generales|safe }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if evaluacion.recomendaciones_generales %}
+                        <div class="col-lg-6 mb-4">
+                            <div class="h-100">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="rounded-circle p-2 me-3" style="background-color: #d4edda;">
+                                        <i class="fas fa-lightbulb text-success"></i>
+                                    </div>
+                                    <h6 class="mb-0 fw-bold text-dark">Recomendaciones Generales</h6>
+                                </div>
+                                <div class="card border-0" style="background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%); border-left: 4px solid #17a2b8 !important;">
+                                    <div class="card-body p-3">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-arrow-right text-info me-2 mt-1" style="font-size: 0.8rem; opacity: 0.7;"></i>
+                                            <p class="mb-0 text-dark" style="line-height: 1.6; font-size: 0.95rem;">
+                                                {{ evaluacion.recomendaciones_generales|safe }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Información adicional -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-light border-0 mb-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-info-circle text-info me-3"></i>
+                                    <div>
+                                        <small class="text-muted fw-semibold">Nota:</small>
+                                        <small class="d-block text-muted">
+                                            Estas observaciones y recomendaciones están basadas en el análisis integral de la evaluación de riesgos 
+                                            realizada el {{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}.
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botones de acción -->
+            <div class="text-center">
+                <a href="{% url 'risk_conjuntos:detalle_conjunto' conjunto.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Conjunto
+                </a>
+                <a href="#" class="btn btn-primary">
+                    <i class="fas fa-file-pdf"></i> Generar Reporte PDF
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Tabs Modernos Mejorados */
+    .nav-tabs-modern {
+        background: #f8f9fa;
+        padding: 8px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+    
+    .nav-tabs-modern .nav {
+        border: none;
+        gap: 4px;
+    }
+    
+    .nav-tabs-modern .nav-link {
+        border: none;
+        border-radius: 8px;
+        padding: 8px 12px;
+        color: #6c757d;
+        background: transparent;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        min-height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .nav-tabs-modern .nav-link:hover {
+        background: rgba(255, 255, 255, 0.7);
+        color: #495057;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .nav-tabs-modern .nav-link.active {
+        background: #ffffff;
+        color: #495057;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .nav-tabs-modern .nav-link.active::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border-radius: 2px 2px 0 0;
+    }
+    
+    .tab-content-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .tab-icon {
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        transition: transform 0.3s ease;
+    }
+    
+    .nav-tabs-modern .nav-link:hover .tab-icon {
+        transform: scale(1.1);
+    }
+    
+    .nav-tabs-modern .nav-link.active .tab-icon {
+        color: #007bff;
+        transform: scale(1.15);
+    }
+    
+    .tab-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+    
+    .tab-title {
+        font-weight: 600;
+        font-size: 0.8rem;
+        margin-bottom: 0px;
+    }
+    
+    .tab-subtitle {
+        font-size: 0.65rem;
+        opacity: 0.7;
+        font-weight: 400;
+    }
+    
+    .nav-tabs-modern .nav-link.active .tab-subtitle {
+        opacity: 0.8;
+        color: #6c757d;
+    }
+    
+    /* Responsive para tablets */
+    @media (max-width: 992px) {
+        .nav-tabs-modern .nav-link {
+            min-height: 40px;
+            padding: 6px 10px;
+        }
+        
+        .tab-icon {
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+        
+        .tab-title {
+            font-size: 0.75rem;
+        }
+        
+        .tab-subtitle {
+            font-size: 0.6rem;
+        }
+    }
+    
+    /* Responsive para móviles */
+    @media (max-width: 768px) {
+        .nav-tabs-modern {
+            padding: 4px;
+        }
+        
+        .nav-tabs-modern .nav-link {
+            min-height: 35px;
+            padding: 6px 8px;
+        }
+        
+        .tab-icon {
+            font-size: 0.9rem;
+            margin-bottom: 2px;
+        }
+        
+        .tab-title {
+            font-size: 0.7rem;
+        }
+        
+        .tab-subtitle {
+            font-size: 0.55rem;
+        }
+    }
+    
+    /* Chart containers */
+    .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .chart-container canvas {
+        max-width: 100% !important;
+        max-height: 100% !important;
+        width: auto !important;
+        height: auto !important;
+    }
+    .pie-chart-container {
+        height: 350px;
+        max-height: 350px;
+    }
+    .bar-chart-container {
+        height: 400px;
+        max-height: 400px;
+    }
+    .radar-chart-container {
+        height: 400px;
+        max-height: 400px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js versión estable -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar que Chart.js esté disponible
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js no está disponible');
+        return;
+    }
+
+    // Desactivar animaciones por defecto para evitar problemas
+    Chart.defaults.animation = false;
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    // Datos de los riesgos desde Django con validación
+    const riskData = {
+        levels: {
+            bajo: {{ riesgos_aceptables|default:0 }},
+            moderado: {{ riesgos_moderados|default:0 }},
+            alto: {{ riesgos_criticos|default:0 }}
+        },
+        types: [
+            {% for riesgo_data in riesgos_data %}
+            {
+                name: "{{ riesgo_data.tipo.nombre|escapejs }}",
+                percentage: parseFloat({{ riesgo_data.porcentaje|default:0 }}),
+                color: "{{ riesgo_data.semaforo_color|default:'#6c757d' }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    };
+
+    // Configuración de colores
+    const colors = {
+        bajo: '#28a745',
+        moderado: '#ffc107', 
+        alto: '#dc3545'
+    };
+
+    // 1. Gráfica de Pastel - Distribución por Nivel de Riesgo
+    const pieCtx = document.getElementById('riskLevelPieChart');
+    if (pieCtx) {
+        const totalLevels = riskData.levels.bajo + riskData.levels.moderado + riskData.levels.alto;
+        if (totalLevels > 0) {
+            try {
+                new Chart(pieCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Riesgos Bajos', 'Riesgos Moderados', 'Riesgos Altos'],
+                        datasets: [{
+                            data: [riskData.levels.bajo, riskData.levels.moderado, riskData.levels.alto],
+                            backgroundColor: [colors.bajo, colors.moderado, colors.alto],
+                            borderColor: ['#ffffff'],
+                            borderWidth: 3,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    usePointStyle: true,
+                                    font: {
+                                        size: 12,
+                                        weight: 'bold'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                        return context.label + ': ' + context.parsed + ' (' + percentage + '%)';
+                                    }
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+                console.log('✅ Gráfica de dona creada correctamente');
+            } catch (error) {
+                console.error('Error al crear gráfica de dona:', error);
+                pieCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i><p>Error al cargar gráfica</p></div>';
+            }
+        } else {
+            // Mostrar mensaje cuando no hay datos
+            pieCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-chart-pie fa-3x mb-3" style="opacity: 0.3;"></i><p>No hay datos para mostrar</p></div>';
+        }
+    }
+
+    // 2. Gráfica de Barras - Comparación por Tipo de Riesgo
+    const barCtx = document.getElementById('riskTypeBarChart');
+    if (barCtx && riskData.types.length > 0) {
+        const validTypes = riskData.types.filter(type => type.percentage > 0);
+        if (validTypes.length > 0) {
+            try {
+                new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: validTypes.map(item => item.name),
+                        datasets: [{
+                            label: 'Porcentaje de Riesgo',
+                            data: validTypes.map(item => item.percentage),
+                            backgroundColor: validTypes.map(item => item.color + '80'),
+                            borderColor: validTypes.map(item => item.color),
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    maxRotation: 45,
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('✅ Gráfica de barras creada correctamente');
+            } catch (error) {
+                console.error('Error al crear gráfica de barras:', error);
+                barCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i><p>Error al cargar gráfica</p></div>';
+            }
+        } else {
+            barCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-chart-bar fa-3x mb-3" style="opacity: 0.3;"></i><p>No hay datos para mostrar</p></div>';
+        }
+    }
+
+    // 3. Gráfica Radar - Análisis Multidimensional
+    const radarCtx = document.getElementById('riskRadarChart');
+    if (radarCtx && riskData.types.length > 0) {
+        const validTypes = riskData.types.filter(type => type.percentage > 0);
+        if (validTypes.length > 0) {
+            try {
+                new Chart(radarCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: validTypes.map(item => item.name),
+                        datasets: [{
+                            label: 'Nivel de Riesgo',
+                            data: validTypes.map(item => item.percentage),
+                            backgroundColor: 'rgba(111, 66, 193, 0.2)',
+                            borderColor: 'rgba(111, 66, 193, 1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: validTypes.map(item => item.color),
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.label + ': ' + context.parsed.r.toFixed(1) + '%';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    stepSize: 20,
+                                    callback: function(value) {
+                                        return value + '%';
+                                    },
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                angleLines: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 10,
+                                        weight: 'bold'
+                                    },
+                                    callback: function(label) {
+                                        // Truncar etiquetas largas
+                                        return label.length > 15 ? label.substring(0, 12) + '...' : label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                console.log('✅ Gráfica radar creada correctamente');
+            } catch (error) {
+                console.error('Error al crear gráfica radar:', error);
+                radarCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i><p>Error al cargar gráfica</p></div>';
+            }
+        } else {
+            radarCtx.parentElement.innerHTML = '<div class="text-center text-muted p-4"><i class="fas fa-chart-area fa-3x mb-3" style="opacity: 0.3;"></i><p>No hay datos para mostrar</p></div>';
+        }
+    }
+
+    console.log('✅ Todas las gráficas inicializadas correctamente');
+});
+</script>
+{% endblock %}

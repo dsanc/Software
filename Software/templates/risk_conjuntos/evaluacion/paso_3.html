@@ -1,0 +1,940 @@
+﻿{% extends "risk_conjuntos/evaluacion/base_evaluacion.html" %}
+{% load static %}
+
+{% block evaluation_content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Formulario principal de observaciones -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>Paso 3: Observaciones y Recomendaciones</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="form-observaciones">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-eye text-info me-2"></i>
+                            Observaciones Generales
+                        </label>
+                        <small class="form-text text-muted d-block mb-2">
+                            Describa las observaciones principales identificadas durante la evaluación de riesgos
+                        </small>
+                        <textarea name="observaciones_generales" id="id_observaciones_generales" class="form-control summernote" 
+                                  placeholder="Ingrese sus observaciones generales sobre la evaluación realizada...">{{ form.observaciones_generales.value|default:'' }}</textarea>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-lightbulb text-warning me-2"></i>
+                            Recomendaciones
+                        </label>
+                        <small class="form-text text-muted d-block mb-2">
+                            Especifique las recomendaciones y medidas sugeridas para mitigar los riesgos identificados
+                        </small>
+                        <textarea name="recomendaciones_generales" id="id_recomendaciones_generales" class="form-control summernote" 
+                                  placeholder="Ingrese las recomendaciones para mejorar la seguridad y mitigar riesgos...">{{ form.recomendaciones_generales.value|default:'' }}</textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Sección de adjuntar imágenes -->
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-images me-2"></i>
+                    Adjuntar Imágenes
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- Formulario de carga de imágenes -->
+                        <form method="post" enctype="multipart/form-data" class="imagen-form" id="form-upload-imagen">
+                            {% csrf_token %}
+                            <div class="upload-section p-4 text-center border-2 border-dashed rounded" style="border-color: #dee2e6; background-color: #f8f9fa;">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <p class="mb-3">Arrastra imágenes aquí o haz clic para seleccionar</p>
+                                
+                                <div class="mb-3">
+                                    <input type="file" name="archivo" id="id_archivo_upload" class="form-control" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif,.webp" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ archivo_form.descripcion.id_for_label }}" class="form-label">Descripción:</label>
+                                    {{ archivo_form.descripcion }}
+                                </div>
+                                
+                                <!-- Campo tipo_archivo hidden para imágenes -->
+                                <input type="hidden" name="tipo_archivo" value="evidencia">
+                                
+                                <button type="submit" name="subir_archivo" class="btn btn-success" id="btn-subir-archivo">
+                                    <i class="fas fa-upload me-2"></i>
+                                    <span class="btn-text">Subir Imagen</span>
+                                    <span class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
+                                </button>
+                                
+                                <!-- Mensaje de éxito -->
+                                <div id="upload-success" class="alert alert-success mt-2 d-none" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span id="success-message"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Formatos permitidos: JPG, PNG, GIF, WEBP<br>
+                                    Tamaño máximo: 5 MB por imagen
+                                </small>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <!-- Lista de imágenes cargadas -->
+                        <div id="archivos-cargados">
+                            {% if archivos_temporales %}
+                            <div>
+                                <h6 class="border-bottom pb-2">
+                                    <i class="fas fa-images me-2"></i>
+                                    Archivos Cargados ({{ archivos_temporales|length }})
+                                    <small class="text-muted">- Haz clic en las imágenes para ampliar</small>
+                                </h6>
+                                
+                                <!-- Filtrar solo imágenes para el carrusel -->
+                                {% if archivos_temporales %}
+                                {% with imagenes=archivos_temporales %}
+                                <!-- Carrusel de imágenes -->
+                                <div id="carruselImagenes" class="carousel slide mb-3" data-bs-ride="carousel">
+                                    <div class="carousel-inner rounded">
+                                        {% for archivo in imagenes %}
+                                        {% if archivo.tipo_archivo == 'evidencia' and '.jpg' in archivo.nombre_original or '.jpeg' in archivo.nombre_original or '.png' in archivo.nombre_original or '.gif' in archivo.nombre_original or '.webp' in archivo.nombre_original %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <img src="{{ MEDIA_URL }}{{ archivo.ruta_temporal }}" 
+                                                 class="d-block w-100" 
+                                                 style="height: 350px; object-fit: cover;"
+                                                 alt="{{ archivo.descripcion|default:'Imagen' }}"
+                                                 onerror="console.error('Error cargando imagen:', this.src);"
+                                                 onload="console.log('Imagen cargada exitosamente:', this.src);">
+                                            <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-2">
+                                                <h6 class="mb-1">{{ archivo.nombre_original }}</h6>
+                                                <p class="mb-0 small">{{ archivo.descripcion|default:"Sin descripción" }}</p>
+                                                <small class="text-light">{{ archivo.tamaño|filesizeformat }}</small>
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    <!-- Controles del carrusel -->
+                                    {% if imagenes|length > 1 %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carruselImagenes" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Anterior</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carruselImagenes" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Siguiente</span>
+                                    </button>
+                                    
+                                    <!-- Indicadores -->
+                                    <div class="carousel-indicators">
+                                        {% for archivo in imagenes %}
+                                        {% if archivo.tipo_archivo == 'evidencia' and '.jpg' in archivo.nombre_original or '.jpeg' in archivo.nombre_original or '.png' in archivo.nombre_original or '.gif' in archivo.nombre_original or '.webp' in archivo.nombre_original %}
+                                        <button type="button" data-bs-target="#carruselImagenes" 
+                                                data-bs-slide-to="{{ forloop.counter0 }}" 
+                                                {% if forloop.first %}class="active"{% endif %}
+                                                aria-label="Slide {{ forloop.counter }}"></button>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Lista de documentos (no imágenes) -->
+                                {% for archivo in archivos_temporales %}
+                                {% if archivo.tipo_archivo != 'evidencia' or not '.jpg' in archivo.nombre_original and not '.jpeg' in archivo.nombre_original and not '.png' in archivo.nombre_original and not '.gif' in archivo.nombre_original and not '.webp' in archivo.nombre_original %}
+                                <div class="d-flex align-items-center border rounded p-2 mb-2 bg-light archivo-documento">
+                                    <div class="me-3">
+                                        <i class="fas fa-file fa-2x text-muted"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ archivo.nombre_original }}</h6>
+                                        <small class="text-muted">{{ archivo.descripcion|default:"Sin descripción" }}</small>
+                                        <br><small class="text-info">{{ archivo.tamaño|filesizeformat }}</small>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                                {% endwith %}
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="text-center text-muted" id="sin-archivos">
+                                <i class="fas fa-image fa-3x mb-3"></i>
+                                <p>No hay archivos cargados aún</p>
+                                <small>Los archivos aparecerán aquí una vez que los subas</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Card de ayuda -->
+                <div class="mt-4 p-3 bg-light rounded">
+                    <h6 class="mb-2">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        Consejos
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0 small">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Sea específico en sus observaciones
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Incluya imágenes como evidencia
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0 small">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Describa claramente las recomendaciones
+                                </li>
+                                <li>
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Use imágenes para ilustrar problemas
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block back_button %}
+<a href="{% url 'risk_conjuntos:paso_2_preguntas' conjunto.id 0 %}" class="btn btn-outline-secondary">
+    <i class="fas fa-arrow-left"></i> Volver al Paso 2
+</a>
+{% endblock %}
+
+{% block next_button %}
+<button type="submit" form="form-observaciones" name="continuar_paso_4" class="btn btn-primary">
+    <i class="fas fa-arrow-right"></i> Continuar al Paso 4
+</button>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+
+<!-- Summernote CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.css" rel="stylesheet">
+
+<!-- Summernote JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.js"></script>
+
+<style>
+/* Estilos personalizados para Summernote */
+.note-editor {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+}
+
+.note-editor.note-frame {
+    border: 1px solid #dee2e6;
+}
+
+.note-editor .note-toolbar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 8px 12px;
+}
+
+.note-editor .note-editing-area {
+    background-color: #ffffff;
+}
+
+.note-editor .note-editable {
+    background-color: #ffffff;
+    color: #212529;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 12px;
+}
+
+.note-editor .note-editable:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.note-editor .note-statusbar {
+    background-color: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+}
+
+/* Botones de la toolbar */
+.note-toolbar .note-btn {
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    padding: 4px 8px;
+    margin: 1px;
+    border-radius: 0.25rem;
+}
+
+.note-toolbar .note-btn:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.note-toolbar .note-btn.active {
+    background-color: #0d6efd;
+    color: #ffffff;
+}
+
+/* Dropdowns */
+.note-toolbar .dropdown-menu {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .note-editor .note-toolbar {
+        padding: 4px 8px;
+    }
+    
+    .note-toolbar .note-btn {
+        padding: 2px 6px;
+        font-size: 0.8rem;
+    }
+}
+
+.upload-section {
+    transition: all 0.3s ease;
+}
+
+.upload-section:hover {
+    border-color: #0d6efd !important;
+    background-color: #e7f1ff !important;
+}
+
+.upload-section.dragover {
+    border-color: #0d6efd !important;
+    background-color: #e7f1ff !important;
+}
+
+/* Estilos para el carrusel de imágenes */
+#carruselImagenes {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.carousel-item img {
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.carousel-item img:hover {
+    transform: scale(1.02);
+}
+
+/* Estilos para el contenedor de archivos */
+#archivos-cargados {
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.carousel-caption {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    text-align: left;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 8%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    padding: 10px;
+}
+
+.carousel-indicators {
+    margin-bottom: -20px;
+}
+
+.carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 0 3px;
+}
+
+/* Hover effects para documentos */
+.archivo-documento:hover {
+    background-color: #f8f9fa !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // URL del endpoint para la subida de archivos
+    const UPLOAD_URL = window.location.pathname;
+    
+    // Inicializar Summernote para editores de texto enriquecido
+    $('.summernote').summernote({
+        height: 200,
+        minHeight: null,
+        maxHeight: null,
+        focus: false,
+        lang: 'es-ES',
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+        ],
+        fontNames: ['Arial', 'Arial Black', 'Comic Sans MS', 'Courier New', 'Helvetica', 'Impact', 'Tahoma', 'Times New Roman', 'Verdana'],
+        fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36', '48'],
+        styleTags: [
+            'p',
+            { title: 'Título 1', tag: 'h1', className: 'h3', value: 'h1' },
+            { title: 'Título 2', tag: 'h2', className: 'h4', value: 'h2' },
+            { title: 'Título 3', tag: 'h3', className: 'h5', value: 'h3' },
+            'pre', 'blockquote'
+        ],
+        callbacks: {
+            onChange: function(contents, $editable) {
+                // Guardar cambios automáticamente
+                guardarComentariosLocal();
+            }
+        }
+    });
+
+    // Funcionalidad para drag & drop de imágenes
+    const uploadSection = $('.upload-section');
+    const fileInput = $('#id_archivo_upload'); // Campo de archivo del formulario
+
+    // Prevenir comportamiento por defecto del navegador
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadSection[0].addEventListener(eventName, preventDefaults, false);
+        document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Destacar zona de drop cuando archivo está sobre ella
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadSection[0].addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadSection[0].addEventListener(eventName, unhighlight, false);
+    });
+
+    // Manejar archivos soltados
+    uploadSection[0].addEventListener('drop', handleDrop, false);
+
+    // Click en zona de upload abre selector de archivos
+    uploadSection.click(function(e) {
+        if (e.target === this || e.target.tagName === 'P' || e.target.tagName === 'I') {
+            fileInput.click();
+        }
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    function highlight(e) {
+        uploadSection.addClass('dragover');
+    }
+
+    function unhighlight(e) {
+        uploadSection.removeClass('dragover');
+    }
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        
+        if (files.length > 0) {
+            const file = files[0];
+            
+            // Validar que sea una imagen
+            if (file.type.startsWith('image/')) {
+                fileInput[0].files = files;
+                updateFileLabel(file.name);
+            } else {
+                alert('Por favor seleccione solo archivos de imagen.');
+            }
+        }
+    }
+
+    // Actualizar etiqueta cuando se selecciona archivo
+    fileInput.change(function() {
+        const file = this.files[0];
+        if (file) {
+            // Validar que sea una imagen
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor seleccione solo archivos de imagen.');
+                this.value = '';
+                updateFileLabel('');
+                return;
+            }
+            
+            // Validar tamaño del archivo (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('La imagen es demasiado grande. Máximo 5 MB.');
+                this.value = '';
+                updateFileLabel('');
+                return;
+            }
+
+            updateFileLabel(file.name);
+        }
+    });
+
+    function updateFileLabel(fileName) {
+        if (fileName) {
+            uploadSection.find('p').text(fileName);
+        } else {
+            uploadSection.find('p').text('Arrastra imágenes aquí o haz clic para seleccionar');
+        }
+    }
+
+    // Función para auto-guardar comentarios en localStorage
+    function guardarComentariosLocal() {
+        const observaciones = $('#id_observaciones_generales').summernote('code');
+        const recomendaciones = $('#id_recomendaciones_generales').summernote('code');
+        
+        localStorage.setItem('temp_observaciones', observaciones);
+        localStorage.setItem('temp_recomendaciones', recomendaciones);
+    }
+
+    // Función para restaurar comentarios desde localStorage
+    function restaurarComentariosLocal() {
+        const observaciones = localStorage.getItem('temp_observaciones');
+        const recomendaciones = localStorage.getItem('temp_recomendaciones');
+        
+        if (observaciones && !$('#id_observaciones_generales').summernote('code').trim()) {
+            $('#id_observaciones_generales').summernote('code', observaciones);
+        }
+        
+        if (recomendaciones && !$('#id_recomendaciones_generales').summernote('code').trim()) {
+            $('#id_recomendaciones_generales').summernote('code', recomendaciones);
+        }
+    }
+
+    // Restaurar comentarios al cargar la página
+    restaurarComentariosLocal();
+
+    // DEBUG: Verificar elementos del formulario de subida
+    console.log('🔍 Verificando elementos de subida:');
+    console.log('   - Formulario #form-upload-imagen:', $('#form-upload-imagen').length);
+    console.log('   - Input #id_archivo_upload:', $('#id_archivo_upload').length);
+    console.log('   - Botón #btn-subir-archivo:', $('#btn-subir-archivo').length);
+
+    // AJAX para subida de archivos sin recargar página
+    $('#form-upload-imagen').on('submit', function(e) {
+        e.preventDefault();
+        console.log('🚀 Iniciando subida de archivo...');
+        
+        const formData = new FormData(this);
+        
+        // Agregar el campo subir_archivo que la vista necesita
+        formData.append('subir_archivo', 'true');
+        
+        const $btn = $('#btn-subir-archivo');
+        const $btnText = $btn.find('.btn-text');
+        const $spinner = $btn.find('.spinner-border');
+        
+        // Validar que se haya seleccionado un archivo
+        const archivo = $('#id_archivo_upload')[0].files[0];
+        console.log('📁 Archivo seleccionado:', archivo);
+        
+        if (!archivo) {
+            console.error('❌ No hay archivo seleccionado');
+            alert('Por favor selecciona un archivo antes de subir.');
+            return;
+        }
+        
+        // Debug: Mostrar datos del formulario
+        console.log('📋 Datos del formulario:');
+        for (let pair of formData.entries()) {
+            console.log('   -', pair[0], ':', pair[1]);
+        }
+        
+        // Preservar contenido de Summernote antes de la subida
+        preservarContenidoSummernote();
+        
+        // Mostrar loading
+        $btn.prop('disabled', true);
+        $btnText.text('Subiendo...');
+        $spinner.removeClass('d-none');
+        
+        // Guardar comentarios antes de la subida
+        guardarComentariosLocal();
+        
+        console.log('📡 URL de subida:', UPLOAD_URL);
+        console.log('🔑 CSRF Token:', $('[name=csrfmiddlewaretoken]').val());
+        
+        $.ajax({
+            url: UPLOAD_URL,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val(),
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                console.log('Respuesta del servidor:', response);
+                
+                // Mostrar mensaje de éxito
+                $('#success-message').text('¡Archivo subido exitosamente!');
+                $('#upload-success').removeClass('d-none');
+                
+                // Agregar archivo a la lista sin recargar
+                if (response.archivo) {
+                    agregarArchivoALista(response.archivo);
+                }
+                
+                // Limpiar formulario
+                $('#id_archivo_upload').val('');
+                $('textarea[name="descripcion"]').val('');
+                updateFileLabel('');
+                
+                // Ocultar mensaje después de 3 segundos
+                setTimeout(function() {
+                    $('#upload-success').addClass('d-none');
+                }, 3000);
+                
+                // Restaurar botón
+                $btn.prop('disabled', false);
+                $btnText.text('Subir Imagen');
+                $spinner.addClass('d-none');
+            },
+            error: function(xhr, status, error) {
+                console.error('❌ Error al subir archivo:', error);
+                console.error('📊 Status:', status);
+                console.error('📄 Status Code:', xhr.status);
+                console.error('📝 Response Text:', xhr.responseText);
+                console.error('📋 Response Headers:', xhr.getAllResponseHeaders());
+                
+                let errorMessage = 'Error al subir el archivo. Por favor intenta de nuevo.';
+                if (xhr.responseText) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.error) {
+                            errorMessage = response.error;
+                        }
+                    } catch (e) {
+                        // Si no es JSON, mostrar mensaje simple
+                    }
+                }
+                
+                alert(errorMessage);
+                
+                // Restaurar botón
+                $btn.prop('disabled', false);
+                $btnText.text('Subir Imagen');
+                $spinner.addClass('d-none');
+            }
+        });
+    });
+
+    // Limpiar localStorage cuando se envía el formulario principal
+    $('#form-observaciones').on('submit', function() {
+        // Sincronizar contenido de Summernote con los textareas antes del envío
+        $('#id_observaciones_generales').val($('#id_observaciones_generales').summernote('code'));
+        $('#id_recomendaciones_generales').val($('#id_recomendaciones_generales').summernote('code'));
+        
+        // Limpiar localStorage
+        localStorage.removeItem('temp_observaciones');
+        localStorage.removeItem('temp_recomendaciones');
+    });
+
+    // Funcionalidad mejorada para el carrusel
+    if ($('#carruselImagenes').length > 0) {
+        // Auto-play pausado en hover
+        $('#carruselImagenes').hover(
+            function() {
+                $(this).carousel('pause');
+            },
+            function() {
+                $(this).carousel('cycle');
+            }
+        );
+
+        // Navegación con teclado
+        $(document).keydown(function(e) {
+            if ($('#carruselImagenes:hover').length > 0) {
+                if (e.which === 37) { // Flecha izquierda
+                    $('#carruselImagenes').carousel('prev');
+                } else if (e.which === 39) { // Flecha derecha
+                    $('#carruselImagenes').carousel('next');
+                }
+            }
+        });
+
+        // Contador de imágenes
+        const totalImages = $('#carruselImagenes .carousel-item').length;
+        if (totalImages > 1) {
+            $('#carruselImagenes').on('slide.bs.carousel', function(e) {
+                const activeIndex = $(e.relatedTarget).index() + 1;
+                console.log(`Mostrando imagen ${activeIndex} de ${totalImages}`);
+            });
+        }
+
+        // Click para expandir imagen (opcional)
+        $('#carruselImagenes img').on('click', function() {
+            const imgSrc = $(this).attr('src');
+            const imgAlt = $(this).attr('alt');
+            
+            // Crear modal simple para vista expandida
+            const modal = `
+                <div class="modal fade" id="modalImagenExpandida" tabindex="-1">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${imgAlt}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="${imgSrc}" class="img-fluid" alt="${imgAlt}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remover modal anterior si existe
+            $('#modalImagenExpandida').remove();
+            
+            // Agregar y mostrar nuevo modal
+            $('body').append(modal);
+            $('#modalImagenExpandida').modal('show');
+            
+            // Limpiar modal después de cerrar
+            $('#modalImagenExpandida').on('hidden.bs.modal', function() {
+                $(this).remove();
+            });
+        });
+    }
+
+    // Función para agregar archivo a la lista dinámicamente
+    function agregarArchivoALista(archivo) {
+        console.log('📁 Agregando archivo a la lista:', archivo);
+        
+        // Si no hay archivos, cambiar el contenido de "sin archivos"
+        if ($('#sin-archivos').length > 0) {
+            $('#sin-archivos').remove();
+            $('#archivos-cargados').html(`
+                <div>
+                    <h6 class="border-bottom pb-2">
+                        <i class="fas fa-images me-2"></i>
+                        Archivos Cargados (1)
+                        <small class="text-muted">- Haz clic en las imágenes para ampliar</small>
+                    </h6>
+                    <div id="lista-archivos"></div>
+                </div>
+            `);
+        }
+        
+        // Determinar si es imagen
+        const esImagen = /\.(jpg|jpeg|png|gif|webp)$/i.test(archivo.nombre_original);
+        
+        if (esImagen) {
+            // Si es imagen, crear carrusel o agregarlo al existente
+            if ($('#carruselImagenes').length === 0) {
+                // Crear nuevo carrusel
+                const carruselHtml = `
+                    <div id="carruselImagenes" class="carousel slide mb-3" data-bs-ride="carousel">
+                        <div class="carousel-inner rounded">
+                            <div class="carousel-item active">
+                                <img src="/media/${archivo.ruta_temporal}" 
+                                     class="d-block w-100 imagen-ampliable" 
+                                     style="height: 350px; object-fit: cover; cursor: pointer;"
+                                     alt="${archivo.descripcion || 'Imagen'}"
+                                     data-imagen-src="/media/${archivo.ruta_temporal}"
+                                     data-imagen-nombre="${archivo.nombre_original}"
+                                     data-imagen-descripcion="${archivo.descripcion || 'Sin descripción'}"
+                                     data-imagen-tamaño="${formatBytes(archivo.tamaño)}"
+                                     onerror="console.error('Error cargando imagen:', this.src);"
+                                     onload="console.log('Imagen cargada exitosamente:', this.src);"
+                                     title="Haz clic para ampliar">
+                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-2">
+                                    <h6 class="mb-1">${archivo.nombre_original}</h6>
+                                    <p class="mb-0 small">${archivo.descripcion || "Sin descripción"}</p>
+                                    <small class="text-light">${formatBytes(archivo.tamaño)}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                $('#lista-archivos').append(carruselHtml);
+            } else {
+                // Agregar nueva imagen al carrusel existente
+                const nuevaSlide = `
+                    <div class="carousel-item">
+                        <img src="/media/${archivo.ruta_temporal}" 
+                             class="d-block w-100 imagen-ampliable" 
+                             style="height: 350px; object-fit: cover; cursor: pointer;"
+                             alt="${archivo.descripcion || 'Imagen'}"
+                             data-imagen-src="/media/${archivo.ruta_temporal}"
+                             data-imagen-nombre="${archivo.nombre_original}"
+                             data-imagen-descripcion="${archivo.descripcion || 'Sin descripción'}"
+                             data-imagen-tamaño="${formatBytes(archivo.tamaño)}"
+                             onerror="console.error('Error cargando imagen:', this.src);"
+                             onload="console.log('Imagen cargada exitosamente:', this.src);"
+                             title="Haz clic para ampliar">
+                        <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-75 rounded p-2">
+                            <h6 class="mb-1">${archivo.nombre_original}</h6>
+                            <p class="mb-0 small">${archivo.descripcion || "Sin descripción"}</p>
+                            <small class="text-light">${formatBytes(archivo.tamaño)}</small>
+                        </div>
+                    </div>
+                `;
+                $('#carruselImagenes .carousel-inner').append(nuevaSlide);
+                
+                // Agregar controles si es el segundo item
+                if ($('#carruselImagenes .carousel-item').length === 2) {
+                    const controles = `
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carruselImagenes" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carruselImagenes" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                    `;
+                    $('#carruselImagenes').append(controles);
+                }
+            }
+        } else {
+            // Si es documento, agregar a lista de documentos
+            const documentoHtml = `
+                <div class="d-flex align-items-center border rounded p-2 mb-2 bg-light archivo-documento">
+                    <div class="me-3">
+                        <i class="fas fa-file fa-2x text-muted"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-1">${archivo.nombre_original}</h6>
+                        <small class="text-muted">${archivo.descripcion || "Sin descripción"}</small>
+                        <br><small class="text-info">${formatBytes(archivo.tamaño)}</small>
+                    </div>
+                </div>
+            `;
+            $('#lista-archivos').append(documentoHtml);
+        }
+        
+        // Actualizar contador
+        const totalArchivos = $('.carousel-item').length + $('.archivo-documento').length;
+        $('.border-bottom').html(`
+            <i class="fas fa-images me-2"></i>
+            Archivos Cargados (${totalArchivos})
+            <small class="text-muted">- Haz clic en las imágenes para ampliar</small>
+        `);
+    }
+    
+    // Función helper para formatear bytes
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    // Funciones para preservar contenido de Summernote
+    let contenidoPreservado = {};
+    
+    function preservarContenidoSummernote() {
+        contenidoPreservado.observaciones = $('#id_observaciones_generales').summernote('code');
+        contenidoPreservado.recomendaciones = $('#id_recomendaciones_generales').summernote('code');
+        console.log('💾 Contenido Summernote preservado');
+    }
+    
+    function restaurarContenidoSummernote() {
+        if (contenidoPreservado.observaciones) {
+            $('#id_observaciones_generales').summernote('code', contenidoPreservado.observaciones);
+        }
+        if (contenidoPreservado.recomendaciones) {
+            $('#id_recomendaciones_generales').summernote('code', contenidoPreservado.recomendaciones);
+        }
+        console.log('🔄 Contenido Summernote restaurado');
+    }
+    
+    // Evento para ampliar imágenes al hacer clic
+    $(document).on('click', '.imagen-ampliable', function() {
+        console.log('🖼️ Clic en imagen para ampliar');
+        
+        const src = $(this).data('imagen-src');
+        const nombre = $(this).data('imagen-nombre');
+        const descripcion = $(this).data('imagen-descripcion');
+        const tamaño = $(this).data('imagen-tamaño');
+        
+        console.log('📋 Datos de la imagen:', { src, nombre, descripcion, tamaño });
+        
+        // Actualizar contenido del modal
+        $('#modalImage').attr('src', src);
+        $('#modalImageName').text(nombre);
+        $('#modalImageDescription').text(descripcion);
+        $('#modalImageSize').text(tamaño);
+        
+        // Mostrar modal
+        const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+        modal.show();
+    });
+});
+</script>
+
+<!-- Modal para ampliar imágenes -->
+<div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalLabel">Imagen Ampliada</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" class="img-fluid" style="max-height: 70vh;" alt="Imagen ampliada">
+                <div class="mt-3">
+                    <h6 id="modalImageName"></h6>
+                    <p id="modalImageDescription" class="text-muted"></p>
+                    <small id="modalImageSize" class="text-muted"></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

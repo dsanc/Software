@@ -1,0 +1,112 @@
+{
+  "name": "Risk Hotels - Sistema de Análisis de Riesgo",
+  "short_name": "Risk Hotels",
+  "description": "Plataforma profesional para análisis de riesgo en la industria hotelera",
+  "start_url": "/risk-hoteles/dashboard/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["business", "productivity", "security"],
+  "icons": [
+    {
+      "src": "/static/images/pwa/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/pwa/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/images/pwa/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Acceso rápido al dashboard principal",
+      "url": "/risk-hoteles/dashboard/",
+      "icons": [
+        {
+          "src": "/static/images/pwa/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Carrito de Compras",
+      "short_name": "Carrito",
+      "description": "Acceso directo al carrito de suscripciones",
+      "url": "/subscriptions/cart/",
+      "icons": [
+        {
+          "src": "/static/images/pwa/cart-icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Nuevo Análisis",
+      "short_name": "Análisis",
+      "description": "Crear nuevo análisis de riesgo",
+      "url": "/risk-hoteles/hoteles/",
+      "icons": [
+        {
+          "src": "/static/images/pwa/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Hoteles",
+      "short_name": "Hoteles",
+      "description": "Gestionar hoteles registrados",
+      "url": "/risk-hoteles/hoteles/",
+      "icons": [
+        {
+          "src": "/static/images/pwa/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "dir": "ltr",
+  "serviceworker": {
+    "src": "/static/js/sw.js",
+    "scope": "/",
+    "update_via_cache": "imports"
+  },
+  "screenshots": [
+    {
+      "src": "/static/images/pwa/screenshot-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Dashboard principal del sistema"
+    },
+    {
+      "src": "/static/images/pwa/screenshot-narrow.png",
+      "sizes": "720x1280",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Vista móvil del análisis de riesgo"
+    }
+  ],
+  "features": [
+    "Cross Platform",
+    "fast",
+    "simple"
+  ]
+}

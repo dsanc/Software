@@ -1,0 +1,85 @@
+/* Correcciones para el dropdown del navbar */
+.dropdown-menu {
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    padding: 0.5rem 0;
+    min-width: 250px;
+    margin-top: 0.5rem;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1.5rem;
+    color: #333;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: rgba(3, 105, 160, 0.1);
+    color: #0369A0;
+}
+
+.dropdown-header .user-info {
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.dropdown-header .user-info strong {
+    display: block;
+    color: #333;
+    font-weight: 600;
+}
+
+.dropdown-header .user-info small {
+    display: block;
+    color: #666;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Asegurar que el dropdown aparezca correctamente */
+.dropdown-toggle::after {
+    display: none;
+}
+
+/* Estilo para el avatar del usuario */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #0369A0, #637B9C);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 0.5rem;
+}
+
+.user-name {
+    font-weight: 500;
+    color: white;
+}
+
+/* Responsive para el dropdown */
+@media (max-width: 768px) {
+    .dropdown-menu {
+        min-width: 200px;
+        margin-top: 0.25rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}

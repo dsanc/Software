@@ -1,0 +1,185 @@
+<div class="info-general datos-conjunto-fix">
+    <div class="row">
+        <!-- Información del Conjunto -->
+        <div class="col-md-4">
+            <div class="info-section conjunto-info">
+                <div class="info-header conjunto-header">
+                    <div class="header-icon-container">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="header-content">
+                        <span class="header-title">Datos del Conjunto</span>
+                        <span class="header-subtitle">Información básica del inmueble</span>
+                    </div>
+                </div>
+                <div class="info-grid enhanced-grid">
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-id-card-alt"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">NIT</span>
+                            <span class="info-value">{{ conjunto.nit|default:"No especificado" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Tipo</span>
+                            <span class="info-value">{{ conjunto.tipo_conjunto.get_nombre_display|default:"No especificado" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Unidades</span>
+                            <span class="info-value">{{ conjunto.numero_unidades|default:"0" }}</span>
+                        </div>
+                    </div>
+                    {% if conjunto.fecha_construccion %}
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Construido</span>
+                            <span class="info-value">{{ conjunto.fecha_construccion|date:"Y" }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información de Ubicación -->
+        <div class="col-md-4">
+            <div class="info-section ubicacion-info">
+                <div class="info-header ubicacion-header">
+                    <div class="header-icon-container">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="header-content">
+                        <span class="header-title">Ubicación</span>
+                        <span class="header-subtitle">Localización geográfica</span>
+                    </div>
+                </div>
+                <div class="info-grid enhanced-grid">
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-road"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Dirección</span>
+                            <span class="info-value" title="{{ conjunto.direccion }}">{{ conjunto.direccion|truncatechars:35 }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-city"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Ciudad</span>
+                            <span class="info-value">{{ conjunto.ciudad|default:"No especificado" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-map"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Departamento</span>
+                            <span class="info-value">{{ conjunto.departamento|default:"No especificado" }}</span>
+                        </div>
+                    </div>
+                    {% if conjunto.codigo_postal %}
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-mailbox"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Código Postal</span>
+                            <span class="info-value">{{ conjunto.codigo_postal }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información de Evaluación -->
+        <div class="col-md-4">
+            <div class="info-section evaluacion-info">
+                <div class="info-header evaluacion-header">
+                    <div class="header-icon-container">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
+                    <div class="header-content">
+                        <span class="header-title">Evaluación</span>
+                        <span class="header-subtitle">Detalles del proceso</span>
+                    </div>
+                </div>
+                <div class="info-grid enhanced-grid">
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Evaluador</span>
+                            <span class="info-value" title="{{ evaluacion.creado_por.get_full_name|default:evaluacion.creado_por.username }}">
+                                {{ evaluacion.creado_por.get_full_name|default:evaluacion.creado_por.username|truncatechars:18 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Completada</span>
+                            <span class="info-value">{{ evaluacion.fecha_completado|date:"d/m/Y"|default:"En proceso" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Duración</span>
+                            <span class="info-value">
+                                {% if evaluacion.fecha_completado and evaluacion.fecha_evaluacion %}
+                                    {{ evaluacion.fecha_completado|timeuntil:evaluacion.fecha_evaluacion|default:"N/A" }}
+                                {% else %}
+                                    En proceso
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-item enhanced-item">
+                        <div class="item-icon">
+                            {% if evaluacion.get_estado_display == "Completada" %}
+                                <i class="fas fa-check-circle text-success"></i>
+                            {% elif evaluacion.get_estado_display == "En Proceso" %}
+                                <i class="fas fa-spinner text-warning"></i>
+                            {% else %}
+                                <i class="fas fa-exclamation-circle text-info"></i>
+                            {% endif %}
+                        </div>
+                        <div class="item-content">
+                            <span class="info-label">Estado</span>
+                            <span class="info-value estado-badge 
+                                {% if evaluacion.get_estado_display == "Completada" %}completada
+                                {% elif evaluacion.get_estado_display == "En Proceso" %}en-proceso
+                                {% else %}otros{% endif %}">
+                                {{ evaluacion.get_estado_display }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

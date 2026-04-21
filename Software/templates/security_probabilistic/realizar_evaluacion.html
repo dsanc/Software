@@ -1,0 +1,564 @@
+{% extends 'base_with_sidebar.html' %}
+{% load l10n %}
+
+{% block title %}Evaluación de Seguridad - {{ evaluacion.perfil.nombre_completo }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Estilos personalizados para la evaluación */
+.evaluation-header {
+    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.evaluation-header .text-sm {
+    font-size: 0.875rem;
+    opacity: 0.95;
+}
+
+.evaluation-header .badge {
+    font-size: 0.75rem;
+}
+
+.progress-container {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.question-card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.question-card:hover {
+    transform: translateY(-2px);
+}
+
+.question-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.question-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #6f42c1, #e83e8c);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-right: 1rem;
+}
+
+.question-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    line-height: 1.6;
+}
+
+.option-container {
+    padding: 1rem;
+}
+
+.option-item {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    position: relative;
+    overflow: hidden;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+}
+
+.option-item:hover {
+    border-color: #6f42c1;
+    background: rgba(111, 66, 193, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.15);
+}
+
+.option-item.selected {
+    border-color: #6f42c1;
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.1), rgba(232, 62, 140, 0.1));
+    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);
+    transform: translateY(-2px);
+}
+
+.option-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: transparent;
+    transition: background 0.3s ease;
+}
+
+.option-item.selected::before {
+    background: linear-gradient(135deg, #6f42c1, #e83e8c);
+}
+
+.option-radio {
+    transform: scale(1.2);
+    margin: 0;
+}
+
+.option-text {
+    font-size: 0.85rem;
+    color: #495057;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: center;
+}
+
+.option-value {
+    color: #6c757d;
+    font-size: 0.75rem;
+    font-weight: 400;
+    margin-top: 0.125rem;
+}
+
+.evaluation-controls {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    bottom: 1rem;
+    z-index: 100;
+    border-top: 3px solid #6f42c1;
+}
+
+.evaluation-info {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.variable-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.progress-bar {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #6f42c1, #e83e8c);
+    transition: width 0.6s ease;
+}
+
+.btn-next {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    color: white;
+}
+
+.btn-next:hover {
+    background: linear-gradient(135deg, #218838, #1ea080);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.btn-back {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: linear-gradient(135deg, #5a6268, #343a40);
+    transform: translateY(-1px);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .evaluation-header {
+        text-align: center;
+        padding: 1.5rem;
+    }
+    
+    .question-header {
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .question-number {
+        margin: 0 auto 1rem auto;
+    }
+    
+    .option-container {
+        padding: 1rem;
+    }
+    
+    .evaluation-controls {
+        position: relative;
+        bottom: auto;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header de la Evaluación -->
+    <div class="evaluation-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <i class="fas fa-clipboard-check fa-2x"></i>
+            </div>
+            <div class="col">
+                <h1 class="h4 mb-1">Evaluación de Seguridad</h1>
+                <div class="d-flex flex-wrap align-items-center text-sm">
+                    <span class="me-3">
+                        <strong>Perfil:</strong> {{ evaluacion.perfil.nombre_completo }}
+                    </span>
+                    <span class="me-3">
+                        <strong>Tipo:</strong> {{ evaluacion.arbol.nombre }}
+                    </span>
+                    <span>
+                        <strong>Evaluador:</strong> {{ evaluacion.evaluador_nombre }}
+                    </span>
+                </div>
+            </div>
+            <div class="col-auto">
+                <div class="text-end">
+                    <div class="badge bg-warning">
+                        {{ evaluacion.get_estado_display }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progreso de la Evaluación -->
+    <div class="progress-container">
+        <div class="row align-items-center">
+            <div class="col-md-12">
+                <h6 class="mb-2">Progreso de la Evaluación</h6>
+                <div class="progress" style="height: 12px; background-color: #e9ecef; border-radius: 6px;">
+                    <div class="progress-bar" 
+                         style="width: {{ progreso_porcentaje|default:0|unlocalize }}%; background: linear-gradient(90deg, #6f42c1, #e83e8c); border-radius: 6px; transition: width 0.6s ease;"
+                         role="progressbar"
+                         data-progress="{{ progreso_porcentaje|default:0 }}"
+                         aria-valuenow="{{ progreso_porcentaje|default:0|floatformat:1 }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                        <span class="visually-hidden">{{ progreso_porcentaje|default:0|floatformat:1 }}% completado</span>
+                    </div>
+                </div>
+                <small class="text-muted mt-1">{{ progreso_porcentaje|default:0|floatformat:1 }}% completado</small>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" id="evaluationForm">
+        {% csrf_token %}
+        
+        <!-- Campo oculto para la acción -->
+        <input type="hidden" name="accion" id="hiddenAccion" value="">
+        
+        {% if pregunta_actual %}
+        <!-- Tarjeta de Pregunta -->
+        <div class="question-card fade-in">
+            <div class="question-header">
+                <div class="d-flex align-items-center">
+                    <div class="question-number">
+                        {{ numero_pregunta }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="question-text">
+                            {{ pregunta_actual.texto }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="option-container">
+                <div class="row g-2">
+                    {% for opcion in opciones %}
+                    <div class="{% if opciones|length <= 2 %}col-md-6{% elif opciones|length == 3 %}col-md-4{% else %}col-md-3{% endif %}">
+                        <div class="option-item h-100" onclick="selectOption({{ opcion.id }})">
+                            <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100">
+                                <input type="radio" 
+                                       name="respuesta" 
+                                       value="{{ opcion.id }}" 
+                                       id="option_{{ opcion.id }}"
+                                       class="option-radio mb-2"
+                                       {% if respuesta_seleccionada == opcion.id %}checked{% endif %}>
+                                <label for="option_{{ opcion.id }}" class="option-text mb-0 fw-semibold">
+                                    {{ opcion.texto }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Mensaje si no hay pregunta actual -->
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                <h4>¡Evaluación Completada!</h4>
+                <p class="text-muted">Has respondido todas las preguntas de esta evaluación.</p>
+                <a href="{% url 'security_probabilistic:detalle_perfil' evaluacion.perfil.pk %}" 
+                   class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Perfil
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Controles de Navegación -->
+        {% if pregunta_actual %}
+        <div class="evaluation-controls">
+            <div class="d-flex justify-content-between align-items-center">
+                <!-- Botón Anterior -->
+                {% if hay_pregunta_anterior %}
+                <button type="submit" name="accion" value="anterior" class="btn btn-back">
+                    <i class="fas fa-arrow-left me-1"></i>Anterior
+                </button>
+                {% else %}
+                <div></div>
+                {% endif %}
+                
+                <!-- Información Central -->
+                <small class="text-muted">
+                    Pregunta {{ numero_pregunta }}
+                </small>
+                
+                <!-- Botón Siguiente -->
+                <button type="submit" 
+                        name="accion" 
+                        value="siguiente" 
+                        class="btn btn-next"
+                        id="btnSiguiente"
+                        disabled>
+                    <span id="btnTexto">
+                        {% if es_ultima_pregunta %}
+                            <i class="fas fa-check me-1"></i>Finalizar
+                        {% else %}
+                            Siguiente<i class="fas fa-arrow-right ms-1"></i>
+                        {% endif %}
+                    </span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<script>
+// Variables globales
+let selectedOption = {% if respuesta_seleccionada %}{{ respuesta_seleccionada }}{% else %}null{% endif %};
+
+// Función para seleccionar una opción
+function selectOption(optionId) {
+    console.log('Seleccionando opción:', optionId);
+    
+    // Remover selección anterior
+    document.querySelectorAll('.option-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Seleccionar nueva opción
+    const optionElement = document.querySelector(`#option_${optionId}`).closest('.option-item');
+    optionElement.classList.add('selected');
+    
+    // Marcar radio button
+    const radioButton = document.querySelector(`#option_${optionId}`);
+    radioButton.checked = true;
+    console.log('Radio button marcado:', radioButton.name, '=', radioButton.value);
+    
+    // Actualizar variable global
+    selectedOption = optionId;
+    
+    // Habilitar botón siguiente
+    const btnSiguiente = document.getElementById('btnSiguiente');
+    btnSiguiente.disabled = false;
+    console.log('Botón siguiente habilitado');
+    
+    // Efecto visual
+    optionElement.style.transform = 'translateY(-4px) scale(1.02)';
+    setTimeout(() => {
+        optionElement.style.transform = 'translateY(-2px)';
+    }, 150);
+}
+
+// Inicializar estado de la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Asegurar que la barra de progreso se muestre correctamente
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        const progresoStr = progressBar.getAttribute('data-progress');
+        // Convertir coma a punto si es necesario
+        const progreso = parseFloat(progresoStr.replace(',', '.')) || 0;
+        progressBar.style.width = progreso + '%';
+        console.log('Progreso establecido:', progreso + '%', 'desde valor:', progresoStr);
+    }
+    
+    // Si hay una respuesta preseleccionada, marcar la opción
+    if (selectedOption) {
+        selectOption(selectedOption);
+    }
+    
+    // Agregar eventos a las opciones
+    document.querySelectorAll('.option-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                selectOption(radio.value);
+            }
+        });
+    });
+    
+    // Validación del formulario
+    document.getElementById('evaluationForm').addEventListener('submit', function(e) {
+        const submitter = e.submitter;
+        const accion = submitter ? submitter.value : null;
+        console.log('Enviando formulario con acción:', accion);
+        console.log('Submitter:', submitter);
+        
+        // Asegurar que la acción se envíe correctamente
+        const hiddenAccion = document.getElementById('hiddenAccion');
+        if (accion) {
+            hiddenAccion.value = accion;
+            console.log('Acción asignada al campo oculto:', accion);
+        }
+        
+        if (accion === 'siguiente') {
+            const respuestaSeleccionada = document.querySelector('input[name="respuesta"]:checked');
+            console.log('Respuesta seleccionada:', respuestaSeleccionada ? respuestaSeleccionada.value : 'ninguna');
+            
+            if (!respuestaSeleccionada) {
+                e.preventDefault();
+                alert('Por favor, seleccione una opción antes de continuar.');
+                return false;
+            }
+            
+            // Deshabilitar botón para evitar doble envío
+            console.log('Deshabilitando botón y cambiando texto...');
+            submitter.disabled = true;
+            
+            // Cambiar solo el contenido del span, no el botón completo
+            const btnTexto = submitter.querySelector('#btnTexto');
+            if (btnTexto) {
+                btnTexto.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
+            }
+            
+            console.log('Formulario enviado correctamente');
+        }
+    });
+    
+    // Atajos de teclado
+    document.addEventListener('keydown', function(e) {
+        // Números 1-9 para seleccionar opciones
+        if (e.key >= '1' && e.key <= '9') {
+            const optionIndex = parseInt(e.key) - 1;
+            const options = document.querySelectorAll('input[name="respuesta"]');
+            if (options[optionIndex]) {
+                selectOption(options[optionIndex].value);
+            }
+        }
+        
+        // Enter para continuar (si hay opción seleccionada)
+        if (e.key === 'Enter' && selectedOption) {
+            e.preventDefault();
+            const btnSiguiente = document.getElementById('btnSiguiente');
+            if (btnSiguiente && !btnSiguiente.disabled) {
+                // Establecer acción antes de hacer submit
+                document.getElementById('hiddenAccion').value = 'siguiente';
+                btnSiguiente.click();
+            }
+        }
+        
+        // Escape o Backspace para volver
+        if ((e.key === 'Escape' || e.key === 'Backspace') && !e.ctrlKey && !e.altKey) {
+            e.preventDefault();
+            const btnAnterior = document.querySelector('button[value="anterior"]');
+            if (btnAnterior) {
+                if (confirm('¿Desea volver a la pregunta anterior?')) {
+                    btnAnterior.click();
+                }
+            }
+        }
+        
+        // Flecha izquierda para pregunta anterior
+        if (e.key === 'ArrowLeft' && e.ctrlKey) {
+            e.preventDefault();
+            const btnAnterior = document.querySelector('button[value="anterior"]');
+            if (btnAnterior) {
+                document.getElementById('hiddenAccion').value = 'anterior';
+                btnAnterior.click();
+            }
+        }
+        
+        // Flecha derecha para siguiente pregunta
+        if (e.key === 'ArrowRight' && e.ctrlKey && selectedOption) {
+            e.preventDefault();
+            const btnSiguiente = document.getElementById('btnSiguiente');
+            if (btnSiguiente && !btnSiguiente.disabled) {
+                document.getElementById('hiddenAccion').value = 'siguiente';
+                btnSiguiente.click();
+            }
+        }
+    });
+});
+
+// Auto-guardar respuesta (opcional)
+function autoSave() {
+    if (selectedOption) {
+        // Aquí se podría implementar auto-guardado con AJAX
+        console.log('Auto-guardando respuesta:', selectedOption);
+    }
+}
+
+// Guardar cada 30 segundos
+setInterval(autoSave, 30000);
+</script>
+{% endblock %}

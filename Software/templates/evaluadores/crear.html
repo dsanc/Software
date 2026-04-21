@@ -1,0 +1,1093 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .section-card {
+        margin-bottom: 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: box-shadow 0.15s ease-in-out;
+    }
+    
+    .section-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .section-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1rem 1.25rem;
+        border-bottom: none;
+    }
+    
+    .section-header h5 {
+        margin: 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-header i {
+        margin-right: 0.5rem;
+    }
+    
+    .section-body {
+        padding: 1.5rem 1.25rem;
+    }
+    
+    .progress-indicator {
+        background: #f8f9fc;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        border-left: 4px solid #5a67d8;
+    }
+    
+    .step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+    
+    .step {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem;
+        background: #e2e8f0;
+        margin: 0 0.125rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+    
+    .step.completed {
+        background: #68d391;
+        color: white;
+    }
+    
+    .step.active {
+        background: #5a67d8;
+        color: white;
+    }
+    
+    .field-group {
+        background: #f7fafc;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .field-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .field-label i {
+        margin-right: 0.5rem;
+        color: #5a67d8;
+    }
+    
+    .help-tooltip {
+        position: relative;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+    
+    .help-tooltip .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #1a202c;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 0.75rem;
+    }
+    
+    .help-tooltip:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-user-plus text-primary"></i>
+            {{ page_title }}
+        </h1>
+        <a href="{% url 'evaluadores:lista' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+
+    <!-- Progress Indicator -->
+    <div class="progress-indicator">
+        <div class="step-indicator">
+            <div class="step active" id="step-1">
+                <i class="fas fa-user"></i> Información Personal
+            </div>
+            <div class="step" id="step-2">
+                <i class="fas fa-cogs"></i> Configuración de Acceso
+            </div>
+            <div class="step" id="step-3">
+                <i class="fas fa-shield-alt"></i> Permisos CRUD
+            </div>
+            <div class="step" id="step-4">
+                <i class="fas fa-sliders-h"></i> Restricciones
+            </div>
+        </div>
+        <small class="text-muted">Completa cada sección para crear el evaluador</small>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-8 col-lg-10">
+            <form method="post" id="evaluador-form">
+                {% csrf_token %}
+                
+                <!-- Sección 1: Información Personal -->
+                <div class="section-card" data-section="1">
+                    <div class="section-header">
+                        <h5>
+                            <i class="fas fa-user-edit"></i>
+                            Información Personal del Evaluador
+                        </h5>
+                    </div>
+                    <div class="section-body">
+                        <!-- Email del evaluador -->
+                        <div class="field-group">
+                            <label class="field-label">
+                                <i class="fas fa-envelope"></i>
+                                {{ form.email_evaluador.label }}
+                                <span class="text-danger">*</span>
+                                <span class="help-tooltip">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                    <span class="tooltip-text">Email para el evaluador (se creará usuario si no existe)</span>
+                                </span>
+                            </label>
+                            {{ form.email_evaluador }}
+                            {% if form.email_evaluador.help_text %}
+                                <small class="form-text text-muted">{{ form.email_evaluador.help_text }}</small>
+                            {% endif %}
+                            {% if form.email_evaluador.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email_evaluador.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div id="usuario-info" class="mt-2" style="display: none;">
+                                <div class="alert alert-info alert-sm" role="alert">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span id="usuario-mensaje"></span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Contraseña del evaluador -->
+                        <div class="field-group">
+                            <label class="field-label">
+                                <i class="fas fa-lock"></i>
+                                {{ form.password_evaluador.label }}
+                                <span class="text-danger">*</span>
+                                <span class="help-tooltip">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                    <span class="tooltip-text">Contraseña de acceso para el evaluador</span>
+                                </span>
+                            </label>
+                            {{ form.password_evaluador }}
+                            {% if form.password_evaluador.help_text %}
+                                <small class="form-text text-muted">{{ form.password_evaluador.help_text }}</small>
+                            {% endif %}
+                            {% if form.password_evaluador.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password_evaluador.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Nombres y Apellidos -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">
+                                        <i class="fas fa-user"></i>
+                                        {{ form.nombres.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.nombres }}
+                                    {% if form.nombres.help_text %}
+                                        <small class="form-text text-muted">{{ form.nombres.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.nombres.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.nombres.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">
+                                        <i class="fas fa-user"></i>
+                                        {{ form.apellidos.label }}
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.apellidos }}
+                                    {% if form.apellidos.help_text %}
+                                        <small class="form-text text-muted">{{ form.apellidos.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.apellidos.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.apellidos.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tipo de Evaluador -->
+                        <div class="field-group">
+                            <label class="field-label">
+                                <i class="fas fa-user-tag"></i>
+                                {{ form.tipo_evaluador.label }}
+                                <span class="text-danger">*</span>
+                                <span class="help-tooltip">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                    <span class="tooltip-text">Define el nivel de responsabilidad del evaluador</span>
+                                </span>
+                            </label>
+                            {{ form.tipo_evaluador }}
+                            {% if form.tipo_evaluador.help_text %}
+                                <small class="form-text text-muted">{{ form.tipo_evaluador.help_text }}</small>
+                            {% endif %}
+                            {% if form.tipo_evaluador.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tipo_evaluador.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 2: Configuración de Acceso -->
+                <div class="section-card" data-section="2">
+                    <div class="section-header">
+                        <h5>
+                            <i class="fas fa-cogs"></i>
+                            Configuración de Acceso a Módulos
+                        </h5>
+                    </div>
+                    <div class="section-body">
+                        <div class="field-group">
+                            <label class="field-label">
+                                <i class="fas fa-puzzle-piece"></i>
+                                {{ form.modulos_permitidos.label }}
+                                <span class="help-tooltip">
+                                    <i class="fas fa-question-circle text-muted"></i>
+                                    <span class="tooltip-text">Solo se muestran módulos de tus suscripciones activas</span>
+                                </span>
+                            </label>
+                            
+                            {% if form.modulos_permitidos.field.choices %}
+                                <div class="row">
+                                    {% for choice in form.modulos_permitidos.field.choices %}
+                                        <div class="col-md-6 col-lg-4 mb-3">
+                                            <div class="card h-100 border-0" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                                <div class="card-body text-center">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               style="transform: scale(1.2);"
+                                                               name="{{ form.modulos_permitidos.name }}" 
+                                                               value="{{ choice.0 }}" 
+                                                               id="modulo_{{ choice.0 }}"
+                                                               {% if choice.0 in form.modulos_permitidos.value %}checked{% endif %}>
+                                                        <label class="form-check-label fw-bold" for="modulo_{{ choice.0 }}">
+                                                            <i class="fas fa-cube text-primary mb-2 d-block" style="font-size: 1.5rem;"></i>
+                                                            {{ choice.1 }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    No tienes suscripciones activas. Los evaluadores necesitan que tengas suscripciones para heredar permisos.
+                                </div>
+                            {% endif %}
+                            
+                            {% if form.modulos_permitidos.help_text %}
+                                <small class="form-text text-muted">{{ form.modulos_permitidos.help_text }}</small>
+                            {% endif %}
+                            {% if form.modulos_permitidos.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.modulos_permitidos.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Permisos CRUD Detallados -->
+                {% if form.permisos_crud %}
+                <div class="section-card" data-section="3">
+                    <div class="section-header">
+                        <h5>
+                            <i class="fas fa-shield-alt"></i>
+                            Permisos CRUD Detallados por Módulo
+                        </h5>
+                    </div>
+                    <div class="section-body">
+                        <div class="alert alert-info mb-4">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h6><i class="fas fa-info-circle"></i> Configuración de Permisos Granulares (Opcional)</h6>
+                                    <p class="mb-2 small">Define exactamente qué acciones puede realizar el evaluador en cada módulo seleccionado. Puedes expandir cada módulo para configurar permisos específicos.</p>
+                                    <p class="mb-0 small text-muted"><strong>Nota:</strong> Si no configuras permisos específicos, el evaluador tendrá permisos básicos por defecto (crear, leer, actualizar).</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="expandAllModulos()">
+                                        <i class="fas fa-expand-arrows-alt"></i> Expandir Todo
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="field-group">
+                            {{ form.permisos_crud }}
+                            {% if form.permisos_crud.help_text %}
+                                <div class="mt-3">
+                                    <small class="form-text text-muted">{{ form.permisos_crud.help_text }}</small>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3 mb-3">
+                            <h6 class="alert-heading"><i class="fas fa-lightbulb me-2"></i>Permisos por Defecto</h6>
+                            <p class="mb-2 small">Si no configuras permisos específicos para un módulo, el evaluador tendrá estos permisos básicos:</p>
+                            <ul class="mb-0 small">
+                                <li><i class="fas fa-plus text-success me-1"></i><strong>Crear:</strong> Puede añadir nuevos elementos</li>
+                                <li><i class="fas fa-eye text-info me-1"></i><strong>Leer:</strong> Puede consultar información existente</li>
+                                <li><i class="fas fa-edit text-warning me-1"></i><strong>Actualizar:</strong> Puede modificar elementos existentes</li>
+                                <li><i class="fas fa-times text-muted me-1"></i><strong>Eliminar:</strong> No permitido por defecto (seguridad)</li>
+                                <li><i class="fas fa-times text-muted me-1"></i><strong>Exportar/Aprobar:</strong> No permitido por defecto</li>
+                            </ul>
+                        </div>
+                        
+                        {% if form.permisos_crud.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.permisos_crud.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Sección 4: Restricciones y Permisos Globales -->
+                <div class="section-card" data-section="4">
+                    <div class="section-header">
+                        <h5>
+                            <i class="fas fa-sliders-h"></i>
+                            Restricciones y Permisos Globales
+                        </h5>
+                    </div>
+                    <div class="section-body">
+                        <!-- Limitaciones numéricas -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        {{ form.max_evaluaciones_mes.label }}
+                                        <span class="help-tooltip">
+                                            <i class="fas fa-question-circle text-muted"></i>
+                                            <span class="tooltip-text">Número máximo de evaluaciones por mes</span>
+                                        </span>
+                                    </label>
+                                    {{ form.max_evaluaciones_mes }}
+                                    {% if form.max_evaluaciones_mes.help_text %}
+                                        <small class="form-text text-muted">{{ form.max_evaluaciones_mes.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.max_evaluaciones_mes.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.max_evaluaciones_mes.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="field-group">
+                                    <label class="field-label">
+                                        <i class="fas fa-clock"></i>
+                                        {{ form.fecha_expiracion.label }}
+                                        <span class="help-tooltip">
+                                            <i class="fas fa-question-circle text-muted"></i>
+                                            <span class="tooltip-text">Fecha límite de acceso (opcional)</span>
+                                        </span>
+                                    </label>
+                                    {{ form.fecha_expiracion }}
+                                    {% if form.fecha_expiracion.help_text %}
+                                        <small class="form-text text-muted">{{ form.fecha_expiracion.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.fecha_expiracion.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.fecha_expiracion.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Permisos globales -->
+                        <div class="field-group">
+                            <h6 class="mb-3">
+                                <i class="fas fa-toggle-on text-primary"></i>
+                                Permisos Globales del Sistema
+                            </h6>
+                            
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-success" style="background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-file-pdf text-success mb-2" style="font-size: 2rem;"></i>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                {{ form.puede_crear_reportes }}
+                                                <label class="form-check-label fw-bold" for="id_puede_crear_reportes">
+                                                    {{ form.puede_crear_reportes.label }}
+                                                </label>
+                                            </div>
+                                            {% if form.puede_crear_reportes.help_text %}
+                                                <small class="form-text text-muted">{{ form.puede_crear_reportes.help_text }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-warning" style="background: linear-gradient(135deg, #fffbf0 0%, #fed7aa 100%);">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-edit text-warning mb-2" style="font-size: 2rem;"></i>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                {{ form.puede_editar_evaluaciones }}
+                                                <label class="form-check-label fw-bold" for="id_puede_editar_evaluaciones">
+                                                    {{ form.puede_editar_evaluaciones.label }}
+                                                </label>
+                                            </div>
+                                            {% if form.puede_editar_evaluaciones.help_text %}
+                                                <small class="form-text text-muted">{{ form.puede_editar_evaluaciones.help_text }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 mb-3">
+                                    <div class="card h-100 border-info" style="background: linear-gradient(135deg, #ebf8ff 0%, #bee3f8 100%);">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-tachometer-alt text-info mb-2" style="font-size: 2rem;"></i>
+                                            <div class="form-check form-switch d-flex justify-content-center">
+                                                {{ form.acceso_completo_dashboard }}
+                                                <label class="form-check-label fw-bold" for="id_acceso_completo_dashboard">
+                                                    {{ form.acceso_completo_dashboard.label }}
+                                                </label>
+                                            </div>
+                                            {% if form.acceso_completo_dashboard.help_text %}
+                                                <small class="form-text text-muted">{{ form.acceso_completo_dashboard.help_text }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Notas -->
+                        <div class="field-group">
+                            <label class="field-label">
+                                <i class="fas fa-sticky-note"></i>
+                                {{ form.notas.label }}
+                            </label>
+                            {{ form.notas }}
+                            {% if form.notas.help_text %}
+                                <small class="form-text text-muted">{{ form.notas.help_text }}</small>
+                            {% endif %}
+                            {% if form.notas.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notas.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="section-card">
+                    <div class="section-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i>
+                                    Todos los campos marcados con <span class="text-danger">*</span> son obligatorios
+                                </small>
+                            </div>
+                            <div>
+                                <a href="{% url 'evaluadores:lista' %}" class="btn btn-secondary me-2">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 
+                                    {% if form.instance.pk %}Actualizar{% else %}Crear{% endif %} Evaluador
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Panel de ayuda contextual -->
+        <div class="col-xl-4 col-lg-12">
+            <!-- Resumen del progreso -->
+            <div class="card shadow mb-4 border-left-primary">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-pie"></i>
+                        Progreso de Configuración
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                             role="progressbar" style="width: 25%" id="form-progress">
+                            <span class="font-weight-bold">25%</span>
+                        </div>
+                    </div>
+                    <div id="progress-text" class="small text-muted">
+                        Completa la información personal para continuar
+                    </div>
+                    <div class="mt-3">
+                        <div class="small">
+                            <span class="badge badge-secondary mr-1" id="badge-info">Información Personal</span>
+                            <span class="badge badge-light mr-1" id="badge-modulos">Módulos</span>
+                            <span class="badge badge-light mr-1" id="badge-permisos">Permisos CRUD</span>
+                            <span class="badge badge-light mr-1" id="badge-restricciones">Restricciones</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ayuda contextual -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-question-circle"></i>
+                        Ayuda Contextual
+                    </h6>
+                </div>
+                <div class="card-body" id="help-content">
+                    <div class="help-section" id="help-info" style="display: block;">
+                        <h6 class="font-weight-bold text-primary">
+                            <i class="fas fa-user-edit"></i> Información Personal
+                        </h6>
+                        <p class="text-sm text-muted mb-3">
+                            Configura los datos básicos del evaluador que se agregará a tu equipo.
+                        </p>
+                        <div class="mb-3">
+                            <h6 class="font-weight-bold">Tipos de Evaluador:</h6>
+                            <ul class="list-unstyled text-sm">
+                                <li class="mb-1">
+                                    <i class="fas fa-user text-success me-1"></i>
+                                    <strong>Evaluador:</strong> Permisos básicos de evaluación
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-user-check text-info me-1"></i>
+                                    <strong>Revisor:</strong> Puede revisar y aprobar evaluaciones
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-user-graduate text-warning me-1"></i>
+                                    <strong>Analista:</strong> Acceso a análisis y reportes avanzados
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-user-shield text-danger me-1"></i>
+                                    <strong>Administrador:</strong> Permisos completos del módulo
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="help-section" id="help-modulos" style="display: none;">
+                        <h6 class="font-weight-bold text-primary">
+                            <i class="fas fa-cogs"></i> Configuración de Módulos
+                        </h6>
+                        <p class="text-sm text-muted mb-3">
+                            Selecciona los módulos a los que tendrá acceso el evaluador.
+                        </p>
+                        <div class="alert alert-info small">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Consejo:</strong> Solo aparecen los módulos de tus suscripciones activas. El evaluador heredará el acceso básico a estos módulos.
+                        </div>
+                    </div>
+
+                    <div class="help-section" id="help-permisos" style="display: none;">
+                        <h6 class="font-weight-bold text-primary">
+                            <i class="fas fa-shield-alt"></i> Permisos CRUD Detallados
+                        </h6>
+                        <p class="text-sm text-muted mb-3">
+                            Define permisos específicos para cada módulo seleccionado.
+                        </p>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="small font-weight-bold">Tipos de Permisos:</h6>
+                                <ul class="list-unstyled text-sm">
+                                    <li class="mb-1">
+                                        <i class="fas fa-plus-circle text-success me-1"></i>
+                                        <strong>Crear:</strong> Añadir nuevos elementos
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-search text-info me-1"></i>
+                                        <strong>Consultar:</strong> Ver y buscar información
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-edit text-warning me-1"></i>
+                                        <strong>Editar:</strong> Modificar elementos existentes
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-trash-alt text-danger me-1"></i>
+                                        <strong>Eliminar:</strong> Borrar elementos (¡cuidado!)
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-download text-secondary me-1"></i>
+                                        <strong>Exportar:</strong> Generar reportes
+                                    </li>
+                                    <li class="mb-1">
+                                        <i class="fas fa-check-circle text-primary me-1"></i>
+                                        <strong>Aprobar:</strong> Validar elementos
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="help-section" id="help-restricciones" style="display: none;">
+                        <h6 class="font-weight-bold text-primary">
+                            <i class="fas fa-sliders-h"></i> Restricciones y Límites
+                        </h6>
+                        <p class="text-sm text-muted mb-3">
+                            Establece límites y permisos globales del sistema.
+                        </p>
+                        <div class="alert alert-warning small">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Importante:</strong> Estos límites se aplicarán independientemente de los permisos CRUD configurados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plantillas rápidas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-magic"></i>
+                        Plantillas Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-sm text-muted">Configura permisos predefinidos con un clic:</p>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="aplicarPlantilla('basico')">
+                            <i class="fas fa-user"></i> Evaluador Básico
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="aplicarPlantilla('intermedio')">
+                            <i class="fas fa-user-tie"></i> Supervisor
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="aplicarPlantilla('avanzado')">
+                            <i class="fas fa-user-graduate"></i> Analista Senior
+                        </button>
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="aplicarPlantilla('completo')">
+                            <i class="fas fa-user-shield"></i> Administrador
+                        </button>
+                    </div>
+                    
+                    <div class="alert alert-info mt-3 small">
+                        <i class="fas fa-info-circle"></i>
+                        Las plantillas configuran automáticamente los permisos CRUD según el rol seleccionado.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const emailInput = document.getElementById('id_email_evaluador');
+    const usuarioInfo = document.getElementById('usuario-info');
+    const usuarioMensaje = document.getElementById('usuario-mensaje');
+    
+    let timeout = null;
+    let currentSection = 1;
+
+    // Verificación de usuario por email
+    emailInput.addEventListener('input', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            verificarUsuario(this.value);
+        }, 500);
+    });
+
+    function verificarUsuario(email) {
+        if (!email || !isValidEmail(email)) {
+            usuarioInfo.style.display = 'none';
+            return;
+        }
+
+        fetch(`{% url 'evaluadores:api_verificar_usuario' %}?email=${encodeURIComponent(email)}`, {
+            method: 'GET',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.valid) {
+                mostrarInfoUsuario(data);
+            } else {
+                usuarioInfo.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error verificando usuario:', error);
+            usuarioInfo.style.display = 'none';
+        });
+    }
+
+    function mostrarInfoUsuario(data) {
+        usuarioInfo.style.display = 'block';
+        const alert = usuarioInfo.querySelector('.alert');
+        
+        if (data.exists && data.is_evaluator) {
+            alert.className = 'alert alert-warning alert-sm';
+            usuarioMensaje.innerHTML = `<strong>${data.name}</strong> ya es tu evaluador`;
+        } else if (data.exists) {
+            alert.className = 'alert alert-success alert-sm';
+            usuarioMensaje.innerHTML = `Usuario encontrado: <strong>${data.name}</strong> - se actualizará su contraseña`;
+        } else {
+            alert.className = 'alert alert-info alert-sm';
+            usuarioMensaje.innerHTML = 'Usuario no registrado. Se creará automáticamente con la contraseña especificada.';
+        }
+    }
+
+    // Funciones de progreso y navegación
+    function updateProgress() {
+        const sections = document.querySelectorAll('.section-card');
+        const steps = document.querySelectorAll('.step');
+        const progressBar = document.getElementById('form-progress');
+        const progressText = document.getElementById('progress-text');
+        
+        let completed = 0;
+        
+        // Verificar cada sección
+        const emailValue = document.getElementById('id_email_evaluador').value.trim();
+        const passwordValue = document.getElementById('id_password_evaluador').value.trim();
+        const nombresValue = document.getElementById('id_nombres').value.trim();
+        const apellidosValue = document.getElementById('id_apellidos').value.trim();
+        
+        // Verificar si estamos editando (campo email es readonly)
+        const emailField = document.getElementById('id_email_evaluador');
+        const isEditing = emailField.hasAttribute('readonly');
+        
+        // Sección 1: Información Personal
+        let personalComplete = false;
+        if (isEditing) {
+            // Al editar, la contraseña es opcional
+            personalComplete = emailValue && nombresValue && apellidosValue;
+        } else {
+            // Al crear, la contraseña es requerida
+            personalComplete = emailValue && passwordValue && nombresValue && apellidosValue;
+        }
+        
+        if (personalComplete) {
+            steps[0].classList.add('completed');
+            completed++;
+        } else {
+            steps[0].classList.remove('completed');
+        }
+        
+        // Sección 2: Módulos
+        const modulosSeleccionados = document.querySelectorAll('input[name="modulos_permitidos"]:checked');
+        if (modulosSeleccionados.length > 0) {
+            steps[1].classList.add('completed');
+            completed++;
+        } else {
+            steps[1].classList.remove('completed');
+        }
+        
+        // Sección 3: Permisos CRUD (opcional)
+        // Los permisos CRUD son opcionales - si no se configuran, se usan permisos básicos por defecto
+        const permisosSeleccionados = document.querySelectorAll('.permiso-checkbox:checked');
+        const tienePermisosWidget = document.querySelector('[id*="_create"], [id*="_read"], [id*="_update"]');
+        
+        // Si hay widget de permisos visible, es recomendado configurarlos, pero no obligatorio
+        if (tienePermisosWidget && permisosSeleccionados.length > 0) {
+            steps[2].classList.add('completed');
+            completed++;
+        } else if (!tienePermisosWidget) {
+            // Si no hay widget de permisos, marcar como completa automáticamente
+            steps[2].classList.add('completed');
+            completed++;
+        } else {
+            // Hay widget pero no hay permisos - marcar como no completa pero no es crítico
+            steps[2].classList.remove('completed');
+        }
+        
+        // Sección 4: Restricciones (siempre completa, tiene valores por defecto)
+        steps[3].classList.add('completed');
+        completed++;
+        
+        // Actualizar barra de progreso
+        const percentage = (completed / 4) * 100;
+        progressBar.style.width = percentage + '%';
+        progressBar.querySelector('span').textContent = Math.round(percentage) + '%';
+        
+        // Actualizar texto de progreso
+        const messages = [
+            'Completa la información personal para continuar',
+            'Selecciona los módulos de acceso',
+            'Configura permisos específicos (opcional - se usarán permisos básicos por defecto)',
+            '¡Configuración completa! Puedes crear el evaluador'
+        ];
+        
+        progressText.textContent = messages[Math.min(completed - 1, 3)];
+        
+        // Actualizar ayuda contextual
+        updateHelpContent(completed);
+    }
+
+    function updateHelpContent(section) {
+        const helpSections = document.querySelectorAll('.help-section');
+        const badges = ['badge-info', 'badge-modulos', 'badge-permisos', 'badge-restricciones'];
+        
+        helpSections.forEach(help => help.style.display = 'none');
+        
+        if (section <= 1) {
+            document.getElementById('help-info').style.display = 'block';
+            updateBadgeStatus('badge-info', 'active');
+        } else if (section <= 2) {
+            document.getElementById('help-modulos').style.display = 'block';
+            updateBadgeStatus('badge-modulos', 'active');
+        } else if (section <= 3) {
+            document.getElementById('help-permisos').style.display = 'block';
+            updateBadgeStatus('badge-permisos', 'active');
+        } else {
+            document.getElementById('help-restricciones').style.display = 'block';
+            updateBadgeStatus('badge-restricciones', 'active');
+        }
+    }
+
+    function updateBadgeStatus(activeBadgeId, status) {
+        const badges = ['badge-info', 'badge-modulos', 'badge-permisos', 'badge-restricciones'];
+        badges.forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (badgeId === activeBadgeId) {
+                badge.className = `badge badge-${status === 'active' ? 'primary' : 'success'} mr-1`;
+            } else {
+                badge.className = 'badge badge-light mr-1';
+            }
+        });
+    }
+
+    // Plantillas rápidas
+    window.aplicarPlantilla = function(tipo) {
+        const plantillas = {
+            'basico': {
+                'create': true,
+                'read': true,
+                'update': false,
+                'delete': false,
+                'export': false,
+                'approve': false
+            },
+            'intermedio': {
+                'create': true,
+                'read': true,
+                'update': true,
+                'delete': false,
+                'export': true,
+                'approve': true
+            },
+            'avanzado': {
+                'create': true,
+                'read': true,
+                'update': true,
+                'delete': false,
+                'export': true,
+                'approve': true
+            },
+            'completo': {
+                'create': true,
+                'read': true,
+                'update': true,
+                'delete': true,
+                'export': true,
+                'approve': true
+            }
+        };
+        
+        const plantilla = plantillas[tipo];
+        if (!plantilla) return;
+        
+        // Aplicar plantilla a todos los módulos seleccionados
+        const modulosSeleccionados = document.querySelectorAll('input[name="modulos_permitidos"]:checked');
+        modulosSeleccionados.forEach(modulo => {
+            const moduloValue = modulo.value;
+            Object.keys(plantilla).forEach(permiso => {
+                const checkbox = document.getElementById(`id_permisos_crud_${moduloValue}_${permiso}`);
+                const card = checkbox?.closest('.permiso-card');
+                if (checkbox) {
+                    checkbox.checked = plantilla[permiso];
+                    if (plantilla[permiso]) {
+                        card?.classList.add('selected');
+                    } else {
+                        card?.classList.remove('selected');
+                    }
+                }
+            });
+            
+            // Actualizar toggle del módulo
+            if (typeof updateToggleAll === 'function') {
+                updateToggleAll(moduloValue);
+            }
+        });
+        
+        updateProgress();
+    };
+
+    // Expandir todos los módulos
+    window.expandAllModulos = function() {
+        document.querySelectorAll('.modulo-body').forEach(body => {
+            body.style.display = 'block';
+        });
+        document.querySelectorAll('.modulo-header').forEach(header => {
+            header.classList.remove('collapsed');
+        });
+    };
+
+    // Event listeners para actualizar progreso
+    document.querySelectorAll('input, select, textarea').forEach(field => {
+        field.addEventListener('change', updateProgress);
+        field.addEventListener('input', updateProgress);
+    });
+
+    // Validación del formulario
+    document.getElementById('evaluador-form').addEventListener('submit', function(e) {
+        let valid = true;
+        
+        // Verificar email
+        if (!emailInput.value.trim()) {
+            valid = false;
+            showFieldError(emailInput, 'El email es requerido');
+        }
+        
+        // Verificar al menos un módulo seleccionado
+        const modulosSeleccionados = document.querySelectorAll('input[name="modulos_permitidos"]:checked');
+        if (modulosSeleccionados.length === 0) {
+            valid = false;
+            alert('Debes seleccionar al menos un módulo');
+            return false;
+        }
+        
+        // Validar que si un módulo está seleccionado, tenga al menos un permiso CRUD O sea un caso especial
+        let modulosConPermisos = true;
+        modulosSeleccionados.forEach(modulo => {
+            const moduloValue = modulo.value;
+            const permisosCrud = document.querySelectorAll(`input[name*="${moduloValue}_"]:checked`);
+            
+            // LÓGICA MEJORADA: Permitir módulos sin permisos CRUD específicos
+            // El evaluador puede tener acceso básico al módulo sin permisos granulares configurados
+            
+            // Solo validar si el widget de permisos CRUD está visible y disponible
+            const permisosWidget = document.querySelector(`[id*="${moduloValue}_"]`);
+            
+            if (permisosWidget && permisosCrud.length === 0) {
+                // Si hay widget de permisos visible pero no hay permisos seleccionados,
+                // mostrar advertencia pero no bloquear el formulario
+                const confirmMessage = `El módulo "${modulo.nextElementSibling.textContent.trim()}" no tiene permisos CRUD específicos asignados.\n\nEsto significa que el evaluador tendrá permisos básicos por defecto (crear, leer, actualizar).\n\n¿Deseas continuar?`;
+                
+                if (!confirm(confirmMessage)) {
+                    modulosConPermisos = false;
+                }
+            }
+        });
+        
+        if (!modulosConPermisos) {
+            valid = false;
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+
+    // Funciones de utilidad
+    function showFieldError(field, message) {
+        const existingError = field.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        field.classList.add('is-invalid');
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback d-block';
+        errorDiv.textContent = message;
+        field.parentNode.appendChild(errorDiv);
+    }
+
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Inicializar progreso
+    updateProgress();
+});
+</script>
+{% endblock %}

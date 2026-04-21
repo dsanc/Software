@@ -1,0 +1,438 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Exportación de Datos - Risk Hotels{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+<style>
+.export-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.export-card:hover {
+    transform: translateY(-5px);
+    border-color: #007bff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.format-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+}
+
+.csv-card { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.json-card { background: linear-gradient(135deg, #007bff 0%, #6f42c1 100%); }
+.excel-card { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+.pdf-card { background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%); }
+
+.export-options {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-download text-primary"></i> Exportación de Datos</h2>
+                <a href="{% url 'risk_hoteles:dashboard' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del plan -->
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i>
+        <strong>Plan Pro Requerido:</strong> 
+        La exportación de datos es una característica premium disponible para usuarios con plan Pro o superior.
+        {% if user.usersubscription_set.first.plan.name == 'Basic Plan' %}
+        <a href="#" class="alert-link">Actualizar plan</a> para acceder a esta funcionalidad.
+        {% endif %}
+    </div>
+
+    <!-- Opciones de exportación -->
+    <div class="export-options">
+        <h5><i class="fas fa-cog"></i> Opciones de Exportación</h5>
+        <form id="exportOptionsForm" class="row">
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="dateFrom">Fecha Desde:</label>
+                    <input type="date" id="dateFrom" name="date_from" class="form-control" 
+                           value="{{ request.GET.date_from|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="dateTo">Fecha Hasta:</label>
+                    <input type="date" id="dateTo" name="date_to" class="form-control"
+                           value="{{ request.GET.date_to|default:'' }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="hotelFilter">Hotel Específico:</label>
+                    <select id="hotelFilter" name="hotel" class="form-control">
+                        <option value="">Todos los hoteles</option>
+                        <!-- Se cargarían dinámicamente -->
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <label for="riskLevel">Nivel de Riesgo:</label>
+                    <select id="riskLevel" name="risk_level" class="form-control">
+                        <option value="">Todos los niveles</option>
+                        <option value="very_low">Muy Bajo</option>
+                        <option value="low">Bajo</option>
+                        <option value="medium">Medio</option>
+                        <option value="high">Alto</option>
+                        <option value="very_high">Muy Alto</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includeMetrics" checked>
+                    <label class="form-check-label" for="includeMetrics">
+                        Incluir métricas detalladas por categoría
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="includeRecommendations">
+                    <label class="form-check-label" for="includeRecommendations">
+                        Incluir recomendaciones y notas
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formatos de exportación -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card export-card csv-card text-white h-100" onclick="exportData('csv')">
+                <div class="card-body text-center">
+                    <div class="format-icon">
+                        <i class="fas fa-file-csv"></i>
+                    </div>
+                    <h4>Formato CSV</h4>
+                    <p class="mb-3">
+                        Archivo de valores separados por comas, compatible con Excel y otras hojas de cálculo.
+                    </p>
+    
+                    <div class="mb-3">
+                        <small><strong>Ventajas:</strong></small><br>
+                        <small>• Compatible con Excel</small><br>
+                        <small>• Fácil de importar</small><br>
+                        <small>• Formato estándar</small>
+                    </div>
+                    
+                    <div class="btn btn-light btn-lg">
+                        <i class="fas fa-download"></i> Descargar CSV
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card export-card json-card text-white h-100" onclick="exportData('json')">
+                <div class="card-body text-center">
+                    <div class="format-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <h4>Formato JSON</h4>
+                    <p class="mb-3">
+                        Formato JSON estructurado, ideal para integración con APIs y sistemas externos.
+                    </p>
+                    
+                    <div class="mb-3">
+                        <small><strong>Ventajas:</strong></small><br>
+                        <small>• Estructura completa</small><br>
+                        <small>• Fácil integración API</small><br>
+                        <small>• Incluye metadatos</small>
+                    </div>
+                    
+                    <div class="btn btn-light btn-lg">
+                        <i class="fas fa-download"></i> Descargar JSON
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card export-card excel-card text-white h-100" onclick="showComingSoon('Excel')">
+                <div class="card-body text-center">
+                    <div class="format-icon">
+                        <i class="fas fa-file-excel"></i>
+                    </div>
+                    <h4>Formato Excel</h4>
+                    <p class="mb-3">
+                        Archivo Excel nativo con formato avanzado, gráficos y múltiples hojas.
+                    </p>
+                    
+                    <div class="mb-3">
+                        <small><strong>Ventajas:</strong></small><br>
+                        <small>• Formato avanzado</small><br>
+                        <small>• Gráficos incluidos</small><br>
+                        <small>• Múltiples hojas</small>
+                    </div>
+                    
+                    <div class="btn btn-light btn-lg">
+                        <i class="fas fa-clock"></i> Próximamente
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card export-card pdf-card text-white h-100" onclick="showComingSoon('PDF')">
+                <div class="card-body text-center">
+                    <div class="format-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <h4>Reporte PDF</h4>
+                    <p class="mb-3">
+                        Reporte completo en PDF con gráficos, análisis y recomendaciones.
+                    </p>
+                    
+                    <div class="mb-3">
+                        <small><strong>Ventajas:</strong></small><br>
+                        <small>• Reporte profesional</small><br>
+                        <small>• Gráficos integrados</small><br>
+                        <small>• Listo para imprimir</small>
+                    </div>
+                    
+                    <div class="btn btn-light btn-lg">
+                        <i class="fas fa-clock"></i> Próximamente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas de exportación -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-chart-bar"></i> Resumen de Datos a Exportar</h5>
+                </div>
+                <div class="card-body">
+                    <div id="exportSummary">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h3 class="text-primary" id="totalHotels">-</h3>
+                                <small class="text-muted">Hoteles</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="text-success" id="totalAnalyses">-</h3>
+                                <small class="text-muted">Análisis</small>
+                            </div>
+                            <div class="col-4">
+                                <h3 class="text-info" id="avgRiskScore">-</h3>
+                                <small class="text-muted">Riesgo Promedio</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="button" class="btn btn-outline-primary" onclick="updatePreview()">
+                            <i class="fas fa-refresh"></i> Actualizar Vista Previa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-history"></i> Exportaciones Recientes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>exportacion_hoteles_2024.csv</strong><br>
+                                <small class="text-muted">25 de Octubre, 2024 - 14:30</small>
+                            </div>
+                            <span class="badge badge-success">CSV</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>analisis_riesgo_octubre.json</strong><br>
+                                <small class="text-muted">20 de Octubre, 2024 - 09:15</small>
+                            </div>
+                            <span class="badge badge-info">JSON</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>reporte_mensual_sept.csv</strong><br>
+                                <small class="text-muted">30 de Septiembre, 2024 - 16:45</small>
+                            </div>
+                            <span class="badge badge-success">CSV</span>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Las exportaciones se mantienen disponibles por 30 días
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de progreso -->
+<div class="modal fade" id="exportProgressModal" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-spinner fa-spin"></i> Exportando Datos
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="progress mb-3" style="height: 30px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="exportProgress">
+                        0%
+                    </div>
+                </div>
+                <p id="exportStatus">Preparando exportación...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportData(format) {
+    // Verificar si el usuario tiene acceso
+    {% comment %}
+    {% if user.usersubscription_set.first.plan.name == 'Basic Plan' %}
+        alert('Esta funcionalidad requiere un plan Pro o superior.');
+        return;
+    {% endif %}
+    {% endcomment %}
+    
+    // Mostrar modal de progreso
+    $('#exportProgressModal').modal('show');
+    
+    // Simular progreso de exportación
+    simulateExportProgress(format);
+}
+
+function simulateExportProgress(format) {
+    const progressBar = document.getElementById('exportProgress');
+    const statusText = document.getElementById('exportStatus');
+    
+    let progress = 0;
+    const steps = [
+        'Recopilando datos de hoteles...',
+        'Procesando análisis de riesgo...',
+        'Generando métricas...',
+        'Formateando archivo ' + format.toUpperCase() + '...',
+        'Preparando descarga...'
+    ];
+    
+    const interval = setInterval(() => {
+        progress += 20;
+        progressBar.style.width = progress + '%';
+        progressBar.textContent = progress + '%';
+        
+        if (progress <= 100) {
+            statusText.textContent = steps[Math.floor((progress - 1) / 20)];
+        }
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                $('#exportProgressModal').modal('hide');
+                
+                // Simular descarga
+                const params = new URLSearchParams();
+                params.append('format', format);
+                
+                // Agregar filtros del formulario
+                const form = document.getElementById('exportOptionsForm');
+                const formData = new FormData(form);
+                for (let [key, value] of formData.entries()) {
+                    if (value) params.append(key, value);
+                }
+                
+                // Crear URL de descarga
+                const downloadUrl = `{% url 'risk_hoteles:export_data' %}?${params.toString()}`;
+                
+                // Abrir enlace de descarga
+                window.open(downloadUrl, '_blank');
+                
+                // Mostrar mensaje de éxito
+                showSuccessMessage('Exportación completada exitosamente');
+            }, 500);
+        }
+    }, 800);
+}
+
+function showComingSoon(format) {
+    alert(`La exportación en formato ${format} estará disponible próximamente.\n\nPor ahora puedes usar los formatos CSV y JSON.`);
+}
+
+function updatePreview() {
+    // Simular actualización de estadísticas
+    document.getElementById('totalHotels').textContent = Math.floor(Math.random() * 20) + 5;
+    document.getElementById('totalAnalyses').textContent = Math.floor(Math.random() * 100) + 20;
+    document.getElementById('avgRiskScore').textContent = (Math.random() * 40 + 40).toFixed(1) + '%';
+    
+    showSuccessMessage('Vista previa actualizada');
+}
+
+function showSuccessMessage(message) {
+    // Crear mensaje de éxito temporal
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+    alertDiv.innerHTML = `
+        <i class="fas fa-check-circle"></i> ${message}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    `;
+    
+    // Insertar al inicio del contenedor
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-ocultar después de 3 segundos
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
+}
+
+$(document).ready(function() {
+    // Cargar vista previa inicial
+    updatePreview();
+    
+    // Actualizar vista previa cuando cambien los filtros
+    $('#exportOptionsForm input, #exportOptionsForm select').change(function() {
+        updatePreview();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,1118 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load dashboard_tags %}
+{% load subscription_extras %}
+
+{% block title %}Inicio - {{ block.super }}{% endblock %}
+
+{% block extra_css %}
+<!-- <link rel="stylesheet" href="{% static 'css/subscriptions.css' %}"> -->
+<link rel="stylesheet" href="{% static 'css/home_professional.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section id="inicio" class="hero-professional">
+    <div class="container">
+        <div class="row align-items-center min-vh-100">
+            <div class="col-lg-6 hero-content">
+                <h1 class="hero-title fade-in">Análisis Inteligente de Riesgos</h1>
+                <p class="hero-subtitle fade-in delay-1">
+                    Plataforma especializada en identificación y gestión de riesgos para <strong>Hoteles</strong>, 
+                    <strong>Conjuntos Residenciales</strong> y <strong>Análisis de Seguridad Probabilístico</strong>. 
+                    Tecnología IA para proteger sus activos más importantes.
+                </p>
+                <div class="d-flex gap-3 mb-4 fade-in delay-2">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary-professional">
+                        <span><i class="fas fa-shield-alt me-2"></i>Proteger Ahora</span>
+                    </a>
+                    <a href="#servicios" class="btn btn-outline-professional">
+                        <span><i class="fas fa-search me-2"></i>Explorar Módulos</span>
+                    </a>
+                    {% else %}
+                    <button type="button" class="btn btn-primary-professional" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <span><i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión</span>
+                    </button>
+                    <a href="#servicios" class="btn btn-outline-professional">
+                        <span><i class="fas fa-search me-2"></i>Explorar Módulos</span>
+                    </a>
+                    {% endif %}
+                </div>
+                
+                <!-- Estadísticas Especializadas -->
+                <div class="hero-stats fade-in delay-3">
+                    <div class="stat-item">
+                        <span class="stat-number">3</span>
+                        <span class="stat-label">Módulos Especializados</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">IA</span>
+                        <span class="stat-label">Análisis Predictivo</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Monitoreo Continuo</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center fade-in delay-1">
+                <div id="media-carousel" class="position-relative">
+                    <!-- Elementos rotatorios -->
+                    <div class="media-slide active">
+                    <video class="img-fluid hero-illustration" src="{% static 'images/preview.mp4' %}" autoplay loop muted playsinline></video>
+                    </div>
+                    <div class="media-slide">
+                    <img src="{% static 'images/risk2.jpg' %}" alt="Imagen 1" class="img-fluid hero-illustration">
+                    </div>
+                    <div class="media-slide">
+                    <img src="{% static 'images/risk1.jpg' %}" alt="Imagen 2" class="img-fluid hero-illustration">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Módulos de Identificación de Riesgos -->
+<section id="servicios" class="section-padding bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Módulos de Identificación de Riesgos</h2>
+                <p class="section-subtitle">Soluciones especializadas para identificar, evaluar y mitigar riesgos en sectores específicos</p>
+                <div class="title-underline mx-auto"></div>
+            </div>
+        </div>
+        <div class="row g-4 services-grid justify-content-center">
+            <!-- Módulo HOTELES -->
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="service-card h-100 module-card">
+                    <div class="service-icon module-hotel">
+                        <i class="fas fa-hotel"></i>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-title">Módulo HOTELES</h5>
+                        <p class="service-description">Identificación y gestión integral de riesgos en la industria hotelera con análisis predictivo especializado.</p>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Análisis de riesgos operacionales</li>
+                            <li><i class="fas fa-check"></i> Evaluación de seguridad huéspedes</li>
+                            <li><i class="fas fa-check"></i> Gestión de crisis reputacional</li>
+                            <li><i class="fas fa-check"></i> Monitoreo de ocupación y revenue</li>
+                            <li><i class="fas fa-check"></i> Análisis de satisfacción cliente</li>
+                        </ul>
+                        <div class="module-badge">
+                            <span class="badge bg-primary">Sector Hotelero</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo CONJUNTOS -->
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="service-card h-100 module-card">
+                    <div class="service-icon module-conjuntos">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-title">Módulo CONJUNTOS</h5>
+                        <p class="service-description">Identificación de riesgos en conjuntos residenciales con enfoque en seguridad comunitaria y gestión integral.</p>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Análisis de seguridad perimetral</li>
+                            <li><i class="fas fa-check"></i> Evaluación de riesgos comunitarios</li>
+                            <li><i class="fas fa-check"></i> Control de acceso inteligente</li>
+                            <li><i class="fas fa-check"></i> Gestión de visitantes y proveedores</li>
+                            <li><i class="fas fa-check"></i> Monitoreo de áreas comunes</li>
+                        </ul>
+                        <div class="module-badge">
+                            <span class="badge bg-success">Conjuntos Residenciales</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Módulo SECURITY PROBABILISTIC -->
+            <div class="col-lg-4 col-md-6 col-sm-12">
+                <div class="service-card h-100 module-card">
+                    <div class="service-icon module-security">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="service-content">
+                        <h5 class="service-title">Security Probabilistic</h5>
+                        <p class="service-description">Análisis avanzado de seguridad mediante modelos probabilísticos y algoritmos de machine learning.</p>
+                        <ul class="service-features">
+                            <li><i class="fas fa-check"></i> Análisis probabilístico de amenazas</li>
+                            <li><i class="fas fa-check"></i> Detección de patrones anómalos</li>
+                            <li><i class="fas fa-check"></i> Predicción de incidentes</li>
+                            <li><i class="fas fa-check"></i> Evaluación de vulnerabilidades</li>
+                            <li><i class="fas fa-check"></i> Respuesta automatizada</li>
+                        </ul>
+                        <div class="module-badge">
+                            <span class="badge bg-warning">Análisis de Seguridad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Características Transversales -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="features-transversales">
+                    <h4 class="text-center mb-4">Características Transversales de Todos los Módulos</h4>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-sm-6">
+                            <div class="feature-item text-center">
+                                <i class="fas fa-brain mb-2"></i>
+                                <h6>Inteligencia Artificial</h6>
+                                <small class="text-muted">Algoritmos ML avanzados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="feature-item text-center">
+                                <i class="fas fa-chart-line mb-2"></i>
+                                <h6>Análisis Predictivo</h6>
+                                <small class="text-muted">Predicción de riesgos futuros</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="feature-item text-center">
+                                <i class="fas fa-clock mb-2"></i>
+                                <h6>Tiempo Real</h6>
+                                <small class="text-muted">Monitoreo 24/7 continuo</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
+                            <div class="feature-item text-center">
+                                <i class="fas fa-shield-alt mb-2"></i>
+                                <h6>Respuesta Automática</h6>
+                                <small class="text-muted">Acciones preventivas</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Metodología de Identificación de Riesgos -->
+<section id="soluciones" class="section-padding solutions-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title text-white">Metodología de Identificación de Riesgos</h2>
+                <p class="section-subtitle text-white opacity-90">Proceso sistemático y tecnología avanzada para detectar, evaluar y mitigar riesgos</p>
+                <div class="title-underline mx-auto bg-white"></div>
+            </div>
+        </div>
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6 col-md-12 order-2 order-lg-1">
+                <div class="pe-lg-4">
+                    <div class="solution-card">
+                        <h3 class="solution-title">Proceso de Identificación Inteligente</h3>
+                        <p class="solution-description">
+                            Metodología integral que utiliza algoritmos de machine learning y análisis de patrones 
+                            para identificar riesgos potenciales antes de que se materialicen, adaptada específicamente 
+                            para hoteles, conjuntos residenciales y análisis de seguridad.
+                        </p>
+                        
+                        <div class="row g-4 mt-3">
+                            <div class="col-sm-6 col-12">
+                                <div class="solution-feature">
+                                    <div class="feature-icon-small">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h6>Detección Proactiva</h6>
+                                        <p>Identificación temprana de patrones de riesgo mediante IA</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="solution-feature">
+                                    <div class="feature-icon-small">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h6>Análisis Probabilístico</h6>
+                                        <p>Evaluación estadística de probabilidad de ocurrencia</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="solution-feature">
+                                    <div class="feature-icon-small">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h6>Evaluación de Impacto</h6>
+                                        <p>Cuantificación del impacto potencial en operaciones</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="solution-feature">
+                                    <div class="feature-icon-small">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="feature-content">
+                                        <h6>Mitigación Automática</h6>
+                                        <p>Respuestas automatizadas para contener riesgos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="solution-stats mt-4">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-number text-white">85%</div>
+                                    <div class="stat-label text-white-50">Precisión IA</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-number text-white">< 5min</div>
+                                    <div class="stat-label text-white-50">Detección</div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-number text-white">60%</div>
+                                    <div class="stat-label text-white-50">Reducción Riesgos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 order-1 order-lg-2">
+                <div class="text-center">
+                    <div class="solution-diagram">
+                        <div class="diagram-center">
+                            <div class="center-node">
+                                <i class="fas fa-microchip"></i>
+                                <span>AI Core</span>
+                            </div>
+                        </div>
+                        <div class="diagram-orbits">
+                            <div class="orbit-node orbit-1">
+                                <i class="fas fa-database"></i>
+                                <span>Big Data</span>
+                            </div>
+                            <div class="orbit-node orbit-2">
+                                <i class="fas fa-cloud"></i>
+                                <span>Cloud Native</span>
+                            </div>
+                            <div class="orbit-node orbit-3">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Security</span>
+                            </div>
+                            <div class="orbit-node orbit-4">
+                                <i class="fas fa-cogs"></i>
+                                <span>Automation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Nosotros -->
+<section id="nosotros" class="section-padding bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Liderazgo en Innovación Tecnológica</h2>
+                <p class="section-subtitle">Más de una década transformando la gestión de riesgos empresariales</p>
+                <div class="title-underline mx-auto"></div>
+            </div>
+        </div>
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6 col-md-12 order-2 order-lg-1">
+                <div class="about-image-container">
+                    <div class="about-image-main">
+                        <div class="placeholder-image">
+                            <div class="placeholder-content">
+                                <i class="fas fa-users fa-4x mb-3"></i>
+                                <h4>Equipo de Innovación</h4>
+                                <p>Especialistas en Gestión de Riesgos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about-image-floating">
+                        <div class="floating-card">
+                            <i class="fas fa-award text-warning"></i>
+                            <span>ISO 27001 Certified</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 order-1 order-lg-2">
+                <div class="ps-lg-4">
+                    <div class="about-content">
+                        <h3 class="about-title">Excelencia Técnica & Visión Estratégica</h3>
+                        <p class="about-description">
+                            Somos pioneros en la aplicación de inteligencia artificial y machine learning para la gestión 
+                            de riesgos empresariales. Nuestro equipo multidisciplinario combina experiencia en ciberseguridad, 
+                            ciencia de datos y arquitectura empresarial.
+                        </p>
+                        <p class="about-description">
+                            Nuestra plataforma Django Modular representa la evolución de años de investigación y desarrollo, 
+                            implementando las mejores prácticas de DevSecOps y arquitectura cloud-native.
+                        </p>
+                        
+                        <div class="expertise-areas">
+                            <div class="expertise-item">
+                                <i class="fas fa-brain"></i>
+                                <span>Artificial Intelligence & ML</span>
+                            </div>
+                            <div class="expertise-item">
+                                <i class="fas fa-shield-halved"></i>
+                                <span>Cybersecurity & Compliance</span>
+                            </div>
+                            <div class="expertise-item">
+                                <i class="fas fa-cloud"></i>
+                                <span>Cloud Architecture</span>
+                            </div>
+                            <div class="expertise-item">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Advanced Analytics</span>
+                            </div>
+                        </div>
+                        
+                        <div class="company-metrics">
+                            <div class="row text-center">
+                                <div class="col-6 col-sm-3">
+                                    <div class="metric-item">
+                                        <div class="metric-number">500+</div>
+                                        <div class="metric-label">Enterprise Clients</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="metric-item">
+                                        <div class="metric-number">12+</div>
+                                        <div class="metric-label">Years Innovation</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="metric-item">
+                                        <div class="metric-number">99.9%</div>
+                                        <div class="metric-label">Platform Uptime</div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-sm-3">
+                                    <div class="metric-item">
+                                        <div class="metric-number">24/7</div>
+                                        <div class="metric-label">Expert Support</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sección Precios -->
+<section id="precios" class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">Nuestros Precios</h2>
+                <p class="section-subtitle">Planes flexibles que se adaptan a las necesidades de su empresa</p>
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-tags me-2"></i>Ver Todos los Planes
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Módulos y Planes Disponibles -->
+{% if modules %}
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="section-title">
+                    <i class="fas fa-cubes text-primary me-3"></i>
+                    Soluciones Empresariales
+                </h2>
+                <p class="section-subtitle">
+                    Descubre nuestros módulos especializados diseñados para impulsar el crecimiento de tu empresa
+                </p>
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary btn-lg professional-btn">
+                    <i class="fas fa-search me-2"></i>Explorar Todos los Planes
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for module in modules %}
+            <div class="col-lg-4 col-md-6">
+                <div class="enterprise-module-card">
+                    <!-- Badge de suscripción si el usuario está suscrito -->
+                    {% if user.is_authenticated %}
+                        {% if user_subscriptions|lookup:module.name %}
+                        <div class="subscription-badge">
+                            <span class="badge-active">
+                                <i class="fas fa-check me-1"></i>Activo
+                            </span>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    
+                    <div class="module-header">
+                        <div class="module-icon-enterprise" style="background: linear-gradient(135deg, {{ module.color }}20, {{ module.color }}40);">
+                            <i class="{{ module.icon|default:'fas fa-cube' }}" style="color: {{ module.color }};"></i>
+                        </div>
+                        <h3 class="module-title">{{ module.display_name }}</h3>
+                        <p class="module-description">{{ module.description|truncatewords:20 }}</p>
+                    </div>
+                    
+                    <div class="module-body">
+                        <!-- Estadísticas del módulo -->
+                        <div class="module-stats mb-3">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-number">{{ module.ordered_plans|length }}</div>
+                                        <div class="stat-label">Planes</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-number">
+                                            {% if module.first_plan %}
+                                                {% if module.first_plan.trial_days %}{{ module.first_plan.trial_days }}{% else %}15{% endif %}
+                                            {% else %}
+                                                15
+                                            {% endif %}
+                                        </div>
+                                        <div class="stat-label">Días Demo</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="stat-item">
+                                        <div class="stat-number">
+                                            {% if module.top_plan %}
+                                                {% if module.top_plan.max_users == -1 %}∞{% else %}{{ module.top_plan.max_users }}{% endif %}
+                                            {% else %}
+                                                0
+                                            {% endif %}
+                                        </div>
+                                        <div class="stat-label">Max Users</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Características principales del módulo (basadas en plan más completo) -->
+                        {% if module.top_plan and module.top_plan.features %}
+                        <div class="module-features mb-3">
+                            <h5 class="features-title">Características principales:</h5>
+                            <ul class="features-list">
+                                {% for feature in module.top_plan.features|slice:":4" %}
+                                <li><i class="fas fa-check text-success me-2"></i>{{ feature }}</li>
+                                {% endfor %}
+                                {% if module.top_plan.features|length > 4 %}
+                                <li class="text-muted small">
+                                    <i class="fas fa-plus me-2"></i>{{ module.top_plan.features|length|add:"-4" }} características más
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Planes disponibles -->
+                        {% if module.ordered_plans %}
+                        <div class="plans-preview">
+                            <h5 class="plans-title">Planes disponibles:</h5>
+                            <div class="plans-grid">
+                                {% for plan in module.ordered_plans|slice:":3" %}
+                                <div class="plan-item">
+                                    <div class="plan-name">{{ plan.plan_type.name }}</div>
+                                    <div class="plan-price">
+                                        {% if plan.yearly_price == 0 %}
+                                            <span class="price-amount text-success">GRATIS</span>
+                                        {% elif plan.monthly_price > 0 %}
+                                            <span class="price-amount">${{ plan.monthly_price|currency_co }}</span>
+                                            <span class="price-period">/mes</span>
+                                        {% else %}
+                                            <span class="price-amount">${{ plan.yearly_price|currency_co }}</span>
+                                            <span class="price-period">/año</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% if module.ordered_plans|length > 3 %}
+                            <div class="text-center mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-plus me-1"></i>{{ module.ordered_plans|length|add:"-3" }} planes más disponibles
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Acciones -->
+                    <div class="module-actions">
+                        {% if user.is_authenticated %}
+                            {% with subscription=user_subscriptions|lookup:module.name %}
+                                {% if subscription %}
+                                    <!-- Usuario ya suscrito a este módulo -->
+                                    <a href="{% url 'subscriptions:subscription_detail' subscription.id %}" 
+                                       class="btn btn-outline-primary btn-action">
+                                        <i class="fas fa-cog me-2"></i>Gestionar Suscripción
+                                    </a>
+                                    <a href="{% url 'subscriptions:upgrade' module.name %}" 
+                                       class="btn btn-primary btn-action">
+                                        <i class="fas fa-arrow-up me-2"></i>Actualizar Plan
+                                    </a>
+                                {% else %}
+                                    <!-- Usuario no suscrito a este módulo -->
+                                    <a href="{% url 'subscriptions:demo_info' module.name %}" 
+                                       class="btn btn-outline-primary btn-action">
+                                        <i class="fas fa-eye me-2"></i>Ver Detalles
+                                    </a>
+                                    {% if module.first_plan %}
+                                    <button class="btn btn-primary btn-action add-to-cart-btn"
+                                            data-plan-id="{{ module.first_plan.id }}"
+                                            data-module-name="{{ module.display_name }}">
+                                        <i class="fas fa-shopping-cart me-2"></i>Contratar Ahora
+                                    </button>
+                                    {% endif %}
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <!-- Usuario no autenticado -->
+                            <a href="{% url 'subscriptions:plans' %}" 
+                               class="btn btn-outline-primary btn-action">
+                                <i class="fas fa-eye me-2"></i>Ver Detalles
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Suscripciones del usuario (si está autenticado y tiene suscripciones) -->
+{% if user.is_authenticated and has_subscriptions %}
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-user-check text-success me-2"></i>
+            Mis Suscripciones Activas
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    {% for module_name, subscription in user_subscriptions.items %}
+    <div class="col-lg-4 col-md-6">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">{{ subscription.plan.module.display_name }}</h6>
+                    <span class="badge bg-light text-success">{{ subscription.plan.plan_type.name }}</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-6">
+                            <small class="text-muted">Plan Actual</small>
+                            <div class="fw-bold text-primary">{{ subscription.plan.plan_type.name }}</div>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted">Estado</small>
+                            <div class="fw-bold">
+                                {% if subscription.status == 'active' %}
+                                    <span class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>Activo
+                                    </span>
+                                {% elif subscription.status == 'trial' %}
+                                    <span class="text-info">
+                                        <i class="fas fa-clock me-1"></i>Prueba
+                                    </span>
+                                {% else %}
+                                    <span class="text-warning">{{ subscription.status|title }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        {% if subscription.end_date %}
+                            Vence: {{ subscription.end_date|date:"d M Y" }}
+                        {% else %}
+                            Sin fecha de vencimiento
+                        {% endif %}
+                    </small>
+                    {% if subscription.days_remaining %}
+                    <div class="progress mt-2" style="height: 8px;">
+                        {% with days_remaining=subscription.days_remaining %}
+                            {% if days_remaining <= 7 %}
+                            <div class="progress-bar bg-danger" style="width: 25%"></div>
+                            {% elif days_remaining <= 15 %}
+                            <div class="progress-bar bg-warning" style="width: 50%"></div>
+                            {% else %}
+                            <div class="progress-bar bg-success" style="width: 85%"></div>
+                            {% endif %}
+                        {% endwith %}
+                    </div>
+                    <div class="text-center mt-1">
+                        <small class="
+                            {% if subscription.days_remaining <= 7 %}text-danger{% elif subscription.days_remaining <= 15 %}text-warning{% else %}text-success{% endif %}
+                        ">
+                            {{ subscription.days_remaining }} días restantes
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Límites del plan -->
+                {% if subscription.plan.max_users != -1 or subscription.plan.max_reports != -1 %}
+                <div class="mb-3">
+                    <small class="text-muted">Límites del Plan</small>
+                    <div class="row text-center">
+                        {% if subscription.plan.max_users != -1 %}
+                        <div class="col-6">
+                            <div class="limit-badge">
+                                <i class="fas fa-users text-primary"></i>
+                                <div class="limit-value">{{ subscription.plan.max_users }}</div>
+                                <div class="limit-label">Usuarios</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if subscription.plan.max_reports != -1 %}
+                        <div class="col-6">
+                            <div class="limit-badge">
+                                <i class="fas fa-file-alt text-info"></i>
+                                <div class="limit-value">{{ subscription.plan.max_reports }}</div>
+                                <div class="limit-label">Reportes</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="d-flex justify-content-between gap-2">
+                    <a href="{% url 'subscriptions:subscription_detail' subscription.id %}" 
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-info-circle me-1"></i>Detalles
+                    </a>
+                    <a href="{% url 'subscriptions:upgrade' module_name %}" 
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-arrow-up me-1"></i>Upgrade
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Características del Sistema -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="mb-4">
+            <i class="fas fa-star text-warning me-2"></i>
+            ¿Por qué elegir Django Modular?
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-primary text-white">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h5 class="card-title">Seguridad Avanzada</h5>
+                <p class="card-text text-muted">Autenticación 2FA, logging detallado y protección contra amenazas.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-success text-white">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h5 class="card-title">Análisis Inteligente</h5>
+                <p class="card-text text-muted">Reportes avanzados y análisis predictivo para toma de decisiones.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-info text-white">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <h5 class="card-title">En la Nube</h5>
+                <p class="card-text text-muted">Acceso desde cualquier lugar, respaldos automáticos y escalabilidad.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon bg-warning text-white">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h5 class="card-title">Soporte 24/7</h5>
+                <p class="card-text text-muted">Equipo de soporte técnico disponible para resolver cualquier duda.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+{% if not user.is_authenticated or not has_subscriptions %}
+<div class="row">
+    <div class="col-12">
+        <div class="card bg-light border-0">
+            <div class="card-body text-center py-5">
+                <h3 class="mb-3">¿Listo para comenzar?</h3>
+                <p class="lead text-muted mb-4">
+                    {% if not user.is_authenticated %}
+                    Únete a cientos de empresas que ya confían en nuestros análisis de riesgo.
+                    {% else %}
+                    Explora nuestros módulos especializados y encuentra el plan perfecto para tu empresa.
+                    {% endif %}
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    {% if not user.is_authenticated %}
+                    <button type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                    </button>
+                    {% endif %}
+                    <a href="{% url 'subscriptions:plans' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-search me-2"></i>Explorar Planes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Carrito flotante (si hay módulos disponibles) -->
+{% if modules %}
+<div class="cart-floating" id="cart-floating">
+    <button class="btn btn-primary btn-cart" data-bs-toggle="offcanvas" data-bs-target="#cartOffcanvas">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-badge badge bg-danger" id="cart-count-floating" style="display: none;">0</span>
+    </button>
+</div>
+
+<!-- Offcanvas del carrito -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="cartOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title">
+            <i class="fas fa-shopping-cart me-2"></i>
+            Carrito de Compras
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <div id="cart-content">
+            <div class="text-center text-muted py-4">
+                <i class="fas fa-shopping-cart fa-3x mb-3"></i>
+                <p>Tu carrito está vacío</p>
+                <a href="{% url 'subscriptions:plans' %}" class="btn btn-primary">Ver Planes</a>
+            </div>
+        </div>
+    </div>
+    <div class="offcanvas-footer border-top p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <strong>Total: $<span id="cart-total">0</span></strong>
+        </div>
+        <div class="d-grid gap-2">
+            <a href="{% url 'subscriptions:cart' %}" class="btn btn-outline-primary">Ver Carrito</a>
+            <a href="{% url 'subscriptions:checkout' %}" class="btn btn-primary" id="checkout-btn" style="display: none;">
+                Proceder al Pago
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Sección Contacto -->
+<section id="contacto" class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="row align-items-center">
+                    <!-- Contact Form -->
+                    <div class="col-lg-7 mb-4 mb-lg-0">
+                        <div class="contact-form-container">
+                            <h2 class="section-title text-start mb-4">
+                                <i class="fas fa-envelope-open me-3 text-primary"></i>
+                                ¿Listo para transformar tu negocio?
+                            </h2>
+                            <p class="contact-subtitle mb-4">
+                                Contacta con nuestros expertos y descubre cómo nuestras soluciones pueden impulsar tu empresa
+                            </p>
+                            
+                            <form class="professional-form" method="post" action="#">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="firstName" placeholder="Nombre" required>
+                                            <label for="firstName">
+                                                <i class="fas fa-user me-2"></i>Nombre
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-floating">
+                                            <input type="text" class="form-control" id="lastName" placeholder="Apellido" required>
+                                            <label for="lastName">
+                                                <i class="fas fa-user me-2"></i>Apellido
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-floating">
+                                            <input type="email" class="form-control" id="email" placeholder="Email" required>
+                                            <label for="email">
+                                                <i class="fas fa-envelope me-2"></i>Email corporativo
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-floating">
+                                            <input type="tel" class="form-control" id="phone" placeholder="Teléfono">
+                                            <label for="phone">
+                                                <i class="fas fa-phone me-2"></i>Teléfono
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="company" placeholder="Empresa" required>
+                                        <label for="company">
+                                            <i class="fas fa-building me-2"></i>Empresa / Organización
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="interest" required>
+                                            <option value="">Selecciona tu interés principal</option>
+                                            <option value="development">Desarrollo de Software</option>
+                                            <option value="cloud">Soluciones Cloud</option>
+                                            <option value="analytics">Análisis de Datos</option>
+                                            <option value="security">Ciberseguridad</option>
+                                            <option value="automation">Automatización</option>
+                                            <option value="consulting">Consultoría IT</option>
+                                        </select>
+                                        <label for="interest">
+                                            <i class="fas fa-lightbulb me-2"></i>Área de interés
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="message" placeholder="Mensaje" style="height: 120px" required></textarea>
+                                        <label for="message">
+                                            <i class="fas fa-comment-dots me-2"></i>Cuéntanos sobre tu proyecto
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary btn-lg professional-btn w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>
+                                    Enviar consulta
+                                    <i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Info -->
+                    <div class="col-lg-5">
+                        <div class="contact-info">
+                            <div class="contact-info-card">
+                                <h3 class="contact-info-title">Conecta con nosotros</h3>
+                                <p class="contact-info-subtitle">
+                                    Estamos aquí para ayudarte a alcanzar tus objetivos empresariales
+                                </p>
+                                
+                                <div class="contact-methods">
+                                    <div class="contact-method">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <h5>Ubicación</h5>
+                                            <p>Bogotá, Colombia<br>Disponible para proyectos globales</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-method">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <h5>Email</h5>
+                                            <p>contacto@riskassessment.co<br>soporte@riskassessment.co</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-method">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-phone"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <h5>Teléfono</h5>
+                                            <p>+57 300 123 4567<br>Lun - Vie: 9:00 - 18:00</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="contact-method">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="contact-details">
+                                            <h5>Respuesta</h5>
+                                            <p>< 24 horas en días hábiles<br>Soporte prioritario disponible</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="social-links">
+                                    <h5>Síguenos</h5>
+                                    <div class="social-buttons">
+                                        <a href="#" class="social-btn linkedin">
+                                            <i class="fab fa-linkedin-in"></i>
+                                        </a>
+                                        <a href="#" class="social-btn twitter">
+                                            <i class="fab fa-twitter"></i>
+                                        </a>
+                                        <a href="#" class="social-btn github">
+                                            <i class="fab fa-github"></i>
+                                        </a>
+                                        <a href="#" class="social-btn youtube">
+                                            <i class="fab fa-youtube"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer-professional">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="logo-placeholder me-2">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="footer-title mb-0">Risk Assessment</span>
+                </div>
+                <p class="text-white-50">
+                    Expertos en gestión de riesgos empresariales con soluciones integrales 
+                    para la protección y continuidad de su organización.
+                </p>
+            </div>
+            
+            <div class="col-lg-4">
+                <h5 class="footer-title">Enlaces</h5>
+                <a href="#servicios" class="footer-link">Servicios</a>
+                <a href="#soluciones" class="footer-link">Soluciones</a>
+                <a href="#precios" class="footer-link">Precios</a>
+                <a href="#contacto" class="footer-link">Contacto</a>
+            </div>
+            
+            <div class="col-lg-4">
+                <h5 class="footer-title">Contacto</h5>
+                <p class="text-white-50 mb-1">
+                    <i class="fas fa-envelope me-2"></i>info@riskassessment.co
+                </p>
+                <p class="text-white-50 mb-3">
+                    <i class="fas fa-phone me-2"></i>+57 300 123 4567
+                </p>
+                
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4 pt-4 border-top border-light">
+            <p class="text-white-50 mb-0">
+                © 2026 Risk Assessment and Research. Todos los derechos reservados.
+            </p>
+        </div>
+    </div>
+</footer>
+
+<!-- Toast para notificaciones -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cartToast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="fas fa-shopping-cart me-2 text-primary"></i>
+            <strong class="me-auto">Carrito</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toast-message">
+            <!-- Mensaje dinámico -->
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- JavaScript general para navegación -->
+<script src="{% static 'js/home_interactions.js' %}"></script>
+
+{% if modules %}
+<!-- Lógica del carrito de compras -->
+<script src="{% static 'js/cart_logic.js' %}"></script>
+{% endif %}
+{% endblock %}

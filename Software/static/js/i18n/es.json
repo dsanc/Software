@@ -1,0 +1,61 @@
+{
+    "sidebar": {
+        "brand": "Django Modular",
+        "dashboard": "Dashboard",
+        "profile": "Mi Perfil",
+        "configuration": "Configuración",
+        "appearance": "Apariencia", 
+        "notifications": "Notificaciones",
+        "privacy": "Privacidad",
+        "statistics": "Estadísticas",
+        "reports": "Reportes",
+        "sales": "Ventas",
+        "users": "Usuarios",
+        "activity": "Actividad",
+        "tools": "Herramientas",
+        "admin_panel": "Admin Panel",
+        "search": "Búsqueda",
+        "favorites": "Favoritos",
+        "help": "Ayuda",
+        "logout": "Cerrar Sesión"
+    },
+    "search": {
+        "placeholder": "Buscar en el menú... (Ctrl+K)",
+        "no_results": "No se encontraron resultados",
+        "navigate": "navegar",
+        "select": "seleccionar", 
+        "close": "cerrar"
+    },
+    "voice": {
+        "listening": "Escuchando...",
+        "command_executed": "Ejecutando: {command}",
+        "command_not_recognized": "Comando no reconocido",
+        "not_supported": "Comandos de voz no soportados en este navegador"
+    },
+    "help": {
+        "title": "Atajos del Sidebar",
+        "quick_search": "Búsqueda rápida",
+        "toggle_sidebar": "Toggle sidebar", 
+        "show_help": "Mostrar ayuda",
+        "change_theme": "Cambiar tema",
+        "voice_command": "Comando de voz",
+        "close": "Cerrar"
+    },
+    "themes": {
+        "default": "Por defecto",
+        "dark": "Oscuro",
+        "light": "Claro", 
+        "auto": "Automático"
+    },
+    "user": {
+        "administrator": "Administrador",
+        "user": "Usuario",
+        "welcome": "Bienvenido a tu espacio personal, {name}"
+    },
+    "notifications": {
+        "new_update": "Nueva actualización disponible",
+        "monthly_report": "Reporte mensual listo",
+        "new_user": "Nuevo usuario registrado",
+        "view_all": "Ver todas"
+    }
+}

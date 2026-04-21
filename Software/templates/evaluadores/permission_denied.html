@@ -1,0 +1,176 @@
+{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}Acceso Denegado{% endblock %}
+
+{% block extra_css %}
+<style>
+    .permission-denied-container {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .permission-denied-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 3rem;
+        text-align: center;
+        max-width: 500px;
+        width: 100%;
+    }
+    
+    .permission-denied-icon {
+        font-size: 4rem;
+        color: #dc3545;
+        margin-bottom: 1.5rem;
+        display: block;
+    }
+    
+    .permission-denied-title {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .permission-denied-message {
+        color: #6c757d;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .permission-denied-details {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .permission-denied-suggestion {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1.5rem 0;
+        border-left: 4px solid #2196f3;
+        color: #1565c0;
+    }
+    
+    .btn-return {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        margin-right: 1rem;
+    }
+    
+    .btn-return:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-contact {
+        background: transparent;
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        padding: 0.75rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-contact:hover {
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="permission-denied-container">
+    <div class="permission-denied-card">
+        <i class="fas fa-ban permission-denied-icon"></i>
+        
+        {% if error_type == 'module_access' %}
+            <h2 class="permission-denied-title">Acceso Denegado al Módulo</h2>
+            <p class="permission-denied-message">
+                No tienes permisos para acceder al módulo <strong>{{ module_display }}</strong>.
+            </p>
+        {% else %}
+            <h2 class="permission-denied-title">Permisos Insuficientes</h2>
+            <p class="permission-denied-message">
+                No tienes permisos para <strong>{{ action_display }}</strong> en el módulo <strong>{{ module_display }}</strong>.
+            </p>
+        {% endif %}
+        
+        <div class="permission-denied-details">
+            <strong>Detalles del Error:</strong><br>
+            <small>
+                Usuario: <code>{{ user.username }}</code><br>
+                Módulo: <code>{{ module_display }}</code><br>
+                Acción: <code>{{ action_display }}</code><br>
+                Tipo de usuario: <code>{{ user_type|title }}</code>
+            </small>
+        </div>
+        
+        <div class="permission-denied-suggestion">
+            <i class="fas fa-lightbulb me-2"></i>
+            {% if error_type == 'module_access' %}
+                <strong>Sugerencia:</strong> Contacta a tu administrador para solicitar acceso al módulo {{ module_display }}.
+            {% else %}
+                <strong>Sugerencia:</strong> Solo puedes realizar las acciones para las que tienes permisos en {{ module_display }}.
+            {% endif %}
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ return_url }}" class="btn-return">
+                <i class="fas fa-arrow-left me-2"></i>Regresar
+            </a>
+            <a href="mailto:{{ admin_email }}" class="btn-contact">
+                <i class="fas fa-envelope me-2"></i>Contactar Admin
+            </a>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                Si crees que esto es un error, contacta al administrador del sistema.
+            </small>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-redirect después de 10 segundos si no hay interacción
+    let countdown = 10;
+    const timer = setInterval(function() {
+        countdown--;
+        if (countdown <= 0) {
+            clearInterval(timer);
+            window.history.back();
+        }
+    }, 1000);
+    
+    // Cancelar auto-redirect si el usuario interactúa
+    $(document).on('click mousemove keypress', function() {
+        clearInterval(timer);
+    });
+});
+</script>
+{% endblock %}

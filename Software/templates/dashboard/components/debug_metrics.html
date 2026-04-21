@@ -1,0 +1,28 @@
+<!-- DEBUG: Template de debugging para métricas -->
+<div class="debug-info p-3 mb-3 border rounded bg-light" style="font-family: monospace; font-size: 12px;">
+    <h6>🐛 DEBUG - Métricas de {{ subscription.plan.module.name }}</h6>
+    <p><strong>Usuario:</strong> {{ subscription.user.username }} ({{ subscription.user.get_full_name }})</p>
+    <p><strong>Plan:</strong> {{ subscription.plan.name }}</p>
+    
+    <h6>📊 Estadísticas detalladas:</h6>
+    <ul>
+        {% for key, value in detailed_stats.items %}
+            <li><strong>{{ key }}:</strong> {{ value|default:"NULL" }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h6>👥 Estadísticas de evaluadores:</h6>
+    <ul>
+        {% for key, value in evaluadores_stats.items %}
+            <li><strong>{{ key }}:</strong> {{ value|default:"NULL" }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h6>🎯 Valores que deberían mostrarse:</h6>
+    <ul>
+        {% if subscription.plan.module.name == 'risk_conjuntos' %}
+            <li><strong>Conjuntos:</strong> {{ detailed_stats.conjuntos_total|default:"NOT FOUND" }}</li>
+            <li><strong>Evaluaciones:</strong> {{ detailed_stats.evaluaciones_total|default:"NOT FOUND" }}</li>
+        {% endif %}
+    </ul>
+</div>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo circular moderno -->
+  <circle cx="17" cy="17" r="17" fill="url(#gradient1)"/>
+  
+  <!-- Logo principal - cubo isométrico -->
+  <g transform="translate(8.5, 8.5)">
+    <!-- Cara frontal -->
+    <path d="M0 8.5L8.5 4.25L17 8.5L8.5 12.75L0 8.5Z" fill="#ffffff" fill-opacity="0.95"/>
+    <!-- Cara derecha -->
+    <path d="M17 8.5L8.5 12.75L8.5 17L17 12.75V8.5Z" fill="#ffffff" fill-opacity="0.8"/>
+    <!-- Cara izquierda -->
+    <path d="M0 8.5L8.5 12.75L8.5 17L0 12.75V8.5Z" fill="#ffffff" fill-opacity="0.7"/>
+  </g>
+  
+  <!-- Gradiente moderno -->
+  <defs>
+    <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+</svg>

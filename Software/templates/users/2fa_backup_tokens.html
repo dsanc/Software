@@ -1,0 +1,351 @@
+{% extends 'base_with_sidebar.html' %}
+{% load static %}
+
+{% block title %}Códigos de Backup - {{ block.super }}{% endblock %}
+{% block page_title %}Códigos de Backup 2FA{% endblock %}
+
+{% block extra_css %}
+<style>
+.backup-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.backup-tokens {
+    background: #fff3cd;
+    border: 2px solid #ffeaa7;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+}
+
+.token-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.token-card {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.token-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+}
+
+.token-code {
+    font-family: 'Courier New', monospace;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0.5rem 0;
+    letter-spacing: 2px;
+}
+
+.copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    border: none;
+    background: transparent;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.copy-btn:hover {
+    background: #f8f9fc;
+    color: #007bff;
+}
+
+.security-warning {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.instructions {
+    background: #e7f3ff;
+    border: 1px solid #b3d7ff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+}
+
+.print-only {
+    display: none;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .print-only {
+        display: block !important;
+    }
+    
+    .token-card {
+        break-inside: avoid;
+        margin-bottom: 1rem;
+    }
+    
+    .copy-btn {
+        display: none;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="backup-container">
+    <div class="text-center mb-4 no-print">
+        {% if regenerated %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle me-2"></i>
+            <strong>¡Códigos regenerados exitosamente!</strong>
+            Guarda estos nuevos códigos en un lugar seguro.
+        </div>
+        {% endif %}
+        
+        <h2 class="text-primary mb-3">
+            <i class="fas fa-key me-2"></i>
+            Códigos de Backup para 2FA
+        </h2>
+        <p class="text-muted">
+            Guarda estos códigos en un lugar seguro. Los necesitarás si pierdes acceso a tu dispositivo autenticador.
+        </p>
+    </div>
+
+    <!-- Header para impresión -->
+    <div class="print-only">
+        <div class="text-center mb-4">
+            <h1>Códigos de Backup - 2FA</h1>
+            <p><strong>Usuario:</strong> {{ user.email }}</p>
+            <p><strong>Generados:</strong> {{ "now"|date:"d/m/Y H:i" }}</p>
+            <hr>
+        </div>
+    </div>
+
+    <div class="backup-tokens">
+        <div class="text-center mb-3">
+            <h4 class="text-warning mb-2">
+                <i class="fas fa-shield-alt me-2"></i>
+                Códigos de Recuperación
+            </h4>
+            <p class="mb-0">Cada código solo puede usarse <strong>una vez</strong></p>
+        </div>
+
+        <div class="token-grid">
+            {% for token in backup_tokens %}
+            <div class="token-card">
+                <button class="copy-btn no-print" 
+                        onclick="copyToken('{{ token }}')"
+                        title="Copiar código">
+                    <i class="fas fa-copy"></i>
+                </button>
+                
+                <div class="small text-muted">Código {{ forloop.counter }}</div>
+                <div class="token-code">{{ token }}</div>
+                <div class="small text-success">
+                    <i class="fas fa-check-circle me-1"></i>Disponible
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="security-warning">
+        <h5 class="text-danger mb-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            Importante - Información de Seguridad
+        </h5>
+        <ul class="mb-0">
+            <li><strong>Guárdalos de forma segura:</strong> Imprime esta página o guárdala en un gestor de contraseñas</li>
+            <li><strong>No los compartas:</strong> Nunca envíes estos códigos por email o mensaje</li>
+            <li><strong>Un solo uso:</strong> Cada código solo funciona una vez</li>
+            <li><strong>Regenera cuando sea necesario:</strong> Puedes crear nuevos códigos desde tu perfil</li>
+        </ul>
+    </div>
+
+    <div class="instructions">
+        <h5 class="text-info mb-3">
+            <i class="fas fa-info-circle me-2"></i>
+            ¿Cómo usar estos códigos?
+        </h5>
+        <ol class="mb-0">
+            <li>Si pierdes acceso a tu dispositivo autenticador, ve a la página de login</li>
+            <li>Ingresa tu email y contraseña normalmente</li>
+            <li>Cuando te pida el código 2FA, usa uno de estos códigos de backup</li>
+            <li>Una vez usado, ese código quedará invalidado permanentemente</li>
+            <li>Configura un nuevo dispositivo autenticador lo antes posible</li>
+        </ol>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="text-center mt-4 no-print">
+        <div class="btn-group" role="group">
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="fas fa-print me-2"></i>
+                Imprimir Códigos
+            </button>
+            
+            <button onclick="downloadAsTxt()" class="btn btn-outline-primary">
+                <i class="fas fa-download me-2"></i>
+                Descargar como Texto
+            </button>
+            
+            <button onclick="copyAllTokens()" class="btn btn-outline-secondary">
+                <i class="fas fa-clipboard me-2"></i>
+                Copiar Todos
+            </button>
+        </div>
+        
+        <div class="mt-3">
+            <a href="{% url 'users:2fa_manage' %}" class="btn btn-link">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver a Gestión 2FA
+            </a>
+        </div>
+    </div>
+
+    <!-- Información adicional para impresión -->
+    <div class="print-only mt-4">
+        <hr>
+        <div class="small text-muted">
+            <p><strong>Instrucciones de uso:</strong></p>
+            <ol>
+                <li>Guarda estos códigos en un lugar seguro</li>
+                <li>Úsalos solo si pierdes acceso a tu dispositivo autenticador</li>
+                <li>Cada código solo puede usarse una vez</li>
+                <li>Después de usar un código de backup, configura un nuevo dispositivo 2FA</li>
+            </ol>
+            
+            <p class="mt-3">
+                <strong>Soporte:</strong> Si tienes problemas, contacta al administrador del sistema.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Función para copiar un token individual
+function copyToken(token) {
+    navigator.clipboard.writeText(token).then(function() {
+        // Mostrar feedback visual
+        const event = window.event;
+        const btn = event.target.closest('.copy-btn');
+        const icon = btn.querySelector('i');
+        
+        icon.className = 'fas fa-check text-success';
+        
+        setTimeout(() => {
+            icon.className = 'fas fa-copy';
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Error al copiar: ', err);
+        alert('No se pudo copiar el código');
+    });
+}
+
+// Función para copiar todos los tokens
+function copyAllTokens() {
+    const tokens = [
+        {% for token in backup_tokens %}
+        '{{ token }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    const text = 'Códigos de Backup 2FA - {{ user.email }}\n' +
+                 'Generados: {{ "now"|date:"d/m/Y H:i" }}\n\n' +
+                 tokens.map((token, index) => `Código ${index + 1}: ${token}`).join('\n') +
+                 '\n\n¡IMPORTANTE: Guarda estos códigos de forma segura!';
+    
+    navigator.clipboard.writeText(text).then(function() {
+        const btn = event.target;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>¡Copiado!';
+        btn.className = 'btn btn-success';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.className = 'btn btn-outline-secondary';
+        }, 3000);
+    }).catch(function(err) {
+        console.error('Error al copiar: ', err);
+        alert('No se pudo copiar los códigos');
+    });
+}
+
+// Función para descargar como archivo de texto
+function downloadAsTxt() {
+    const tokens = [
+        {% for token in backup_tokens %}
+        '{{ token }}'{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    
+    const content = 'CÓDIGOS DE BACKUP - AUTENTICACIÓN 2FA\n' +
+                   '=====================================\n\n' +
+                   'Usuario: {{ user.email }}\n' +
+                   'Generados: {{ "now"|date:"d/m/Y H:i" }}\n\n' +
+                   'CÓDIGOS DE RECUPERACIÓN:\n' +
+                   tokens.map((token, index) => `${index + 1}. ${token}`).join('\n') +
+                   '\n\n' +
+                   'INSTRUCCIONES DE SEGURIDAD:\n' +
+                   '- Guarda estos códigos en un lugar seguro\n' +
+                   '- Cada código solo puede usarse UNA VEZ\n' +
+                   '- Úsalos solo si pierdes acceso a tu dispositivo autenticador\n' +
+                   '- Nunca compartas estos códigos con nadie\n' +
+                   '- Después de usar un código, configura un nuevo dispositivo 2FA\n\n' +
+                   'Para soporte, contacta al administrador del sistema.';
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `backup-codes-2fa-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+
+// Advertencia antes de cerrar la página
+window.addEventListener('beforeunload', function(e) {
+    const message = '¿Estás seguro de que has guardado tus códigos de backup de forma segura?';
+    e.returnValue = message;
+    return message;
+});
+
+// Ocultar advertencia después de imprimir o descargar
+let actionTaken = false;
+window.addEventListener('afterprint', function() {
+    actionTaken = true;
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Deshabilitar click derecho en los códigos para evitar inspección accidental
+    document.querySelectorAll('.token-code').forEach(function(element) {
+        element.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+    });
+});
+</script>
+{% endblock %}

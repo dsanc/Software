@@ -1,0 +1,1024 @@
+﻿{% extends "base_with_sidebar.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}Dashboard Evaluador{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Header ─────────────────────────────────────────────────────────── */
+.eval-header {
+    background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #4a5568 100%);
+    border-radius: 1rem;
+    padding: 2rem;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+.eval-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+}
+.eval-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border: 3px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+}
+/* ── Metric cards ────────────────────────────────────────────────────── */
+.metric-card {
+    border: 0;
+    border-radius: 0.75rem;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.metric-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.12);
+}
+.metric-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+/* ── Module access cards ─────────────────────────────────────────────── */
+.module-card {
+    border-radius: 0.75rem;
+    border: 1px solid #e3e6f0;
+    transition: all 0.25s;
+}
+.module-card:hover {
+    box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1);
+    border-color: #bdc3d0;
+    transform: translateY(-2px);
+}
+.module-icon-lg {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+/* ── CRUD permission table ───────────────────────────────────────────── */
+.perm-cell {
+    text-align: center;
+    vertical-align: middle !important;
+}
+/* ── Activity / hotel rows ───────────────────────────────────────────── */
+.activity-item, .hotel-row {
+    border-left: 3px solid transparent;
+    transition: border-color 0.2s, background 0.2s;
+}
+.activity-item:hover {
+    background: rgba(13,110,253,0.03);
+    border-left-color: #0d6efd;
+}
+.hotel-row:hover {
+    background: rgba(25,135,84,0.04);
+    border-left-color: #198754;
+}
+/* ── Score bar ───────────────────────────────────────────────────────── */
+.score-bar-wrap {
+    background: #e9ecef;
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+}
+.score-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+}
+/* ── Expiry alert ────────────────────────────────────────────────────── */
+.expiry-banner { border-radius: 0.75rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+    {% if perfil_evaluador.fecha_expiracion %}
+    <div class="alert alert-warning expiry-banner d-flex align-items-center mb-4" role="alert">
+        <i class="fas fa-clock me-3 fs-5"></i>
+        <div>
+            <strong>Acceso con fecha limite:</strong>
+            Tu acceso expira el {{ perfil_evaluador.fecha_expiracion|date:"d/m/Y H:i" }}.
+            Contacta a <strong>{{ usuario_principal.get_full_name }}</strong> para renovarlo.
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="eval-header shadow mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="eval-avatar bg-{{ perfil_evaluador.get_avatar_color }} bg-opacity-75 text-white">
+                    {{ perfil_evaluador.get_initials }}
+                </div>
+                <div>
+                    <h1 class="h3 fw-bold mb-1 text-white">
+                        Hola, {{ perfil_evaluador.get_full_name }}!
+                    </h1>
+                    <p class="mb-1 text-white-50">
+                        <i class="fas fa-user-tie me-1"></i>
+                        {{ perfil_evaluador.get_tipo_evaluador_display }}
+                        &nbsp;&bull;&nbsp;
+                        <i class="fas fa-user me-1"></i>
+                        Bajo: <strong class="text-white">{{ usuario_principal.get_full_name }}</strong>
+                        <span class="text-white-50 small">&lt;{{ usuario_principal.email }}&gt;</span>
+                    </p>
+                    <div class="d-flex gap-2 flex-wrap mt-2">
+                        <span class="badge bg-success px-3 py-2">
+                            <i class="fas fa-circle me-1" style="font-size:.6rem;"></i>Activo
+                        </span>
+                        {% for modulo in perfil_evaluador.modulos_permitidos %}
+                        <span class="badge bg-white bg-opacity-20 text-white px-3 py-2">
+                            {% if modulo == 'risk_hoteles' %}<i class="fas fa-hotel me-1"></i>Risk Hoteles
+                            {% elif modulo == 'risk_conjuntos' %}<i class="fas fa-building me-1"></i>Risk Conjuntos
+                            {% elif modulo == 'security_probabilistic' %}<i class="fas fa-shield-alt me-1"></i>Security Probabilistic
+                            {% else %}<i class="fas fa-cube me-1"></i>{{ modulo|title }}{% endif %}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-user-circle me-1"></i>Mi Perfil
+                </a>
+                <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-hotel me-1"></i>Ir a Hoteles
+                </a>
+            </div>
+        </div>
+        <div class="mt-3 pt-3 border-top border-white border-opacity-25">
+            <small class="text-white-50">
+                <i class="fas fa-calendar-check me-1"></i>
+                Activo desde: {{ perfil_evaluador.fecha_activacion|date:"d/m/Y"|default:"" }}
+                &nbsp;&bull;&nbsp;
+                Ultimo acceso: {% if perfil_evaluador.fecha_ultimo_acceso %}{{ perfil_evaluador.fecha_ultimo_acceso|date:"d/m/Y H:i" }}{% else %}Primera visita{% endif %}
+                &nbsp;&bull;&nbsp;
+                {% now "l, d F Y" %}
+            </small>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         1. ALERTAS DE SEGUIMIENTO (urgente primero)
+    ============================================================ -->
+    {% if 'risk_hoteles' in perfil_evaluador.modulos_permitidos and stats_hoteles.tiene_datos %}
+    {% if hoteles_sin_reevaluar or pendientes_revision %}
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2 me-2">
+            <i class="fas fa-bell fs-5"></i>
+        </div>
+        <h4 class="mb-0 fw-bold">Alertas de Seguimiento</h4>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Hoteles sin re-evaluar -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-clock text-warning me-2"></i>Hoteles sin Re-evaluar
+                        </h6>
+                        {% if hoteles_sin_reevaluar %}
+                        <span class="badge bg-warning text-dark">+60 dias sin evaluacion</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if hoteles_sin_reevaluar %}
+                    <div class="list-group list-group-flush">
+                        {% for hotel in hoteles_sin_reevaluar %}
+                        <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}"
+                           class="list-group-item list-group-item-action hotel-row px-4 py-3 text-decoration-none">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-warning bg-opacity-10 text-warning rounded-2 d-flex align-items-center justify-content-center"
+                                     style="width:38px;height:38px;flex-shrink:0;">
+                                    <i class="fas fa-hotel"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-truncate">{{ hotel.name }}</div>
+                                    <small class="text-muted">{{ hotel.city }}, {{ hotel.country }}</small>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-warning fw-semibold d-block">Ultima:</small>
+                                    <small class="text-muted">{{ hotel.ultima_eval|date:"d/m/Y" }}</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle text-success fs-2 mb-2"></i>
+                        <p class="text-muted small mb-0">Todos los hoteles evaluados recientemente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluaciones completadas pendientes de revision -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-hourglass-half text-info me-2"></i>Pendientes de Revision
+                        </h6>
+                        {% if stats_hoteles.total_pendientes_revision %}
+                        <span class="badge bg-info">{{ stats_hoteles.total_pendientes_revision }} completada{{ stats_hoteles.total_pendientes_revision|pluralize }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if pendientes_revision %}
+                    <div class="list-group list-group-flush">
+                        {% for eval in pendientes_revision %}
+                        <a href="{% url 'risk_hoteles:assessment_results' eval.id %}"
+                           class="list-group-item list-group-item-action activity-item px-4 py-3 text-decoration-none">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-info bg-opacity-10 text-info rounded-2 d-flex align-items-center justify-content-center"
+                                     style="width:38px;height:38px;flex-shrink:0;">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-truncate">{{ eval.hotel.name }}</div>
+                                    <small class="text-muted">
+                                        {{ eval.get_assessment_type_display }} &bull; {{ eval.completed_at|date:"d/m/Y" }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    {% if eval.overall_score %}
+                                    <div class="fw-bold text-info">{{ eval.overall_score|floatformat:1 }}/5</div>
+                                    {% endif %}
+                                    <span class="badge bg-success" style="font-size:.65rem;">Completada</span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-double text-success fs-2 mb-2"></i>
+                        <p class="text-muted small mb-0">No hay evaluaciones esperando revision</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- ============================================================
+         2. METRICAS RISK HOTELES
+    ============================================================ -->
+    {% if 'risk_hoteles' in perfil_evaluador.modulos_permitidos %}
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2 me-2">
+            <i class="fas fa-hotel fs-5"></i>
+        </div>
+        <h4 class="mb-0 fw-bold text-gray-800">Risk Hoteles</h4>
+        <span class="badge bg-primary ms-2 px-3 py-2">Estadisticas del evaluador</span>
+    </div>
+
+    <!-- Tarjetas de metricas principales -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="metric-icon bg-primary bg-opacity-10 text-primary me-3">
+                            <i class="fas fa-hotel fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="small fw-bold text-uppercase text-muted">Hoteles</div>
+                            <div class="h3 mb-0 fw-bold text-primary">{{ stats_hoteles.total_hoteles|default:0 }}</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">Hoteles con mis evaluaciones</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="metric-icon bg-success bg-opacity-10 text-success me-3">
+                            <i class="fas fa-clipboard-check fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="small fw-bold text-uppercase text-muted">Mis Evaluaciones</div>
+                            <div class="h3 mb-0 fw-bold text-success">{{ stats_hoteles.total_evaluaciones|default:0 }}</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-calendar-alt me-1 text-success"></i>
+                        {{ stats_hoteles.evaluaciones_este_mes|default:0 }} este mes
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="metric-icon bg-info bg-opacity-10 text-info me-3">
+                            <i class="fas fa-chart-line fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="small fw-bold text-uppercase text-muted">Promedio Cumplimiento</div>
+                            <div class="h3 mb-0 fw-bold text-info">
+                                {% if stats_hoteles.avg_score %}{{ stats_hoteles.avg_score }}%{% else %}--{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if stats_hoteles.avg_score %}
+                    <div class="score-bar-wrap">
+                        <div class="score-bar bg-{% if stats_hoteles.avg_score >= 75 %}success{% elif stats_hoteles.avg_score >= 60 %}info{% elif stats_hoteles.avg_score >= 40 %}warning{% else %}danger{% endif %}"
+                             style="width: {{ stats_hoteles.avg_score }}%"></div>
+                    </div>
+                    {% else %}
+                    <small class="text-muted">Sin evaluaciones completadas</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card metric-card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="metric-icon bg-warning bg-opacity-10 text-warning me-3">
+                            <i class="fas fa-clock fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="small fw-bold text-uppercase text-muted">En Progreso</div>
+                            <div class="h3 mb-0 fw-bold text-warning">{{ stats_hoteles.evaluaciones_en_progreso|default:0 }}</div>
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        <i class="fas fa-check-circle me-1 text-success"></i>
+                        {{ stats_hoteles.evaluaciones_completadas|default:0 }} completadas &bull;
+                        <i class="fas fa-eye me-1 text-info"></i>
+                        {{ stats_hoteles.evaluaciones_revisadas|default:0 }} revisadas
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Distribucion por estado -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>Estado de Evaluaciones
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if stats_hoteles.total_evaluaciones %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-semibold"><i class="fas fa-circle text-warning me-1"></i>En Progreso</small>
+                            <small class="text-muted">{{ stats_hoteles.evaluaciones_en_progreso|default:0 }}</small>
+                        </div>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar bg-warning"
+                                 style="width: {% widthratio stats_hoteles.evaluaciones_en_progreso stats_hoteles.total_evaluaciones 100 %}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-semibold"><i class="fas fa-circle text-success me-1"></i>Completadas</small>
+                            <small class="text-muted">{{ stats_hoteles.evaluaciones_completadas|default:0 }}</small>
+                        </div>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar bg-success"
+                                 style="width: {% widthratio stats_hoteles.evaluaciones_completadas stats_hoteles.total_evaluaciones 100 %}%"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="fw-semibold"><i class="fas fa-circle text-info me-1"></i>Revisadas</small>
+                            <small class="text-muted">{{ stats_hoteles.evaluaciones_revisadas|default:0 }}</small>
+                        </div>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar bg-info"
+                                 style="width: {% widthratio stats_hoteles.evaluaciones_revisadas stats_hoteles.total_evaluaciones 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% if stats_hoteles.evaluaciones_por_nivel %}
+                    <hr class="my-3">
+                    <p class="small fw-bold text-muted text-uppercase mb-2">Nivel de Riesgo</p>
+                    {% for nivel in stats_hoteles.evaluaciones_por_nivel %}
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge bg-{{ nivel.color }}" style="font-size:.75rem;">{{ nivel.label }}</span>
+                        <span class="fw-semibold small">{{ nivel.total }} eval.</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-clipboard fs-2 text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">Aun no has realizado evaluaciones</p>
+                        <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-primary btn-sm mt-3">
+                            <i class="fas fa-plus me-1"></i>Comenzar evaluacion
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Hoteles con puntuacion de riesgo -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-hotel text-success me-2"></i>Hoteles — Ultimo Resultado
+                        </h6>
+                        <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list me-1"></i>Ver todos
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if hoteles_con_riesgo %}
+                    <div class="list-group list-group-flush">
+                        {% for item in hoteles_con_riesgo %}
+                        <a href="{% url 'risk_hoteles:hotel_detail' item.hotel.id %}"
+                           class="list-group-item list-group-item-action hotel-row px-4 py-3 text-decoration-none">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-2 d-flex align-items-center justify-content-center"
+                                     style="width:40px;height:40px;flex-shrink:0;">
+                                    <i class="fas fa-hotel"></i>
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <div class="fw-semibold text-truncate">{{ item.hotel.name }}</div>
+                                    <small class="text-muted">{{ item.hotel.city }}, {{ item.hotel.country }}</small>
+                                </div>
+                                <div class="text-end" style="min-width:100px;">
+                                    <div class="fw-bold text-{{ item.color }}">{{ item.porcentaje }}%</div>
+                                    <div class="score-bar-wrap mt-1">
+                                        <div class="score-bar bg-{{ item.color }}" style="width:{{ item.porcentaje }}%"></div>
+                                    </div>
+                                    <small class="badge bg-{{ item.color }} mt-1">{{ item.evaluacion.risk_level }}</small>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% elif stats_hoteles.total_hoteles %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-bar fs-2 text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">
+                            Hay {{ stats_hoteles.total_hoteles }} hotel{{ stats_hoteles.total_hoteles|pluralize }} con evaluaciones tuyas sin completar.
+                        </p>
+                        <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-success btn-sm mt-3">
+                            <i class="fas fa-clipboard-check me-1"></i>Iniciar evaluacion
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-hotel fs-2 text-muted mb-2"></i>
+                        <p class="text-muted small mb-0">Aun no has creado evaluaciones en ningun hotel.</p>
+                        <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-outline-primary btn-sm mt-3">
+                            <i class="fas fa-plus me-1"></i>Ver modulo
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluaciones recientes -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-history text-info me-2"></i>Mis Evaluaciones Recientes
+                        </h6>
+                        <span class="badge bg-info px-3 py-2">Ultimas 8</span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if evaluaciones_recientes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="px-4 py-3">Hotel</th>
+                                    <th class="px-3 py-3">Tipo</th>
+                                    <th class="px-3 py-3">Fecha</th>
+                                    <th class="px-3 py-3">Puntuacion</th>
+                                    <th class="px-3 py-3">Estado</th>
+                                    <th class="px-3 py-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for eval in evaluaciones_recientes %}
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-semibold">{{ eval.hotel.name }}</div>
+                                        <small class="text-muted">{{ eval.hotel.city }}</small>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="badge bg-secondary">{{ eval.get_assessment_type_display }}</span>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <div>{{ eval.assessment_date|date:"d/m/Y" }}</div>
+                                        <small class="text-muted">{{ eval.assessment_date|date:"H:i" }}</small>
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        {% if eval.overall_score %}
+                                        <div class="fw-bold text-{% if eval.overall_score >= 3.75 %}success{% elif eval.overall_score >= 3 %}info{% elif eval.overall_score >= 2 %}warning{% else %}danger{% endif %}">
+                                            {{ eval.overall_score|floatformat:1 }}/5
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted small">--</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-3 py-3">
+                                        <span class="badge bg-{% if eval.status == 'completed' %}success{% elif eval.status == 'reviewed' %}info{% else %}warning text-dark{% endif %}">
+                                            {{ eval.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="px-3 py-3 text-center">
+                                        {% if eval.status == 'in_progress' %}
+                                        <a href="{% url 'risk_hoteles:assessment_survey' eval.id %}"
+                                           class="btn btn-warning btn-sm" title="Continuar">
+                                            <i class="fas fa-play"></i>
+                                        </a>
+                                        {% else %}
+                                        <a href="{% url 'risk_hoteles:assessment_results' eval.id %}"
+                                           class="btn btn-outline-info btn-sm" title="Ver resultados">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fs-2 text-muted mb-3"></i>
+                        <h6 class="text-muted">No has realizado evaluaciones aun</h6>
+                        <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-primary btn-sm mt-2">
+                            <i class="fas fa-plus me-1"></i>Comenzar
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================================================
+         3. ANALISIS DE RESULTADOS
+    ============================================================ -->
+    {% if 'risk_hoteles' in perfil_evaluador.modulos_permitidos and stats_hoteles.tiene_datos %}
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-success bg-opacity-10 text-success rounded-3 p-2 me-2">
+            <i class="fas fa-chart-line fs-5"></i>
+        </div>
+        <h4 class="mb-0 fw-bold">Analisis de Resultados</h4>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Tendencia mensual -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-calendar-alt text-info me-2"></i>Tendencia Mensual
+                        <span class="badge bg-info ms-1">Ultimos 6 meses</span>
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if stats_hoteles.tendencia_meses %}
+                    <div class="d-flex align-items-end gap-2" style="height:120px;">
+                        {% for mes in stats_hoteles.tendencia_meses %}
+                        <div class="flex-grow-1 d-flex flex-column align-items-center gap-1">
+                            <span class="small fw-bold text-primary">{{ mes.total }}</span>
+                            <div class="w-100 bg-primary rounded-top"
+                                 style="height: {% widthratio mes.total stats_hoteles.tendencia_max 100 %}px; min-height: 4px;"></div>
+                            <span class="small text-muted" style="font-size:.65rem;text-align:center;white-space:nowrap;">
+                                {{ mes.mes_label }}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-bar text-muted fs-3 mb-2"></i>
+                        <p class="text-muted small mb-0">Sin evaluaciones en los ultimos 6 meses</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Mejor y peor hotel -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-trophy text-warning me-2"></i>Mejor / Peor Hotel Evaluado
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if mejor_hotel %}
+                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-success bg-opacity-10 rounded-3">
+                        <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:40px;height:40px;flex-shrink:0;">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="small text-muted fw-semibold mb-0">Mejor cumplimiento</div>
+                            <div class="fw-bold text-truncate">{{ mejor_hotel.hotel.name }}</div>
+                            <small class="text-muted">{{ mejor_hotel.hotel.city }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="h5 mb-0 fw-bold text-success">{{ mejor_hotel.pct }}%</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if peor_hotel %}
+                    <div class="d-flex align-items-center gap-3 mb-3 p-3 bg-danger bg-opacity-10 rounded-3">
+                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center"
+                             style="width:40px;height:40px;flex-shrink:0;">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                        <div class="flex-grow-1 min-w-0">
+                            <div class="small text-muted fw-semibold mb-0">Menor cumplimiento</div>
+                            <div class="fw-bold text-truncate">{{ peor_hotel.hotel.name }}</div>
+                            <small class="text-muted">{{ peor_hotel.hotel.city }}</small>
+                        </div>
+                        <div class="text-end">
+                            <div class="h5 mb-0 fw-bold text-danger">{{ peor_hotel.pct }}%</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if not mejor_hotel and not peor_hotel %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-trophy text-muted fs-3 mb-2"></i>
+                        <p class="text-muted small mb-0">Completa evaluaciones para ver el ranking</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking categorias de seguridad -->
+    {% if stats_hoteles.categorias_ranking %}
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-bottom py-3">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h6 class="mb-0 fw-bold">
+                            <i class="fas fa-layer-group text-secondary me-2"></i>Ranking de Categorias de Seguridad
+                        </h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            {% if stats_hoteles.categoria_mas_debil %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Debil: {{ stats_hoteles.categoria_mas_debil.category__name }}
+                                ({{ stats_hoteles.categoria_mas_debil.avg_pct|floatformat:1 }}%)
+                            </span>
+                            {% endif %}
+                            {% if stats_hoteles.categoria_mas_fuerte %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check me-1"></i>
+                                Fuerte: {{ stats_hoteles.categoria_mas_fuerte.category__name }}
+                                ({{ stats_hoteles.categoria_mas_fuerte.avg_pct|floatformat:1 }}%)
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        {% for cat in stats_hoteles.categorias_ranking %}
+                        <div class="col-lg-6">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="text-end" style="min-width:40px;">
+                                    <span class="small fw-bold text-{% if cat.avg_pct >= 75 %}success{% elif cat.avg_pct >= 60 %}info{% elif cat.avg_pct >= 40 %}warning{% else %}danger{% endif %}">
+                                        {{ cat.avg_pct|floatformat:0 }}%
+                                    </span>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="fw-semibold text-truncate" style="max-width:200px;">
+                                            {{ cat.category__name }}
+                                        </small>
+                                        <small class="text-muted">{{ cat.total }} eval.</small>
+                                    </div>
+                                    <div class="score-bar-wrap">
+                                        <div class="score-bar bg-{% if cat.avg_pct >= 75 %}success{% elif cat.avg_pct >= 60 %}info{% elif cat.avg_pct >= 40 %}warning{% else %}danger{% endif %}"
+                                             style="width: {{ cat.avg_pct|floatformat:0 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================================================
+         4. DISTRIBUCION DEL TRABAJO
+    ============================================================ -->
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-info bg-opacity-10 text-info rounded-3 p-2 me-2">
+            <i class="fas fa-chart-bar fs-5"></i>
+        </div>
+        <h4 class="mb-0 fw-bold">Distribucion del Trabajo</h4>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Por tipo de evaluacion -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-tags text-primary me-2"></i>Por Tipo de Evaluacion
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if stats_hoteles.evaluaciones_por_tipo %}
+                    {% for item in stats_hoteles.evaluaciones_por_tipo %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-semibold">
+                                <i class="fas fa-circle text-{{ item.color }} me-1" style="font-size:.55rem;"></i>
+                                {{ item.label }}
+                            </span>
+                            <span class="badge bg-{{ item.color }} rounded-pill">{{ item.total }}</span>
+                        </div>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar bg-{{ item.color }}"
+                                 style="width: {% widthratio item.total stats_hoteles.total_evaluaciones 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-tags text-muted fs-3 mb-2"></i>
+                        <p class="text-muted small mb-0">Sin datos</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Por categoria de hotel -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-star text-warning me-2"></i>Por Categoria de Hotel
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if stats_hoteles.hoteles_por_categoria %}
+                    {% with total_h=stats_hoteles.total_hoteles %}
+                    {% for item in stats_hoteles.hoteles_por_categoria %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small fw-semibold">{{ item.label }}</span>
+                            <span class="badge bg-warning text-dark rounded-pill">{{ item.total }}</span>
+                        </div>
+                        <div class="score-bar-wrap">
+                            <div class="score-bar bg-warning"
+                                 style="width: {% widthratio item.total total_h 100 %}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endwith %}
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-star text-muted fs-3 mb-2"></i>
+                        <p class="text-muted small mb-0">Sin datos</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribucion geografica -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-map-marker-alt text-danger me-2"></i>Distribucion Geografica
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    {% if stats_hoteles.geo_dist %}
+                    <div class="list-group list-group-flush">
+                        {% for loc in stats_hoteles.geo_dist %}
+                        <div class="list-group-item px-4 py-2 d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="fw-semibold small">{{ loc.city }}</div>
+                                <small class="text-muted">{{ loc.country }}</small>
+                            </div>
+                            <span class="badge bg-danger rounded-pill">{{ loc.total }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-map text-muted fs-3 mb-2"></i>
+                        <p class="text-muted small mb-0">Sin datos</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ============================================================
+         5. PERMISOS Y ACCESO
+    ============================================================ -->
+
+
+    <!-- ============================================================
+         SECCION PERMISOS Y ACCESO
+    ============================================================ -->
+    <div class="row g-4 mb-4">
+        <!-- Modulos con acceso -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-th-large text-primary me-2"></i>Mis Modulos de Trabajo
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    {% if perfil_evaluador.modulos_permitidos %}
+                    <div class="row g-3">
+                        {% for modulo in perfil_evaluador.modulos_permitidos %}
+                        <div class="col-md-6">
+                            <div class="module-card p-3 h-100">
+                                <div class="d-flex align-items-center gap-3 mb-3">
+                                    <div class="module-icon-lg
+                                        {% if modulo == 'risk_hoteles' %}bg-primary bg-opacity-10 text-primary
+                                        {% elif modulo == 'risk_conjuntos' %}bg-success bg-opacity-10 text-success
+                                        {% elif modulo == 'security_probabilistic' %}bg-danger bg-opacity-10 text-danger
+                                        {% else %}bg-info bg-opacity-10 text-info{% endif %}"
+                                        style="width:44px;height:44px;font-size:1.1rem;">
+                                        {% if modulo == 'risk_hoteles' %}<i class="fas fa-hotel"></i>
+                                        {% elif modulo == 'risk_conjuntos' %}<i class="fas fa-building"></i>
+                                        {% elif modulo == 'security_probabilistic' %}<i class="fas fa-shield-alt"></i>
+                                        {% else %}<i class="fas fa-cube"></i>{% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small">
+                                            {% if modulo == 'risk_hoteles' %}Risk Hoteles
+                                            {% elif modulo == 'risk_conjuntos' %}Risk Conjuntos
+                                            {% elif modulo == 'security_probabilistic' %}Security Probabilistic
+                                            {% else %}{{ modulo|title }}{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% if modulo == 'risk_hoteles' %}
+                                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-arrow-right me-1"></i>Acceder
+                                    </a>
+                                {% elif modulo == 'risk_conjuntos' %}
+                                    <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="btn btn-success btn-sm w-100">
+                                        <i class="fas fa-arrow-right me-1"></i>Acceder
+                                    </a>
+                                {% elif modulo == 'security_probabilistic' %}
+                                    <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-danger btn-sm w-100">
+                                        <i class="fas fa-arrow-right me-1"></i>Acceder
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm w-100" disabled>{{ modulo|title }}</button>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-box-open fs-2 text-muted mb-2"></i>
+                        <p class="text-muted small">Sin modulos asignados. Contacta a {{ usuario_principal.get_full_name }}.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Permisos generales -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-key text-info me-2"></i>Mis Permisos
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="list-unstyled mb-0">
+                        <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <span class="text-muted small"><i class="fas fa-file-alt me-2"></i>Crear reportes</span>
+                            {% if perfil_evaluador.puede_crear_reportes %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Si</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>No</span>
+                            {% endif %}
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <span class="text-muted small"><i class="fas fa-edit me-2"></i>Editar evaluaciones</span>
+                            {% if perfil_evaluador.puede_editar_evaluaciones %}
+                                <span class="badge bg-success"><i class="fas fa-check me-1"></i>Si</span>
+                            {% else %}
+                                <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>No</span>
+                            {% endif %}
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                            <span class="text-muted small"><i class="fas fa-tachometer-alt me-2"></i>Limite mensual</span>
+                            <span class="badge bg-warning text-dark fw-semibold">{{ perfil_evaluador.max_evaluaciones_mes }}/mes</span>
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between py-2">
+                            <span class="text-muted small"><i class="fas fa-infinity me-2"></i>Expiracion</span>
+                            {% if perfil_evaluador.fecha_expiracion %}
+                                <span class="badge bg-danger">{{ perfil_evaluador.fecha_expiracion|date:"d/m/Y" }}</span>
+                            {% else %}
+                                <span class="badge bg-success">Sin limite</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    {% if perfil_evaluador.permisos_crud %}
+                    <hr class="my-3">
+                    <p class="small fw-bold text-muted text-uppercase mb-2">CRUD por modulo</p>
+                    {% for modulo_nombre, permisos in perfil_evaluador.permisos_crud.items %}
+                    <div class="mb-2">
+                        <small class="fw-semibold text-muted d-block mb-1">
+                            {% if modulo_nombre == 'risk_hoteles' %}<i class="fas fa-hotel text-primary me-1"></i>Risk Hoteles
+                            {% elif modulo_nombre == 'risk_conjuntos' %}<i class="fas fa-building text-success me-1"></i>Risk Conjuntos
+                            {% else %}<i class="fas fa-cube me-1"></i>{{ modulo_nombre|title }}{% endif %}
+                        </small>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if permisos.read %}<span class="badge bg-secondary" title="Leer"><i class="fas fa-eye"></i></span>{% endif %}
+                            {% if permisos.create %}<span class="badge bg-success" title="Crear"><i class="fas fa-plus"></i></span>{% endif %}
+                            {% if permisos.update %}<span class="badge bg-info" title="Editar"><i class="fas fa-edit"></i></span>{% endif %}
+                            {% if permisos.delete %}<span class="badge bg-danger" title="Eliminar"><i class="fas fa-trash"></i></span>{% endif %}
+                            {% if permisos.export %}<span class="badge bg-primary" title="Exportar"><i class="fas fa-download"></i></span>{% endif %}
+                            {% if permisos.approve %}<span class="badge bg-warning text-dark" title="Aprobar"><i class="fas fa-check-double"></i></span>{% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light border-0 p-3">
+                    <a href="{% url 'evaluadores:mi_perfil_evaluador' %}" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="fas fa-user-circle me-1"></i>Ver Perfil Completo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

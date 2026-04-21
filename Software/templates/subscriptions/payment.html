@@ -1,0 +1,59 @@
+{% extends 'subscriptions/base_subscriptions.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow text-center">
+                <div class="card-header bg-primary text-white py-3">
+                    <h4 class="mb-0">Confirmar Pago</h4>
+                </div>
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-shield-alt fa-4x text-primary mb-3"></i>
+                        <h3>Orden #{{ order.order_number }}</h3>
+                        <p class="text-muted">Estás a un paso de activar tu suscripción</p>
+                    </div>
+                    
+                    <div class="alert alert-light border mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span>Total a pagar:</span>
+                            <span class="h4 mb-0">${{ order.total_amount|intcomma }} {{ order.currency }}</span>
+                        </div>
+                        <div class="small text-muted text-start">
+                            Incluye {{ order.items.count }} item(s)
+                        </div>
+                    </div>
+                    
+                    <!-- Wompi Widget Container -->
+                    <form>
+                        <script
+                            src="https://checkout.wompi.co/widget.js"
+                            data-render="button"
+                            data-public-key="{{ widget_data.public_key }}"
+                            data-currency="{{ widget_data.currency }}"
+                            data-amount-in-cents="{{ widget_data.amount_in_cents }}"
+                            data-reference="{{ widget_data.reference }}"
+                            data-signature:integrity="{{ widget_data.signature }}"
+                            data-redirect-url="{{ widget_data.redirect_url }}"
+                            >
+                        </script>
+                    </form>
+                    
+                    <div class="mt-4 text-muted small">
+                        <p class="mb-1">Al hacer clic en el botón, serás redirigido a la pasarela de pagos segura de Wompi.</p>
+                        <p>Aceptamos tarjetas de crédito, débito (PSE), Nequi y Bancolombia.</p>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{% url 'subscriptions:checkout' %}" class="btn btn-link text-muted">
+                        Cancelar y volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

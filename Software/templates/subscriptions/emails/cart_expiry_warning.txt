@@ -1,0 +1,28 @@
+⏰ URGENTE: Tu carrito expira en {{ hours_remaining }} horas
+
+Hola {{ user.first_name|default:"" }},
+
+Tu carrito con planes de suscripción está a punto de expirar en {{ hours_remaining }} horas. No pierdas esta oportunidad.
+
+PLANES EN TU CARRITO:
+{% for item in items %}
+- {{ item.plan.plan_type.name }} - {{ item.plan.module.display_name }}
+  ${{ item.unit_price|floatformat:0 }}/{{ item.billing_cycle|default:"año" }}
+{% endfor %}
+
+TOTAL: ${{ total_amount|floatformat:0 }}
+
+🚀 Completar Compra: {{ checkout_url }}
+👀 Ver Carrito: {{ cart_url }}
+
+¿Por qué actuar ahora?
+• Acceso inmediato a todas las funcionalidades
+• Soporte especializado incluido
+• Precios especiales por tiempo limitado
+• Sin compromisos de permanencia
+
+Después de {{ hours_remaining }} horas, perderás los planes en tu carrito.
+
+---
+Este es un recordatorio automático de expiración.
+Preguntas: soporte@ejemplo.com
