@@ -127,7 +127,7 @@ class DemoService:
             demo_subscription = Subscription.objects.create(
                 user=user,
                 plan=demo_plan,
-                billing_cycle='monthly',
+                billing_cycle='yearly',
                 start_date=timezone.now(),
                 end_date=timezone.now() + timedelta(days=30),
                 status='active',

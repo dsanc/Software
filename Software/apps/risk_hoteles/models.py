@@ -873,6 +873,30 @@ class SecurityCategoryComment(models.Model):
         return f"{self.assessment.hotel.name} - {self.category.name}: {self.comments[:50]}..."
 
 
+class ResponseOption(models.Model):
+    """
+    Opciones de respuesta configurables para las evaluaciones de seguridad.
+    Corresponden a la escala de calificación 0-5.
+    """
+    value = models.IntegerField(
+        unique=True,
+        validators=[MinValueValidator(-1), MaxValueValidator(10)],
+        verbose_name="Valor numérico"
+    )
+    label = models.CharField(max_length=100, verbose_name="Etiqueta corta")
+    description = models.TextField(verbose_name="Descripción completa")
+    is_active = models.BooleanField(default=True, verbose_name="Activo")
+    order = models.PositiveIntegerField(default=0, verbose_name="Orden")
+
+    class Meta:
+        verbose_name = "Opción de Respuesta"
+        verbose_name_plural = "Opciones de Respuesta"
+        ordering = ['order', 'value']
+
+    def __str__(self):
+        return f"{self.value} - {self.label}"
+
+
 class SecurityResponse(models.Model):
     """
     Respuestas a las preguntas de seguridad para una evaluación específica
@@ -932,12 +956,28 @@ class SecurityResponse(models.Model):
     @property
     def rating_description(self):
         """
-        Retorna la descripción completa de la calificación
+        Retorna la descripción completa de la calificación.
+        Busca primero en ResponseOption (DB), con fallback a valores por defecto.
         """
         if self.not_applicable:
+            try:
+                option = ResponseOption.objects.get(value=-1, is_active=True)
+                return option.description
+            except ResponseOption.DoesNotExist:
+                pass
             return "No aplica - Por el tipo de organización hotelera, por la dinámica operativa, por ubicación o servicio, el criterio no aplica"
-        
-        rating_descriptions = {
+
+        if self.rating is None:
+            return "Sin calificación"
+
+        try:
+            option = ResponseOption.objects.get(value=self.rating, is_active=True)
+            return option.description
+        except ResponseOption.DoesNotExist:
+            pass
+
+        # Fallback si la tabla aún no tiene datos
+        fallback = {
             0: "Expuesto - Se carece de dicho control",
             1: "Vulnerable - El control que se tiene es totalmente vulnerable dado que no cumple con ningún nivel de efectividad y podría ser superado, quebrantado u omitido dado que no genera ningún tipo de incidencia en la mitigación del riesgo o en el cumplimiento cabal del requisito",
             2: "Insuficiente - El control puede funcionar en ocasiones o incidir positivamente en algunos casos pero no en todos. Esto implica que el control no es efectivo para la mayoría de los casos y su fallo es recurrente.",
@@ -945,7 +985,7 @@ class SecurityResponse(models.Model):
             4: "Adecuado - El control que se tiene funciona adecuadamente la mayoría de las veces. Este podría fallar excepcionalmente. Se considera que el control es efectivo cumpliendo confiablemente con el requisito.",
             5: "Excelente - El control que se tiene funciona con un nivel superior, dado que tiene mecanismos redundantes y cuenta con diseño a prueba de fallos. Se considera que el control es efectivo cumple a un nivel más alto que garantiza su constante confiabilidad y no se conocen fallos de este."
         }
-        return rating_descriptions.get(self.rating, "Sin calificación")
+        return fallback.get(self.rating, "Sin calificación")
 
 
 class AssessmentEvidence(models.Model):

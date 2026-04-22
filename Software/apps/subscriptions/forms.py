@@ -99,15 +99,13 @@ class CheckoutForm(forms.Form):
     """Formulario para el proceso de checkout"""
     
     BILLING_CYCLE_CHOICES = [
-        ('monthly', 'Mensual'),
-        ('quarterly', 'Trimestral'),
         ('yearly', 'Anual'),
     ]
     
     billing_cycle = forms.ChoiceField(
         label='Ciclo de facturación',
         choices=BILLING_CYCLE_CHOICES,
-        initial='monthly',
+        initial='yearly',
         widget=forms.RadioSelect(attrs={
             'class': 'form-check-input'
         })
@@ -137,8 +135,8 @@ class PlanSelectionForm(forms.Form):
     
     billing_cycle = forms.ChoiceField(
         label='Período de facturación',
-        choices=Plan.BILLING_CYCLES,
-        initial='monthly',
+        choices=[('yearly', 'Anual')],
+        initial='yearly',
         widget=forms.RadioSelect(attrs={
             'class': 'form-check-input'
         })
@@ -206,7 +204,8 @@ class UpgradeForm(forms.Form):
     
     billing_cycle = forms.ChoiceField(
         label='Período de facturación',
-        choices=Plan.BILLING_CYCLES,
+        choices=[('yearly', 'Anual')],
+        initial='yearly',
         widget=forms.RadioSelect(attrs={
             'class': 'form-check-input'
         })

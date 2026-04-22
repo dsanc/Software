@@ -40,10 +40,11 @@ class EvaluadorMiddleware(MiddlewareMixin):
                 for key, value in context.items():
                     if key == 'evaluator_profiles' and isinstance(value, list):
                         # Filtrar perfiles que pertenezcan al usuario autenticado como evaluador
+                        # Los perfiles son dicts con clave 'perfil', no objetos con atributo 'perfil'
                         filtered_profiles = []
                         for profile in value:
-                            if (hasattr(profile, 'perfil') and 
-                                profile['perfil'].usuario_evaluador_id == request.user.id):
+                            if (isinstance(profile, dict) and 'perfil' in profile and
+                                    profile['perfil'].usuario_evaluador_id == request.user.id):
                                 filtered_profiles.append(profile)
                         filtered_context[key] = filtered_profiles
                     elif key == 'main_users' and isinstance(value, list):

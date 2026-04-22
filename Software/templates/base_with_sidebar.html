@@ -29,10 +29,13 @@
     <link rel="apple-touch-icon" href="{% static 'images/Logo_R.png' %}">
     
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha384-iw3OoTErCYJJB9mCa8LNS2hbsQ7M3C0EpIsO/H5+EGAkPGc6rk+V8i04oW/K5xq0" crossorigin="anonymous">
+
+    <!-- meta current-user para sistema de permisos -->
+    <meta name="current-user" content="{{ user.username|default:'Anónimo'|escapejs }}">
     
     <!-- CSS personalizado - Solo elementos básicos -->
     <style>
@@ -184,9 +187,6 @@
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
         width: 40px !important;
         height: 40px !important;
         display: flex !important;
@@ -270,39 +270,6 @@
         visibility: hidden !important;
     }
     
-    /* Separador de navegación */
-    .nav-separator {
-        height: 1px !important;
-        background: rgba(255, 255, 255, 0.08) !important;
-        margin: 12px 16px !important;
-        list-style: none !important;
-    }
-    
-    /* =================================================================
-       BADGES Y ELEMENTOS DECORATIVOS
-       ================================================================= */
-    .nav-badge {
-        background: var(--accent-gradient) !important;
-        color: var(--text-primary) !important;
-        padding: 2px 8px !important;
-        border-radius: 12px !important;
-        font-size: 0.7rem !important;
-        font-weight: 600 !important;
-        margin-left: auto !important;
-    }
-    
-    /* Shortcuts en la navegación */
-    .nav-shortcut {
-        background: rgba(255, 255, 255, 0.1) !important;
-        color: var(--text-secondary) !important;
-        padding: 2px 6px !important;
-        border-radius: 4px !important;
-        font-size: 0.7rem !important;
-        font-weight: 500 !important;
-        margin-left: auto !important;
-        border: var(--sidebar-border) !important;
-    }
-    
     /* Header del sidebar */
     .sidebar-header {
         padding: 20px !important;
@@ -335,7 +302,7 @@
     /* Estilos para diferentes tipos de logo */
     .sidebar-logo-image,
     .logo-text-alternative {
-        transition: all 0.3s ease !important;
+        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
         max-width: 100% !important;
         max-height: 100% !important;
         object-fit: contain !important;
@@ -396,12 +363,6 @@
         opacity: 1 !important;
     }
 
-    /* Efecto de transición suave para el logo */
-    .sidebar-logo-image,
-    .logo-text-alternative {
-        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
-    }
-    
     /* Cuando está colapsado, centrar el logo */
     .modern-sidebar.collapsed .sidebar-header {
         justify-content: center !important;
@@ -547,12 +508,15 @@
     
     .nav-icon {
         font-size: 1.1rem !important;
-        width: 20px !important;
+        width: 1.25rem !important;
         min-width: 20px !important;
         text-align: center !important;
         flex-shrink: 0 !important;
         opacity: 1 !important;
         visibility: visible !important;
+        margin-right: 0.75rem !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        transition: all 0.3s ease !important;
     }
     
     /* Iconos siempre visibles incluso cuando está colapsado */
@@ -938,14 +902,6 @@
     }
     
     /* Mejoras en los iconos */
-    .nav-icon {
-        width: 1.25rem !important;
-        text-align: center !important;
-        margin-right: 0.75rem !important;
-        color: rgba(255, 255, 255, 0.8) !important;
-        transition: all 0.3s ease !important;
-    }
-    
     .nav-link:hover .nav-icon,
     .nav-link.active .nav-icon {
         color: #ffffff !important;
@@ -1249,11 +1205,18 @@
                class="sidebar-logo" 
                aria-label="Ir al inicio - {{ site_name }}">
                 <div class="logo-icon" aria-hidden="true">
-                    <!-- Logo SVG -->
+                    <!-- Logo SVG (expandido) -->
                     <img src="{% static 'images/file.svg' %}"
                          alt="Logo del Sistema" 
                          class="sidebar-logo-image logo-expanded"
                          id="logoExpanded">
+
+                    <!-- Logo PNG (colapsado, modo alternativo) -->
+                    <img src="{% static 'images/Logo_R.png' %}"
+                         alt="Logo colapsado"
+                         class="sidebar-logo-image logo-collapsed"
+                         id="logoCollapsed"
+                         style="display:none;">
                     
                     <!-- Icono fallback -->
                     <i class="fas fa-cube" aria-hidden="true" style="display:none;" id="logoFallback"></i>
@@ -1272,21 +1235,35 @@
         <!-- Navegación -->
         <div class="sidebar-nav-container">
             <ul class="sidebar-nav" role="menubar" aria-label="Navegación principal">
-                <!-- Dashboard -->
+                <!-- Dashboard Switch: Usuario Principal vs Evaluador -->
                 <li class="nav-item" role="none">
-                    <a href="{% url 'dashboard:home' %}" 
-                       class="nav-link" 
-                       role="menuitem" 
-                       tabindex="0"
-                       aria-label="Ir al panel principal">
-                        <i class="nav-icon fas fa-home" aria-hidden="true"></i>
-                        <span class="nav-text" data-i18n="sidebar.dashboard">Inicio</span>
-                        <div class="sidebar-tooltip">Panel Principal</div>
-                    </a>
+                    {% if evaluator.is_evaluator %}
+                        {% with first_p=evaluator.evaluator_profiles.0 %}
+                        <a href="{% if first_p.usuario_principal.id %}{% url 'evaluadores:dashboard_evaluador' first_p.usuario_principal.id %}{% else %}{% url 'evaluadores:mi_perfil_evaluador' %}{% endif %}"
+                           class="nav-link"
+                           role="menuitem"
+                           tabindex="0"
+                           aria-label="Ir a mi dashboard de evaluador">
+                            <i class="nav-icon fas fa-tachometer-alt" aria-hidden="true"></i>
+                            <span class="nav-text">Dashboard Evaluador</span>
+                            <div class="sidebar-tooltip">Mi Dashboard de Evaluador</div>
+                        </a>
+                        {% endwith %}
+                    {% else %}
+                        <a href="{% url 'dashboard:dashboard' %}"
+                           class="nav-link"
+                           role="menuitem"
+                           tabindex="0"
+                           aria-label="Ir al panel principal">
+                            <i class="nav-icon fas fa-home" aria-hidden="true"></i>
+                            <span class="nav-text" data-i18n="sidebar.dashboard">Mi Dashboard</span>
+                            <div class="sidebar-tooltip">Panel Principal</div>
+                        </a>
+                    {% endif %}
                 </li>
                 
                 <!-- Separador sutil -->
-                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                <li class="nav-separator" role="separator"></li>
                 
                 <!-- Risk Hoteles -->
                 <li class="nav-item has-submenu" role="none">
@@ -1326,23 +1303,23 @@
                 </li>
                 
                 <!-- Risk Conjuntos -->
-                <li class="nav-item has-submenu">
-                    <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link">
+                <li class="nav-item has-submenu" role="none">
+                    <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link" role="menuitem" aria-expanded="false" aria-haspopup="true" aria-label="Análisis de riesgo para conjuntos residenciales">
                         <i class="nav-icon fas fa-building"></i>
                         <span class="nav-text">Risk Conjuntos</span>
                         <i class="submenu-indicator fas fa-chevron-right"></i>
                         <div class="sidebar-tooltip">Análisis de riesgo para conjuntos residenciales</div>
                     </a>
                     <ul class="submenu">
-                        <li class="nav-item">
-                            <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link">
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'risk_conjuntos:dashboard' %}" class="nav-link" role="menuitem" aria-label="Panel principal conjuntos">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <span class="nav-text">Dashboard</span>
                                 <div class="sidebar-tooltip">Panel principal conjuntos</div>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="nav-link">
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="nav-link" role="menuitem" aria-label="Gestionar mis conjuntos">
                                 <i class="nav-icon fas fa-home"></i>
                                 <span class="nav-text">Mis Conjuntos</span>
                                 <div class="sidebar-tooltip">Gestionar conjuntos</div>
@@ -1352,23 +1329,23 @@
                 </li>
                 
                 <!-- Security Probabilistic -->
-                <li class="nav-item has-submenu">
-                    <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link">
+                <li class="nav-item has-submenu" role="none">
+                    <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link" role="menuitem" aria-expanded="false" aria-haspopup="true" aria-label="Evaluación de seguridad probabilística">
                         <i class="nav-icon fas fa-shield-alt"></i>
                         <span class="nav-text">Seguridad Probabilística</span>
                         <i class="submenu-indicator fas fa-chevron-right"></i>
                         <div class="sidebar-tooltip">Evaluación de seguridad probabilística</div>
                     </a>
                     <ul class="submenu">
-                        <li class="nav-item">
-                            <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link">
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'security_probabilistic:dashboard' %}" class="nav-link" role="menuitem" aria-label="Panel principal de seguridad">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <span class="nav-text">Dashboard</span>
                                 <div class="sidebar-tooltip">Panel principal de seguridad</div>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="nav-link">
+                        <li class="nav-item" role="none">
+                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="nav-link" role="menuitem" aria-label="Listado de perfiles de seguridad">
                                 <i class="nav-icon fas fa-users"></i>
                                 <span class="nav-text">Perfiles</span>
                                 <div class="sidebar-tooltip">Listado de perfiles de seguridad</div>
@@ -1480,7 +1457,7 @@
 
                 {% if user.is_staff %}
                 <!-- Administración -->
-                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                <li class="nav-separator" role="separator"></li>
                 <li class="nav-item">
                     <a href="/admin/" class="nav-link" target="_blank">
                         <i class="nav-icon fas fa-cogs"></i>
@@ -1491,7 +1468,7 @@
                 {% endif %}
                 
                 <!-- Separador -->
-                <li class="nav-separator" role="separator" aria-hidden="true"></li>
+                <li class="nav-separator" role="separator"></li>
                 
                 <!-- Cerrar sesión -->
                 <li class="nav-item logout-item">
@@ -1684,7 +1661,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <p>&copy; 2023 Proyecto Django Modular. Todos los derechos reservados.</p>
+                    <p>&copy; 2026 Proyecto Django Modular. Todos los derechos reservados.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p>Desarrollado con Django y Bootstrap</p>
@@ -1695,10 +1672,10 @@
     {% endif %}
     
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     
     <!-- jQuery (antes de main.js y permission_handler.js) -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs" crossorigin="anonymous"></script>
     
     <!-- Establecer datos del usuario para WebSocket -->
     <script>
@@ -1712,8 +1689,6 @@
     <!-- Sistema de manejo de permisos -->
     <script src="{% static 'js/permission_handler.js' %}"></script>
     
-    <!-- Establecer usuario actual para el sistema de permisos -->
-    <meta name="current-user" content="{{ user.username|default:'Anónimo'|escapejs }}">
     <script>
     // Establecer variables globales para el sistema de permisos
     window.currentUser = '{{ user.username|default:"Anónimo"|escapejs }}';
@@ -1869,12 +1844,10 @@
             // Configurar submenús con manejo mejorado
             document.querySelectorAll('.has-submenu > .nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
-                    if (!this.isMobile) {
-                        e.preventDefault();
-                        const item = e.target.closest('.has-submenu');
-                        this.toggleSubmenu(item);
-                        this.updateSubmenuAriaAttributes(item);
-                    }
+                    e.preventDefault();
+                    const item = e.target.closest('.has-submenu');
+                    this.toggleSubmenu(item);
+                    this.updateSubmenuAriaAttributes(item);
                 });
 
                 // Enhanced keyboard navigation
@@ -2361,12 +2334,10 @@
     // Inicializar cuando el DOM esté listo
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {
-            const sidebar = new ModernSidebar();
-            setTimeout(() => { sidebar.updateLogoDisplay(); }, 500);
+            new ModernSidebar();
         });
     } else {
-        const sidebar = new ModernSidebar();
-        setTimeout(() => { sidebar.updateLogoDisplay(); }, 500);
+        new ModernSidebar();
     }
 
     // Bootstrap dropdowns compatibility
@@ -2381,27 +2352,6 @@
         }, 100);
     });
     
-    // Manejo de fallback del avatar
-    document.addEventListener('DOMContentLoaded', function() {
-        function handleAvatarFallback() {
-            const avatarImage = document.querySelector('.avatar-image');
-            const avatarInitials = document.querySelector('.avatar-initials');
-            
-            if (avatarImage) {
-                if (!avatarImage.complete) {
-                    setTimeout(handleAvatarFallback, 500);
-                    return;
-                }
-                if (avatarImage.naturalWidth === 0) {
-                    avatarImage.style.display = 'none';
-                    if (avatarInitials) avatarInitials.style.display = 'flex';
-                } else {
-                    if (avatarInitials) avatarInitials.style.display = 'none';
-                }
-            }
-        }
-        setTimeout(handleAvatarFallback, 500);
-    });
     </script>
     {% endif %}
     

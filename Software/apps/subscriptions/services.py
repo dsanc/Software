@@ -450,7 +450,7 @@ class CartService:
         source_cart.delete()
     
     @staticmethod
-    def add_to_cart(cart, plan, billing_cycle='monthly', quantity=1):
+    def add_to_cart(cart, plan, billing_cycle='yearly', quantity=1):
         """Agrega un plan al carrito - Con validaciones de negocio"""
         try:
             # VALIDACIÓN 1: Verificar si es plan Demo y el usuario ya lo ha usado

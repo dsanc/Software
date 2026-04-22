@@ -228,7 +228,7 @@ def activate_module_plan(request, module_name):
         subscription = Subscription.objects.create(
             user=request.user,
             plan=plan,
-            billing_cycle='monthly',
+            billing_cycle='yearly',
             start_date=timezone.now(),
             end_date=timezone.now() + timedelta(days=30),
             status='active',
@@ -301,7 +301,7 @@ def add_to_cart(request):
     try:
         data = json.loads(request.body)
         plan_id = data.get('plan_id')
-        billing_cycle = data.get('billing_cycle', 'monthly')
+        billing_cycle = data.get('billing_cycle', 'yearly')
         quantity = int(data.get('quantity', 1))
         
         logger.info(f"Attempting to add plan {plan_id} to cart")

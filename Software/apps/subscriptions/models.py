@@ -218,7 +218,7 @@ class CartItem(models.Model):
     
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    billing_cycle = models.CharField('Ciclo de facturación', max_length=20, choices=BILLING_CYCLES, default='monthly')
+    billing_cycle = models.CharField('Ciclo de facturación', max_length=20, choices=BILLING_CYCLES, default='yearly')
     quantity = models.PositiveIntegerField('Cantidad', default=1, validators=[MinValueValidator(1)])
     unit_price = models.DecimalField('Precio unitario', max_digits=10, decimal_places=2)
     
