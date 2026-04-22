@@ -18,6 +18,10 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+# django_browser_reload: incluido en INSTALLED_APPS para que el tag esté registrado en templates.
+# Sin el middleware no ejecuta ningún reload en producción.
+INSTALLED_APPS += ['django_browser_reload']
+
 # Base de datos MySQL (PythonAnywhere provee MySQL)
 DATABASES = {
     'default': {
