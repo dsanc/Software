@@ -10,13 +10,12 @@ INSTRUCCIONES:
 import sys
 import os
 
-# === AJUSTA ESTAS DOS VARIABLES ===
-TUUSUARIO = 'tuusuario'            # Tu nombre de usuario en PythonAnywhere
-NOMBRE_PROYECTO = 'Software'        # Nombre de la carpeta raíz del proyecto
-# ==================================
-
-# Ruta al proyecto (donde está manage.py)
-RUTA_PROYECTO = f'/home/{TUUSUARIO}/{NOMBRE_PROYECTO}'
+# === AJUSTA ESTAS VARIABLES ===
+TUUSUARIO = 'Dey0707'              # Tu nombre de usuario en PythonAnywhere
+# Ruta donde está manage.py y la carpeta config/
+# IMPORTANTE: el repo se clona en ~/Software pero el proyecto Django está dentro en ~/Software/Software
+RUTA_PROYECTO = f'/home/{TUUSUARIO}/Software/Software'
+# ==============================
 
 # Agregar el proyecto al Python path
 if RUTA_PROYECTO not in sys.path:

@@ -1,6 +1,7 @@
 {% extends "base_with_sidebar.html" %}
 {% load static %}
 {% load humanize %}
+{% load evaluador_permissions %}
 
 {% block title %}{{ conjunto.nombre }} - Detalle{% endblock %}
 
@@ -94,6 +95,19 @@
         background: rgba(255, 255, 255, 0.1);
         color: white;
         transform: translateY(-1px);
+    }
+    
+    .btn-header-report {
+        background: rgba(220, 53, 69, 0.85);
+        color: white;
+        border: 1px solid rgba(220, 53, 69, 1);
+    }
+    
+    .btn-header-report:hover {
+        background: rgba(200, 35, 51, 1);
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
     }
     
     /* Estilos para la tabla de evaluaciones */
@@ -943,7 +957,6 @@
                 </div>
             </div>
             <div class="header-actions">
-                {% load evaluador_permissions %}
                 {% has_module_permission user 'risk_conjuntos' 'update' as can_update %}
                 {% if can_update %}
                 <button class="btn-header btn-header-primary" onclick="openEditModal('{{ conjunto.id }}')">
@@ -955,6 +968,16 @@
                 <a href="{% url 'risk_conjuntos:iniciar_evaluacion' conjunto.id %}" class="btn-header btn-header-success">
                     <i class="fas fa-shield-alt"></i>Nueva Evaluación
                 </a>
+                {% endif %}
+                {% if total_evaluaciones > 1 %}
+                {% has_module_permission user 'risk_conjuntos' 'read' as can_read_report %}
+                {% if can_read_report %}
+                <a href="{% url 'risk_conjuntos:generar_reporte_general' conjunto.id %}" 
+                   class="btn-header btn-header-report" target="_blank"
+                   title="Reporte General — Estado actual basado en {{ total_evaluaciones }} evaluaciones">
+                    <i class="fas fa-file-pdf"></i>Reporte General
+                </a>
+                {% endif %}
                 {% endif %}
             </div>
         </div>
@@ -1129,14 +1152,10 @@
                                            class="btn-table btn-table-success" title="Generar reporte PDF con IA" target="_blank">
                                             <i class="fas fa-file-pdf"></i>
                                         </a>
-                                        <a href="{% url 'risk_conjuntos:preview_pdf_evaluacion' evaluacion.id %}" 
-                                           class="btn-table btn-table-info" title="Vista previa del reporte" target="_blank">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
                                     {% elif evaluacion.estado == 'en_progreso' %}
                                         {% has_module_permission user 'risk_conjuntos' 'update' as can_update_eval %}
                                         {% if can_update_eval %}
-                                        <a href="{% url 'risk_conjuntos:continuar_evaluacion' evaluacion.id %}" 
+                                        <a href="{% url 'risk_conjuntos:paso_1_seleccion_riesgos' conjunto.id %}" 
                                            class="btn-table btn-table-primary" title="Continuar evaluación en progreso">
                                             <i class="fas fa-play"></i>
                                         </a>
@@ -1196,7 +1215,7 @@
                     <p class="text-muted mb-3">Tienes una evaluación sin completar</p>
                     {% has_module_permission user 'risk_conjuntos' 'update' as can_continue %}
                     {% if can_continue %}
-                    <a href="{% url 'risk_conjuntos:continuar_evaluacion' evaluacion_en_progreso.id %}" 
+                    <a href="{% url 'risk_conjuntos:paso_1_seleccion_riesgos' conjunto.id %}" 
                        class="btn btn-warning w-100">
                         <i class="fas fa-play me-2"></i>Continuar Evaluación
                     </a>

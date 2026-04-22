@@ -1,8 +1,13 @@
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.utils import timezone
+import logging
 import uuid
+
+logger = logging.getLogger(__name__)
 
 # Importar modelos base del core
 from core.models import SoftDeleteModel, TimeStampedModel
@@ -569,7 +574,7 @@ class EvaluacionRiesgo(SoftDeleteModel):
     def save(self, *args, **kwargs):
         if self.estado == 'completada' and not self.fecha_completado:
             self.fecha_completado = timezone.now()
-            
+
         super().save(*args, **kwargs)
 
     def calcular_promedio_general(self):
@@ -578,9 +583,9 @@ class EvaluacionRiesgo(SoftDeleteModel):
         
         if promedios_riesgos:
             promedio = sum(promedios_riesgos) / len(promedios_riesgos)
-            self.promedio_general = round(promedio, 4)
+            self.promedio_general = round(Decimal(str(promedio)), 4)
             return self.promedio_general
-        return 0
+        return Decimal('0')
 
     def get_nivel_riesgo(self):
         """
@@ -846,8 +851,8 @@ class RespuestaPregunta(models.Model):
         return f'{self.evaluacion} - {self.pregunta.texto_pregunta[:30]}...'
     
     def save(self, *args, **kwargs):
-        # Calcular resultado: 1 - valor de calificación
-        self.resultado_calculado = 1 - self.calificacion.valor
+        # Calcular resultado: 1 - valor de calificación (usando Decimal para consistencia)
+        self.resultado_calculado = Decimal('1') - self.calificacion.valor
         super().save(*args, **kwargs)
 
 

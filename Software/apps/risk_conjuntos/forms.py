@@ -339,6 +339,10 @@ class ArchivoEvaluacionForm(forms.ModelForm):
     """
     Formulario para subir archivos adjuntos a evaluaciones
     """
+
+    ALLOWED_EXTENSIONS = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png', '.gif'}
+    MAX_FILE_SIZE_MB = 10
+
     class Meta:
         model = ArchivoEvaluacion
         fields = ['archivo', 'tipo_archivo', 'descripcion']
@@ -362,3 +366,24 @@ class ArchivoEvaluacionForm(forms.ModelForm):
         })
         
         self.fields['descripcion'].required = False
+
+    def clean_archivo(self):
+        archivo = self.cleaned_data.get('archivo')
+        if not archivo:
+            return archivo
+
+        import os
+        ext = os.path.splitext(archivo.name)[1].lower()
+        if ext not in self.ALLOWED_EXTENSIONS:
+            raise forms.ValidationError(
+                f'Tipo de archivo no permitido. Extensiones válidas: '
+                f'{", ".join(sorted(self.ALLOWED_EXTENSIONS))}'
+            )
+
+        max_bytes = self.MAX_FILE_SIZE_MB * 1024 * 1024
+        if archivo.size > max_bytes:
+            raise forms.ValidationError(
+                f'El archivo excede el tamaño máximo permitido de {self.MAX_FILE_SIZE_MB} MB.'
+            )
+
+        return archivo

@@ -7,11 +7,13 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_http_methods
 from django.core.exceptions import PermissionDenied
+import json
+import logging
+from datetime import datetime, timedelta
+
 from apps.subscriptions.access_control import requires_risk_conjuntos
 from apps.subscriptions.access_control import AccessControlMixin
 from django.views.generic import TemplateView
-import json
-from datetime import datetime, timedelta
 
 # Importar sistema de permisos de evaluadores
 from apps.evaluadores.permissions import (
@@ -79,27 +81,44 @@ def get_user_evaluaciones(user):
     return mixin.get_ownership_queryset(queryset)
 
 
+logger = logging.getLogger(__name__)
+
+
 def ensure_conjunto_ownership(user, conjunto):
     """
-    Verifica que el usuario tenga acceso a un conjunto específico
+    Verifica que el usuario tenga acceso a un conjunto específico.
+    Superusuarios y staff tienen acceso completo.
     """
+    if user.is_superuser or user.is_staff:
+        return
+
     mixin = RiskConjuntosOwnershipMixin()
-    mixin.request = type('obj', (object,), {'user': user})()  # Mock request object
-    
+    mixin.request = type('obj', (object,), {'user': user})()
+
     if not mixin.get_object_ownership(conjunto):
-        from django.core.exceptions import PermissionDenied
+        logger.warning(
+            "Acceso denegado al conjunto %s por usuario %s (id=%s)",
+            conjunto.id, user.username, user.pk
+        )
         raise PermissionDenied("No tienes permisos para acceder a este conjunto")
 
 
 def ensure_evaluacion_ownership(user, evaluacion):
     """
-    Verifica que el usuario tenga acceso a una evaluación específica
+    Verifica que el usuario tenga acceso a una evaluación específica.
+    Superusuarios y staff tienen acceso completo.
     """
+    if user.is_superuser or user.is_staff:
+        return
+
     mixin = RiskConjuntosOwnershipMixin()
-    mixin.request = type('obj', (object,), {'user': user})()  # Mock request object
-    
+    mixin.request = type('obj', (object,), {'user': user})()
+
     if not mixin.get_object_ownership(evaluacion):
-        from django.core.exceptions import PermissionDenied
+        logger.warning(
+            "Acceso denegado a evaluación %s por usuario %s (id=%s)",
+            evaluacion.id, user.username, user.pk
+        )
         raise PermissionDenied("No tienes permisos para acceder a esta evaluación")
 
 
@@ -251,15 +270,22 @@ def dashboard(request):
     fecha_actual = timezone.now()
     hace_6_meses = fecha_actual - timedelta(days=180)
     
+    from django.db.models.functions import TruncMonth
     evaluaciones_por_mes = evaluaciones.filter(
         estado='completada',
         fecha_evaluacion__gte=hace_6_meses
-    ).extra({
-        'mes': "strftime('%%Y-%%m', fecha_evaluacion)"
-    }).values('mes').annotate(
+    ).annotate(
+        mes=TruncMonth('fecha_evaluacion')
+    ).values('mes').annotate(
         total=Count('id')
     ).order_by('mes')
-    
+
+    eval_mes_dict = {}
+    for eval_mes in evaluaciones_por_mes:
+        if eval_mes['mes']:
+            key = eval_mes['mes'].strftime('%Y-%m')
+            eval_mes_dict[key] = eval_mes['total']
+
     # Preparar datos para Chart.js
     meses_labels = []
     meses_data = []
@@ -270,14 +296,7 @@ def dashboard(request):
         mes_str = mes.strftime('%Y-%m')
         mes_label = mes.strftime('%B %Y')
         meses_labels.insert(0, mes_label)
-        
-        # Buscar data para este mes
-        count = 0
-        for eval_mes in evaluaciones_por_mes:
-            if eval_mes['mes'] == mes_str:
-                count = eval_mes['total']
-                break
-        meses_data.insert(0, count)
+        meses_data.insert(0, eval_mes_dict.get(mes_str, 0))
     
     # ===== NUEVAS GRÁFICAS DE TENDENCIAS =====
     
@@ -591,7 +610,7 @@ def crear_conjunto(request):
             conjunto = form.save(commit=False)
             conjunto.propietario = request.user
             conjunto.save()
-            
+            CacheManager.invalidate_user_cache(request.user.id)
             messages.success(request, f'Conjunto "{conjunto.nombre}" creado exitosamente.')
             return redirect('risk_conjuntos:detalle_conjunto', conjunto_id=conjunto.id)
     else:
@@ -671,6 +690,7 @@ def detalle_conjunto(request, conjunto_id):
         'total_evaluaciones': total_evaluaciones,
         'evaluacion_en_progreso': evaluacion_en_progreso,
         'score_actual': score_actual,  # Agregar score actual en porcentaje
+        'ultima_evaluacion_completada': ultima_evaluacion_completada,
         'riesgos_bajos': riesgos_bajos,
         'riesgos_moderados': riesgos_moderados,
         'riesgos_altos': riesgos_altos,
@@ -718,12 +738,11 @@ def eliminar_conjunto(request, conjunto_id):
     
     conjunto.activo = False
     conjunto.save()
-    
+    CacheManager.invalidate_user_cache(request.user.id)
     messages.success(
-        request, 
+        request,
         f'Conjunto "{conjunto.nombre}" eliminado exitosamente.'
     )
-    
     return redirect('risk_conjuntos:lista_conjuntos')
 
 
@@ -1340,24 +1359,25 @@ def export_csv(request):
     ])
     
     conjuntos = Conjunto.objects.filter(
-        propietario=request.user, 
+        propietario=request.user,
         activo=True
-    ).select_related('tipo_conjunto')
-    
+    ).select_related('tipo_conjunto').prefetch_related('evaluaciones_riesgo')
+
     for conjunto in conjuntos:
-        ultima_evaluacion = conjunto.evaluaciones_seguridad.filter(
-            estado='completada'
+        ultima_evaluacion = conjunto.evaluaciones_riesgo.filter(
+            estado='completada',
+            deleted_at__isnull=True
         ).order_by('-fecha_evaluacion').first()
-        
+
         writer.writerow([
             conjunto.nombre,
             conjunto.tipo_conjunto.get_nombre_display(),
             conjunto.ciudad,
             conjunto.numero_unidades,
-            ultima_evaluacion.score_total if ultima_evaluacion else 'N/A',
+            f'{ultima_evaluacion.get_promedio_porcentaje():.1f}%' if ultima_evaluacion else 'N/A',
             ultima_evaluacion.get_nivel_riesgo() if ultima_evaluacion else 'Sin evaluar',
             ultima_evaluacion.fecha_evaluacion.strftime('%d/%m/%Y') if ultima_evaluacion else 'N/A',
-            conjunto.evaluaciones_seguridad.filter(estado='completada').count()
+            conjunto.evaluaciones_riesgo.filter(estado='completada', deleted_at__isnull=True).count()
         ])
     
     return response
@@ -1369,18 +1389,18 @@ def export_csv(request):
 @evaluador_permission_required('risk_conjuntos', 'create')
 def import_data(request):
     """
-    Importar datos desde CSV
+    Importar datos desde CSV — funcionalidad no disponible.
     """
+    from django.http import HttpResponseNotAllowed
     if request.method == 'POST':
-        # Esta funcionalidad se puede implementar según necesidades específicas
-        messages.info(request, 'Funcionalidad de importación en desarrollo.')
-        return redirect('risk_conjuntos:lista_conjuntos')
-    
-    context = {
-        'page_title': 'Importar Datos - Risk Conjuntos'
-    }
-    
-    return render(request, 'risk_conjuntos/import_data.html', context)
+        return JsonResponse(
+            {'success': False, 'error': 'Funcionalidad de importación no disponible.'},
+            status=501
+        )
+    return JsonResponse(
+        {'success': False, 'error': 'Funcionalidad de importación no disponible.'},
+        status=501
+    )
 
 
 # ==================== VISTAS API PARA MODAL ====================
@@ -1475,7 +1495,7 @@ def api_conjunto_crear(request):
             conjunto = form.save(commit=False)
             conjunto.propietario = request.user
             conjunto.save()
-            
+            CacheManager.invalidate_user_cache(request.user.id)
             return JsonResponse({
                 'success': True,
                 'message': f'Conjunto "{conjunto.nombre}" creado exitosamente.',
@@ -1513,7 +1533,7 @@ def api_conjunto_editar(request, conjunto_id):
         form = ConjuntoModalForm(request.POST, instance=conjunto)
         if form.is_valid():
             conjunto = form.save()
-            
+            CacheManager.invalidate_user_cache(request.user.id)
             return JsonResponse({
                 'success': True,
                 'message': f'Conjunto "{conjunto.nombre}" actualizado exitosamente.',
@@ -1688,12 +1708,11 @@ def api_eliminar_evaluacion(request, evaluacion_id):
         
         # Soft delete: marcar como eliminado en lugar de eliminar físicamente
         evaluacion.delete()  # Esto llama al método soft delete del modelo
-        
-        # Log de la acción
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f'Evaluación eliminada (soft delete): ID={evaluacion_id}, Conjunto={conjunto_nombre}, '
-                   f'Fecha={fecha_evaluacion}, Estado={estado_evaluacion}, Usuario={request.user.username}')
+        CacheManager.invalidate_user_cache(request.user.id)
+        logger.info(
+            'Evaluación eliminada (soft delete): ID=%s, Conjunto=%s, Fecha=%s, Estado=%s, Usuario=%s',
+            evaluacion_id, conjunto_nombre, fecha_evaluacion, estado_evaluacion, request.user.username
+        )
         
         return JsonResponse({
             'success': True,
@@ -1724,23 +1743,3 @@ def api_eliminar_evaluacion(request, evaluacion_id):
         }, status=500)
 
 
-@login_required
-@requires_risk_conjuntos()
-@evaluador_module_required('risk_conjuntos')
-def debug_crear_conjunto(request):
-    """
-    Vista de debug para investigar el problema del tipo_conjunto
-    """
-    if request.method == 'POST':
-        print("🚨 POST recibido en debug_crear_conjunto")
-        print(f"Datos POST: {request.POST}")
-        return JsonResponse({
-            'status': 'debug',
-            'message': 'POST interceptado en modo debug',
-            'data': dict(request.POST)
-        })
-    
-    context = {
-        'page_title': 'DEBUG - Crear Conjunto'
-    }
-    return render(request, 'risk_conjuntos/debug_crear_conjunto.html', context)

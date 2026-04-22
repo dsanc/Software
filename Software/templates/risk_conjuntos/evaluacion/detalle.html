@@ -28,7 +28,7 @@
                                             <i class="fas fa-map-marker-alt me-1"></i>{{ conjunto.direccion|default:"Sin dirección" }}
                                         </span>
                                         <span style="color: rgba(255,255,255,0.8); font-size: 0.85rem;">
-                                            <i class="fas fa-tag me-1"></i>{{ conjunto.get_tipo_conjunto_display|default:"Sin tipo" }}
+                                            <i class="fas fa-tag me-1"></i>{{ conjunto.tipo_conjunto.get_nombre_display|default:"Sin tipo" }}
                                         </span>
                                     </div>
                                 </div>
@@ -357,7 +357,7 @@
                                         
                                         {% if riesgo_data.porcentaje %}
                                             <!-- Resultado principal con semáforo -->
-                                            <div class="d-flex align-items-center mb-2 p-2 rounded" style="background-color: rgba({{ riesgo_data.semaforo_color|slice:'1:' }}, 0.1);">
+                                            <div class="d-flex align-items-center mb-2 p-2 rounded" style="background-color: {{ riesgo_data.semaforo_color }}1a;">
                                                 <div class="me-2" 
                                                      style="width: 28px; height: 28px; border-radius: 50%; background-color: {{ riesgo_data.semaforo_color }}; 
                                                             border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; 
@@ -512,7 +512,7 @@
                 <a href="{% url 'risk_conjuntos:detalle_conjunto' conjunto.id %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Volver al Conjunto
                 </a>
-                <a href="#" class="btn btn-primary">
+                <a href="{% url 'risk_conjuntos:generar_pdf_evaluacion' evaluacion.id %}" class="btn btn-primary">
                     <i class="fas fa-file-pdf"></i> Generar Reporte PDF
                 </a>
             </div>

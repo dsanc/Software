@@ -13,7 +13,6 @@ urlpatterns = [
     # Gestión de conjuntos
     path('conjuntos/', views.lista_conjuntos, name='lista_conjuntos'),
     path('conjuntos/crear/', views.crear_conjunto, name='crear_conjunto'),
-    path('debug/crear/', views.debug_crear_conjunto, name='debug_crear_conjunto'),
     path('conjuntos/<uuid:conjunto_id>/', views.detalle_conjunto, name='detalle_conjunto'),
     path('conjuntos/<uuid:conjunto_id>/editar/', views.editar_conjunto, name='editar_conjunto'),
     path('conjuntos/<uuid:conjunto_id>/eliminar/', views.eliminar_conjunto, name='eliminar_conjunto'),
@@ -40,6 +39,7 @@ urlpatterns = [
         path('evaluacion/<uuid:evaluacion_id>/generar/', views_pdf_report.generar_reporte_pdf, name='generar_pdf_evaluacion'),
         path('evaluacion/<uuid:evaluacion_id>/preview/', views_pdf_report.preview_reporte_pdf, name='preview_pdf_evaluacion'),
         path('evaluacion/<uuid:evaluacion_id>/datos-json/', views_pdf_report.api_datos_reporte_json, name='api_datos_reporte_json'),
+        path('conjunto/<uuid:conjunto_id>/general/', views_pdf_report.generar_reporte_general_pdf, name='generar_reporte_general'),
     ])),
     
     # APIs para JavaScript/AJAX

@@ -192,6 +192,130 @@ def api_datos_reporte_json(request, evaluacion_id):
         return JsonResponse({'error': 'Error al obtener datos del reporte'}, status=500)
 
 
+@login_required
+@evaluador_module_required('risk_conjuntos')
+@evaluador_permission_required('risk_conjuntos', 'read')
+def generar_reporte_general_pdf(request, conjunto_id):
+    """
+    Genera un reporte general del conjunto basado en el historial
+    completo de evaluaciones (requiere más de 1 evaluación completada).
+    """
+    try:
+        conjunto = get_object_or_404(Conjunto, id=conjunto_id)
+        ensure_conjunto_ownership(request.user, conjunto)
+
+        evaluaciones = conjunto.evaluaciones_riesgo.filter(
+            estado='completada',
+            promedio_general__isnull=False
+        ).order_by('fecha_evaluacion')
+
+        if evaluaciones.count() < 2:
+            messages.error(
+                request,
+                'El Reporte General requiere al menos 2 evaluaciones completadas.'
+            )
+            return redirect('risk_conjuntos:detalle_conjunto', conjunto_id=conjunto_id)
+
+        # --- Métricas globales ---
+        total_evaluaciones = evaluaciones.count()
+        scores = [e.get_promedio_porcentaje() for e in evaluaciones]
+        promedio_historico = round(sum(scores) / len(scores), 1)
+        mejor_evaluacion = evaluaciones[scores.index(min(scores))]
+        peor_evaluacion  = evaluaciones[scores.index(max(scores))]
+        ultima_evaluacion = evaluaciones.last()
+        primera_evaluacion = evaluaciones.first()
+
+        # Tendencia: compara última vs penúltima
+        penultima = list(evaluaciones)[-2]
+        diff = ultima_evaluacion.get_promedio_porcentaje() - penultima.get_promedio_porcentaje()
+        if abs(diff) < 2:
+            tendencia = 'estable'
+            tendencia_icono = 'fas fa-minus'
+            tendencia_color = '#ffc107'
+        elif diff > 0:
+            tendencia = 'empeorando'
+            tendencia_icono = 'fas fa-arrow-up'
+            tendencia_color = '#dc3545'
+        else:
+            tendencia = 'mejorando'
+            tendencia_icono = 'fas fa-arrow-down'
+            tendencia_color = '#28a745'
+
+        # --- Tabla de historial de evaluaciones ---
+        historial = []
+        for ev in evaluaciones:
+            historial.append({
+                'evaluacion': ev,
+                'fecha': ev.fecha_evaluacion,
+                'score': ev.get_promedio_porcentaje(),
+                'nivel': ev.get_nivel_riesgo(),
+                'color': ev.get_color_semaforo(),
+                'texto_nivel': ev.get_texto_nivel_riesgo(),
+                'creado_por': ev.creado_por,
+            })
+
+        # --- Categorías agregadas (promedio histórico por categoría) ---
+        categorias_agregadas = {}
+        for ev in evaluaciones:
+            for resultado in ev.resultados_riesgo.select_related('tipo_riesgo').all():
+                nombre = resultado.tipo_riesgo.nombre
+                pct = float(resultado.promedio_riesgo * 100) if resultado.promedio_riesgo else 0
+                if nombre not in categorias_agregadas:
+                    categorias_agregadas[nombre] = {'suma': 0, 'count': 0}
+                categorias_agregadas[nombre]['suma'] += pct
+                categorias_agregadas[nombre]['count'] += 1
+
+        categorias_promedio = {}
+        for nombre, datos in categorias_agregadas.items():
+            pct = round(datos['suma'] / datos['count'], 1) if datos['count'] else 0
+            if pct > 60:
+                nivel = 'alto'
+            elif pct > 30:
+                nivel = 'medio'
+            else:
+                nivel = 'bajo'
+            categorias_promedio[nombre] = {'porcentaje': pct, 'nivel': nivel}
+
+        # Ordenar categorías de mayor a menor riesgo
+        categorias_promedio = dict(
+            sorted(categorias_promedio.items(), key=lambda x: x[1]['porcentaje'], reverse=True)
+        )
+
+        # --- Análisis IA de la última evaluación ---
+        analisis_ia = generar_analisis_completo_ia(ultima_evaluacion)
+
+        context = {
+            'conjunto': conjunto,
+            'total_evaluaciones': total_evaluaciones,
+            'promedio_historico': promedio_historico,
+            'mejor_evaluacion': mejor_evaluacion,
+            'peor_evaluacion': peor_evaluacion,
+            'ultima_evaluacion': ultima_evaluacion,
+            'primera_evaluacion': primera_evaluacion,
+            'historial': historial,
+            'tendencia': tendencia,
+            'tendencia_icono': tendencia_icono,
+            'tendencia_color': tendencia_color,
+            'tendencia_diff': round(abs(diff), 1),
+            'categorias_promedio': categorias_promedio,
+            'analisis_ia': analisis_ia,
+            'fecha_generacion': timezone.now(),
+            'usuario_generador': request.user,
+        }
+
+        logger.info(
+            f'Reporte General PDF - Conjunto: {conjunto.nombre}, '
+            f'Evaluaciones: {total_evaluaciones}, Usuario: {request.user.username}'
+        )
+
+        return render(request, 'risk_conjuntos/pdf/pdf_general_report.html', context)
+
+    except Exception as e:
+        logger.error(f'Error generando Reporte General PDF: {str(e)}')
+        messages.error(request, 'Error al generar el Reporte General.')
+        return redirect('risk_conjuntos:detalle_conjunto', conjunto_id=conjunto_id)
+
+
 def obtener_datos_completos_evaluacion(evaluacion):
     """
     Extrae todos los datos necesarios de la evaluación para el reporte

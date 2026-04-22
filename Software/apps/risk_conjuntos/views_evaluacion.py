@@ -31,24 +31,23 @@ from .forms import ComentarioRiesgoForm
 
 def get_conjunto_with_permissions(conjunto_id, user):
     """
-    Helper function para obtener un conjunto verificando permisos de manera flexible
+    Helper function para obtener un conjunto verificando permisos de forma estricta.
+    Lanza PermissionDenied si el usuario no tiene acceso.
     """
-    # Obtener el conjunto sin filtrar por propietario
     conjunto = get_object_or_404(Conjunto, id=conjunto_id, activo=True)
-    
-    # Verificar permisos usando el sistema de ownership
-    try:
-        from .views import ensure_conjunto_ownership
-        ensure_conjunto_ownership(user, conjunto)
-    except Exception as e:
-        # Si hay problemas con el sistema de permisos, usar fallback
-        logger.warning(f"Error en verificación de permisos: {e}")
-        # Verificar si es el propietario directo o si tiene permisos especiales
-        if conjunto.propietario != user:
-            # Verificar si es superusuario o tiene permisos especiales
-            if not (user.is_superuser or user.is_staff):
-                raise PermissionDenied("No tienes permisos para acceder a este conjunto")
-    
+
+    # Superusuario y staff tienen acceso completo
+    if user.is_superuser or user.is_staff:
+        return conjunto
+
+    # Verificar propiedad directa
+    if conjunto.propietario_id != user.pk:
+        logger.warning(
+            "Acceso denegado al conjunto %s por usuario %s (id=%s)",
+            conjunto_id, user.username, user.pk
+        )
+        raise PermissionDenied("No tienes permisos para acceder a este conjunto")
+
     return conjunto
 
 

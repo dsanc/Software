@@ -57,7 +57,7 @@ def obtener_datos_completos_evaluacion(evaluacion):
         datos = {
             'evaluacion': evaluacion,
             'conjunto': evaluacion.conjunto,
-            'score_total': evaluacion.porcentaje_riesgo() if hasattr(evaluacion, 'porcentaje_riesgo') else 0,
+            'score_total': evaluacion.get_promedio_porcentaje() if hasattr(evaluacion, 'get_promedio_porcentaje') else 0,
             'fecha': getattr(evaluacion, 'fecha_evaluacion', datetime.now()),
             'evaluador': getattr(evaluacion, 'evaluador', None),
             'nivel_riesgo': 'No definido',

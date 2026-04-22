@@ -143,6 +143,19 @@
                         
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label for="{{ form.nit.id_for_label }}" class="form-label">
+                                    NIT del Conjunto <span class="required-field">*</span>
+                                </label>
+                                {{ form.nit }}
+                                {% if form.nit.help_text %}
+                                <div class="form-text">{{ form.nit.help_text }}</div>
+                                {% endif %}
+                                {% if form.nit.errors %}
+                                <div class="text-danger">{{ form.nit.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.nombre.id_for_label }}" class="form-label">
                                     Nombre del Conjunto <span class="required-field">*</span>
                                 </label>
@@ -154,7 +167,9 @@
                                 <div class="text-danger">{{ form.nombre.errors.0 }}</div>
                                 {% endif %}
                             </div>
-                            
+                        </div>
+                        
+                        <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="{{ form.tipo_conjunto.id_for_label }}" class="form-label">
                                     Tipo de Conjunto <span class="required-field">*</span>
@@ -164,7 +179,7 @@
                                     <option value="">Seleccione un tipo</option>
                                     {% for value, text in form.tipo_conjunto.field.choices %}
                                         {% if value %}
-                                            <option value="{{ value }}"{% if form.tipo_conjunto.value == value %} selected{% endif %}>{{ text }}</option>
+                                            <option value="{{ value }}"{% if form.tipo_conjunto.value|stringformat:"s" == value|stringformat:"s" %} selected{% endif %}>{{ text }}</option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
@@ -187,7 +202,7 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.ciudad.id_for_label }}" class="form-label">
                                     Ciudad <span class="required-field">*</span>
                                 </label>
@@ -197,23 +212,13 @@
                                 {% endif %}
                             </div>
                             
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.departamento.id_for_label }}" class="form-label">
                                     Departamento <span class="required-field">*</span>
                                 </label>
                                 {{ form.departamento }}
                                 {% if form.departamento.errors %}
                                 <div class="text-danger">{{ form.departamento.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.codigo_postal.id_for_label }}" class="form-label">
-                                    Código Postal
-                                </label>
-                                {{ form.codigo_postal }}
-                                {% if form.codigo_postal.errors %}
-                                <div class="text-danger">{{ form.codigo_postal.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -229,7 +234,7 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.numero_unidades.id_for_label }}" class="form-label">
                                     Número de Unidades <span class="required-field">*</span>
                                 </label>
@@ -239,33 +244,13 @@
                                 {% endif %}
                             </div>
                             
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="{{ form.numero_torres.id_for_label }}" class="form-label">
                                     Número de Torres/Bloques <span class="required-field">*</span>
                                 </label>
                                 {{ form.numero_torres }}
                                 {% if form.numero_torres.errors %}
                                 <div class="text-danger">{{ form.numero_torres.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label for="{{ form.pisos_por_torre.id_for_label }}" class="form-label">
-                                    Pisos por Torre <span class="required-field">*</span>
-                                </label>
-                                {{ form.pisos_por_torre }}
-                                {% if form.pisos_por_torre.errors %}
-                                <div class="text-danger">{{ form.pisos_por_torre.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label for="{{ form.area_total_m2.id_for_label }}" class="form-label">
-                                    Área Total (m²)
-                                </label>
-                                {{ form.area_total_m2 }}
-                                {% if form.area_total_m2.errors %}
-                                <div class="text-danger">{{ form.area_total_m2.errors.0 }}</div>
                                 {% endif %}
                             </div>
                         </div>
@@ -318,64 +303,6 @@
                                 <label for="{{ form.tiene_canchas_deportivas.id_for_label }}" class="form-check-label">
                                     <i class="fas fa-basketball-ball me-2 text-danger"></i>
                                     Canchas Deportivas
-                                </label>
-                            </div>
-                            
-                            <div class="checkbox-card">
-                                {{ form.tiene_parqueadero_visitantes }}
-                                <label for="{{ form.tiene_parqueadero_visitantes.id_for_label }}" class="form-check-label">
-                                    <i class="fas fa-parking me-2 text-secondary"></i>
-                                    Parqueadero Visitantes
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Seguridad -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <div class="section-icon">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <h5 class="section-title">Seguridad Básica</h5>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="checkbox-card">
-                                    {{ form.tiene_porteria }}
-                                    <label for="{{ form.tiene_porteria.id_for_label }}" class="form-check-label">
-                                        <i class="fas fa-user-shield me-2 text-primary"></i>
-                                        Tiene Portería
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.numero_porterias.id_for_label }}" class="form-label">
-                                    Número de Porterías
-                                </label>
-                                {{ form.numero_porterias }}
-                                {% if form.numero_porterias.errors %}
-                                <div class="text-danger">{{ form.numero_porterias.errors.0 }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="checkbox-group">
-                            <div class="checkbox-card">
-                                {{ form.tiene_circuito_cerrado }}
-                                <label for="{{ form.tiene_circuito_cerrado.id_for_label }}" class="form-check-label">
-                                    <i class="fas fa-video me-2 text-info"></i>
-                                    Circuito Cerrado (CCTV)
-                                </label>
-                            </div>
-                            
-                            <div class="checkbox-card">
-                                {{ form.tiene_alarmas }}
-                                <label for="{{ form.tiene_alarmas.id_for_label }}" class="form-check-label">
-                                    <i class="fas fa-exclamation-triangle me-2 text-warning"></i>
-                                    Sistema de Alarmas
                                 </label>
                             </div>
                         </div>
@@ -475,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('conjuntoForm');
     if (form) {
         form.addEventListener('submit', function(e) {
-            const requiredFields = ['nombre', 'tipo_conjunto', 'direccion', 'ciudad', 'departamento', 'numero_unidades', 'numero_torres'];
+            const requiredFields = ['nit', 'nombre', 'tipo_conjunto', 'direccion', 'ciudad', 'departamento', 'numero_unidades', 'numero_torres'];
             let isValid = true;
             
             requiredFields.forEach(fieldName => {

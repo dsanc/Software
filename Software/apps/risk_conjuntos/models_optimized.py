@@ -2,6 +2,8 @@
 Modelos refactorizados para optimizar la complejidad del sistema
 Separación de responsabilidades para mejorar mantenimiento
 """
+from decimal import Decimal
+
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
@@ -55,21 +57,21 @@ class AnalisisRiesgo(models.Model):
         return f'Análisis: {self.nivel_riesgo} ({self.porcentaje_riesgo}%)'
     
     def save(self, *args, **kwargs):
-        # Auto-calcular porcentaje de riesgo
-        self.porcentaje_riesgo = self.valor_riesgo * 100
-        
+        # Auto-calcular porcentaje de riesgo con Decimal para consistencia
+        self.porcentaje_riesgo = (self.valor_riesgo * Decimal('100')).quantize(Decimal('0.01'))
+
         # Auto-determinar nivel de riesgo
-        if self.valor_riesgo <= 0.2:
+        if self.valor_riesgo <= Decimal('0.2'):
             self.nivel_riesgo = 'muy_bajo'
-        elif self.valor_riesgo <= 0.4:
+        elif self.valor_riesgo <= Decimal('0.4'):
             self.nivel_riesgo = 'bajo'
-        elif self.valor_riesgo <= 0.6:
+        elif self.valor_riesgo <= Decimal('0.6'):
             self.nivel_riesgo = 'medio'
-        elif self.valor_riesgo <= 0.8:
+        elif self.valor_riesgo <= Decimal('0.8'):
             self.nivel_riesgo = 'alto'
         else:
             self.nivel_riesgo = 'muy_alto'
-        
+
         super().save(*args, **kwargs)
     
     @property

@@ -22,7 +22,7 @@
                             Describa las observaciones principales identificadas durante la evaluación de riesgos
                         </small>
                         <textarea name="observaciones_generales" id="id_observaciones_generales" class="form-control summernote" 
-                                  placeholder="Ingrese sus observaciones generales sobre la evaluación realizada...">{{ form.observaciones_generales.value|default:'' }}</textarea>
+                                  placeholder="Ingrese sus observaciones generales sobre la evaluación realizada...">{{ observaciones_form.observaciones_generales.value|default:'' }}</textarea>
                     </div>
                     
                     <div class="mb-4">
@@ -34,7 +34,7 @@
                             Especifique las recomendaciones y medidas sugeridas para mitigar los riesgos identificados
                         </small>
                         <textarea name="recomendaciones_generales" id="id_recomendaciones_generales" class="form-control summernote" 
-                                  placeholder="Ingrese las recomendaciones para mejorar la seguridad y mitigar riesgos...">{{ form.recomendaciones_generales.value|default:'' }}</textarea>
+                                  placeholder="Ingrese las recomendaciones para mejorar la seguridad y mitigar riesgos...">{{ observaciones_form.recomendaciones_generales.value|default:'' }}</textarea>
                     </div>
                 </form>
             </div>
