@@ -2,722 +2,1025 @@
 {% load static %}
 {% load evaluador_permissions %}
 
-{% block title %}Risk Hotels - Dashboard{% endblock %}
+{% block title %}Dashboard - Risk Hotels{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 <style>
-.risk-card {
-    border-left: 4px solid;
-    transition: transform 0.2s;
-}
-.risk-card:hover {
-    transform: translateY(-2px);
-}
-.risk-very-low { border-left-color: #28a745; }
-.risk-low { border-left-color: #17a2b8; }
-.risk-medium { border-left-color: #ffc107; }
-.risk-high { border-left-color: #dc3545; }
-.risk-very-high { border-left-color: #343a40; }
-
-.stats-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-/* Estilos para tabla mejorada */
-.avatar-sm {
-    width: 40px;
-    height: 40px;
-    font-size: 14px;
-}
-
-.table th {
-    font-weight: 600;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* ================================================================
+   RISK HOTELS DASHBOARD — REDISEÑO MODERNO
+   ================================================================ */
+:root {
+    --db-primary:      #667eea;
+    --db-primary-d:    #764ba2;
+    --db-dark:         #1a1a2e;
+    --db-dark-mid:     #16213e;
+    --db-dark-deep:    #0f3460;
+    --db-accent:       #e94560;
+    --db-success:      #10b981;
+    --db-warning:      #f59e0b;
+    --db-danger:       #ef4444;
+    --db-info:         #3b82f6;
+    --db-surface:      #ffffff;
+    --db-bg:           #f1f5f9;
+    --db-border:       #e5e7eb;
+    --db-text:         #111827;
+    --db-text-muted:   #6b7280;
+    --db-radius:       0.875rem;
+    --db-shadow-sm:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --db-shadow:       0 4px 16px rgba(0,0,0,.1);
+    --db-shadow-lg:    0 8px 32px rgba(0,0,0,.14);
 }
 
-.table td {
-    vertical-align: middle;
-    border-top: 1px solid #e9ecef;
-}
-
-.badge-pill {
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.btn-group .btn {
-    margin-right: 2px;
-}
-
-.opacity-50 {
-    opacity: 0.5;
-}
-
-.text-sm {
-    font-size: 0.875rem;
-}
-
-/* Mini barra de progreso */
-.progress-mini {
-    height: 6px;
-    background-color: #e9ecef;
-    border-radius: 3px;
-    overflow: hidden;
+/* ── PAGE HEADER ─────────────────────────────────────────── */
+.db-header {
+    background: linear-gradient(135deg, var(--db-dark) 0%, var(--db-dark-mid) 50%, var(--db-dark-deep) 100%);
+    border-radius: var(--db-radius);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.5rem;
     position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid var(--db-accent);
+    box-shadow: var(--db-shadow-lg);
 }
 
-.progress-bar-mini {
-    height: 100%;
-    border-radius: 3px;
-    transition: width 0.3s ease;
+.db-header::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -5%;
+    width: 320px; height: 320px;
+    background: rgba(233,69,96,.08);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
-.progress-bar-mini.bg-success { background-color: #28a745; }
-.progress-bar-mini.bg-info { background-color: #17a2b8; }
-.progress-bar-mini.bg-warning { background-color: #ffc107; }
-.progress-bar-mini.bg-danger { background-color: #dc3545; }
-.progress-bar-mini.bg-dark { background-color: #343a40; }
-.progress-bar-mini.bg-secondary { background-color: #6c757d; }
-
-/* Semáforo icons */
-.semaforo-icon {
-    font-size: 12px;
-    animation: pulse-soft 2s infinite;
+.db-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60%; right: 10%;
+    width: 220px; height: 220px;
+    background: rgba(102,126,234,.07);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
-@keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+.db-breadcrumb {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .8rem; color: rgba(255,255,255,.55);
+    margin-bottom: .6rem;
+}
+.db-breadcrumb a { color: rgba(255,255,255,.7); text-decoration: none; transition: color .2s; }
+.db-breadcrumb a:hover { color: #fff; }
+.db-breadcrumb i { font-size: .6rem; }
+
+.db-header h1 {
+    font-size: 1.4rem; font-weight: 800;
+    color: #fff; margin: 0 0 .25rem;
+    letter-spacing: -.4px;
+    display: flex; align-items: center; gap: .625rem;
 }
 
-/* Badges outline */
-.badge-outline-success {
-    color: #28a745;
-    border: 1px solid #28a745;
-    background-color: rgba(40, 167, 69, 0.1);
+.db-header h1 .h1-icon {
+    width: 38px; height: 38px;
+    background: rgba(233,69,96,.2);
+    border: 1.5px solid rgba(233,69,96,.4);
+    border-radius: .625rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.05rem; color: #ff8fa3; flex-shrink: 0;
 }
 
-.badge-outline-info {
-    color: #17a2b8;
-    border: 1px solid #17a2b8;
-    background-color: rgba(23, 162, 184, 0.1);
+.db-header p { font-size: .82rem; color: rgba(255,255,255,.6); margin: 0; }
+
+.db-header-actions { display: flex; align-items: center; gap: .625rem; flex-wrap: wrap; }
+
+.btn-db-ghost {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.1); color: rgba(255,255,255,.85);
+    border: 1.5px solid rgba(255,255,255,.2); border-radius: .625rem;
+    padding: .5rem 1rem; font-size: .8rem; font-weight: 600;
+    text-decoration: none; transition: all .2s; backdrop-filter: blur(4px);
+}
+.btn-db-ghost:hover {
+    background: rgba(255,255,255,.18);
+    border-color: rgba(255,255,255,.45);
+    color: #fff; transform: translateY(-1px);
 }
 
-.badge-outline-warning {
-    color: #856404;
-    border: 1px solid #ffc107;
-    background-color: rgba(255, 193, 7, 0.1);
+.btn-db-accent {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--db-accent); color: #fff;
+    border: none; border-radius: .625rem;
+    padding: .5rem 1.125rem; font-size: .8rem; font-weight: 700;
+    text-decoration: none; transition: all .2s;
+    box-shadow: 0 3px 12px rgba(233,69,96,.3);
+}
+.btn-db-accent:hover {
+    background: #d63650; color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(233,69,96,.4);
 }
 
-.badge-outline-danger {
-    color: #dc3545;
-    border: 1px solid #dc3545;
-    background-color: rgba(220, 53, 69, 0.1);
+/* ── KPI CARDS ───────────────────────────────────────────── */
+.db-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.badge-outline-dark {
-    color: #343a40;
-    border: 1px solid #343a40;
-    background-color: rgba(52, 58, 64, 0.1);
+.db-kpi-card {
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    padding: 1.25rem 1.375rem;
+    display: flex; align-items: center; gap: 1rem;
+    box-shadow: var(--db-shadow-sm);
+    transition: all .2s;
+    position: relative; overflow: hidden;
 }
 
-.badge-outline-secondary {
-    color: #6c757d;
-    border: 1px solid #6c757d;
-    background-color: rgba(108, 117, 125, 0.1);
+.db-kpi-card::after {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: var(--db-radius) 0 0 var(--db-radius);
 }
 
-.me-1 { margin-right: 0.25rem; }
-.me-2 { margin-right: 0.5rem; }
-.me-3 { margin-right: 1rem; }
+.db-kpi-card:hover { transform: translateY(-3px); box-shadow: var(--db-shadow); }
+
+.db-kpi-card.kpi-blue::after   { background: var(--db-info); }
+.db-kpi-card.kpi-green::after  { background: var(--db-success); }
+.db-kpi-card.kpi-purple::after { background: var(--db-primary); }
+.db-kpi-card.kpi-amber::after  { background: var(--db-warning); }
+
+.db-kpi-icon {
+    width: 50px; height: 50px;
+    border-radius: .875rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.125rem; flex-shrink: 0;
+}
+.kpi-blue   .db-kpi-icon { background: #eff6ff; color: var(--db-info); }
+.kpi-green  .db-kpi-icon { background: #f0fdf4; color: var(--db-success); }
+.kpi-purple .db-kpi-icon { background: #f5f3ff; color: var(--db-primary); }
+.kpi-amber  .db-kpi-icon { background: #fffbeb; color: var(--db-warning); }
+
+.db-kpi-body { flex: 1; min-width: 0; }
+
+.db-kpi-value {
+    font-size: 1.75rem; font-weight: 900;
+    color: var(--db-text); line-height: 1;
+    margin-bottom: .25rem; letter-spacing: -.02em;
+}
+
+.db-kpi-label {
+    font-size: .73rem; font-weight: 600;
+    color: var(--db-text-muted);
+    text-transform: uppercase; letter-spacing: .05em;
+}
+
+.db-kpi-sub {
+    font-size: .72rem; color: var(--db-text-muted); margin-top: .2rem;
+}
+
+/* ── SECTION CARDS ───────────────────────────────────────── */
+.db-card {
+    background: var(--db-surface);
+    border: 1px solid var(--db-border);
+    border-radius: var(--db-radius);
+    box-shadow: var(--db-shadow-sm);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+}
+
+.db-card-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--db-border);
+    background: #fafbfc; gap: .75rem;
+}
+
+.db-card-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .875rem; font-weight: 700; color: var(--db-text);
+}
+
+.db-card-sub {
+    font-size: .72rem; color: var(--db-text-muted);
+    margin-top: .15rem; display: block;
+}
+
+.db-card-badge {
+    font-size: .7rem; font-weight: 700;
+    padding: .2rem .625rem; border-radius: 50px;
+    background: rgba(102,126,234,.1); color: var(--db-primary);
+    border: 1px solid rgba(102,126,234,.2); flex-shrink: 0;
+}
+
+.db-card-body { padding: 1.25rem; }
+.db-card-body.p-0 { padding: 0; }
+
+/* ── TOP HOTELS RANKING ──────────────────────────────────── */
+.rank-list { list-style: none; padding: 0; margin: 0; }
+
+.rank-item {
+    display: flex; align-items: center; gap: .875rem;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background .15s;
+}
+.rank-item:last-child { border-bottom: none; }
+.rank-item:hover { background: #fafbfc; }
+
+.rank-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .72rem; font-weight: 800; flex-shrink: 0;
+}
+.rank-item:nth-child(1) .rank-num { background: linear-gradient(135deg,#ffd700,#ffa500); color: #7a4500; }
+.rank-item:nth-child(2) .rank-num { background: linear-gradient(135deg,#c0c0c0,#9e9e9e); color: #3a3a3a; }
+.rank-item:nth-child(3) .rank-num { background: linear-gradient(135deg,#cd7f32,#a0522d); color: #fff; }
+.rank-item:nth-child(n+4) .rank-num { background: #f1f5f9; color: var(--db-text-muted); }
+
+.rank-info { flex: 1; min-width: 0; }
+.rank-name {
+    font-size: .845rem; font-weight: 600; color: var(--db-text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+}
+.rank-meta {
+    font-size: .72rem; color: var(--db-text-muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.rank-score { display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; }
+.rank-pct { font-size: 1rem; font-weight: 800; line-height: 1; }
+.rank-pct.p-success { color: var(--db-success); }
+.rank-pct.p-warning { color: var(--db-warning); }
+.rank-pct.p-danger  { color: var(--db-danger); }
+.rank-evals { font-size: .68rem; color: var(--db-text-muted); margin-top: .1rem; }
+
+/* ── SCORE RANGES ────────────────────────────────────────── */
+.range-list {
+    list-style: none; padding: .875rem 1.25rem; margin: 0;
+    display: flex; flex-direction: column; gap: .75rem;
+}
+
+.range-item { display: flex; align-items: center; gap: .75rem; }
+
+.range-label {
+    font-size: .72rem; font-weight: 700;
+    width: 66px; flex-shrink: 0; text-align: right;
+}
+
+.range-bar-wrap {
+    flex: 1; height: 8px; background: #f1f5f9;
+    border-radius: 4px; overflow: hidden;
+}
+
+.range-bar-fill { height: 100%; border-radius: 4px; }
+
+.range-count {
+    font-size: .8rem; font-weight: 700;
+    width: 20px; text-align: right; color: var(--db-text);
+}
+
+/* ── ATTENTION SECTION ───────────────────────────────────── */
+.attention-empty {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; gap: .75rem; text-align: center;
+}
+.attention-empty i { font-size: 2.5rem; color: var(--db-success); opacity: .8; }
+.attention-empty h5 { font-size: .95rem; font-weight: 700; color: var(--db-success); margin: 0; }
+.attention-empty p  { font-size: .8rem; color: var(--db-text-muted); margin: 0; }
+
+.attention-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .875rem; padding: 1.25rem;
+}
+
+.attention-card {
+    background: #fff9f0;
+    border: 1px solid #fed7aa;
+    border-left: 4px solid var(--db-warning);
+    border-radius: .625rem; padding: .875rem 1rem;
+}
+
+.attention-card-name {
+    font-size: .845rem; font-weight: 700; color: var(--db-text);
+    margin-bottom: .25rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.attention-card-loc {
+    font-size: .72rem; color: var(--db-text-muted);
+    margin-bottom: .5rem;
+    display: flex; align-items: center; gap: .25rem;
+}
+
+.attention-card-foot {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: .5rem;
+}
+
+.score-pill {
+    display: inline-block;
+    padding: .2rem .625rem; border-radius: 50px;
+    font-size: .72rem; font-weight: 800;
+    background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;
+}
+.score-pill.pill-danger { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+
+.btn-sm-link {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .72rem; font-weight: 600;
+    color: var(--db-primary); text-decoration: none;
+    padding: .25rem .625rem;
+    border: 1px solid rgba(102,126,234,.3);
+    border-radius: .375rem; transition: all .15s;
+    background: rgba(102,126,234,.06);
+}
+.btn-sm-link:hover {
+    background: rgba(102,126,234,.14);
+    color: var(--db-primary-d);
+    border-color: rgba(102,126,234,.5);
+}
+
+/* ── RECENT ANALYSES TABLE ───────────────────────────────── */
+.db-table { width: 100%; border-collapse: collapse; font-size: .845rem; }
+.db-table thead tr { background: #fafbfc; }
+
+.db-table th {
+    padding: .75rem 1rem;
+    font-size: .7rem; font-weight: 700; color: var(--db-text-muted);
+    text-transform: uppercase; letter-spacing: .06em;
+    border-bottom: 1px solid var(--db-border);
+    white-space: nowrap;
+}
+.db-table th:first-child { padding-left: 1.5rem; }
+.db-table th:last-child  { padding-right: 1.5rem; }
+
+.db-table td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+}
+.db-table td:first-child { padding-left: 1.5rem; }
+.db-table td:last-child  { padding-right: 1.5rem; }
+.db-table tbody tr:last-child td { border-bottom: none; }
+.db-table tbody tr:hover td { background: #fafbfc; }
+
+.hotel-avatar {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--db-primary), var(--db-primary-d));
+    border-radius: .625rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .875rem; color: #fff; flex-shrink: 0;
+}
+
+.hotel-cell-name { font-size: .845rem; font-weight: 600; color: var(--db-text); line-height: 1.3; }
+.hotel-cell-loc  { font-size: .72rem; color: var(--db-text-muted); display: flex; align-items: center; gap: .2rem; }
+
+.tbl-date-main { font-size: .8rem; font-weight: 600; color: var(--db-text); }
+.tbl-date-time { font-size: .7rem; color: var(--db-text-muted); }
+
+.tbl-progress-wrap { display: flex; align-items: center; gap: .5rem; }
+
+.tbl-pbar {
+    width: 60px; height: 6px;
+    background: #e5e7eb; border-radius: 3px; overflow: hidden; flex-shrink: 0;
+}
+.tbl-pbar-fill {
+    display: block; height: 100%; border-radius: 3px;
+}
+.tbl-pbar-fill.f-success { background: var(--db-success); }
+.tbl-pbar-fill.f-warning { background: var(--db-warning); }
+.tbl-pbar-fill.f-danger  { background: var(--db-danger); }
+
+.tbl-pct { font-size: .845rem; font-weight: 800; white-space: nowrap; }
+.tbl-pct.p-success { color: var(--db-success); }
+.tbl-pct.p-warning { color: var(--db-warning); }
+.tbl-pct.p-danger  { color: var(--db-danger); }
+
+.risk-badge {
+    display: inline-block;
+    padding: .2rem .65rem; border-radius: 50px;
+    font-size: .72rem; font-weight: 700;
+}
+.risk-badge.rb-success { background: #d1fae5; color: #065f46; }
+.risk-badge.rb-warning { background: #fef3c7; color: #92400e; }
+.risk-badge.rb-danger  { background: #fee2e2; color: #991b1b; }
+.risk-badge.rb-muted   { background: #f1f5f9; color: var(--db-text-muted); }
+
+.tbl-actions { display: flex; align-items: center; gap: .375rem; }
+
+.tbl-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: .5rem;
+    font-size: .8rem; text-decoration: none;
+    border: 1.5px solid var(--db-border);
+    color: var(--db-text-muted); background: transparent;
+    transition: all .15s; cursor: pointer;
+}
+.tbl-btn:hover { transform: translateY(-1px); }
+.tbl-btn.view { border-color: #bfdbfe; color: #3b82f6; }
+.tbl-btn.view:hover { background: #eff6ff; }
+.tbl-btn.pdf  { border-color: #bbf7d0; color: #10b981; }
+.tbl-btn.pdf:hover  { background: #f0fdf4; }
+
+/* ── EMPTY STATES ────────────────────────────────────────── */
+.empty-state {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3rem 2rem; gap: .875rem; text-align: center;
+}
+.empty-state i { font-size: 2.5rem; color: #cbd5e1; }
+.empty-state p { font-size: .845rem; color: var(--db-text-muted); margin: 0; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width: 992px) {
+    .db-kpi-grid        { grid-template-columns: repeat(2, 1fr); }
+    .attention-grid     { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 576px) {
+    .db-kpi-grid        { grid-template-columns: 1fr; }
+    .attention-grid     { grid-template-columns: 1fr; }
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-hotel text-primary"></i> Dashboard - Risk Hotels</h2>
-                <div class="btn-group">
-                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-outline-primary">
-                        <i class="fas fa-list"></i> Ver Hoteles
-                    </a>
-                </div>
+<div class="container-fluid px-0">
+
+    <!-- ══ HEADER ══════════════════════════════════════════ -->
+    <div class="db-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+            <div class="db-breadcrumb">
+                <a href="{% url 'dashboard:home' %}">Inicio</a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Risk Hotels</span>
             </div>
+            <h1>
+                <span class="h1-icon"><i class="fas fa-hotel"></i></span>
+                Dashboard &mdash; Risk Hotels
+            </h1>
+            <p>Métricas y análisis de seguridad hotelera</p>
+        </div>
+        <div class="db-header-actions">
+            <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn-db-ghost">
+                <i class="fas fa-list"></i> Ver Hoteles
+            </a>
+            <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn-db-accent">
+                <i class="fas fa-plus"></i> Nueva Evaluación
+            </a>
         </div>
     </div>
 
-    <!-- Estadísticas principales -->
-    <div class="row mb-3">
-        <!-- Card 1: Total Hoteles -->
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card stats-card">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-hotel fa-2x mb-2"></i>
-                    <h4 class="mb-1">{{ total_hotels }}</h4>
-                    <small>Hoteles Registrados</small>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Card 2: Total Evaluaciones -->
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card bg-success text-white">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-clipboard-check fa-2x mb-2"></i>
-                    <h4 class="mb-1">{{ total_assessments }}</h4>
-                    <small>Evaluaciones Completadas</small>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Card 3: Promedio de Seguridad -->
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card text-white" style="background: linear-gradient(135deg, 
-                {% if avg_security_percentage >= 80 %}#28a745, #20c997{% elif avg_security_percentage >= 60 %}#ffc107, #fd7e14{% else %}#dc3545, #e83e8c{% endif %});">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-shield-alt fa-2x mb-2"></i>
-                    <h4 class="mb-1">{{ avg_security_percentage|floatformat:1 }}%</h4>
-                    <small>Promedio de Seguridad</small>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Card 4: Evaluaciones Este Mes -->
-        <div class="col-md-3 col-sm-6 mb-3">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center py-3">
-                    <i class="fas fa-calendar-check fa-2x mb-2"></i>
-                    <h4 class="mb-1">{{ assessments_this_month }}</h4>
-                    <small>Evaluaciones Este Mes</small>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- ══ KPI CARDS ══════════════════════════════════════ -->
+    <div class="db-kpi-grid">
 
-    <!-- Gráficas de Análisis Avanzado -->
-    <div class="row mb-4">
-        <!-- Evolución Temporal -->
-        <div class="col-md-8 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-chart-line text-primary"></i> Evolución Temporal de Seguridad</h5>
-                    <small class="text-muted">Promedio mensual de puntuaciones - Últimos 6 meses</small>
+        <div class="db-kpi-card kpi-blue">
+            <div class="db-kpi-icon"><i class="fas fa-hotel"></i></div>
+            <div class="db-kpi-body">
+                <div class="db-kpi-value">{{ total_hotels }}</div>
+                <div class="db-kpi-label">Hoteles Registrados</div>
+                <div class="db-kpi-sub">{{ hotels_with_assessments_count }} con evaluaciones</div>
+            </div>
+        </div>
+
+        <div class="db-kpi-card kpi-green">
+            <div class="db-kpi-icon"><i class="fas fa-clipboard-check"></i></div>
+            <div class="db-kpi-body">
+                <div class="db-kpi-value">{{ total_assessments }}</div>
+                <div class="db-kpi-label">Evaluaciones Completadas</div>
+                <div class="db-kpi-sub">{{ assessments_this_month }} este mes</div>
+            </div>
+        </div>
+
+        <div class="db-kpi-card kpi-purple">
+            <div class="db-kpi-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="db-kpi-body">
+                <div class="db-kpi-value">{{ avg_security_percentage|floatformat:1 }}<span style="font-size:.9rem;font-weight:600;">%</span></div>
+                <div class="db-kpi-label">Promedio de Seguridad</div>
+                <div class="db-kpi-sub">
+                    {% if avg_security_percentage >= 80 %}Nivel óptimo
+                    {% elif avg_security_percentage >= 60 %}Nivel aceptable
+                    {% elif avg_security_percentage > 0 %}Requiere mejora
+                    {% else %}Sin datos aún{% endif %}
                 </div>
-                <div class="card-body">
+            </div>
+        </div>
+
+        <div class="db-kpi-card kpi-amber">
+            <div class="db-kpi-icon"><i class="fas fa-calendar-check"></i></div>
+            <div class="db-kpi-body">
+                <div class="db-kpi-value">{{ assessments_this_month }}</div>
+                <div class="db-kpi-label">Evaluaciones Este Mes</div>
+                <div class="db-kpi-sub">{{ hotels_without_assessments_count }} hotel{{ hotels_without_assessments_count|pluralize:"es" }} sin evaluar</div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /KPI CARDS -->
+
+    <!-- ══ CHARTS ROW 1 ═══════════════════════════════════ -->
+    <div class="row g-3">
+
+        <div class="col-lg-8">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-chart-line" style="color:var(--db-info);"></i>
+                            Evolución Temporal de Seguridad
+                        </div>
+                        <span class="db-card-sub">Promedio mensual — Últimos 6 meses</span>
+                    </div>
+                </div>
+                <div class="db-card-body">
                     <canvas id="monthlyTrendsChart" height="100"></canvas>
                 </div>
             </div>
         </div>
-        
-        <!-- Distribución Geográfica -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-globe text-success"></i> Distribución Geográfica</h5>
-                    <small class="text-muted">Hoteles por país/ciudad</small>
+
+        <div class="col-lg-4">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-globe" style="color:var(--db-success);"></i>
+                            Distribución Geográfica
+                        </div>
+                        <span class="db-card-sub">Hoteles por país</span>
+                    </div>
                 </div>
-                <div class="card-body">
+                <div class="db-card-body">
                     <canvas id="geographicChart" height="200"></canvas>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Segunda fila de gráficas -->
-    <div class="row mb-4">
-        <!-- Análisis por Categoría -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-star text-warning"></i> Análisis por Categoría</h5>
-                    <small class="text-muted">Seguridad promedio por estrellas del hotel</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="categoryChart" height="120"></canvas>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Frecuencia de Evaluaciones -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-calendar-check text-info"></i> Frecuencia de Evaluaciones</h5>
-                    <small class="text-muted">Evaluaciones por mes</small>
-                </div>
-                <div class="card-body">
-                    <canvas id="evaluationFrequencyChart" height="120"></canvas>
-                </div>
-            </div>
-        </div>
     </div>
+    <!-- /CHARTS ROW 1 -->
 
-    <!-- Métricas Adicionales -->
-    <div class="row">
-        <!-- Top Hoteles -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-trophy text-warning"></i> Top 5 Mejores Hoteles</h5>
+    <!-- ══ CHARTS ROW 2 ═══════════════════════════════════ -->
+    <div class="row g-3">
+
+        <div class="col-lg-6">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-star" style="color:var(--db-warning);"></i>
+                            Seguridad por Categoría
                         </div>
-                        <div class="card-body">
-                            {% if top_hotels %}
-                                {% for item in top_hotels %}
-                                <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3">
-                                        <div class="badge badge-outline-success px-2 py-1" style="font-size: 0.9rem;">
-                                            #{{ forloop.counter }}
-                                        </div>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">{{ item.hotel.name }}</h6>
-                                        <small class="text-muted">
-                                            <i class="fas fa-map-marker-alt me-1"></i>
-                                            {{ item.hotel.city }}, {{ item.hotel.country }}
-                                        </small>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="h5 mb-0 text-success">{{ item.avg_percentage }}%</div>
-                                        <small class="text-muted">{{ item.assessment_count }} eval{{ item.assessment_count|pluralize:"uación,uaciones" }}</small>
-                                    </div>
-                                </div>
-                                {% if not forloop.last %}<hr class="my-2">{% endif %}
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center py-3">
-                                    <i class="fas fa-trophy fa-2x text-muted opacity-50 mb-2"></i>
-                                    <p class="text-muted mb-0">No hay hoteles evaluados aún</p>
-                                </div>
-                            {% endif %}
-                        </div>
+                        <span class="db-card-sub">Promedio por estrellas del hotel</span>
                     </div>
                 </div>
+                <div class="db-card-body">
+                    <canvas id="categoryChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
 
-                <!-- Distribución por Rangos -->
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-chart-bar text-info"></i> Distribución por Puntuación</h5>
+        <div class="col-lg-6">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-calendar-check" style="color:var(--db-primary);"></i>
+                            Frecuencia de Evaluaciones
                         </div>
-                        <div class="card-body">
-                            {% for range, count in score_ranges.items %}
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="me-3" style="width: 70px;">
-                                    <span class="badge {% if range == '90-100%' %}bg-success{% elif range == '80-89%' %}bg-info{% elif range == '70-79%' %}bg-warning{% elif range == '60-69%' %}bg-secondary{% else %}bg-danger{% endif %}">
-                                        {{ range }}
-                                    </span>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="progress" style="height: 6px;">
-                                        <div class="progress-bar {% if range == '90-100%' %}bg-success{% elif range == '80-89%' %}bg-info{% elif range == '70-79%' %}bg-warning{% elif range == '60-69%' %}bg-secondary{% else %}bg-danger{% endif %}" 
-                                             style="width: {% if total_hotels > 0 %}{% widthratio count total_hotels 100 %}{% else %}0{% endif %}%;"></div>
-                                    </div>
-                                </div>
-                                <div class="ms-3">
-                                    <strong>{{ count }}</strong>
-                                </div>
+                        <span class="db-card-sub">Evaluaciones por mes</span>
+                    </div>
+                </div>
+                <div class="db-card-body">
+                    <canvas id="evaluationFrequencyChart" height="140"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /CHARTS ROW 2 -->
+
+    <!-- ══ TOP HOTELS + SCORE RANGES ══════════════════════ -->
+    <div class="row g-3">
+
+        <!-- Top 5 hoteles -->
+        <div class="col-lg-6">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-trophy" style="color:#f59e0b;"></i>
+                            Top 5 Mejores Hoteles
+                        </div>
+                        <span class="db-card-sub">Por promedio de seguridad</span>
+                    </div>
+                    {% if top_hotels %}
+                    <span class="db-card-badge">{{ top_hotels|length }} hotel{{ top_hotels|length|pluralize:"es" }}</span>
+                    {% endif %}
+                </div>
+                {% if top_hotels %}
+                <ul class="rank-list">
+                    {% for item in top_hotels %}
+                    <li class="rank-item">
+                        <span class="rank-num">{{ forloop.counter }}</span>
+                        <div class="rank-info">
+                            <div class="rank-name">{{ item.hotel.name }}</div>
+                            <div class="rank-meta">
+                                <i class="fas fa-map-marker-alt" style="font-size:.65rem;margin-right:.2rem;"></i>
+                                {{ item.hotel.city }}{% if item.hotel.country %}, {{ item.hotel.country }}{% endif %}
                             </div>
-                            {% endfor %}
                         </div>
+                        <div class="rank-score">
+                            <span class="rank-pct {% if item.avg_percentage >= 70 %}p-success{% elif item.avg_percentage >= 40 %}p-warning{% else %}p-danger{% endif %}">
+                                {{ item.avg_percentage }}%
+                            </span>
+                            <span class="rank-evals">{{ item.assessment_count }} eval{{ item.assessment_count|pluralize:"uación,uaciones" }}</span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-trophy"></i>
+                    <p>No hay hoteles evaluados aún</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Distribución por puntuación -->
+        <div class="col-lg-6">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-chart-bar" style="color:var(--db-info);"></i>
+                            Distribución por Puntuación
+                        </div>
+                        <span class="db-card-sub">Hoteles según rango de seguridad</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Alertas y Estados -->
-            <div class="row mt-3">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h5><i class="fas fa-exclamation-triangle text-warning"></i> Hoteles que Necesitan Atención</h5>
+                <ul class="range-list">
+                    {% for range_label, count in score_ranges.items %}
+                    <li class="range-item">
+                        <span class="range-label" style="color:{% if range_label == '90-100%' %}#059669{% elif range_label == '80-89%' %}#0891b2{% elif range_label == '70-79%' %}#d97706{% elif range_label == '60-69%' %}#6b7280{% elif range_label == '50-59%' %}#ea580c{% else %}#dc2626{% endif %};">
+                            {{ range_label }}
+                        </span>
+                        <div class="range-bar-wrap">
+                            <div class="range-bar-fill" style="width:{% if total_hotels > 0 %}{% widthratio count total_hotels 100 %}{% else %}0{% endif %}%;background:{% if range_label == '90-100%' %}#10b981{% elif range_label == '80-89%' %}#3b82f6{% elif range_label == '70-79%' %}#f59e0b{% elif range_label == '60-69%' %}#9ca3af{% elif range_label == '50-59%' %}#f97316{% else %}#ef4444{% endif %};"></div>
                         </div>
-                        <div class="card-body">
-                            {% if hotels_need_attention %}
-                                <div class="row">
-                                    {% for item in hotels_need_attention %}
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card border-warning">
-                                            <div class="card-body">
-                                                <h6 class="card-title">{{ item.hotel.name }}</h6>
-                                                <p class="card-text">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                                        {{ item.hotel.city }}, {{ item.hotel.country }}
-                                                    </small>
-                                                </p>
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <span class="badge bg-warning">{{ item.avg_percentage }}%</span>
-                                                    <a href="{% url 'risk_hoteles:hotel_detail' item.hotel.id %}" class="btn btn-sm btn-outline-primary">
-                                                        Ver Detalles
-                                                    </a>
+                        <span class="range-count">{{ count }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+    </div>
+    <!-- /TOP HOTELS + SCORE RANGES -->
+
+    <!-- ══ HOTELES QUE NECESITAN ATENCIÓN ════════════════ -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-exclamation-triangle" style="color:var(--db-warning);"></i>
+                            Hoteles que Necesitan Atención
+                        </div>
+                        <span class="db-card-sub">Hoteles con promedio de seguridad menor al 60%</span>
+                    </div>
+                    {% if hotels_need_attention %}
+                    <span class="db-card-badge" style="background:rgba(239,68,68,.1);color:#dc2626;border-color:rgba(239,68,68,.25);">
+                        {{ hotels_need_attention|length }} alerta{{ hotels_need_attention|length|pluralize }}
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if hotels_need_attention %}
+                <div class="attention-grid">
+                    {% for item in hotels_need_attention %}
+                    <div class="attention-card">
+                        <div class="attention-card-name">{{ item.hotel.name }}</div>
+                        <div class="attention-card-loc">
+                            <i class="fas fa-map-marker-alt" style="font-size:.65rem;"></i>
+                            {{ item.hotel.city }}{% if item.hotel.country %}, {{ item.hotel.country }}{% endif %}
+                        </div>
+                        <div class="attention-card-foot">
+                            <span class="score-pill {% if item.avg_percentage < 40 %}pill-danger{% endif %}">
+                                {{ item.avg_percentage }}%
+                            </span>
+                            <a href="{% url 'risk_hoteles:hotel_detail' item.hotel.id %}" class="btn-sm-link">
+                                <i class="fas fa-eye"></i> Ver detalles
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="attention-empty">
+                    <i class="fas fa-check-circle"></i>
+                    <h5>¡Excelente!</h5>
+                    <p>Todos los hoteles tienen puntuaciones satisfactorias (≥ 60%)</p>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    <!-- /ATENCIÓN -->
+
+    <!-- ══ ANÁLISIS RECIENTES ══════════════════════════════ -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="db-card">
+                <div class="db-card-header">
+                    <div>
+                        <div class="db-card-title">
+                            <i class="fas fa-history" style="color:var(--db-primary);"></i>
+                            Análisis Recientes
+                        </div>
+                        <span class="db-card-sub">Últimas 8 evaluaciones completadas</span>
+                    </div>
+                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn-sm-link">
+                        <i class="fas fa-external-link-alt"></i> Ver todos
+                    </a>
+                </div>
+
+                {% if recent_analyses %}
+                <div class="db-card-body p-0">
+                    <div class="table-responsive">
+                        <table class="db-table">
+                            <thead>
+                                <tr>
+                                    <th>Hotel</th>
+                                    <th>Fecha</th>
+                                    <th style="text-align:center;">Puntuación</th>
+                                    <th style="text-align:center;">Nivel de Riesgo</th>
+                                    <th style="text-align:center;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assessment in recent_analyses %}
+                                {% if assessment.overall_score %}{% widthratio assessment.overall_score 5 100 as score_pct %}{% else %}{% with score_pct=0 %}{% endwith %}{% endif %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="hotel-avatar"><i class="fas fa-building"></i></div>
+                                            <div>
+                                                <div class="hotel-cell-name">{{ assessment.hotel.name }}</div>
+                                                <div class="hotel-cell-loc">
+                                                    <i class="fas fa-map-marker-alt" style="font-size:.6rem;"></i>
+                                                    {{ assessment.hotel.city }}{% if assessment.hotel.country %}, {{ assessment.hotel.country }}{% endif %}
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            {% else %}
-                                <div class="text-center py-4">
-                                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                                    <h5 class="text-success">¡Excelente!</h5>
-                                    <p class="text-muted mb-0">Todos los hoteles tienen puntuaciones satisfactorias (≥60%)</p>
-                                </div>
-                            {% endif %}
-                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="tbl-date-main">{{ assessment.assessment_date|date:"d/m/Y" }}</div>
+                                        <div class="tbl-date-time">{{ assessment.assessment_date|date:"H:i" }}</div>
+                                    </td>
+                                    <td style="text-align:center;">
+                                        {% if assessment.overall_score %}
+                                        <div class="tbl-progress-wrap" style="justify-content:center;">
+                                            <div class="tbl-pbar">
+                                                <span class="tbl-pbar-fill {% if score_pct >= 70 %}f-success{% elif score_pct >= 40 %}f-warning{% else %}f-danger{% endif %}"
+                                                      style="width:{{ score_pct }}%;"></span>
+                                            </div>
+                                            <span class="tbl-pct {% if score_pct >= 70 %}p-success{% elif score_pct >= 40 %}p-warning{% else %}p-danger{% endif %}">
+                                                {{ score_pct }}%
+                                            </span>
+                                        </div>
+                                        {% else %}
+                                        <span style="font-size:.75rem;color:var(--db-text-muted);">Sin puntuación</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:center;">
+                                        {% if assessment.overall_score %}
+                                        <span class="risk-badge {% if score_pct >= 80 %}rb-success{% elif score_pct >= 60 %}rb-warning{% else %}rb-danger{% endif %}">
+                                            {% if score_pct >= 80 %}Bajo
+                                            {% elif score_pct >= 60 %}Moderado
+                                            {% elif score_pct >= 40 %}Alto
+                                            {% else %}Crítico{% endif %}
+                                        </span>
+                                        {% else %}
+                                        <span class="risk-badge rb-muted">Pendiente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align:center;">
+                                        <div class="tbl-actions" style="justify-content:center;">
+                                            <a href="{% url 'risk_hoteles:hotel_detail' assessment.hotel.id %}"
+                                               class="tbl-btn view" title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'risk_hoteles:assessment_pdf_preview' assessment.id %}"
+                                               class="tbl-btn pdf" title="Ver Reporte PDF" target="_blank">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-            </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-chart-line"></i>
+                    <p>No hay análisis recientes. Comienza creando tu primera evaluación.</p>
+                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn-sm-link" style="margin-top:.5rem;">
+                        <i class="fas fa-plus"></i> Crear Análisis
+                    </a>
+                </div>
+                {% endif %}
 
-            <!-- Análisis Recientes -->
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5><i class="fas fa-history"></i> Análisis Recientes</h5>
-                            <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-sm btn-primary">Ver Todos</a>
-                        </div>
-                        <div class="card-body p-0">
-                            {% if recent_analyses %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover mb-0">
-                                        <thead class="bg-light">
-                                            <tr>
-                                                <th class="border-0 px-4 py-3">
-                                                    <i class="fas fa-hotel text-muted me-2"></i>Hotel
-                                                </th>
-                                                <th class="border-0 py-3">
-                                                    <i class="fas fa-calendar text-muted me-2"></i>Fecha
-                                                </th>
-                                                <th class="border-0 py-3 text-center">
-                                                    <i class="fas fa-percentage text-muted me-2"></i>Puntuación
-                                                </th>
-                                                <th class="border-0 py-3 text-center">
-                                                    <i class="fas fa-shield-alt text-muted me-2"></i>Riesgo
-                                                </th>
-                                                <th class="border-0 py-3 text-center">Acciones</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for assessment in recent_analyses %}
-                                            <tr class="border-bottom">
-                                                <td class="px-4 py-3">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-3">
-                                                            <i class="fas fa-building text-white"></i>
-                                                        </div>
-                                                        <div>
-                                                            <h6 class="mb-0 font-weight-bold">{{ assessment.hotel.name }}</h6>
-                                                            <small class="text-muted">
-                                                                <i class="fas fa-map-marker-alt me-1"></i>
-                                                                {{ assessment.hotel.city }}, {{ assessment.hotel.country }}
-                                                            </small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="py-3">
-                                                    <div class="text-sm">
-                                                        <div class="font-weight-bold">{{ assessment.assessment_date|date:"d/m/Y" }}</div>
-                                                        <small class="text-muted">{{ assessment.assessment_date|date:"H:i" }}</small>
-                                                    </div>
-                                                </td>
-                                                <td class="py-3 text-center">
-                                                    <div class="d-flex flex-column align-items-center">
-                                                        {% if assessment.overall_score %}
-                                                            {% widthratio assessment.overall_score 5 100 as score_percentage %}
-                                                            <!-- Mini barra de progreso -->
-                                                            <div class="progress-mini mb-2" style="width: 80px;">
-                                                                <div class="progress-bar-mini {% if score_percentage >= 80 %}bg-success{% elif score_percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
-                                                                     style="width: {{ score_percentage }}%;"></div>
-                                                            </div>
-                                                            <!-- Puntuación con semáforo -->
-                                                            <div class="d-flex align-items-center">
-                                                                <span class="semaforo-icon me-1">
-                                                                    {% if score_percentage >= 80 %}
-                                                                        <i class="fas fa-circle text-success"></i>
-                                                                    {% elif score_percentage >= 60 %}
-                                                                        <i class="fas fa-circle text-warning"></i>
-                                                                    {% else %}
-                                                                        <i class="fas fa-circle text-danger"></i>
-                                                                    {% endif %}
-                                                                </span>
-                                                                <span class="font-weight-bold text-dark">
-                                                                    {{ score_percentage }}%
-                                                                </span>
-                                                            </div>
-                                                        {% else %}
-                                                            <span class="text-muted">Sin puntuación</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                                <td class="py-3 text-center">
-                                                    <div class="d-flex align-items-center justify-content-center">
-                                                        {% if assessment.overall_score %}
-                                                            <!-- Badge de estado según puntuación -->
-                                                            <span class="badge {% if score_percentage >= 80 %}badge-outline-success{% elif score_percentage >= 60 %}badge-outline-warning{% else %}badge-outline-danger{% endif %}">
-                                                                {% if score_percentage >= 80 %}Excelente
-                                                                {% elif score_percentage >= 60 %}Bueno
-                                                                {% else %}Mejorable
-                                                                {% endif %}
-                                                            </span>
-                                                        {% else %}
-                                                            <span class="badge badge-outline-secondary">Pendiente</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                                <td class="py-3 text-center">
-                                                    <div class="btn-group">
-                                                        <a href="{% url 'risk_hoteles:hotel_detail' assessment.hotel.id %}" 
-                                                           class="btn btn-sm btn-outline-primary" 
-                                                           data-bs-toggle="tooltip" 
-                                                           title="Ver detalles">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="{% url 'risk_hoteles:assessment_pdf_preview' assessment.id %}"
-                                                           class="btn btn-sm btn-outline-success"
-                                                           data-bs-toggle="tooltip"
-                                                           title="Ver Reporte PDF"
-                                                           target="_blank">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% else %}
-                                <div class="text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="fas fa-chart-line fa-4x text-muted opacity-50"></i>
-                                    </div>
-                                    <h5 class="text-muted mb-2">No hay análisis recientes</h5>
-                                    <p class="text-muted mb-4">Comienza creando tu primer análisis de riesgo</p>
-                                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-primary">
-                                        <i class="fas fa-plus me-2"></i>Crear Análisis
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
+    <!-- /ANÁLISIS RECIENTES -->
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script>
-$(document).ready(function() {
-    // Inicializar tooltips Bootstrap 5
-    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function(el) {
-        new bootstrap.Tooltip(el);
-    });
-    
-    // Auto-ocultar alertas después de 5 segundos
-    setTimeout(function() {
-        $('.alert').fadeOut('slow');
-    }, 5000);
-    
-    // ================================
-    // GRÁFICAS CON CHART.JS
-    // ================================
-    
-    // Parsear datos JSON desde Django
-    const monthlyTrendsData = JSON.parse('{{ monthly_trends|escapejs }}');
-    const geographicData = JSON.parse('{{ geographic_data|escapejs }}');
-    const categoryData = JSON.parse('{{ category_data|escapejs }}');
+document.addEventListener('DOMContentLoaded', function () {
+
+    // NO registrar globalmente — se pasa por chart para evitar conflictos
+    const DL = ChartDataLabels;
+
+    // Datos de Django
+    const monthlyTrendsData       = JSON.parse('{{ monthly_trends|escapejs }}');
+    const geographicData          = JSON.parse('{{ geographic_data|escapejs }}');
+    const categoryData            = JSON.parse('{{ category_data|escapejs }}');
     const evaluationFrequencyData = JSON.parse('{{ evaluation_frequency|escapejs }}');
-    
-    // 1. EVOLUCIÓN TEMPORAL
-    const monthlyTrendsCtx = document.getElementById('monthlyTrendsChart').getContext('2d');
-    new Chart(monthlyTrendsCtx, {
+
+    Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    Chart.defaults.font.size   = 12;
+
+    // ── 1. Evolución temporal ─────────────────────────────
+    new Chart(document.getElementById('monthlyTrendsChart'), {
+        plugins: [DL],
         type: 'line',
         data: {
             labels: monthlyTrendsData.labels,
-            datasets: [{
-                label: 'Promedio de Seguridad (%)',
-                data: monthlyTrendsData.data,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                tension: 0.4,
-                fill: true
-            }, {
-                label: 'Número de Evaluaciones',
-                data: monthlyTrendsData.counts,
-                type: 'bar',
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                yAxisID: 'y1'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                title: {
-                    display: false
-                }
-            },
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    min: 0,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Porcentaje de Seguridad (%)'
+            datasets: [
+                {
+                    label: 'Promedio Seguridad (%)',
+                    data: monthlyTrendsData.data,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102,126,234,.1)',
+                    tension: 0.4, fill: true,
+                    pointBackgroundColor: '#667eea',
+                    pointRadius: 4, pointHoverRadius: 6,
+                    yAxisID: 'y',
+                    datalabels: {
+                        align: 'top', anchor: 'top',
+                        color: '#5046e4',
+                        font: { size: 10, weight: '700' },
+                        formatter: v => (v > 0 ? v + '%' : ''),
                     }
                 },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    min: 0,
-                    title: {
-                        display: true,
-                        text: 'Número de Evaluaciones'
-                    },
-                    grid: {
-                        drawOnChartArea: false,
-                    },
-                }
-            }
-        }
-    });
-    
-    // 2. DISTRIBUCIÓN GEOGRÁFICA
-    const geographicCtx = document.getElementById('geographicChart').getContext('2d');
-    new Chart(geographicCtx, {
-        type: 'doughnut',
-        data: {
-            labels: geographicData.labels,
-            datasets: [{
-                data: geographicData.data,
-                backgroundColor: [
-                    '#FF6384',
-                    '#36A2EB',
-                    '#FFCE56',
-                    '#4BC0C0',
-                    '#9966FF',
-                    '#FF9F40'
-                ],
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12,
-                        font: {
-                            size: 11
-                        }
+                {
+                    label: 'Evaluaciones',
+                    data: monthlyTrendsData.counts,
+                    type: 'bar',
+                    backgroundColor: 'rgba(16,185,129,.2)',
+                    borderColor: '#10b981',
+                    borderWidth: 1, borderRadius: 4,
+                    yAxisID: 'y1',
+                    datalabels: {
+                        anchor: 'end', align: 'end',
+                        color: '#059669',
+                        font: { size: 10, weight: '700' },
+                        formatter: v => (v > 0 ? v : ''),
                     }
                 }
-            }
-        }
-    });
-    
-    // 3. ANÁLISIS POR CATEGORÍA
-    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-    new Chart(categoryCtx, {
-        type: 'bar',
-        data: {
-            labels: categoryData.labels,
-            datasets: [{
-                label: 'Promedio de Seguridad (%)',
-                data: categoryData.data,
-                backgroundColor: [
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)',
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(153, 102, 255, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(153, 102, 255, 1)'
-                ],
-                borderWidth: 1
-            }]
+            ]
         },
         options: {
             responsive: true,
+            interaction: { mode: 'index', intersect: false },
             plugins: {
-                legend: {
-                    display: false
-                }
+                legend: { position: 'top', labels: { boxWidth: 12, padding: 16 } },
+                datalabels: {}   // requerido para que el plugin sepa que está activo
             },
             scales: {
-                y: {
-                    beginAtZero: true,
-                    max: 100,
-                    title: {
-                        display: true,
-                        text: 'Porcentaje (%)'
-                    }
-                }
+                y:  { type: 'linear', position: 'left',  min: 0, max: 115,
+                      title: { display: true, text: 'Seguridad (%)' } },
+                y1: { type: 'linear', position: 'right', min: 0,
+                      grid: { drawOnChartArea: false },
+                      title: { display: true, text: 'Evaluaciones' } }
             }
         }
     });
-    
-    // 4. FRECUENCIA DE EVALUACIONES
-    const evaluationFrequencyCtx = document.getElementById('evaluationFrequencyChart').getContext('2d');
-    new Chart(evaluationFrequencyCtx, {
+
+    // ── 2. Distribución geográfica ────────────────────────
+    if (geographicData.data && geographicData.data.length > 0) {
+        new Chart(document.getElementById('geographicChart'), {
+            plugins: [DL],
+            type: 'doughnut',
+            data: {
+                labels: geographicData.labels,
+                datasets: [{
+                    data: geographicData.data,
+                    backgroundColor: ['#667eea','#10b981','#f59e0b','#ef4444','#3b82f6','#8b5cf6'],
+                    hoverOffset: 6, borderWidth: 2, borderColor: '#fff',
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } },
+                    datalabels: {
+                        color: '#fff',
+                        font: { size: 11, weight: '700' },
+                        formatter: function(value, ctx) {
+                            const data  = ctx.chart.data.datasets[0].data;
+                            const total = data.reduce(function(a, b) { return a + b; }, 0);
+                            const pct   = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return pct > 5 ? pct + '%' : '';
+                        },
+                        textShadowBlur: 4,
+                        textShadowColor: 'rgba(0,0,0,.5)',
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('geographicChart').closest('.db-card-body').innerHTML =
+            '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:.84rem;"><i class="fas fa-globe" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.4;"></i>Sin datos geográficos</div>';
+    }
+
+    // ── 3. Por categoría ──────────────────────────────────
+    if (categoryData.data && categoryData.data.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            plugins: [DL],
+            type: 'bar',
+            data: {
+                labels: categoryData.labels,
+                datasets: [{
+                    label: 'Promedio (%)',
+                    data: categoryData.data,
+                    backgroundColor: ['#fbbf24','#10b981','#3b82f6','#8b5cf6','#ef4444'],
+                    borderRadius: 6, borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end', align: 'end',
+                        color: '#374151',
+                        font: { size: 11, weight: '700' },
+                        formatter: v => (v > 0 ? v + '%' : ''),
+                    }
+                },
+                scales: { y: { beginAtZero: true, max: 115, title: { display: true, text: '%' } } }
+            }
+        });
+    } else {
+        document.getElementById('categoryChart').closest('.db-card-body').innerHTML =
+            '<div style="text-align:center;padding:2rem;color:#9ca3af;font-size:.84rem;"><i class="fas fa-star" style="font-size:2rem;display:block;margin-bottom:.5rem;opacity:.4;"></i>Sin evaluaciones por categoría</div>';
+    }
+
+    // ── 4. Frecuencia de evaluaciones ─────────────────────
+    new Chart(document.getElementById('evaluationFrequencyChart'), {
+        plugins: [DL],
         type: 'bar',
         data: {
             labels: evaluationFrequencyData.labels,
             datasets: [{
-                label: 'Evaluaciones Realizadas',
+                label: 'Evaluaciones',
                 data: evaluationFrequencyData.data,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
+                backgroundColor: 'rgba(102,126,234,.75)',
+                borderColor: '#667eea',
+                borderWidth: 1, borderRadius: 5, borderSkipped: false,
             }]
         },
         options: {
             responsive: true,
             plugins: {
-                legend: {
-                    display: false
+                legend: { display: false },
+                datalabels: {
+                    anchor: 'end', align: 'end',
+                    color: '#4c1d95',
+                    font: { size: 11, weight: '700' },
+                    formatter: v => (v > 0 ? v : ''),
                 }
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1
-                    },
-                    title: {
-                        display: true,
-                        text: 'Número de Evaluaciones'
-                    }
-                }
-            }
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
     });
+
 });
 </script>
 {% endblock %}

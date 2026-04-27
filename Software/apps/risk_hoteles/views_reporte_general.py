@@ -314,198 +314,6 @@ class AdvancedHotelAnalytics:
         }
 
 @login_required
-def reporte_general_preview(request, hotel_id):
-    """Vista de preview del reporte general avanzado"""
-    hotel = get_hotel_or_404(request.user, hotel_id)
-    
-    # Inicializar sistema de analytics avanzado
-    analytics = AdvancedHotelAnalytics(hotel)
-    
-    # Obtener datos básicos del hotel
-    basic_stats = {
-        'total_assessments': analytics.assessments.count(),
-        'assessment_period': {
-            'start': analytics.assessments.first().assessment_date if analytics.assessments.exists() else None,
-            'end': analytics.assessments.last().assessment_date if analytics.assessments.exists() else None
-        },
-        'average_score': hotel.get_average_assessment_percentage(),
-        'last_assessment': analytics.assessments.last() if analytics.assessments.exists() else None
-    }
-    
-    # Análisis avanzados con IA/ML
-    analyses = {
-        'temporal_trends': analytics.get_temporal_trends(),
-        'category_performance': analytics.get_category_performance_analysis(),
-        'anomaly_detection': analytics.get_anomaly_detection(),
-        'risk_patterns': analytics.get_risk_pattern_analysis(),
-        'benchmarking': analytics.get_benchmarking_analysis()
-    }
-    
-    # Calcular variación de rendimiento por categorías
-    category_variation = None
-    if analyses['category_performance']:
-        percentages = [cat['avg_percentage'] for cat in analyses['category_performance']]
-        if percentages:
-            category_variation = {
-                'max_score': max(percentages),
-                'min_score': min(percentages),
-                'variation': round(max(percentages) - min(percentages), 1)
-            }
-    
-    # Generar recomendaciones inteligentes
-    ai_recommendations = None
-    if analytics.assessments.exists():
-        latest_assessment = analytics.assessments.last()
-        
-        # Recopilar datos de la evaluación más reciente para IA
-        categories_data = {}
-        for cat_score in SecurityCategoryScore.objects.filter(assessment=latest_assessment):
-            # Obtener comentarios de la categoría
-            cat_comment = SecurityCategoryComment.objects.filter(
-                assessment=latest_assessment, 
-                category=cat_score.category
-            ).first()
-            
-            categories_data[cat_score.category.code] = {
-                'category': cat_score.category.name,
-                'percentage': cat_score.percentage,
-                'score': cat_score.percentage / 20.0,  # Convertir de 0-100 a 0-5
-                'comments': cat_comment.comments if cat_comment else '',
-                'question_count': cat_score.category.questions.count()
-            }
-        
-        assessment_data = {
-            'categories': categories_data,
-            'overall_score': latest_assessment.overall_score,
-            'hotel_info': {
-                'id': str(hotel.id),
-                'name': hotel.name,
-                'address': hotel.address
-            },
-            'responses': []  # Placeholder para respuestas detalladas
-        }
-        
-        try:
-            ai_recommendations = analytics.ai_engine.analyze_assessment_data(assessment_data)
-        except Exception as e:
-            ai_recommendations = {'error': f'Error en análisis IA: {str(e)}'}
-    
-    # Estadísticas de resumen para el reporte
-    summary_stats = {
-        'total_categories_analyzed': SecurityCategory.objects.filter(is_active=True).count(),
-        'data_quality_score': min(100, max(0, (basic_stats['total_assessments'] * 20))),  # Máximo 100%
-        'analysis_confidence': 'high' if basic_stats['total_assessments'] >= 5 else 'medium' if basic_stats['total_assessments'] >= 3 else 'low'
-    }
-    
-    context = {
-        'hotel': hotel,
-        'basic_stats': basic_stats,
-        'analyses': analyses,
-        'ai_recommendations': ai_recommendations,
-        'summary_stats': summary_stats,
-        'category_variation': category_variation,
-        'generated_at': timezone.now(),
-        'is_preview': True
-    }
-    
-    return render(request, 'risk_hoteles/reporte_general_preview.html', context)
-
-@login_required 
-def reporte_general_print(request, hotel_id):
-    """Vista optimizada para impresión con Browser Print JavaScript"""
-    hotel = get_hotel_or_404(request.user, hotel_id)
-    
-    # Reutilizar la misma lógica de análisis
-    analytics = AdvancedHotelAnalytics(hotel)
-    
-    basic_stats = {
-        'total_assessments': analytics.assessments.count(),
-        'assessment_period': {
-            'start': analytics.assessments.first().assessment_date if analytics.assessments.exists() else None,
-            'end': analytics.assessments.last().assessment_date if analytics.assessments.exists() else None
-        },
-        'average_score': hotel.get_average_assessment_percentage(),
-        'last_assessment': analytics.assessments.last() if analytics.assessments.exists() else None
-    }
-    
-    analyses = {
-        'temporal_trends': analytics.get_temporal_trends(),
-        'category_performance': analytics.get_category_performance_analysis(),
-        'anomaly_detection': analytics.get_anomaly_detection(),
-        'risk_patterns': analytics.get_risk_pattern_analysis(),
-        'benchmarking': analytics.get_benchmarking_analysis()
-    }
-    
-    # Calcular variación de rendimiento por categorías para impresión
-    category_variation = None
-    if analyses['category_performance']:
-        percentages = [cat['avg_percentage'] for cat in analyses['category_performance']]
-        if percentages:
-            category_variation = {
-                'max_score': max(percentages),
-                'min_score': min(percentages),
-                'variation': round(max(percentages) - min(percentages), 1)
-            }
-    
-    # Generar recomendaciones IA para impresión
-    ai_recommendations = None
-    if analytics.assessments.exists():
-        latest_assessment = analytics.assessments.last()
-        
-        # Recopilar datos de la evaluación más reciente para IA
-        categories_data = {}
-        for cat_score in SecurityCategoryScore.objects.filter(assessment=latest_assessment):
-            # Obtener comentarios de la categoría
-            cat_comment = SecurityCategoryComment.objects.filter(
-                assessment=latest_assessment, 
-                category=cat_score.category
-            ).first()
-            
-            categories_data[cat_score.category.code] = {
-                'category': cat_score.category.name,
-                'percentage': cat_score.percentage,
-                'score': cat_score.percentage / 20.0,  # Convertir de 0-100 a 0-5
-                'comments': cat_comment.comments if cat_comment else '',
-                'question_count': cat_score.category.questions.count()
-            }
-        
-        assessment_data = {
-            'categories': categories_data,
-            'overall_score': latest_assessment.overall_score,
-            'hotel_info': {
-                'id': str(hotel.id),
-                'name': hotel.name,
-                'address': hotel.address
-            },
-            'responses': []  # Placeholder para respuestas detalladas
-        }
-        
-        try:
-            ai_recommendations = analytics.ai_engine.analyze_assessment_data(assessment_data)
-        except Exception as e:
-            ai_recommendations = {'error': f'Error en análisis IA: {str(e)}'}
-    
-    summary_stats = {
-        'total_categories_analyzed': SecurityCategory.objects.filter(is_active=True).count(),
-        'data_quality_score': min(100, max(0, (basic_stats['total_assessments'] * 20))),
-        'analysis_confidence': 'high' if basic_stats['total_assessments'] >= 5 else 'medium' if basic_stats['total_assessments'] >= 3 else 'low'
-    }
-    
-    context = {
-        'hotel': hotel,
-        'basic_stats': basic_stats,
-        'analyses': analyses,
-        'ai_recommendations': ai_recommendations,
-        'summary_stats': summary_stats,
-        'category_variation': category_variation,
-        'generated_at': timezone.now(),
-        'is_print': True,
-        'auto_print': True  # Activar auto-print con JavaScript
-    }
-    
-    return render(request, 'risk_hoteles/reporte_general_print.html', context)
-
-@login_required
 def reporte_general_api(request, hotel_id):
     """API endpoint para obtener datos del reporte en formato JSON"""
     hotel = get_hotel_or_404(request.user, hotel_id)
@@ -534,3 +342,202 @@ def reporte_general_api(request, hotel_id):
     }
     
     return JsonResponse(data, safe=False)
+
+
+# ─────────────────────────────────────────────────────────────
+#  NUEVO REPORTE GENERAL  (templates/risk_hoteles/reports/)
+# ─────────────────────────────────────────────────────────────
+
+from collections import defaultdict
+from .models import SecurityCategoryScore as _CatScore
+
+
+def _score_level(pct):
+    """Devuelve 'success'/'warning'/'danger' según el porcentaje."""
+    if pct >= 70:
+        return 'success'
+    if pct >= 40:
+        return 'warning'
+    return 'danger'
+
+
+def _risk_from_pct(pct):
+    """Devuelve nivel de riesgo, etiqueta y descripción."""
+    if pct >= 80:
+        return {
+            'level': 'bajo',
+            'label': 'Riesgo Bajo',
+            'css': 'success',
+            'icon': 'fas fa-shield-check',
+            'desc': (
+                'El hotel presenta controles de seguridad sólidos y bien implementados. '
+                'Los procesos de protección superan el estándar del sector. '
+                'Se recomienda mantener las buenas prácticas y programar auditorías periódicas.'
+            ),
+        }
+    if pct >= 60:
+        return {
+            'level': 'medio',
+            'label': 'Riesgo Moderado',
+            'css': 'warning',
+            'icon': 'fas fa-triangle-exclamation',
+            'desc': (
+                'El hotel cuenta con medidas de seguridad aceptables, aunque existen áreas '
+                'de mejora identificadas. Se recomienda reforzar las categorías con menor '
+                'desempeño y establecer un plan de acción correctiva a corto plazo.'
+            ),
+        }
+    if pct >= 40:
+        return {
+            'level': 'alto',
+            'label': 'Riesgo Alto',
+            'css': 'danger',
+            'icon': 'fas fa-circle-exclamation',
+            'desc': (
+                'Se detectan deficiencias significativas en múltiples áreas de seguridad. '
+                'Es prioritario implementar medidas correctivas inmediatas en las categorías '
+                'críticas para reducir la exposición al riesgo operativo.'
+            ),
+        }
+    return {
+        'level': 'critico',
+        'label': 'Riesgo Crítico',
+        'css': 'danger',
+        'icon': 'fas fa-skull-crossbones',
+        'desc': (
+            'El hotel presenta vulnerabilidades críticas que requieren atención urgente. '
+            'Los controles de seguridad están por debajo del umbral mínimo aceptable. '
+            'Se recomienda intervención inmediata y revisión integral de todos los procesos.'
+        ),
+    }
+
+
+def _build_report_context(hotel, page_size, back_url, auto_print):
+    """Construye el contexto completo para el reporte general."""
+
+    # ─── Evaluaciones completadas (orden cronológico para tendencias) ───
+    assessments_qs = hotel.security_assessments.filter(
+        status='completed',
+        overall_score__isnull=False,
+    ).select_related('created_by').order_by('assessment_date')
+
+    assessments_list = list(assessments_qs)
+
+    assessments_data = []
+    for a in reversed(assessments_list):          # recientes primero para tabla
+        pct = round((a.overall_score / 5.0) * 100, 1)
+        assessments_data.append({
+            'obj': a,
+            'percentage': pct,
+            'level': _score_level(pct),
+        })
+
+    # ─── Puntuaciones por categoría (todos los assessments completados) ───
+    cat_scores_qs = _CatScore.objects.filter(
+        assessment__hotel=hotel,
+        assessment__status='completed',
+        assessment__overall_score__isnull=False,
+    ).select_related('category', 'assessment').order_by(
+        'category__order', 'assessment__assessment_date'
+    )
+
+    # Agrupar por categoría → lista de porcentajes en orden cronológico
+    cat_map = defaultdict(list)
+    for cs in cat_scores_qs:
+        cat_map[cs.category].append(cs.percentage)
+
+    category_analysis = []
+    for cat, scores in cat_map.items():
+        avg_pct = round(sum(scores) / len(scores), 1)
+        last_pct = round(scores[-1], 1)
+
+        # Tendencia: regresión simple sobre los últimos puntos
+        if len(scores) >= 3:
+            n = len(scores)
+            x_mean = (n - 1) / 2
+            y_mean = sum(scores) / n
+            num = sum((i - x_mean) * (s - y_mean) for i, s in enumerate(scores))
+            den = sum((i - x_mean) ** 2 for i in range(n))
+            slope = num / den if den else 0
+            trend = 'improving' if slope > 1.0 else 'declining' if slope < -1.0 else 'stable'
+        elif len(scores) == 2:
+            delta = scores[1] - scores[0]
+            trend = 'improving' if delta > 3 else 'declining' if delta < -3 else 'stable'
+        else:
+            trend = 'stable'
+
+        # Variación entre mejor y peor
+        variation = round(max(scores) - min(scores), 1) if len(scores) > 1 else 0
+
+        category_analysis.append({
+            'name': cat.name,
+            'icon': cat.icon,
+            'avg_pct': avg_pct,
+            'last_pct': last_pct,
+            'count': len(scores),
+            'trend': trend,
+            'variation': variation,
+            'risk': _risk_from_pct(avg_pct)['level'],
+            'level': _score_level(avg_pct),
+        })
+
+    category_analysis.sort(key=lambda x: x['avg_pct'], reverse=True)
+
+    strengths  = category_analysis[:3]
+    weaknesses = list(reversed(category_analysis[-3:])) if len(category_analysis) >= 3 else list(reversed(category_analysis))
+
+    # ─── Nivel de riesgo global ───
+    avg_pct_global = hotel.get_average_assessment_percentage()
+    global_risk = _risk_from_pct(avg_pct_global) if avg_pct_global is not None else None
+
+    # ─── Tendencia global (comparando primera vs última evaluación) ───
+    global_trend = None
+    if len(assessments_list) >= 2:
+        first_pct = round((assessments_list[0].overall_score / 5.0) * 100, 1)
+        last_pct_g = round((assessments_list[-1].overall_score / 5.0) * 100, 1)
+        delta_g = round(last_pct_g - first_pct, 1)
+        direction = 'improving' if delta_g > 2 else 'declining' if delta_g < -2 else 'stable'
+        global_trend = {'direction': direction, 'delta': delta_g, 'first': first_pct, 'last': last_pct_g}
+
+    return {
+        'hotel': hotel,
+        'generated_at': timezone.now(),
+        'page_size': page_size,
+        'back_url': back_url,
+        'auto_print': auto_print,
+        # evaluaciones
+        'assessments_data': assessments_data,
+        'total_assessments': len(assessments_data),
+        'best_score': max((a['percentage'] for a in assessments_data), default=None),
+        'worst_score': min((a['percentage'] for a in assessments_data), default=None),
+        'latest_assessment': assessments_data[0] if assessments_data else None,
+        # análisis
+        'category_analysis': category_analysis,
+        'strengths': strengths,
+        'weaknesses': weaknesses,
+        'global_risk': global_risk,
+        'global_trend': global_trend,
+        'avg_pct_global': avg_pct_global,
+    }
+
+
+@login_required
+def reporte_general(request, hotel_id):
+    """Preview del nuevo Reporte General de Seguridad."""
+    hotel = get_hotel_or_404(request.user, hotel_id)
+    page_size = request.GET.get('size', 'a4').lower()
+    ctx = _build_report_context(
+        hotel, page_size,
+        back_url=request.META.get('HTTP_REFERER', ''),
+        auto_print=False,
+    )
+    return render(request, 'risk_hoteles/reports/reporte_general.html', ctx)
+
+
+@login_required
+def reporte_general_print(request, hotel_id):
+    """Versión de impresión directa del nuevo Reporte General."""
+    hotel = get_hotel_or_404(request.user, hotel_id)
+    page_size = request.GET.get('size', 'a4').lower()
+    ctx = _build_report_context(hotel, page_size, back_url='', auto_print=True)
+    return render(request, 'risk_hoteles/reports/reporte_general.html', ctx)

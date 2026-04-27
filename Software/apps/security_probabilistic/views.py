@@ -136,7 +136,8 @@ class ListaPerfilesView(AccessControlMixin, EvaluadorPermissionMixin, OwnershipF
     required_permission = 'read'
     
     def get_queryset(self):
-        queryset = PerfilSeguridad.objects.all()
+        # Aplicar filtrado por propiedad primero
+        queryset = self.get_ownership_queryset(PerfilSeguridad.objects.all())
         
         # Filtros
         cargo = self.request.GET.get('cargo')
@@ -154,10 +155,10 @@ class ListaPerfilesView(AccessControlMixin, EvaluadorPermissionMixin, OwnershipF
         riesgo = self.request.GET.get('riesgo')
         if riesgo:
             # Filtrar por nivel de riesgo calculado
-            perfiles_con_riesgo = []
-            for perfil in queryset:
-                if perfil.nivel_riesgo_perfil == riesgo:
-                    perfiles_con_riesgo.append(perfil.id)
+            perfiles_con_riesgo = [
+                perfil.id for perfil in queryset
+                if perfil.nivel_riesgo_perfil == riesgo
+            ]
             queryset = queryset.filter(id__in=perfiles_con_riesgo)
         
         # Ordenamiento
@@ -176,17 +177,17 @@ class ListaPerfilesView(AccessControlMixin, EvaluadorPermissionMixin, OwnershipF
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Agregar estadísticas
-        all_perfiles = PerfilSeguridad.objects.all()
-        context['total_perfiles'] = all_perfiles.count()
+        # Agregar estadísticas usando queryset filtrado por propiedad
+        user_perfiles = list(get_user_perfiles(self.request.user))
+        context['total_perfiles'] = len(user_perfiles)
         
-        # Estadísticas por nivel de riesgo
-        context['stats_riesgo'] = {
-            'muy_alto': len([p for p in all_perfiles if p.nivel_riesgo_perfil == 'muy_alto']),
-            'alto': len([p for p in all_perfiles if p.nivel_riesgo_perfil == 'alto']),
-            'medio': len([p for p in all_perfiles if p.nivel_riesgo_perfil == 'medio']),
-            'bajo': len([p for p in all_perfiles if p.nivel_riesgo_perfil == 'bajo']),
-        }
+        # Estadísticas por nivel de riesgo en un solo recorrido
+        stats_riesgo = {'muy_alto': 0, 'alto': 0, 'medio': 0, 'bajo': 0}
+        for p in user_perfiles:
+            nivel = p.nivel_riesgo_perfil
+            if nivel in stats_riesgo:
+                stats_riesgo[nivel] += 1
+        context['stats_riesgo'] = stats_riesgo
         
         # Mantener filtros en el contexto
         context['filtros_actuales'] = {
@@ -372,9 +373,8 @@ class RealizarEvaluacionView(AccessControlMixin, EvaluadorPermissionMixin, Templ
         """Verificar que la evaluación existe y puede ser realizada"""
         self.evaluacion = get_object_or_404(EvaluacionSeguridad, pk=kwargs['evaluacion_id'])
         
-        print(f"[DISPATCH] Cargando evaluación ID: {self.evaluacion.id}")
-        print(f"[DISPATCH] Estado: {self.evaluacion.estado}")
-        print(f"[DISPATCH] Respuestas actuales: {self.evaluacion.respuestas_json}")
+        # Verificar que el usuario tiene acceso a esta evaluación
+        ensure_evaluacion_security_ownership(request.user, self.evaluacion)
         
         # Verificar que la evaluación puede ser realizada
         if self.evaluacion.estado not in ['iniciada', 'en_progreso']:
@@ -440,20 +440,12 @@ class RealizarEvaluacionView(AccessControlMixin, EvaluadorPermissionMixin, Templ
         total_preguntas = Pregunta.objects.filter(arbol=self.evaluacion.arbol).count()
         respuestas_dadas = len(self.evaluacion.respuestas_json)
         
-        print(f"[CALCULAR_PROGRESO] Evaluación ID: {self.evaluacion.id}")
-        print(f"[CALCULAR_PROGRESO] Total preguntas en árbol: {total_preguntas}")
-        print(f"[CALCULAR_PROGRESO] Respuestas JSON: {self.evaluacion.respuestas_json}")
-        print(f"[CALCULAR_PROGRESO] Número de respuestas: {respuestas_dadas}")
-        
         if total_preguntas == 0:
-            print("[CALCULAR_PROGRESO] ERROR: No hay preguntas en el árbol")
             return 0, 0, 0
         
         # Para árboles de decisión, el progreso es aproximado
         # basado en las respuestas dadas vs total de preguntas posibles
         porcentaje = min((respuestas_dadas / total_preguntas) * 100, 95)  # Máximo 95% hasta completar
-        
-        print(f"[CALCULAR_PROGRESO] Porcentaje calculado: {porcentaje}")
         
         # Asegurar que el porcentaje sea un float para evitar problemas de localización
         return respuestas_dadas, total_preguntas, float(round(porcentaje, 1))
@@ -505,24 +497,12 @@ class RealizarEvaluacionView(AccessControlMixin, EvaluadorPermissionMixin, Templ
     
     def post(self, request, *args, **kwargs):
         """Procesar respuesta del usuario"""
-        # Debug temporal
-        print(f"POST data recibido: {dict(request.POST)}")
-        print(f"Método: {request.method}")
-        
         accion = request.POST.get('accion')
-        respuesta = request.POST.get('respuesta')
-        
-        print(f"Acción extraída: '{accion}'")
-        print(f"Respuesta extraída: '{respuesta}'")
         
         if accion == 'anterior':
-            print("Procesando acción: anterior")
             return self.ir_pregunta_anterior()
         elif accion == 'siguiente':
-            print("Procesando acción: siguiente")
             return self.procesar_respuesta()
-        else:
-            print(f"Acción no reconocida: '{accion}'. Mostrando formulario.")
         
         return self.get(request, *args, **kwargs)
     
@@ -553,11 +533,7 @@ class RealizarEvaluacionView(AccessControlMixin, EvaluadorPermissionMixin, Templ
         """Procesar la respuesta seleccionada y avanzar"""
         respuesta_id = self.request.POST.get('respuesta')
         
-        # Debug temporal
-        print(f"[PROCESAR_RESPUESTA] Iniciando con respuesta_id: {respuesta_id}")
-        
         if not respuesta_id:
-            print("[PROCESAR_RESPUESTA] ERROR: No se recibió respuesta_id")
             messages.error(self.request, "Debe seleccionar una opción para continuar.")
             return self.get(self.request)
         

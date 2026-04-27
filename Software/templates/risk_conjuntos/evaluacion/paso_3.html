@@ -2,59 +2,53 @@
 {% load static %}
 
 {% block evaluation_content %}
-<div class="row">
-    <div class="col-12">
-        <!-- Formulario principal de observaciones -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Paso 3: Observaciones y Recomendaciones</h5>
+
+<div class="eval-card mb-3">
+    <div class="eval-card-header">
+        <h5><i class="fas fa-clipboard-check me-2"></i>Observaciones y Recomendaciones</h5>
+        <span class="header-badge">Paso 3 de 4</span>
+    </div>
+    <div class="eval-card-body">
+        <form method="post" enctype="multipart/form-data" id="form-observaciones">
+            {% csrf_token %}
+
+            <div class="mb-4">
+                <label class="form-label" style="font-size:.85rem;font-weight:700;color:#1e3a6e;">
+                    <i class="fas fa-eye me-2"></i>Observaciones Generales
+                </label>
+                <small class="form-text text-muted d-block mb-2">
+                    Describa las observaciones principales identificadas durante la evaluacion de riesgos
+                </small>
+                <textarea name="observaciones_generales" id="id_observaciones_generales" class="form-control summernote"
+                          placeholder="Ingrese sus observaciones generales sobre la evaluacion realizada...">{{ observaciones_form.observaciones_generales.value|default:'' }}</textarea>
             </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data" id="form-observaciones">
-                    {% csrf_token %}
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">
-                            <i class="fas fa-eye text-info me-2"></i>
-                            Observaciones Generales
-                        </label>
-                        <small class="form-text text-muted d-block mb-2">
-                            Describa las observaciones principales identificadas durante la evaluación de riesgos
-                        </small>
-                        <textarea name="observaciones_generales" id="id_observaciones_generales" class="form-control summernote" 
-                                  placeholder="Ingrese sus observaciones generales sobre la evaluación realizada...">{{ observaciones_form.observaciones_generales.value|default:'' }}</textarea>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">
-                            <i class="fas fa-lightbulb text-warning me-2"></i>
-                            Recomendaciones
-                        </label>
-                        <small class="form-text text-muted d-block mb-2">
-                            Especifique las recomendaciones y medidas sugeridas para mitigar los riesgos identificados
-                        </small>
-                        <textarea name="recomendaciones_generales" id="id_recomendaciones_generales" class="form-control summernote" 
-                                  placeholder="Ingrese las recomendaciones para mejorar la seguridad y mitigar riesgos...">{{ observaciones_form.recomendaciones_generales.value|default:'' }}</textarea>
-                    </div>
-                </form>
+
+            <div class="mb-2">
+                <label class="form-label" style="font-size:.85rem;font-weight:700;color:#1e3a6e;">
+                    <i class="fas fa-lightbulb me-2"></i>Recomendaciones
+                </label>
+                <small class="form-text text-muted d-block mb-2">
+                    Especifique las recomendaciones y medidas sugeridas para mitigar los riesgos identificados
+                </small>
+                <textarea name="recomendaciones_generales" id="id_recomendaciones_generales" class="form-control summernote"
+                          placeholder="Ingrese las recomendaciones para mejorar la seguridad y mitigar riesgos...">{{ observaciones_form.recomendaciones_generales.value|default:'' }}</textarea>
             </div>
-        </div>
+        </form>
+    </div>
+</div>
         
-        <!-- Sección de adjuntar imágenes -->
-        <div class="card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-images me-2"></i>
-                    Adjuntar Imágenes
-                </h5>
-            </div>
-            <div class="card-body">
+<div class="eval-card mb-3">
+    <div class="eval-card-header">
+        <h5><i class="fas fa-images me-2"></i>Evidencias Fotograficas</h5>
+        <span class="header-badge">{{ archivos_temporales|length }} archivo{{ archivos_temporales|length|pluralize:",s" }}</span>
+    </div>
+    <div class="eval-card-body">
                 <div class="row">
                     <div class="col-md-6">
                         <!-- Formulario de carga de imágenes -->
                         <form method="post" enctype="multipart/form-data" class="imagen-form" id="form-upload-imagen">
                             {% csrf_token %}
-                            <div class="upload-section p-4 text-center border-2 border-dashed rounded" style="border-color: #dee2e6; background-color: #f8f9fa;">
+                            <div class="upload-section p-4 text-center border-2 border-dashed rounded" style="border-color: #1e3a6e; background-color: #f0f4f8; border-style: dashed;">
                                 <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                                 <p class="mb-3">Arrastra imágenes aquí o haz clic para seleccionar</p>
                                 
@@ -70,7 +64,7 @@
                                 <!-- Campo tipo_archivo hidden para imágenes -->
                                 <input type="hidden" name="tipo_archivo" value="evidencia">
                                 
-                                <button type="submit" name="subir_archivo" class="btn btn-success" id="btn-subir-archivo">
+                                <button type="submit" name="subir_archivo" class="btn" id="btn-subir-archivo" style="background:linear-gradient(135deg,#1e3a6e,#162a54);color:#fff;border:none;border-radius:8px;padding:.5rem 1.25rem;font-weight:600;font-size:.85rem;">
                                     <i class="fas fa-upload me-2"></i>
                                     <span class="btn-text">Subir Imagen</span>
                                     <span class="spinner-border spinner-border-sm ms-2 d-none" role="status"></span>
@@ -183,53 +177,30 @@
                     </div>
                 </div>
                 
-                <!-- Card de ayuda -->
-                <div class="mt-4 p-3 bg-light rounded">
-                    <h6 class="mb-2">
-                        <i class="fas fa-lightbulb text-warning me-2"></i>
-                        Consejos
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <ul class="list-unstyled mb-0 small">
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Sea específico en sus observaciones
-                                </li>
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Incluya imágenes como evidencia
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <ul class="list-unstyled mb-0 small">
-                                <li class="mb-2">
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Describa claramente las recomendaciones
-                                </li>
-                                <li>
-                                    <i class="fas fa-check text-success me-2"></i>
-                                    Use imágenes para ilustrar problemas
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="mt-3 p-3 rounded" style="background:#f0f4f8;border:1px solid #e0e7f3;">
+            <h6 class="mb-2" style="font-size:.82rem;font-weight:700;color:#1e3a6e;">
+                <i class="fas fa-lightbulb me-2" style="color:#f0a500;"></i>Consejos
+            </h6>
+            <ul class="list-unstyled mb-0 small row">
+                <li class="col-md-6 mb-1"><i class="fas fa-check me-2" style="color:#28a745;"></i>Sea especifico en sus observaciones</li>
+                <li class="col-md-6 mb-1"><i class="fas fa-check me-2" style="color:#28a745;"></i>Incluya imagenes como evidencia</li>
+                <li class="col-md-6 mb-1"><i class="fas fa-check me-2" style="color:#28a745;"></i>Describa claramente las recomendaciones</li>
+                <li class="col-md-6"><i class="fas fa-check me-2" style="color:#28a745;"></i>Use imagenes para ilustrar problemas</li>
+            </ul>
         </div>
     </div>
 </div>
+
 {% endblock %}
 
 {% block back_button %}
-<a href="{% url 'risk_conjuntos:paso_2_preguntas' conjunto.id 0 %}" class="btn btn-outline-secondary">
+<a href="{% url 'risk_conjuntos:paso_2_preguntas' conjunto.id 0 %}" class="btn-nav-back">
     <i class="fas fa-arrow-left"></i> Volver al Paso 2
 </a>
 {% endblock %}
 
 {% block next_button %}
-<button type="submit" form="form-observaciones" name="continuar_paso_4" class="btn btn-primary">
+<button type="submit" form="form-observaciones" name="continuar_paso_4" class="btn-nav-next">
     <i class="fas fa-arrow-right"></i> Continuar al Paso 4
 </button>
 {% endblock %}

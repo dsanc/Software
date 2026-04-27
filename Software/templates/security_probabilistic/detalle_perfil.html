@@ -7,464 +7,580 @@
 
 {% block extra_css %}
 <style>
-/* Estilos personalizados para el detalle del perfil */
-.profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+/* ================================================================
+   DETALLE PERFIL — DISEÑO MODERNO (sistema sp-)
+   ================================================================ */
+:root {
+    --sp-primary:    #0d9488;
+    --sp-primary-d:  #0f766e;
+    --sp-dark:       #0f172a;
+    --sp-dark-mid:   #1e293b;
+    --sp-accent:     #059669;
+    --sp-success:    #10b981;
+    --sp-warning:    #f59e0b;
+    --sp-danger:     #ef4444;
+    --sp-info:       #3b82f6;
+    --sp-surface:    #ffffff;
+    --sp-border:     #e5e7eb;
+    --sp-text:       #111827;
+    --sp-text-muted: #6b7280;
+    --sp-radius:     0.875rem;
+    --sp-shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --sp-shadow:     0 4px 16px rgba(0,0,0,.1);
+    --sp-shadow-lg:  0 8px 32px rgba(0,0,0,.14);
 }
 
-.profile-avatar {
-    width: 60px;
-    height: 60px;
-    font-size: 1.5rem;
-    font-weight: 600;
-    border: 3px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* ── HEADER ──────────────────────────────────────────────── */
+.sp-header {
+    background: linear-gradient(135deg, var(--sp-dark) 0%, var(--sp-dark-mid) 60%, #0d4a3a 100%);
+    border-radius: var(--sp-radius);
+    padding: .875rem 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+    border-bottom: 3px solid var(--sp-accent);
+    box-shadow: var(--sp-shadow-lg);
+}
+.sp-header::before {
+    content: ''; position: absolute; top: -40%; right: -5%;
+    width: 200px; height: 200px;
+    background: rgba(5,150,105,.08); border-radius: 50%; pointer-events: none;
+}
+.sp-breadcrumb {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .75rem; color: rgba(255,255,255,.5); margin-bottom: .35rem;
+}
+.sp-breadcrumb a { color: rgba(255,255,255,.65); text-decoration: none; transition: color .2s; }
+.sp-breadcrumb a:hover { color: #fff; }
+.sp-breadcrumb i { font-size: .55rem; }
+.sp-header h1 {
+    font-size: 1.15rem; font-weight: 800;
+    color: #fff; margin: 0 0 .2rem; letter-spacing: -.3px;
+    display: flex; align-items: center; gap: .5rem;
+}
+.sp-header h1 .h1-icon {
+    width: 30px; height: 30px;
+    background: rgba(5,150,105,.2); border: 1.5px solid rgba(5,150,105,.4);
+    border-radius: .5rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .85rem; color: #6ee7b7; flex-shrink: 0;
+}
+.sp-header p { font-size: .78rem; color: rgba(255,255,255,.55); margin: 0; }
+.sp-header-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.btn-sp-ghost {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.1); color: rgba(255,255,255,.85);
+    border: 1.5px solid rgba(255,255,255,.2); border-radius: .625rem;
+    padding: .45rem .9rem; font-size: .8rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+}
+.btn-sp-ghost:hover {
+    background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45);
+    color: #fff; transform: translateY(-1px);
+}
+.btn-sp-accent {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--sp-accent); color: #fff;
+    border: none; border-radius: .625rem;
+    padding: .45rem 1rem; font-size: .8rem; font-weight: 700;
+    text-decoration: none; transition: all .2s;
+    box-shadow: 0 3px 12px rgba(5,150,105,.35);
+}
+.btn-sp-accent:hover {
+    background: #047857; color: #fff;
+    transform: translateY(-1px); box-shadow: 0 6px 20px rgba(5,150,105,.45);
 }
 
-/* Botones extra pequeños personalizados */
-.btn-xs {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1.2;
-    border-radius: 0.2rem;
+/* ── KPI CARDS ───────────────────────────────────────────── */
+.sp-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .875rem; margin-bottom: 1.25rem;
+}
+@media (max-width: 992px) { .sp-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .sp-kpi-grid { grid-template-columns: 1fr; } }
+.sp-kpi-card {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius);
+    padding: 1rem 1.125rem;
+    display: flex; align-items: center; gap: .875rem;
+    box-shadow: var(--sp-shadow-sm); transition: all .2s;
+    position: relative; overflow: hidden;
+}
+.sp-kpi-card::after {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: var(--sp-radius) 0 0 var(--sp-radius);
+}
+.sp-kpi-card:hover { transform: translateY(-2px); box-shadow: var(--sp-shadow); }
+.sp-kpi-card.kpi-blue::after   { background: var(--sp-info); }
+.sp-kpi-card.kpi-green::after  { background: var(--sp-success); }
+.sp-kpi-card.kpi-amber::after  { background: var(--sp-warning); }
+.sp-kpi-card.kpi-teal::after   { background: var(--sp-primary); }
+.sp-kpi-icon {
+    width: 44px; height: 44px; border-radius: .75rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+}
+.kpi-blue  .sp-kpi-icon { background: #eff6ff; color: var(--sp-info); }
+.kpi-green .sp-kpi-icon { background: #f0fdf4; color: var(--sp-success); }
+.kpi-amber .sp-kpi-icon { background: #fffbeb; color: var(--sp-warning); }
+.kpi-teal  .sp-kpi-icon { background: #f0fdfa; color: var(--sp-primary); }
+.sp-kpi-body { flex: 1; min-width: 0; }
+.sp-kpi-value {
+    font-size: 1.6rem; font-weight: 900; color: var(--sp-text);
+    line-height: 1; margin-bottom: .2rem; letter-spacing: -.02em;
+}
+.sp-kpi-label {
+    font-size: .7rem; font-weight: 600; color: var(--sp-text-muted);
+    text-transform: uppercase; letter-spacing: .05em;
 }
 
-.info-card {
-    border: none;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ── PROFILE HERO ─────────────────────────────────────────── */
+.sp-profile-hero {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    padding: 1.25rem; margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+}
+.sp-profile-hero::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, var(--sp-primary), var(--sp-accent));
+}
+.sp-profile-avatar {
+    width: 64px; height: 64px; border-radius: 1rem;
+    background: linear-gradient(135deg, #0d9488, #0f766e);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem; font-weight: 900; color: #fff; flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(13,148,136,.3);
+}
+.sp-profile-name {
+    font-size: 1.1rem; font-weight: 800; color: var(--sp-text);
+    margin-bottom: .2rem; line-height: 1.3;
+}
+.sp-meta-pill {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .74rem; color: var(--sp-text-muted);
+    background: #f8fafc; border: 1px solid var(--sp-border);
+    border-radius: 50px; padding: .2rem .6rem; margin: .15rem .15rem 0 0;
 }
 
-.info-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+/* ── BADGES ──────────────────────────────────────────────── */
+.sp-badge {
+    display: inline-flex; align-items: center; gap: .25rem;
+    padding: .2rem .55rem; border-radius: 50px;
+    font-size: .69rem; font-weight: 700; white-space: nowrap;
+}
+.sp-badge-muy-alto  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.sp-badge-alto      { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.sp-badge-medio     { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.sp-badge-bajo      { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.sp-badge-activo    { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.sp-badge-inactivo  { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.sp-badge-suspendido{ background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.sp-badge-archivado { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+
+/* ── PANEL / TABLE CARD ──────────────────────────────────── */
+.sp-panel {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    overflow: hidden; margin-bottom: 1.25rem;
+}
+.sp-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--sp-border); background: #fafbfc; gap: .75rem;
+}
+.sp-panel-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .875rem; font-weight: 700; color: var(--sp-text);
+}
+.sp-panel-body { padding: 1.25rem; }
+.sp-count-badge {
+    font-size: .7rem; font-weight: 700; padding: .2rem .625rem;
+    border-radius: 50px; background: rgba(13,148,136,.1); color: var(--sp-primary);
+    border: 1px solid rgba(13,148,136,.2);
 }
 
-.info-label {
-    font-weight: 600;
-    color: #6c757d;
-    font-size: 0.9rem;
-    margin-bottom: 0.25rem;
+/* ── TABLE ───────────────────────────────────────────────── */
+.sp-table { width: 100%; border-collapse: collapse; font-size: .845rem; }
+.sp-table th {
+    padding: .65rem 1rem; background: #f8fafc;
+    border-bottom: 2px solid var(--sp-border);
+    font-size: .72rem; font-weight: 700; color: var(--sp-text-muted);
+    text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
 }
+.sp-table th:first-child { padding-left: 1.25rem; }
+.sp-table th:last-child  { padding-right: 1.25rem; text-align: center; }
+.sp-table td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle; color: var(--sp-text);
+}
+.sp-table td:first-child { padding-left: 1.25rem; }
+.sp-table td:last-child  { padding-right: 1.25rem; }
+.sp-table tbody tr { transition: background .15s; }
+.sp-table tbody tr:last-child td { border-bottom: none; }
+.sp-table tbody tr:hover { background: #f8fafc; }
 
-.info-value {
-    color: #212529;
-    font-size: 1rem;
-    margin-bottom: 1rem;
+/* ── ACTION BUTTONS ──────────────────────────────────────── */
+.sp-action-group { display: flex; gap: .3rem; justify-content: center; }
+.sp-btn-icon {
+    width: 30px; height: 30px; border-radius: .425rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .75rem; text-decoration: none; transition: all .18s;
+    border: 1.5px solid transparent; flex-shrink: 0;
 }
+.sp-btn-view { background: #eff6ff; color: var(--sp-info);    border-color: #bfdbfe; }
+.sp-btn-play { background: #f0fdf4; color: var(--sp-success); border-color: #bbf7d0; }
+.sp-btn-icon:hover { transform: translateY(-2px); box-shadow: var(--sp-shadow-sm); }
 
-.risk-badge {
-    font-size: 1rem;
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    font-weight: 600;
+/* ── SIDEBAR INFO ─────────────────────────────────────────── */
+.sp-info-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: .625rem 0;
+    border-bottom: 1px solid #f1f5f9; gap: .5rem;
+    font-size: .835rem;
 }
+.sp-info-row:last-child { border-bottom: none; }
+.sp-info-label { color: var(--sp-text-muted); font-weight: 600; font-size: .78rem; flex-shrink: 0; }
+.sp-info-value { color: var(--sp-text); font-weight: 500; text-align: right; }
 
-.risk-muy_alto { 
-    background: linear-gradient(135deg, #dc3545, #c82333);
-    color: white;
+/* ── RISK BAR ─────────────────────────────────────────────── */
+.sp-risk-bar { margin-bottom: .75rem; }
+.sp-risk-bar-label {
+    display: flex; justify-content: space-between;
+    font-size: .75rem; font-weight: 600; margin-bottom: .3rem;
 }
-.risk-alto { 
-    background: linear-gradient(135deg, #fd7e14, #e55a00);
-    color: white;
+.sp-risk-bar-track {
+    height: 6px; border-radius: 50px; background: #f1f5f9; overflow: hidden;
 }
-.risk-medio { 
-    background: linear-gradient(135deg, #ffc107, #d39e00);
-    color: #212529;
-}
-.risk-bajo { 
-    background: linear-gradient(135deg, #28a745, #1e7e34);
-    color: white;
-}
+.sp-risk-bar-fill { height: 100%; border-radius: 50px; transition: width .5s ease; }
+.fill-danger  { background: var(--sp-danger); }
+.fill-warning { background: var(--sp-warning); }
+.fill-info    { background: var(--sp-info); }
+.fill-success { background: var(--sp-success); }
 
-.stat-card {
-    text-align: center;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1rem;
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.sp-empty {
+    display: flex; flex-direction: column;
+    align-items: center; padding: 3rem 1rem;
+    gap: .875rem; text-align: center;
 }
-
-.stat-number {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
+.sp-empty-icon {
+    width: 72px; height: 72px; border-radius: 1rem;
+    background: #f0fdfa; color: var(--sp-primary); opacity: .7;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
 }
-
-.stat-label {
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.9;
-}
-
-.timeline-item {
-    border-left: 3px solid #e9ecef;
-    padding-left: 1rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-}
-
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -6px;
-    top: 0.5rem;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: #6c757d;
-}
-
-.timeline-item.completed::before {
-    background: #28a745;
-}
-
-.timeline-item.pending::before {
-    background: #ffc107;
-}
-
-.timeline-item.cancelled::before {
-    background: #dc3545;
-}
-
-.action-buttons .btn {
-    margin: 0.25rem;
-    min-width: 120px;
-}
-
-/* Estilos para la tabla de evaluaciones */
-.table-responsive {
-    border-radius: 0.375rem;
-}
-
-.table th {
-    border-top: none;
-    font-weight: 600;
-    font-size: 0.875rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.table td {
-    vertical-align: middle;
-    padding: 1rem 0.75rem;
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(0, 123, 255, 0.05);
-}
-
-.dropdown-menu {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    border: none;
-}
-
-.dropdown-item {
-    padding: 0.5rem 1rem;
-    transition: background-color 0.15s ease-in-out;
-}
-
-.dropdown-item:hover {
-    background-color: rgba(0, 123, 255, 0.1);
-}
-
-.dropdown-item i {
-    width: 1.25rem;
-    margin-right: 0.5rem;
-}
-
-@media (max-width: 768px) {
-    .profile-header {
-        text-align: center;
-        padding: 1.5rem;
-    }
-    
-    .profile-avatar {
-        width: 60px;
-        height: 60px;
-        font-size: 1.5rem;
-    }
-    
-    .stat-number {
-        font-size: 2rem;
-    }
-}
+.sp-empty h4 { font-size: 1rem; font-weight: 700; color: var(--sp-text); margin: 0; }
+.sp-empty p  { font-size: .84rem; color: var(--sp-text-muted); margin: 0; max-width: 360px; }
 </style>
 {% endblock %}
 
 {% block content %}
+{% has_module_permission user 'security_probabilistic' 'create' as can_create %}
+{% has_module_permission user 'security_probabilistic' 'update' as can_update %}
 <div class="container-fluid">
-    <!-- Header del Perfil -->
-    <div class="profile-header">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <div class="profile-avatar bg-white text-primary rounded-circle d-flex align-items-center justify-content-center">
-                    {{ perfil.iniciales }}
+
+    <!-- ── HEADER ───────────────────────────────────────────── -->
+    <div class="sp-header">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="sp-breadcrumb">
+                    <a href="{% url 'dashboard:home' %}"><i class="fas fa-home"></i> Inicio</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:dashboard' %}">Seguridad Probabilística</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:lista_perfiles' %}">Perfiles</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>{{ perfil.iniciales }}</span>
                 </div>
+                <h1>
+                    <span class="h1-icon"><i class="fas fa-user-shield"></i></span>
+                    {{ perfil.nombre_completo }}
+                </h1>
+                <p>{{ perfil.get_cargo_politico_display }}{% if perfil.partido_politico %} — {{ perfil.partido_politico }}{% endif %}</p>
             </div>
-            <div class="col">
-                <h1 class="h4 mb-1">{{ perfil.nombre_completo }}</h1>
-                <p class="mb-1">
-                    <i class="fas fa-briefcase me-2"></i>{{ perfil.get_cargo_politico_display }}
-                    {% if perfil.partido_politico %}
-                        - {{ perfil.partido_politico }}
-                    {% endif %}
-                </p>
-                <p class="mb-0">
-                    <i class="fas fa-map-marker-alt me-2"></i>{{ perfil.municipio }}, {{ perfil.departamento }}
-                    <span class="ms-3">
-                        <i class="fas fa-birthday-cake me-2"></i>{{ edad }} años
-                    </span>
-                </p>
-            </div>
-            <div class="col-auto">
-                <div class="text-end">
-                    <div class="mb-2">
-                        {% has_module_permission user 'security_probabilistic' 'update' as can_update %}
-                        {% if can_update %}
-                        <button class="btn btn-light btn-xs me-1" onclick="editarPerfil({{ perfil.pk }})">
-                            <i class="fas fa-edit me-1"></i>Editar
-                        </button>
-                        {% endif %}
-                        {% has_module_permission user 'security_probabilistic' 'create' as can_create %}
-                        {% if can_create %}
-                        <button class="btn btn-success btn-xs" onclick="nuevaEvaluacion({{ perfil.pk }})">
-                            <i class="fas fa-plus me-1"></i>Nueva
-                        </button>
-                        {% endif %}
-                    </div>
-                    <div class="d-flex justify-content-end mb-1">
-                        <div class="risk-badge risk-{{ nivel_riesgo_calculado }}">
-                            {% if nivel_riesgo_calculado == 'muy_alto' %}
-                                <i class="fas fa-exclamation-triangle me-2"></i>Riesgo Muy Alto
-                            {% elif nivel_riesgo_calculado == 'alto' %}
-                                <i class="fas fa-exclamation me-2"></i>Riesgo Alto
-                            {% elif nivel_riesgo_calculado == 'medio' %}
-                                <i class="fas fa-minus-circle me-2"></i>Riesgo Medio
-                            {% else %}
-                                <i class="fas fa-check-circle me-2"></i>Riesgo Bajo
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="d-flex justify-content-end">
-                        <span class="badge {% if perfil.estado_perfil == 'activo' %}bg-success{% else %}bg-secondary{% endif %}">
-                            {{ perfil.get_estado_perfil_display }}
-                        </span>
-                    </div>
-                </div>
+            <div class="sp-header-actions">
+                <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn-sp-ghost">
+                    <i class="fas fa-arrow-left"></i> Perfiles
+                </a>
+                {% if can_update %}
+                <a href="{% url 'security_probabilistic:editar_perfil' perfil.pk %}" class="btn-sp-ghost">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                {% endif %}
+                {% if can_create and puede_evaluar %}
+                <a href="{% url 'security_probabilistic:crear_evaluacion' perfil.pk %}" class="btn-sp-accent">
+                    <i class="fas fa-plus"></i> Nueva Evaluación
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-12">
-            <!-- Historial de Evaluaciones -->
-            <div class="card info-card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-history text-info me-2"></i>
-                        Historial de Evaluaciones
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if evaluaciones %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Tipo de Evaluación</th>
-                                        <th>Fecha</th>
-                                        <th>Evaluador</th>
-                                        <th>Estado</th>
-                                        <th>Probabilidad</th>
-                                        <th>Nivel de Riesgo</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for evaluacion in evaluaciones %}
-                                    <tr>
-                                        <td>
-                                            <div class="fw-bold mb-1">{{ evaluacion.arbol.nombre }}</div>
-                                            <div class="d-flex align-items-center mb-1">
-                                                <i class="fas fa-map-marker-alt text-muted me-1" style="font-size: 0.75rem;"></i>
-                                                <small class="text-muted">
-                                                    <span class="fw-medium">{{ perfil.municipio }}</span>, {{ perfil.departamento }}
-                                                </small>
-                                            </div>
-                                            {% if evaluacion.observaciones %}
-                                                <div class="mt-1">
-                                                    <small class="text-muted fst-italic">{{ evaluacion.observaciones|truncatewords:5 }}</small>
-                                                </div>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div>{{ evaluacion.creada_en|date:"d/m/Y" }}</div>
-                                            <small class="text-muted">{{ evaluacion.creada_en|date:"H:i" }}</small>
-                                        </td>
-                                        <td>
-                                            {% if evaluacion.evaluador_nombre %}
-                                                <div>{{ evaluacion.evaluador_nombre }}</div>
-                                                {% if evaluacion.evaluador_email %}
-                                                    <small class="text-muted">{{ evaluacion.evaluador_email }}</small>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">No especificado</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if evaluacion.estado == 'completada' %}
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-check-circle me-1"></i>{{ evaluacion.get_estado_display }}
-                                                </span>
-                                            {% elif evaluacion.estado == 'en_progreso' %}
-                                                <span class="badge bg-warning">
-                                                    <i class="fas fa-clock me-1"></i>{{ evaluacion.get_estado_display }}
-                                                </span>
-                                            {% elif evaluacion.estado == 'cancelada' %}
-                                                <span class="badge bg-danger">
-                                                    <i class="fas fa-times-circle me-1"></i>{{ evaluacion.get_estado_display }}
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">
-                                                    <i class="fas fa-pause-circle me-1"></i>{{ evaluacion.get_estado_display }}
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if evaluacion.estado == 'completada' %}
-                                                {% with promedio=evaluacion|promedio_completo_porcentaje %}
-                                                    {% if promedio %}
-                                                        <div class="fw-bold">{{ promedio|floatformat:2 }}%</div>
-                                                        <small class="text-muted">Promedio completo (con geografía)</small>
-                                                    {% else %}
-                                                        <div class="fw-bold">{{ evaluacion.probabilidad_total|floatformat:5 }}</div>
-                                                        <small class="text-muted">Solo cuestionario (decimal)</small>
-                                                    {% endif %}
-                                                {% endwith %}
-                                                {% if evaluacion.completada_en %}
-                                                    <br><small class="text-muted">{{ evaluacion.completada_en|date:"d/m/Y H:i" }}</small>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if evaluacion.estado == 'completada' and evaluacion.nivel_riesgo %}
-                                                {% if evaluacion.nivel_riesgo == 'muy_alto' %}
-                                                    <span class="badge bg-danger">Muy Alto</span>
-                                                {% elif evaluacion.nivel_riesgo == 'alto' %}
-                                                    <span class="badge bg-warning">Alto</span>
-                                                {% elif evaluacion.nivel_riesgo == 'medio' %}
-                                                    <span class="badge bg-info">Medio</span>
-                                                {% else %}
-                                                    <span class="badge bg-success">Bajo</span>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex flex-wrap justify-content-center gap-1">
-                                                {% if evaluacion.estado == 'completada' %}
-                                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="verResultados({{ evaluacion.id }})" title="Ver Resultados">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="descargarReporte({{ evaluacion.id }})" title="Descargar Reporte">
-                                                        <i class="fas fa-download"></i>
-                                                    </button>
-                                                {% elif evaluacion.estado == 'en_progreso' %}
-                                                    {% if can_update %}
-                                                    <button type="button" class="btn btn-sm btn-outline-success" onclick="continuarEvaluacion({{ evaluacion.id }})" title="Continuar">
-                                                        <i class="fas fa-play"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="cancelarEvaluacion({{ evaluacion.id }})" title="Cancelar">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                    {% endif %}
-                                                {% endif %}
-                                                <button type="button" class="btn btn-sm btn-outline-info" onclick="verDetalles({{ evaluacion.id }})" title="Ver Detalles">
-                                                    <i class="fas fa-info-circle"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+    <!-- ── PROFILE HERO ──────────────────────────────────────── -->
+    <div class="sp-profile-hero">
+        <div class="d-flex align-items-start gap-3 flex-wrap">
+            <div class="sp-profile-avatar">{{ perfil.iniciales }}</div>
+            <div class="flex-fill">
+                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                    <div class="sp-profile-name">{{ perfil.nombre_completo }}</div>
+                    {% if nivel_riesgo_calculado == 'muy_alto' %}
+                        <span class="sp-badge sp-badge-muy-alto"><i class="fas fa-exclamation-triangle"></i> Riesgo Muy Alto</span>
+                    {% elif nivel_riesgo_calculado == 'alto' %}
+                        <span class="sp-badge sp-badge-alto"><i class="fas fa-exclamation"></i> Riesgo Alto</span>
+                    {% elif nivel_riesgo_calculado == 'medio' %}
+                        <span class="sp-badge sp-badge-medio"><i class="fas fa-minus-circle"></i> Riesgo Medio</span>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">No hay evaluaciones registradas para este perfil.</p>
-                            {% if can_create %}
-                            <button class="btn btn-primary" onclick="nuevaEvaluacion({{ perfil.pk }})">
-                                <i class="fas fa-plus me-2"></i>Crear Primera Evaluación
-                            </button>
-                            {% endif %}
-                        </div>
+                        <span class="sp-badge sp-badge-bajo"><i class="fas fa-check-circle"></i> Riesgo Bajo</span>
+                    {% endif %}
+                    <span class="sp-badge sp-badge-{{ perfil.estado_perfil }}">{{ perfil.get_estado_perfil_display }}</span>
+                </div>
+                <div style="font-size:.82rem;color:var(--sp-text-muted);margin-bottom:.5rem">
+                    {{ perfil.get_cargo_politico_display }}{% if perfil.partido_politico %} · {{ perfil.partido_politico }}{% endif %}
+                </div>
+                <div class="d-flex flex-wrap">
+                    <span class="sp-meta-pill"><i class="fas fa-map-marker-alt"></i> {{ perfil.municipio }}, {{ perfil.departamento }}</span>
+                    <span class="sp-meta-pill"><i class="fas fa-birthday-cake"></i> {{ edad }} años</span>
+                    <span class="sp-meta-pill"><i class="fas fa-id-card"></i> {{ perfil.get_tipo_documento_display }}: {{ perfil.numero_documento }}</span>
+                    {% if promedio_riesgo %}
+                    <span class="sp-meta-pill"><i class="fas fa-chart-line"></i> Promedio: {{ promedio_riesgo|floatformat:1 }}%</span>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- ── KPI CARDS ────────────────────────────────────────── -->
+    <div class="sp-kpi-grid">
+        <div class="sp-kpi-card kpi-blue">
+            <div class="sp-kpi-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ total_evaluaciones }}</div>
+                <div class="sp-kpi-label">Total Evaluaciones</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-green">
+            <div class="sp-kpi-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ evaluaciones_completadas }}</div>
+                <div class="sp-kpi-label">Completadas</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-amber">
+            <div class="sp-kpi-icon"><i class="fas fa-clock"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ evaluaciones_pendientes }}</div>
+                <div class="sp-kpi-label">En Proceso</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-teal">
+            <div class="sp-kpi-icon"><i class="fas fa-percentage"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{% if promedio_riesgo %}{{ promedio_riesgo|floatformat:1 }}%{% else %}—{% endif %}</div>
+                <div class="sp-kpi-label">Promedio Riesgo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── BODY: tabla + sidebar ─────────────────────────────── -->
+    <div class="row g-3">
+
+        <!-- ── TABLA EVALUACIONES (col-lg-8) ───────────────── -->
+        <div class="col-lg-8">
+            <div class="sp-panel">
+                <div class="sp-panel-header">
+                    <div class="sp-panel-title">
+                        <i class="fas fa-history" style="color:var(--sp-primary)"></i>
+                        Historial de Evaluaciones
+                    </div>
+                    <span class="sp-count-badge">{{ total_evaluaciones }} evaluación{{ total_evaluaciones|pluralize:"es" }}</span>
+                </div>
+
+                {% if evaluaciones %}
+                <div class="table-responsive">
+                    <table class="sp-table">
+                        <thead>
+                            <tr>
+                                <th>Evaluación</th>
+                                <th>Fecha</th>
+                                <th>Evaluador</th>
+                                <th>Estado</th>
+                                <th>Probabilidad</th>
+                                <th>Riesgo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evaluacion in evaluaciones %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight:700;font-size:.845rem;line-height:1.3">{{ evaluacion.arbol.nombre }}</div>
+                                    {% if evaluacion.observaciones %}
+                                    <div style="font-size:.72rem;color:var(--sp-text-muted);margin-top:.2rem">{{ evaluacion.observaciones|truncatewords:6 }}</div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="font-size:.835rem">{{ evaluacion.creada_en|date:"d/m/Y" }}</div>
+                                    <div style="font-size:.72rem;color:var(--sp-text-muted)">{{ evaluacion.creada_en|date:"H:i" }}</div>
+                                </td>
+                                <td>
+                                    {% if evaluacion.evaluador_nombre %}
+                                        <span style="font-size:.835rem">{{ evaluacion.evaluador_nombre }}</span>
+                                    {% else %}
+                                        <span style="color:var(--sp-text-muted);font-size:.8rem">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if evaluacion.estado == 'completada' %}
+                                        <span class="sp-badge sp-badge-bajo"><i class="fas fa-check-circle"></i> Completada</span>
+                                    {% elif evaluacion.estado == 'en_progreso' %}
+                                        <span class="sp-badge sp-badge-alto"><i class="fas fa-clock"></i> En Progreso</span>
+                                    {% elif evaluacion.estado == 'iniciada' %}
+                                        <span class="sp-badge sp-badge-medio"><i class="fas fa-play-circle"></i> Iniciada</span>
+                                    {% elif evaluacion.estado == 'cancelada' %}
+                                        <span class="sp-badge sp-badge-inactivo"><i class="fas fa-times-circle"></i> Cancelada</span>
+                                    {% else %}
+                                        <span class="sp-badge sp-badge-inactivo">{{ evaluacion.get_estado_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if evaluacion.estado == 'completada' %}
+                                        {% with promedio=evaluacion|promedio_completo_porcentaje %}
+                                            {% if promedio %}
+                                                <div style="font-weight:700;font-size:.875rem">{{ promedio|floatformat:2 }}%</div>
+                                                <div style="font-size:.7rem;color:var(--sp-text-muted)">con geografía</div>
+                                            {% else %}
+                                                <div style="font-weight:700;font-size:.875rem">{{ evaluacion.probabilidad_total|floatformat:5 }}</div>
+                                                <div style="font-size:.7rem;color:var(--sp-text-muted)">decimal</div>
+                                            {% endif %}
+                                        {% endwith %}
+                                        {% if evaluacion.completada_en %}
+                                        <div style="font-size:.7rem;color:var(--sp-text-muted)">{{ evaluacion.completada_en|date:"d/m/Y" }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color:var(--sp-text-muted)">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if evaluacion.estado == 'completada' and evaluacion.nivel_riesgo %}
+                                        {% if evaluacion.nivel_riesgo == 'muy_alto' %}
+                                            <span class="sp-badge sp-badge-muy-alto">Muy Alto</span>
+                                        {% elif evaluacion.nivel_riesgo == 'alto' %}
+                                            <span class="sp-badge sp-badge-alto">Alto</span>
+                                        {% elif evaluacion.nivel_riesgo == 'medio' %}
+                                            <span class="sp-badge sp-badge-medio">Medio</span>
+                                        {% else %}
+                                            <span class="sp-badge sp-badge-bajo">Bajo</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color:var(--sp-text-muted)">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="sp-action-group">
+                                        <a href="{% url 'security_probabilistic:detalle_evaluacion' evaluacion.pk %}" class="sp-btn-icon sp-btn-view" title="Ver detalles">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        {% if evaluacion.estado == 'iniciada' or evaluacion.estado == 'en_progreso' %}
+                                            {% if can_update %}
+                                            <a href="{% url 'security_probabilistic:realizar_evaluacion' evaluacion.pk %}" class="sp-btn-icon sp-btn-play" title="Continuar evaluación">
+                                                <i class="fas fa-play"></i>
+                                            </a>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="sp-empty">
+                    <div class="sp-empty-icon"><i class="fas fa-clipboard-list"></i></div>
+                    <h4>Sin evaluaciones</h4>
+                    <p>Este perfil aún no tiene evaluaciones registradas.</p>
+                    {% if can_create and puede_evaluar %}
+                    <a href="{% url 'security_probabilistic:crear_evaluacion' perfil.pk %}" class="btn-sp-accent">
+                        <i class="fas fa-plus"></i> Crear Primera Evaluación
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ── SIDEBAR (col-lg-4) ─────────────────────────────── -->
+        <div class="col-lg-4">
+
+            <!-- Distribución de riesgo -->
+            {% if estadisticas_riesgo %}
+            <div class="sp-panel">
+                <div class="sp-panel-header">
+                    <div class="sp-panel-title">
+                        <i class="fas fa-chart-bar" style="color:var(--sp-primary)"></i>
+                        Distribución de Riesgo
+                    </div>
+                </div>
+                <div class="sp-panel-body">
+                    <div class="sp-risk-bar">
+                        <div class="sp-risk-bar-label">
+                            <span>Muy Alto</span>
+                            <span style="color:var(--sp-danger);font-weight:800">{{ estadisticas_riesgo.muy_alto|default:0 }}</span>
+                        </div>
+                        <div class="sp-risk-bar-track">
+                            <div class="sp-risk-bar-fill fill-danger" style="width:{% if evaluaciones_completadas %}{% widthratio estadisticas_riesgo.muy_alto|default:0 evaluaciones_completadas 100 %}%{% else %}0%{% endif %}"></div>
+                        </div>
+                    </div>
+                    <div class="sp-risk-bar">
+                        <div class="sp-risk-bar-label">
+                            <span>Alto</span>
+                            <span style="color:var(--sp-warning);font-weight:800">{{ estadisticas_riesgo.alto|default:0 }}</span>
+                        </div>
+                        <div class="sp-risk-bar-track">
+                            <div class="sp-risk-bar-fill fill-warning" style="width:{% if evaluaciones_completadas %}{% widthratio estadisticas_riesgo.alto|default:0 evaluaciones_completadas 100 %}%{% else %}0%{% endif %}"></div>
+                        </div>
+                    </div>
+                    <div class="sp-risk-bar">
+                        <div class="sp-risk-bar-label">
+                            <span>Medio</span>
+                            <span style="color:var(--sp-info);font-weight:800">{{ estadisticas_riesgo.medio|default:0 }}</span>
+                        </div>
+                        <div class="sp-risk-bar-track">
+                            <div class="sp-risk-bar-fill fill-info" style="width:{% if evaluaciones_completadas %}{% widthratio estadisticas_riesgo.medio|default:0 evaluaciones_completadas 100 %}%{% else %}0%{% endif %}"></div>
+                        </div>
+                    </div>
+                    <div class="sp-risk-bar">
+                        <div class="sp-risk-bar-label">
+                            <span>Bajo</span>
+                            <span style="color:var(--sp-success);font-weight:800">{{ estadisticas_riesgo.bajo|default:0 }}</span>
+                        </div>
+                        <div class="sp-risk-bar-track">
+                            <div class="sp-risk-bar-fill fill-success" style="width:{% if evaluaciones_completadas %}{% widthratio estadisticas_riesgo.bajo|default:0 evaluaciones_completadas 100 %}%{% else %}0%{% endif %}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+
+        </div><!-- /col-lg-4 -->
+    </div><!-- /row -->
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
-// Funciones para las acciones (reutilizando las del listado)
-function nuevaEvaluacion(perfilId) {
-    // Redirigir a la página de crear evaluación
-    window.location.href = `{% url 'security_probabilistic:crear_evaluacion' 0 %}`.replace('0', perfilId);
-}
-
-function editarPerfil(perfilId) {
-    alert(`Editar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-}
-
-function verEvaluaciones(perfilId) {
-    alert(`Ver evaluaciones del perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-}
-
-function desactivarPerfil(perfilId) {
-    if (confirm('¿Está seguro de que desea desactivar este perfil?')) {
-        alert(`Desactivar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-    }
-}
-
-function activarPerfil(perfilId) {
-    if (confirm('¿Está seguro de que desea activar este perfil?')) {
-        alert(`Activar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-    }
-}
-
-// Nuevas funciones para las acciones de la tabla de evaluaciones
-function verResultados(evaluacionId) {
-    // Redirigir a la vista de detalle de la evaluación
-    window.location.href = `{% url 'security_probabilistic:detalle_evaluacion' 0 %}`.replace('0', evaluacionId);
-}
-
-function descargarReporte(evaluacionId) {
-    alert(`Descargar reporte de la evaluación ID: ${evaluacionId}\n\n(Funcionalidad pendiente de implementar)`);
-}
-
-function continuarEvaluacion(evaluacionId) {
-    // Redirigir a continuar la evaluación
-    window.location.href = `{% url 'security_probabilistic:realizar_evaluacion' 0 %}`.replace('0', evaluacionId);
-}
-
-function cancelarEvaluacion(evaluacionId) {
-    if (confirm('¿Está seguro de que desea cancelar esta evaluación?')) {
-        alert(`Cancelar evaluación ID: ${evaluacionId}\n\n(Funcionalidad pendiente de implementar)`);
-    }
-}
-
-function verDetalles(evaluacionId) {
-    // Redirigir a la vista de detalle de la evaluación
-    window.location.href = `{% url 'security_probabilistic:detalle_evaluacion' 0 %}`.replace('0', evaluacionId);
-}
+document.addEventListener('DOMContentLoaded', function () {
+    var alerts = document.querySelectorAll('.alert.alert-success');
+    alerts.forEach(function (alert) {
+        setTimeout(function () {
+            var bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+            bsAlert.close();
+        }, 5000);
+    });
+});
 </script>
 {% endblock %}

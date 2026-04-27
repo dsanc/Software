@@ -298,6 +298,26 @@
     color: var(--accent-gold);
 }
 
+/* === ANIMATED UNDERLINE INDICATOR === */
+.nav-link-professional::after {
+    content: '';
+    position: absolute;
+    bottom: 6px;
+    left: 1.25rem;
+    right: 1.25rem;
+    height: 2px;
+    background: var(--accent-gold);
+    border-radius: 1px;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link-professional:hover::after,
+.nav-link-professional.active::after {
+    transform: scaleX(1);
+}
+
 /* === NAVBAR ACTIONS === */
 .navbar-actions {
     display: flex;
@@ -329,7 +349,25 @@
 
 .action-link:hover {
     color: var(--text-white);
+    text-decoration: none;
     transform: translateY(-2px);
+}
+
+.action-link.user-menu,
+.action-link.user-menu:hover,
+.action-link.user-menu:focus {
+    text-decoration: none !important;
+}
+
+a.action-link.dropdown-toggle,
+a.action-link.dropdown-toggle:hover,
+a.action-link.dropdown-toggle:focus,
+a.action-link.dropdown-toggle:active {
+    text-decoration: none !important;
+}
+
+.user-name {
+    text-decoration: none !important;
 }
 
 /* === CART LINK === */
@@ -369,6 +407,16 @@
     justify-content: center;
     color: white;
     margin-right: 0.5rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
 }
 
 .user-name {
@@ -449,6 +497,11 @@ button.action-link {
 .login-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.5);
+}
+
+.login-btn:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.3);
+    outline-offset: 2px;
 }
 
 .signup-btn {

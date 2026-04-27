@@ -1,0 +1,1927 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Evaluación — {{ conjunto.nombre }}</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* =============================================
+           CONFIGURACIÓN DE PÁGINA (A4)
+        ============================================= */
+        /* Páginas 2 en adelante: 10mm arriba para no pegar contenido al borde */
+        @page {
+            size: A4;
+            margin: 10mm 0 0 0;
+        }
+
+        /* Página 1: sin margen superior (el header ocupa ese espacio) */
+        @page :first {
+            margin-top: 0;
+        }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 210mm;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: #1a1a2e;
+            background: #f0f0f0;
+        }
+
+        /* =============================================
+           WRAPPER DE PÁGINA
+        ============================================= */
+        .page-wrapper {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* =============================================
+           CONTENIDO PRINCIPAL
+        ============================================= */
+        .page-content {
+            flex: 1;
+            padding: 5mm 8mm;
+            padding-bottom: 16mm;
+        }
+
+        /* =============================================
+           HEADER
+        ============================================= */
+        .pdf-header {
+            background: linear-gradient(135deg, #1e3a6e 0%, #1a3060 50%, #162a54 100%);
+            color: #ffffff;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 4px solid #e94560;
+        }
+
+        /* Marca izquierda */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-brand-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(233, 69, 96, 0.2);
+            border: 2px solid rgba(233, 69, 96, 0.55);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #e94560;
+        }
+
+        .header-brand-text h1 {
+            font-size: 10pt;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.3px;
+            color: #ffffff;
+        }
+
+        .header-brand-text span {
+            font-size: 6.5pt;
+            color: rgba(255, 255, 255, 0.65);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* Centro: nombre del conjunto */
+        .header-center {
+            flex: 1;
+            text-align: center;
+        }
+
+        .header-center h2 {
+            font-size: 11pt;
+            font-weight: 600;
+            margin: 0 0 4px;
+            color: #ffffff;
+        }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(233, 69, 96, 0.2);
+            border: 1px solid rgba(233, 69, 96, 0.5);
+            color: #ff8fa3;
+            font-size: 7.5pt;
+            padding: 2px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Meta datos derecha */
+        .header-meta {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .header-meta .meta-row {
+            font-size: 6.5pt;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .header-meta .meta-row i {
+            color: #e94560;
+            width: 9px;
+            font-size: 6pt;
+        }
+
+        .header-meta .meta-row strong {
+            color: #ffffff;
+        }
+
+        /* =============================================
+           FOOTER
+        ============================================= */
+        .pdf-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 210mm;
+            background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+            color: rgba(255, 255, 255, 0.75);
+            padding: 8px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 3px solid #e94560;
+            font-size: 7.5pt;
+            gap: 16px;
+            z-index: 100;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-left > i {
+            color: #e94560;
+            font-size: 11pt;
+            flex-shrink: 0;
+        }
+
+        .footer-left .footer-title {
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 1px;
+        }
+
+        .footer-left .footer-subtitle {
+            color: rgba(255, 255, 255, 0.55);
+            font-size: 6.5pt;
+        }
+
+        .footer-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .footer-center {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .footer-right {
+            text-align: right;
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .footer-right div {
+            margin-bottom: 1px;
+        }
+
+        .footer-right strong {
+            color: #ffffff;
+        }
+
+        /* =============================================
+           SECCIONES DE CONTENIDO
+        ============================================= */
+        .report-section {
+            margin-bottom: 10px;
+        }
+
+        .section-header-bar {
+            background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+            color: #ffffff;
+            padding: 5px 10px;
+            border-radius: 6px 6px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .section-header-icon {
+            width: 22px;
+            height: 22px;
+            background: rgba(233, 69, 96, 0.25);
+            border: 1.5px solid rgba(233, 69, 96, 0.5);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: #e94560;
+            flex-shrink: 0;
+        }
+
+        .section-header-title {
+            font-size: 7.5pt;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+        }
+
+        .section-header-sub {
+            font-size: 5.5pt;
+            color: rgba(255,255,255,0.6);
+            margin-top: 1px;
+        }
+
+        .section-badge {
+            font-size: 6pt;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: rgba(233,69,96,0.2);
+            border: 1px solid rgba(233,69,96,0.5);
+            color: #ff8fa3;
+            white-space: nowrap;
+        }
+
+        /* Tarjetas de info */
+        .info-grid {
+            display: grid;
+            gap: 0;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+        }
+
+        .info-row {
+            display: flex;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-card {
+            flex: 1;
+            padding: 4px 8px;
+            border-right: 1px solid #eeeeee;
+            background: #ffffff;
+        }
+
+        .info-card:last-child {
+            border-right: none;
+        }
+
+        .info-card-alt {
+            background: #fafbfd;
+        }
+
+        .info-label {
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .info-value {
+            font-size: 7pt;
+            font-weight: 600;
+            color: #1a1a2e;
+            line-height: 1.3;
+        }
+
+        .info-value-sm {
+            font-size: 6.5pt;
+            font-weight: 500;
+            color: #444;
+        }
+
+        /* Amenidades chips */
+        .amenity-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 6pt;
+            font-weight: 600;
+            margin: 1px 2px 1px 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .amenity-yes {
+            background: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+
+        .amenity-no {
+            background: #f5f5f5;
+            color: #9e9e9e;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* =============================================
+           SECCIÓN: RESULTADOS
+        ============================================= */
+        .results-wrapper {
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+        }
+
+        .results-top-row {
+            display: flex;
+            gap: 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        /* Gauge circular */
+        .gauge-panel {
+            flex: 0 0 30%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 12px;
+            background: #fafbfd;
+            border-right: 1px solid #e8e8e8;
+            gap: 5px;
+        }
+
+        .gauge-label {
+            font-size: 6pt;
+            font-weight: 700;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gauge-wrap {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .gauge-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .gauge-pct {
+            font-size: 12pt;
+            font-weight: 800;
+            display: block;
+        }
+
+        .gauge-sub {
+            font-size: 5.5pt;
+            color: #888;
+            display: block;
+        }
+
+        .gauge-nivel {
+            font-size: 7pt;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .nivel-bajo  { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+        .nivel-medio { background: #fff8e1; color: #e65100; border: 1px solid #ffcc80; }
+        .nivel-alto  { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+        /* Métricas grid */
+        .metrics-panel {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .metric-cell {
+            padding: 7px 10px;
+            border-right: 1px solid #eeeeee;
+            border-bottom: 1px solid #eeeeee;
+            background: #ffffff;
+        }
+
+        .metric-cell:nth-child(even) { background: #fafbfd; border-right: none; }
+        .metric-cell:nth-last-child(-n+2) { border-bottom: none; }
+
+        .metric-label {
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 3px;
+        }
+
+        .metric-value {
+            font-size: 9pt;
+            font-weight: 800;
+            color: #1a1a2e;
+            line-height: 1;
+        }
+
+        .metric-desc {
+            font-size: 6pt;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* Barras de categorías */
+        .cat-bars-panel {
+            padding: 8px 12px;
+            background: #ffffff;
+        }
+
+        .cat-bars-title {
+            font-size: 6pt;
+            font-weight: 700;
+            color: #1a1a2e;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 6px;
+        }
+
+        .cat-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .cat-bar-label {
+            flex: 0 0 100px;
+            font-size: 6.5pt;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cat-bar-track {
+            flex: 1;
+            height: 9px;
+            background: #eeeeee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .cat-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .cat-bar-pct {
+            flex: 0 0 36px;
+            font-size: 6.5pt;
+            font-weight: 700;
+            text-align: right;
+        }
+
+        .cat-nivel-badge {
+            flex: 0 0 52px;
+            font-size: 5.5pt;
+            font-weight: 700;
+            text-align: center;
+            padding: 1px 4px;
+            border-radius: 3px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* =============================================
+           SECCIÓN: ANÁLISIS IA/ML — REDISEÑO
+        ============================================= */
+        .ml-wrapper {
+            border: 1px solid #dde3ed;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+        }
+
+        /* ── Tag de subsección ── */
+        .ml-tag {
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: #e94560;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* ── BANNER EJECUTIVO ── */
+        .ml-banner {
+            display: flex;
+            align-items: stretch;
+            border-bottom: 1px solid #dde3ed;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-banner-stripe {
+            width: 5px;
+            flex-shrink: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-banner-body {
+            flex: 1;
+            padding: 8px 12px;
+            background: #ffffff;
+        }
+
+        .ml-banner-right {
+            flex: 0 0 30%;
+            padding: 8px 12px;
+            background: #f5f7fb;
+            border-left: 1px solid #dde3ed;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .ml-level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 7pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-banner-desc {
+            font-size: 6.5pt;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 3px;
+        }
+
+        .ml-banner-action {
+            font-size: 6pt;
+            color: #555;
+            line-height: 1.4;
+            padding: 4px 8px;
+            background: #f8f9fc;
+            border-left: 3px solid #1e3a6e;
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* ── STRIP KPI ── */
+        .ml-kpi-strip {
+            display: flex;
+            border-bottom: 1px solid #dde3ed;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-kpi-card {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 10px;
+            border-right: 1px solid #dde3ed;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-kpi-card:last-child { border-right: none; }
+
+        .ml-kpi-icon {
+            width: 22px;
+            height: 22px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            flex-shrink: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-kpi-data { flex: 1; }
+
+        .ml-kpi-num {
+            font-size: 9pt;
+            font-weight: 800;
+            line-height: 1;
+            display: block;
+        }
+
+        .ml-kpi-lbl {
+            font-size: 5pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #888;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* ── FILA MAIN: Tabla + Sector ── */
+        .ml-main-row {
+            display: flex;
+            border-bottom: 1px solid #dde3ed;
+        }
+
+        .ml-table-col {
+            flex: 1;
+            padding: 8px 10px;
+            background: #ffffff;
+            border-right: 1px solid #dde3ed;
+        }
+
+        .ml-sector-col {
+            flex: 0 0 36%;
+            padding: 8px 10px;
+            background: #f5f7fb;
+        }
+
+        /* Tabla recomendaciones */
+        .ml-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .ml-table thead tr {
+            background: #1e3a6e;
+            color: #ffffff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-table thead th {
+            padding: 4px 6px;
+            font-weight: 700;
+            text-align: left;
+            font-size: 5.5pt;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .ml-table tbody tr:nth-child(even) {
+            background: #f4f6fb;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-table tbody td {
+            padding: 4px 6px;
+            color: #333;
+            border-bottom: 1px solid #eeeeee;
+            vertical-align: middle;
+            font-size: 6pt;
+        }
+
+        .urgency-badge {
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 5pt;
+            font-weight: 700;
+            display: inline-block;
+            white-space: nowrap;
+            color: #fff;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        /* Sector comparativo */
+        .ml-percentil-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 3px solid #1e3a6e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: #f0f3fa;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-percentil-num {
+            font-size: 9pt;
+            font-weight: 800;
+            color: #1e3a6e;
+            line-height: 1;
+        }
+
+        .ml-percentil-lbl {
+            font-size: 4.5pt;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .ml-comp-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .ml-comp-label {
+            flex: 0 0 70px;
+            font-size: 5.5pt;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .ml-comp-track {
+            flex: 1;
+            height: 6px;
+            background: #e0e4ec;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .ml-comp-fill {
+            height: 100%;
+            border-radius: 3px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-comp-val {
+            flex: 0 0 26px;
+            font-size: 5.5pt;
+            font-weight: 700;
+            text-align: right;
+            color: #333;
+        }
+
+        /* ── FILA SECUNDARIA: Insights + Predicciones ── */
+        .ml-secondary-row {
+            display: flex;
+            border-bottom: 1px solid #dde3ed;
+        }
+
+        .ml-insights-col {
+            flex: 1;
+            padding: 8px 10px;
+            background: #ffffff;
+            border-right: 1px solid #dde3ed;
+        }
+
+        .ml-pred-col {
+            flex: 0 0 42%;
+            padding: 8px 10px;
+            background: #f5f7fb;
+        }
+
+        /* Insight cards */
+        .insight-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            overflow: hidden;
+            border: 1px solid #e8e8e8;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .insight-card:last-child { margin-bottom: 0; }
+
+        .insight-stripe {
+            width: 4px;
+            flex-shrink: 0;
+            align-self: stretch;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .insight-body {
+            flex: 1;
+            padding: 5px 8px;
+            background: #ffffff;
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 2px;
+        }
+
+        .insight-tipo-badge {
+            font-size: 4.5pt;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 2px;
+            color: #fff;
+            text-transform: uppercase;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .insight-title {
+            font-size: 6.5pt;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .insight-desc {
+            font-size: 6pt;
+            color: #555;
+            line-height: 1.4;
+        }
+
+        .insight-action {
+            font-size: 5.5pt;
+            color: #0d47a1;
+            margin-top: 2px;
+            font-style: italic;
+        }
+
+        /* Predicciones */
+        .pred-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 0;
+            border-bottom: 1px solid #e8eaf0;
+        }
+
+        .pred-row:last-child { border-bottom: none; }
+
+        .pred-periodo {
+            flex: 0 0 44px;
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: #444;
+        }
+
+        .pred-bar-track {
+            flex: 1;
+            height: 7px;
+            background: #e0e4ec;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .pred-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .pred-score {
+            flex: 0 0 26px;
+            font-size: 6.5pt;
+            font-weight: 800;
+            text-align: right;
+        }
+
+        .pred-conf {
+            flex: 0 0 34px;
+            font-size: 5pt;
+            color: #aaa;
+            text-align: right;
+        }
+
+        /* ── STRIP NOTAS DEL EVALUADOR ── */
+        .ml-notes-strip {
+            display: flex;
+            background: #f8f9fc;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .ml-note-cell {
+            flex: 1;
+            padding: 7px 10px;
+            border-right: 1px solid #dde3ed;
+        }
+
+        .ml-note-cell:last-child { border-right: none; }
+
+        .ml-note-text {
+            font-size: 6pt;
+            color: #444;
+            line-height: 1.5;
+        }
+
+        /* =============================================
+           CONTROLES DE IMPRESIÓN (no se imprimen)
+        ============================================= */
+        .no-print {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px;
+            background: #e9ecef;
+        }
+
+        @media print {
+            /* ── Ocultar controles de pantalla ── */
+            .no-print {
+                display: none !important;
+            }
+
+            /* ── Colores forzados ── */
+            .pdf-header,
+            .pdf-footer {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* ══════════════════════════════════════════════════════════
+               CONTROL DE SALTOS DE PÁGINA
+               Estrategia:
+                 1. El header de sección siempre acompaña su contenido
+                    (break-after:avoid sobre .section-header-bar)
+                 2. Las filas de info (Sección 1) no se cortan a la mitad
+                 3. Los paneles de resultados (Sección 2) se mantienen juntos
+                 4. Cada bloque del análisis IA/ML (Sección 3) no se corta
+                 5. La Sección 3 comienza siempre en página nueva porque
+                    es la más larga y garantiza mejor lectura
+               ══════════════════════════════════════════════════════════ */
+
+            /* Impide que el header de sección quede solo al pie de página */
+            .section-header-bar {
+                break-after: avoid;
+                page-break-after: avoid;
+            }
+
+            /* ── Sección 1: filas de información ── */
+            .info-row {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* ── Sección 2: paneles de resultados ── */
+            .results-top-row,
+            .gauge-panel,
+            .metrics-panel,
+            .cat-bars-panel,
+            .cat-bar-row {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* ── Sección 3: Análisis IA/ML ──
+               Fuerza inicio en página nueva para evitar
+               que quede partido con el contenido previo */
+            .report-section:last-of-type {
+                break-before: page;
+                page-break-before: always;
+            }
+
+            /* Cada bloque principal no se corta internamente */
+            .ml-banner,
+            .ml-kpi-strip,
+            .ml-main-row,
+            .ml-secondary-row,
+            .ml-notes-strip {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Filas de la tabla de recomendaciones */
+            .ml-table tbody tr {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Cards de insight individualmente */
+            .insight-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            /* Filas de predicción */
+            .pred-row {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== CONTROLES (solo pantalla) ==================== -->
+    <div class="no-print">
+        <button class="btn btn-sm btn-dark" onclick="window.print()">
+            <i class="fas fa-print me-1"></i>Imprimir / Guardar PDF
+        </button>
+        <button class="btn btn-sm btn-outline-secondary" onclick="window.close()">
+            <i class="fas fa-times me-1"></i>Cerrar
+        </button>
+    </div>
+
+    <!-- ==================== PÁGINA ==================== -->
+    <div class="page-wrapper">
+
+        <!-- ==================== HEADER ==================== -->
+        <header class="pdf-header">
+
+            <!-- Marca izquierda -->
+            <div class="header-brand">
+                <div class="header-brand-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div class="header-brand-text">
+                    <h1>Risk Manager</h1>
+                    <span>Gestión de Riesgo — Conjuntos</span>
+                </div>
+            </div>
+
+            <!-- Centro: nombre del conjunto -->
+            <div class="header-center">
+                <h2>{{ conjunto.nombre }}</h2>
+                <span class="header-badge">
+                    <i class="fas fa-file-chart-bar me-1"></i>Reporte de Evaluación de Riesgo
+                </span>
+            </div>
+
+            <!-- Meta datos derecha -->
+            <div class="header-meta">
+                <div class="meta-row">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Evaluación:&nbsp;<strong>{{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</strong></span>
+                </div>
+                <div class="meta-row">
+                    <i class="fas fa-clock"></i>
+                    <span>Generado:&nbsp;<strong>{{ fecha_generacion|date:"d/m/Y H:i" }}</strong></span>
+                </div>
+                <div class="meta-row">
+                    <i class="fas fa-user"></i>
+                    <span>Por:&nbsp;<strong>{{ usuario_generador.get_full_name|default:usuario_generador.username|truncatechars:20 }}</strong></span>
+                </div>
+            </div>
+
+        </header>
+        <!-- ==================== /HEADER ==================== -->
+
+
+        <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+        <main class="page-content">
+
+            <!-- ==================== SECCIÓN: DATOS DEL CONJUNTO ==================== -->
+            <section class="report-section">
+
+                <div class="section-header-bar">
+                    <div class="section-header-left">
+                        <div class="section-header-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <div class="section-header-title">Información del Conjunto Residencial</div>
+                            <div class="section-header-sub">Datos generales, ubicación, administración y características</div>
+                        </div>
+                    </div>
+                    <span class="section-badge">
+                        <i class="fas fa-check-circle me-1"></i>{{ evaluacion.get_estado_display }}
+                    </span>
+                </div>
+
+                <div class="info-grid">
+
+                    <!-- Fila 1: Identificación -->
+                    <div class="info-row">
+                        <div class="info-card" style="flex:2;">
+                            <div class="info-label"><i class="fas fa-building"></i>Nombre del Conjunto</div>
+                            <div class="info-value">{{ conjunto.nombre }}</div>
+                        </div>
+                        <div class="info-card info-card-alt">
+                            <div class="info-label"><i class="fas fa-id-card"></i>NIT</div>
+                            <div class="info-value">{{ conjunto.nit }}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-tag"></i>Tipo</div>
+                            <div class="info-value">{{ conjunto.tipo_conjunto }}</div>
+                        </div>
+                        <div class="info-card info-card-alt">
+                            <div class="info-label"><i class="fas fa-calendar-plus"></i>Registrado</div>
+                            <div class="info-value">{{ conjunto.fecha_creacion|date:"d/m/Y" }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 2: Ubicación -->
+                    <div class="info-row">
+                        <div class="info-card" style="flex:2;">
+                            <div class="info-label"><i class="fas fa-map-marker-alt"></i>Dirección</div>
+                            <div class="info-value-sm">{{ conjunto.direccion }}</div>
+                        </div>
+                        <div class="info-card info-card-alt">
+                            <div class="info-label"><i class="fas fa-city"></i>Ciudad</div>
+                            <div class="info-value">{{ conjunto.ciudad }}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-map"></i>Departamento</div>
+                            <div class="info-value">{{ conjunto.departamento }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Características físicas -->
+                    <div class="info-row">
+                        <div class="info-card info-card-alt">
+                            <div class="info-label"><i class="fas fa-home"></i>Unidades</div>
+                            <div class="info-value">{{ conjunto.numero_unidades }}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-layer-group"></i>Torres / Bloques</div>
+                            <div class="info-value">{{ conjunto.numero_torres }}</div>
+                        </div>
+                        <div class="info-card info-card-alt" style="flex:3;">
+                            <div class="info-label"><i class="fas fa-star"></i>Amenidades</div>
+                            <div style="margin-top:1px;">
+                                <span class="amenity-chip {% if conjunto.tiene_piscina %}amenity-yes{% else %}amenity-no{% endif %}">
+                                    <i class="fas fa-swimming-pool"></i>Piscina
+                                </span>
+                                <span class="amenity-chip {% if conjunto.tiene_gimnasio %}amenity-yes{% else %}amenity-no{% endif %}">
+                                    <i class="fas fa-dumbbell"></i>Gimnasio
+                                </span>
+                                <span class="amenity-chip {% if conjunto.tiene_salon_social %}amenity-yes{% else %}amenity-no{% endif %}">
+                                    <i class="fas fa-users"></i>Salón Social
+                                </span>
+                                <span class="amenity-chip {% if conjunto.tiene_juegos_infantiles %}amenity-yes{% else %}amenity-no{% endif %}">
+                                    <i class="fas fa-child"></i>Juegos Infantiles
+                                </span>
+                                <span class="amenity-chip {% if conjunto.tiene_canchas_deportivas %}amenity-yes{% else %}amenity-no{% endif %}">
+                                    <i class="fas fa-futbol"></i>Canchas
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 4: Administración -->
+                    <div class="info-row">
+                        <div class="info-card info-card-alt" style="flex:2;">
+                            <div class="info-label"><i class="fas fa-user-tie"></i>Administrador</div>
+                            <div class="info-value">{{ conjunto.administrador_nombre|default:"No registrado" }}</div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-label"><i class="fas fa-phone"></i>Teléfono</div>
+                            <div class="info-value-sm">{{ conjunto.administrador_telefono|default:"—" }}</div>
+                        </div>
+                        <div class="info-card info-card-alt" style="flex:2;">
+                            <div class="info-label"><i class="fas fa-envelope"></i>Correo</div>
+                            <div class="info-value-sm">{{ conjunto.administrador_email|default:"—" }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 5: Datos de la evaluación -->
+                    <div class="info-row" style="background:#f4f6fb; -webkit-print-color-adjust:exact; print-color-adjust:exact;">
+                        <div class="info-card" style="background:#f4f6fb;">
+                            <div class="info-label"><i class="fas fa-clipboard-list"></i>Tipo de Evaluación</div>
+                            <div class="info-value">{{ evaluacion.get_tipo_evaluacion_display }}</div>
+                        </div>
+                        <div class="info-card" style="background:#f4f6fb;">
+                            <div class="info-label"><i class="fas fa-calendar-alt"></i>Fecha Evaluación</div>
+                            <div class="info-value">{{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</div>
+                        </div>
+                        <div class="info-card" style="background:#f4f6fb;">
+                            <div class="info-label"><i class="fas fa-calendar-check"></i>Fecha Completado</div>
+                            <div class="info-value">{{ evaluacion.fecha_completado|date:"d/m/Y"|default:"—" }}</div>
+                        </div>
+                        <div class="info-card" style="background:#f4f6fb;">
+                            <div class="info-label"><i class="fas fa-user"></i>Evaluador</div>
+                            <div class="info-value">{{ evaluacion.creado_por.get_full_name|default:evaluacion.creado_por.username|default:"—"|truncatechars:22 }}</div>
+                        </div>
+                        <div class="info-card" style="background:#f4f6fb;">
+                            <div class="info-label"><i class="fas fa-clock"></i>Duración</div>
+                            <div class="info-value">
+                                {% if evaluacion.tiempo_evaluacion_minutos %}
+                                    {{ evaluacion.tiempo_evaluacion_minutos }} min
+                                {% else %}—{% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /info-grid -->
+
+            </section>
+            <!-- ==================== /SECCIÓN: DATOS DEL CONJUNTO ==================== -->
+
+            <!-- ==================== SECCIÓN: RESULTADOS DE LA EVALUACIÓN ==================== -->
+            <section class="report-section">
+
+                <div class="section-header-bar">
+                    <div class="section-header-left">
+                        <div class="section-header-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <div class="section-header-title">Resultados de la Evaluación de Riesgo</div>
+                            <div class="section-header-sub">Índice de riesgo general y desglose por categoría</div>
+                        </div>
+                    </div>
+                    <span class="section-badge">
+                        {% with nivel=evaluacion.get_nivel_riesgo %}
+                            {% if nivel == 'bajo' %}&#x2714; Riesgo Bajo
+                            {% elif nivel == 'medio' %}&#x26A0; Riesgo Moderado
+                            {% elif nivel == 'alto' %}&#x26D4; Riesgo Alto
+                            {% else %}&#x2014; Sin evaluar
+                            {% endif %}
+                        {% endwith %}
+                    </span>
+                </div>
+
+                <div class="results-wrapper">
+
+                    <!-- Fila superior: gauge + métricas -->
+                    <div class="results-top-row">
+
+                        <!-- Gauge circular -->
+                        <div class="gauge-panel">
+                            <div class="gauge-label"><i class="fas fa-tachometer-alt me-1"></i>Índice de Riesgo</div>
+                            <div class="gauge-wrap">
+                                {% with pct=evaluacion.get_promedio_porcentaje %}
+                                <svg width="80" height="80" viewBox="0 0 100 100"
+                                    style="position:absolute;top:0;left:0;transform:rotate(-90deg);">
+                                    <circle cx="50" cy="50" r="38" fill="none" stroke="#eeeeee" stroke-width="10"
+                                        style="-webkit-print-color-adjust:exact; print-color-adjust:exact;"/>
+                                    <circle cx="50" cy="50" r="38" fill="none" stroke-width="10" stroke-linecap="round"
+                                        stroke-dasharray="238.76"
+                                        stroke-dashoffset="{% if pct <= 10 %}214{% elif pct <= 20 %}191{% elif pct <= 30 %}167{% elif pct <= 40 %}143{% elif pct <= 50 %}119{% elif pct <= 60 %}95{% elif pct <= 70 %}72{% elif pct <= 80 %}48{% elif pct <= 90 %}24{% else %}0{% endif %}"
+                                        style="stroke:{% if pct <= 30 %}#28a745{% elif pct <= 60 %}#ffc107{% else %}#dc3545{% endif %};
+                                               -webkit-print-color-adjust:exact; print-color-adjust:exact;"/>
+                                </svg>
+                                <div class="gauge-inner">
+                                    <span class="gauge-pct"
+                                        style="color:{% if pct <= 30 %}#2e7d32{% elif pct <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                        {{ pct|floatformat:1 }}%
+                                    </span>
+                                    <span class="gauge-sub">riesgo</span>
+                                </div>
+                                {% endwith %}
+                            </div>
+                            <span class="gauge-nivel nivel-{{ evaluacion.get_nivel_riesgo }}">
+                                {{ evaluacion.get_texto_nivel_riesgo }}
+                            </span>
+                        </div>
+
+                        <!-- Métricas -->
+                        <div class="metrics-panel">
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-percentage me-1"></i>Promedio General</div>
+                                <div class="metric-value"
+                                    style="color:{% if evaluacion.get_promedio_porcentaje <= 30 %}#2e7d32{% elif evaluacion.get_promedio_porcentaje <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ evaluacion.get_promedio_porcentaje|floatformat:1 }}%
+                                </div>
+                                <div class="metric-desc">Índice ponderado de riesgo</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-shield-alt me-1"></i>Nivel de Riesgo</div>
+                                <div class="metric-value"
+                                    style="color:{% if evaluacion.get_nivel_riesgo == 'bajo' %}#2e7d32{% elif evaluacion.get_nivel_riesgo == 'medio' %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ evaluacion.get_texto_nivel_riesgo }}
+                                </div>
+                                <div class="metric-desc">Clasificación del sistema</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-layer-group me-1"></i>Categorías</div>
+                                <div class="metric-value" style="color:#1a1a2e;">
+                                    {{ datos_evaluacion.estadisticas.total_categorias }}
+                                </div>
+                                <div class="metric-desc">Áreas evaluadas</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-signal me-1"></i>Confianza IA</div>
+                                <div class="metric-value" style="color:#0d47a1;">
+                                    {{ analisis_ia.confianza_analisis.porcentaje }}%
+                                </div>
+                                <div class="metric-desc">{{ analisis_ia.confianza_analisis.nivel }}</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-calendar-alt me-1"></i>Fecha Evaluación</div>
+                                <div class="metric-value" style="color:#1a1a2e; font-size:7.5pt;">
+                                    {{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}
+                                </div>
+                                <div class="metric-desc">{{ evaluacion.get_tipo_evaluacion_display }}</div>
+                            </div>
+                            <div class="metric-cell">
+                                <div class="metric-label"><i class="fas fa-flag me-1"></i>Estado</div>
+                                <div class="metric-value" style="color:#1a1a2e; font-size:7.5pt;">
+                                    {{ evaluacion.get_estado_display }}
+                                </div>
+                                <div class="metric-desc">
+                                    {% if evaluacion.fecha_completado %}Completado {{ evaluacion.fecha_completado|date:"d/m/Y" }}{% else %}En proceso{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /results-top-row -->
+
+                    <!-- Barras por categoría -->
+                    {% if datos_evaluacion.respuestas_por_riesgo %}
+                    <div class="cat-bars-panel">
+                        <div class="cat-bars-title">
+                            <i class="fas fa-chart-bar me-1" style="color:#e94560;"></i>
+                            Desglose de Riesgo por Categoría
+                        </div>
+                        {% for nombre, cat in datos_evaluacion.respuestas_por_riesgo.items %}
+                        <div class="cat-bar-row">
+                            <div class="cat-bar-label">{{ nombre }}</div>
+                            <div class="cat-bar-track">
+                                <div class="cat-bar-fill"
+                                    style="width:{{ cat.porcentaje_riesgo|floatformat:0 }}%;
+                                    background-color:{% if cat.porcentaje_riesgo <= 30 %}#28a745{% elif cat.porcentaje_riesgo <= 60 %}#ffc107{% else %}#dc3545{% endif %};"></div>
+                            </div>
+                            <div class="cat-bar-pct"
+                                style="color:{% if cat.porcentaje_riesgo <= 30 %}#2e7d32{% elif cat.porcentaje_riesgo <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                {{ cat.porcentaje_riesgo|floatformat:1 }}%
+                            </div>
+                            <div class="cat-nivel-badge"
+                                style="{% if cat.porcentaje_riesgo <= 30 %}background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;
+                                {% elif cat.porcentaje_riesgo <= 60 %}background:#fff8e1;color:#e65100;border:1px solid #ffcc80;
+                                {% else %}background:#ffebee;color:#c62828;border:1px solid #ef9a9a;{% endif %}">
+                                {% if cat.porcentaje_riesgo <= 30 %}Bajo
+                                {% elif cat.porcentaje_riesgo <= 60 %}Moderado
+                                {% else %}Alto{% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Descripción del nivel -->
+                    <div style="padding:6px 12px; background:#f8f9fc; border-top:1px solid #eeeeee;">
+                        <div style="font-size:6pt; font-weight:700; color:#e94560; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:3px;">
+                            <i class="fas fa-info-circle me-1"></i>Interpretación del Resultado
+                        </div>
+                        <div style="font-size:6.5pt; color:#444; line-height:1.5;">
+                            {{ evaluacion.get_descripcion_riesgo }}
+                            {% if analisis_ia.resumen_ejecutivo.accion_principal_recomendada %}
+                            &nbsp;&mdash;&nbsp;<strong>Acción:</strong> {{ analisis_ia.resumen_ejecutivo.accion_principal_recomendada }}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div><!-- /results-wrapper -->
+
+            </section>
+            <!-- ==================== /SECCIÓN: RESULTADOS DE LA EVALUACIÓN ==================== -->
+
+            <!-- ==================== SECCIÓN: ANÁLISIS IA/ML ==================== -->
+            <section class="report-section">
+
+                <div class="section-header-bar">
+                    <div class="section-header-left">
+                        <div class="section-header-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <div>
+                            <div class="section-header-title">Análisis Predictivo IA/ML y Recomendaciones</div>
+                            <div class="section-header-sub">Motor de análisis autom. v{{ analisis_ia.metadata.version_algoritmo|default:"2.0" }} &mdash; ISO 31000 &mdash; Generado el {{ fecha_generacion|date:"d/m/Y" }}</div>
+                        </div>
+                    </div>
+                    <span class="section-badge">
+                        <i class="fas fa-shield-alt me-1"></i>Confianza {{ analisis_ia.confianza_analisis.porcentaje }}%
+                    </span>
+                </div>
+
+                <div class="ml-wrapper">
+
+                    <!-- ══════════════════════════════════════════════════════
+                         BLOQUE A: BANNER DIAGNÓSTICO EJECUTIVO
+                    ═══════════════════════════════════════════════════════ -->
+                    <div class="ml-banner">
+
+                        <!-- Franja de color lateral según nivel -->
+                        <div class="ml-banner-stripe"
+                            style="background:
+                                {% if analisis_ia.resumen_ejecutivo.nivel_general == 'CRÍTICO' %}#c62828
+                                {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'MODERADO' %}#e65100
+                                {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'BUENO' %}#0d47a1
+                                {% else %}#2e7d32{% endif %};"></div>
+
+                        <!-- Diagnóstico principal -->
+                        <div class="ml-banner-body">
+                            <div class="ml-tag"><i class="fas fa-microchip"></i> Diagnóstico Ejecutivo — Motor IA</div>
+
+                            <!-- Badge de nivel -->
+                            <div class="ml-level-badge"
+                                style="background:
+                                    {% if analisis_ia.resumen_ejecutivo.nivel_general == 'CRÍTICO' %}#ffebee; color:#c62828; border:1px solid #ef9a9a;
+                                    {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'MODERADO' %}#fff3e0; color:#e65100; border:1px solid #ffcc80;
+                                    {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'BUENO' %}#e3f2fd; color:#0d47a1; border:1px solid #90caf9;
+                                    {% else %}#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7;{% endif %}">
+                                <i class="fas
+                                    {% if analisis_ia.resumen_ejecutivo.nivel_general == 'CRÍTICO' %}fa-exclamation-triangle
+                                    {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'MODERADO' %}fa-exclamation-circle
+                                    {% elif analisis_ia.resumen_ejecutivo.nivel_general == 'BUENO' %}fa-check-circle
+                                    {% else %}fa-shield-alt{% endif %}"></i>
+                                Nivel {{ analisis_ia.resumen_ejecutivo.nivel_general }}
+                                &mdash; {{ analisis_ia.resumen_ejecutivo.descripcion_situacion }}
+                            </div>
+
+                            <!-- Acción principal -->
+                            <div class="ml-banner-action">
+                                <strong>Acción principal:</strong> {{ analisis_ia.resumen_ejecutivo.accion_principal_recomendada }}
+                            </div>
+                        </div>
+
+                        <!-- Panel derecho: confianza + próx. evaluación -->
+                        <div class="ml-banner-right">
+                            <div class="ml-tag"><i class="fas fa-tachometer-alt"></i> Estado del análisis</div>
+
+                            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                                <!-- Indicador confianza -->
+                                <div style="flex:1;">
+                                    <div style="font-size:5.5pt; color:#888; margin-bottom:2px; font-weight:600; text-transform:uppercase;">Confianza del análisis</div>
+                                    <div style="background:#e0e4ec; border-radius:3px; overflow:hidden; height:7px;">
+                                        <div style="width:{{ analisis_ia.confianza_analisis.porcentaje }}%; height:100%;
+                                            background:{% if analisis_ia.confianza_analisis.porcentaje >= 80 %}#2e7d32{% elif analisis_ia.confianza_analisis.porcentaje >= 60 %}#0d47a1{% else %}#e65100{% endif %};
+                                            -webkit-print-color-adjust:exact; print-color-adjust:exact;"></div>
+                                    </div>
+                                    <div style="font-size:6pt; font-weight:800; color:#1a1a2e; margin-top:1px;">{{ analisis_ia.confianza_analisis.porcentaje }}% — {{ analisis_ia.confianza_analisis.nivel }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Próxima evaluación -->
+                            <div style="padding:4px 7px; background:#eef1fa; border-radius:4px; border-left:3px solid #1e3a6e;">
+                                <div style="font-size:5pt; font-weight:700; color:#e94560; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:1px;">
+                                    <i class="fas fa-calendar-check me-1"></i>Próxima evaluación
+                                </div>
+                                <div style="font-size:6.5pt; font-weight:700; color:#1a1a2e;">
+                                    {{ analisis_ia.proxima_evaluacion.fecha_sugerida }}
+                                </div>
+                                <div style="font-size:5.5pt; color:#666; margin-top:1px;">
+                                    {{ analisis_ia.proxima_evaluacion.dias_desde_hoy }} días &mdash; {{ analisis_ia.proxima_evaluacion.urgencia }}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /ml-banner -->
+
+                    <!-- ══════════════════════════════════════════════════════
+                         BLOQUE B: KPI STRIP (4 indicadores clave)
+                    ═══════════════════════════════════════════════════════ -->
+                    <div class="ml-kpi-strip">
+
+                        <!-- KPI 1: Score de riesgo -->
+                        <div class="ml-kpi-card"
+                            style="background:
+                                {% if analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 30 %}#f1fbf4
+                                {% elif analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 60 %}#fffbf0
+                                {% else %}#fff5f5{% endif %};">
+                            <div class="ml-kpi-icon"
+                                style="background:
+                                    {% if analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 30 %}#e8f5e9; color:#2e7d32;
+                                    {% elif analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 60 %}#fff8e1; color:#f57f17;
+                                    {% else %}#ffebee; color:#c62828;{% endif %}">
+                                <i class="fas fa-percent"></i>
+                            </div>
+                            <div class="ml-kpi-data">
+                                <span class="ml-kpi-num"
+                                    style="color:
+                                        {% if analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 30 %}#2e7d32
+                                        {% elif analisis_ia.resumen_ejecutivo.porcentaje_riesgo <= 60 %}#f57f17
+                                        {% else %}#c62828{% endif %}">
+                                    {{ analisis_ia.resumen_ejecutivo.porcentaje_riesgo|floatformat:1 }}%
+                                </span>
+                                <span class="ml-kpi-lbl">Score de riesgo</span>
+                            </div>
+                        </div>
+
+                        <!-- KPI 2: Tendencia histórica -->
+                        <div class="ml-kpi-card" style="background:#fafbff;">
+                            <div class="ml-kpi-icon" style="background:#e3f2fd; color:#0d47a1;">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="ml-kpi-data">
+                                <span class="ml-kpi-num" style="color:#0d47a1;">{{ analisis_ia.tendencias_historicas.tendencia_general }}</span>
+                                <span class="ml-kpi-lbl">Tendencia histórica</span>
+                            </div>
+                        </div>
+
+                        <!-- KPI 3: Clasificación sectorial -->
+                        <div class="ml-kpi-card" style="background:#fdfaff;">
+                            <div class="ml-kpi-icon" style="background:#f3e5f5; color:#6a1b9a;">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="ml-kpi-data">
+                                <span class="ml-kpi-num" style="color:#6a1b9a;">{{ analisis_ia.analisis_comparativo.clasificacion }}</span>
+                                <span class="ml-kpi-lbl">Clasificación sector</span>
+                            </div>
+                        </div>
+
+                        <!-- KPI 4: Categorías analizadas -->
+                        <div class="ml-kpi-card" style="background:#f9fbff;">
+                            <div class="ml-kpi-icon" style="background:#e8eaf6; color:#283593;">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="ml-kpi-data">
+                                <span class="ml-kpi-num" style="color:#283593;">{{ analisis_ia.resumen_ejecutivo.total_categorias_analizadas }}</span>
+                                <span class="ml-kpi-lbl">Categorías evaluadas</span>
+                            </div>
+                        </div>
+
+                    </div><!-- /ml-kpi-strip -->
+
+                    <!-- ══════════════════════════════════════════════════════
+                         BLOQUE C: RECOMENDACIONES ML + COMPARATIVO SECTORIAL
+                    ═══════════════════════════════════════════════════════ -->
+                    <div class="ml-main-row">
+
+                        <!-- Tabla de recomendaciones (izquierda) -->
+                        <div class="ml-table-col">
+                            <div class="ml-tag"><i class="fas fa-tasks"></i> Plan de Acción — Recomendaciones Generadas por ML</div>
+                            {% if analisis_ia.recomendaciones_ml %}
+                            <table class="ml-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:16%;">Categoría</th>
+                                        <th style="width:10%; text-align:center;">Urgencia</th>
+                                        <th style="width:36%;">Intervención</th>
+                                        <th style="width:12%; text-align:center;">Plazo</th>
+                                        <th style="width:14%; text-align:center;">Impacto</th>
+                                        <th style="width:12%; text-align:center;">Costo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for rec in analisis_ia.recomendaciones_ml %}
+                                <tr>
+                                    <td style="font-weight:700; color:#1a1a2e; font-size:5.5pt;">{{ rec.categoria }}</td>
+                                    <td style="text-align:center;">
+                                        {% if rec.urgencia == 'Alta' %}
+                                            <span class="urgency-badge" style="background:#c62828;"><i class="fas fa-circle-exclamation me-1"></i>Alta</span>
+                                        {% elif rec.urgencia == 'Media' %}
+                                            <span class="urgency-badge" style="background:#e65100;">Media</span>
+                                        {% else %}
+                                            <span class="urgency-badge" style="background:#0d47a1;">Baja</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ rec.descripcion }}</td>
+                                    <td style="text-align:center; font-weight:700; color:#555;">{{ rec.tiempo_estimado }}</td>
+                                    <td style="text-align:center;">
+                                        <div style="background:#e0e4ec; border-radius:3px; overflow:hidden; height:6px; margin-bottom:1px;">
+                                            <div style="width:{{ rec.score_impacto }}%; height:100%;
+                                                background:{% if rec.score_impacto >= 80 %}#2e7d32{% elif rec.score_impacto >= 60 %}#f9a825{% else %}#90a4ae{% endif %};
+                                                -webkit-print-color-adjust:exact; print-color-adjust:exact;"></div>
+                                        </div>
+                                        <div style="font-size:5pt; color:#777;">{{ rec.score_impacto }}%</div>
+                                    </td>
+                                    <td style="text-align:center; font-weight:700;
+                                        {% if rec.costo_estimado == 'Alto' %}color:#c62828;
+                                        {% elif rec.costo_estimado == 'Medio' %}color:#e65100;
+                                        {% else %}color:#2e7d32;{% endif %}">
+                                        {{ rec.costo_estimado }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <div style="font-size:6.5pt; color:#999; padding:8px 0;">No se generaron recomendaciones automáticas.</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Comparativo sectorial (derecha) -->
+                        <div class="ml-sector-col">
+                            <div class="ml-tag"><i class="fas fa-chart-bar"></i> Comparativo Sectorial</div>
+
+                            <!-- Percentil + Clasificación -->
+                            <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+                                <div class="ml-percentil-circle">
+                                    <div class="ml-percentil-num">{{ analisis_ia.analisis_comparativo.percentil_sector }}°</div>
+                                    <div class="ml-percentil-lbl">Percentil</div>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:7pt; font-weight:700; color:#1a1a2e;">{{ analisis_ia.analisis_comparativo.clasificacion }}</div>
+                                    <div style="font-size:5.5pt; color:#666; line-height:1.4; margin-top:1px;">
+                                        Diferencia vs promedio:
+                                        <strong style="color:{% if analisis_ia.analisis_comparativo.diferencia_vs_promedio < 0 %}#2e7d32{% else %}#c62828{% endif %}">
+                                            {% if analisis_ia.analisis_comparativo.diferencia_vs_promedio < 0 %}&minus;{% else %}+{% endif %}{{ analisis_ia.analisis_comparativo.diferencia_vs_promedio|floatformat:1 }} pts
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Barras benchmark -->
+                            <div class="ml-comp-bar-row">
+                                <div class="ml-comp-label">Este conjunto</div>
+                                <div class="ml-comp-track">
+                                    <div class="ml-comp-fill" style="width:{{ analisis_ia.resumen_ejecutivo.porcentaje_riesgo|floatformat:0 }}%; background:#e94560;"></div>
+                                </div>
+                                <div class="ml-comp-val" style="color:#e94560;">{{ analisis_ia.resumen_ejecutivo.porcentaje_riesgo|floatformat:1 }}%</div>
+                            </div>
+                            <div class="ml-comp-bar-row">
+                                <div class="ml-comp-label">Promedio sector</div>
+                                <div class="ml-comp-track">
+                                    <div class="ml-comp-fill" style="width:{{ analisis_ia.analisis_comparativo.benchmarks.promedio_sector|floatformat:0 }}%; background:#78909c;"></div>
+                                </div>
+                                <div class="ml-comp-val">{{ analisis_ia.analisis_comparativo.benchmarks.promedio_sector }}%</div>
+                            </div>
+                            <div class="ml-comp-bar-row">
+                                <div class="ml-comp-label">Mejor sector</div>
+                                <div class="ml-comp-track">
+                                    <div class="ml-comp-fill" style="width:{{ analisis_ia.analisis_comparativo.benchmarks.mejor_sector|floatformat:0 }}%; background:#43a047;"></div>
+                                </div>
+                                <div class="ml-comp-val" style="color:#2e7d32;">{{ analisis_ia.analisis_comparativo.benchmarks.mejor_sector }}%</div>
+                            </div>
+                            <div class="ml-comp-bar-row">
+                                <div class="ml-comp-label">Peor sector</div>
+                                <div class="ml-comp-track">
+                                    <div class="ml-comp-fill" style="width:{{ analisis_ia.analisis_comparativo.benchmarks.peor_sector|floatformat:0 }}%; background:#ef9a9a;"></div>
+                                </div>
+                                <div class="ml-comp-val" style="color:#c62828;">{{ analisis_ia.analisis_comparativo.benchmarks.peor_sector }}%</div>
+                            </div>
+
+                            <!-- Interpretación -->
+                            <div style="margin-top:6px; padding:4px 7px; background:#eef1fa; border-radius:3px; font-size:5.5pt; color:#555; font-style:italic; line-height:1.4;">
+                                {{ analisis_ia.analisis_comparativo.interpretacion }}
+                            </div>
+                        </div>
+
+                    </div><!-- /ml-main-row -->
+
+                    <!-- ══════════════════════════════════════════════════════
+                         BLOQUE D: INSIGHTS DETECTADOS + PREDICCIONES FUTURAS
+                    ═══════════════════════════════════════════════════════ -->
+                    <div class="ml-secondary-row">
+
+                        <!-- Insights (izquierda) -->
+                        <div class="ml-insights-col">
+                            <div class="ml-tag" style="margin-bottom:6px;"><i class="fas fa-lightbulb"></i> Insights Detectados Automáticamente</div>
+
+                            {% for insight in analisis_ia.insights_ia %}
+                            <div class="insight-card">
+                                <!-- Franja de color -->
+                                <div class="insight-stripe"
+                                    style="background:
+                                        {% if insight.tipo == 'Alerta Crítica' %}#c62828
+                                        {% elif insight.tipo == 'Patrón Detectado' %}#0d47a1
+                                        {% elif insight.tipo == 'Área Crítica' %}#e65100
+                                        {% else %}#2e7d32{% endif %};"></div>
+                                <div class="insight-body">
+                                    <div class="insight-header">
+                                        <span class="insight-tipo-badge"
+                                            style="background:
+                                                {% if insight.tipo == 'Alerta Crítica' %}#c62828
+                                                {% elif insight.tipo == 'Patrón Detectado' %}#0d47a1
+                                                {% elif insight.tipo == 'Área Crítica' %}#e65100
+                                                {% else %}#2e7d32{% endif %};">
+                                            {% if insight.tipo == 'Alerta Crítica' %}<i class="fas fa-exclamation-triangle me-1"></i>
+                                            {% elif insight.tipo == 'Patrón Detectado' %}<i class="fas fa-chart-line me-1"></i>
+                                            {% elif insight.tipo == 'Área Crítica' %}<i class="fas fa-bullseye me-1"></i>
+                                            {% else %}<i class="fas fa-check-circle me-1"></i>{% endif %}
+                                            {{ insight.tipo }}
+                                        </span>
+                                        <span class="insight-title">{{ insight.titulo }}</span>
+                                    </div>
+                                    <div class="insight-desc">{{ insight.descripcion }}</div>
+                                    {% if insight.accion_sugerida %}
+                                    <div class="insight-action"><i class="fas fa-arrow-right me-1"></i>{{ insight.accion_sugerida }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% empty %}
+                            <div style="font-size:6.5pt; color:#bbb; padding:6px 0; text-align:center;">Sin alertas adicionales detectadas.</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Predicciones futuras (derecha) -->
+                        <div class="ml-pred-col">
+                            <div class="ml-tag" style="margin-bottom:6px;"><i class="fas fa-chart-area"></i> Proyección de Riesgo Futuro</div>
+
+                            {% with p=analisis_ia.predicciones_futuras.predicciones_temporales %}
+
+                            <!-- Fila 30 días -->
+                            <div class="pred-row">
+                                <div class="pred-periodo"><i class="fas fa-circle" style="font-size:4pt; margin-right:3px; color:#bbb;"></i>30 días</div>
+                                <div class="pred-bar-track">
+                                    <div class="pred-bar-fill" style="width:{{ p.30_dias.score_esperado|floatformat:0 }}%;
+                                        background:{% if p.30_dias.score_esperado <= 30 %}#43a047{% elif p.30_dias.score_esperado <= 60 %}#f9a825{% else %}#e53935{% endif %};"></div>
+                                </div>
+                                <div class="pred-score" style="color:{% if p.30_dias.score_esperado <= 30 %}#2e7d32{% elif p.30_dias.score_esperado <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ p.30_dias.score_esperado }}%</div>
+                                <div class="pred-conf">{{ p.30_dias.confianza }}%</div>
+                            </div>
+
+                            <!-- Fila 90 días -->
+                            <div class="pred-row">
+                                <div class="pred-periodo"><i class="fas fa-circle" style="font-size:4pt; margin-right:3px; color:#bbb;"></i>90 días</div>
+                                <div class="pred-bar-track">
+                                    <div class="pred-bar-fill" style="width:{{ p.90_dias.score_esperado|floatformat:0 }}%;
+                                        background:{% if p.90_dias.score_esperado <= 30 %}#43a047{% elif p.90_dias.score_esperado <= 60 %}#f9a825{% else %}#e53935{% endif %};"></div>
+                                </div>
+                                <div class="pred-score" style="color:{% if p.90_dias.score_esperado <= 30 %}#2e7d32{% elif p.90_dias.score_esperado <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ p.90_dias.score_esperado }}%</div>
+                                <div class="pred-conf">{{ p.90_dias.confianza }}%</div>
+                            </div>
+
+                            <!-- Fila 180 días -->
+                            <div class="pred-row">
+                                <div class="pred-periodo"><i class="fas fa-circle" style="font-size:4pt; margin-right:3px; color:#bbb;"></i>180 días</div>
+                                <div class="pred-bar-track">
+                                    <div class="pred-bar-fill" style="width:{{ p.180_dias.score_esperado|floatformat:0 }}%;
+                                        background:{% if p.180_dias.score_esperado <= 30 %}#43a047{% elif p.180_dias.score_esperado <= 60 %}#f9a825{% else %}#e53935{% endif %};"></div>
+                                </div>
+                                <div class="pred-score" style="color:{% if p.180_dias.score_esperado <= 30 %}#2e7d32{% elif p.180_dias.score_esperado <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ p.180_dias.score_esperado }}%</div>
+                                <div class="pred-conf">{{ p.180_dias.confianza }}%</div>
+                            </div>
+
+                            <!-- Fila 1 año -->
+                            <div class="pred-row">
+                                <div class="pred-periodo"><i class="fas fa-circle" style="font-size:4pt; margin-right:3px; color:#bbb;"></i>1 año</div>
+                                <div class="pred-bar-track">
+                                    <div class="pred-bar-fill" style="width:{{ p.365_dias.score_esperado|floatformat:0 }}%;
+                                        background:{% if p.365_dias.score_esperado <= 30 %}#43a047{% elif p.365_dias.score_esperado <= 60 %}#f9a825{% else %}#e53935{% endif %};"></div>
+                                </div>
+                                <div class="pred-score" style="color:{% if p.365_dias.score_esperado <= 30 %}#2e7d32{% elif p.365_dias.score_esperado <= 60 %}#e65100{% else %}#c62828{% endif %}">
+                                    {{ p.365_dias.score_esperado }}%</div>
+                                <div class="pred-conf">{{ p.365_dias.confianza }}%</div>
+                            </div>
+
+                            {% endwith %}
+
+                            <!-- Leyenda confianza + metodología -->
+                            <div style="display:flex; gap:8px; margin-top:5px; align-items:center;">
+                                <div style="flex:1; font-size:5pt; color:#aaa; font-style:italic; line-height:1.4;">
+                                    {{ analisis_ia.predicciones_futuras.metodologia }}
+                                </div>
+                                <div style="flex:0 0 auto; font-size:5pt; color:#999;">
+                                    conf. = confianza
+                                </div>
+                            </div>
+
+                            <!-- Alerta próxima revisión -->
+                            <div style="margin-top:6px; padding:5px 7px;
+                                background:#fff8f0; border:1px solid #ffcc80;
+                                border-radius:4px; display:flex; align-items:center; gap:6px;">
+                                <i class="fas fa-bell" style="color:#e65100; font-size:9px;"></i>
+                                <div>
+                                    <div style="font-size:5.5pt; font-weight:700; color:#e65100;">{{ analisis_ia.proxima_evaluacion.urgencia }}</div>
+                                    <div style="font-size:5.5pt; color:#555;">{{ analisis_ia.proxima_evaluacion.razon }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!-- /ml-secondary-row -->
+
+                    <!-- ══════════════════════════════════════════════════════
+                         BLOQUE E: OBSERVACIONES Y CONCLUSIONES DEL EVALUADOR
+                    ═══════════════════════════════════════════════════════ -->
+                    {% if datos_evaluacion.observaciones_generales or datos_evaluacion.recomendaciones_generales or datos_evaluacion.conclusiones %}
+                    <div class="ml-notes-strip">
+                        {% if datos_evaluacion.observaciones_generales %}
+                        <div class="ml-note-cell">
+                            <div class="ml-tag"><i class="fas fa-eye"></i> Observaciones del Evaluador</div>
+                            <div class="ml-note-text">{{ datos_evaluacion.observaciones_generales }}</div>
+                        </div>
+                        {% endif %}
+                        {% if datos_evaluacion.recomendaciones_generales %}
+                        <div class="ml-note-cell">
+                            <div class="ml-tag"><i class="fas fa-clipboard-list"></i> Recomendaciones del Evaluador</div>
+                            <div class="ml-note-text">{{ datos_evaluacion.recomendaciones_generales }}</div>
+                        </div>
+                        {% endif %}
+                        {% if datos_evaluacion.conclusiones %}
+                        <div class="ml-note-cell">
+                            <div class="ml-tag"><i class="fas fa-flag-checkered"></i> Conclusiones</div>
+                            <div class="ml-note-text">{{ datos_evaluacion.conclusiones }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                </div><!-- /ml-wrapper -->
+
+            </section>
+            <!-- ==================== /SECCIÓN: ANÁLISIS IA/ML ==================== -->
+
+        </main>
+        <!-- ==================== /CONTENIDO PRINCIPAL ==================== -->
+
+
+        <!-- ==================== FOOTER ==================== -->
+        <footer class="pdf-footer">
+
+            <!-- Izquierda: sistema -->
+            <div class="footer-left">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <div class="footer-title">Risk Manager — Sistema de Gestión de Riesgos</div>
+                    <div class="footer-subtitle">
+                        Algoritmo v{{ analisis_ia.version_algoritmo|default:"2.1" }}&nbsp;|&nbsp;Análisis IA/ML&nbsp;|&nbsp;Estándar ISO 31000
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-divider"></div>
+
+            <!-- Centro: confidencialidad -->
+            <div class="footer-center">
+                <i class="fas fa-lock me-1"></i>
+                Documento Confidencial &mdash; Uso Interno
+            </div>
+
+            <div class="footer-divider"></div>
+
+            <!-- Derecha: datos del reporte -->
+            <div class="footer-right">
+                <div>Conjunto: <strong>{{ conjunto.nombre|truncatechars:25 }}</strong></div>
+                <div>Estado: <strong>{{ evaluacion.get_estado_display }}</strong></div>
+                <div>Reporte generado: <strong>{{ fecha_generacion|date:"d/m/Y" }}</strong></div>
+            </div>
+
+        </footer>
+        <!-- ==================== /FOOTER ==================== -->
+
+    </div><!-- /page-wrapper -->
+
+    {% if configuracion_impresion.auto_print %}
+    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () { window.print(); }, 400);
+        });
+    </script>
+    {% endif %}
+
+</body>
+</html>

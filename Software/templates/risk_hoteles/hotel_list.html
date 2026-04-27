@@ -5,1206 +5,607 @@
 {% block title %}Lista de Hoteles - Risk Hotels{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 <style>
-/* =================================================================
-   LISTA DE HOTELES - CSS OPTIMIZADO Y DEPURADO
-   ================================================================= */
+/* ================================================================
+   HOTEL LIST — REDISEÑO MODERNO
+   ================================================================ */
 
-/* ===== COMPONENTES BASE ===== */
-.search-section {
-    background: #f8f9fa;
-    padding: 1.25rem;
-    border-radius: 0.625rem;
-    margin-bottom: 1.25rem;
+:root {
+    --hl-primary:       #667eea;
+    --hl-primary-dark:  #764ba2;
+    --hl-success:       #10b981;
+    --hl-warning:       #f59e0b;
+    --hl-danger:        #ef4444;
+    --hl-surface:       #ffffff;
+    --hl-surface-alt:   #f8fafc;
+    --hl-border:        #e5e7eb;
+    --hl-text:          #111827;
+    --hl-text-muted:    #6b7280;
+    --hl-radius:        0.875rem;
+    --hl-shadow-sm:     0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.05);
+    --hl-shadow:        0 4px 16px rgba(0,0,0,.08);
+    --hl-shadow-hover:  0 8px 28px rgba(102,126,234,.18);
 }
 
-/* ===== TABLA DE HOTELES ===== */
-.hotels-table-container {
-    background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    border: 1px solid #e5e7eb;
-}
-
-.hotels-table-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1.5rem;
-    border: none;
-}
-
-.hotels-table-header h5 {
-    margin: 0;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.hotels-count-badge {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.25rem 0.75rem;
-    border-radius: 50px;
-    font-weight: 500;
-    font-size: 0.875rem;
-}
-
-.table {
-    margin: 0;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-}
-
-.table th {
-    border-top: none;
-    border-bottom: 2px solid #e5e7eb;
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
-    padding: 1.25rem 1rem;
-    background: #f9fafb;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
-
-.table td {
-    vertical-align: middle;
-    padding: 1.25rem 1rem;
-    border-bottom: 1px solid #f3f4f6;
-    font-size: 0.9rem;
-}
-
-.table-hover tbody tr:hover {
-    background: linear-gradient(90deg, #f8fafc 0%, #f1f5f9 100%);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* ===== INFORMACIÓN DEL HOTEL ===== */
-.hotel-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.hotel-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 0.6rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: opacity 0.3s ease;
-}
-
-.hotel-avatar img {
-    width: 100%;
-    height: 100%;
-    border-radius: 0.6rem;
-    object-fit: cover;
-    transition: opacity 0.3s ease;
-}
-
-.hotel-details h6 {
-    margin: 0 0 0.25rem 0;
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 1rem;
-}
-
-.hotel-meta {
-    color: #6b7280;
-    font-size: 0.8125rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-/* ===== CATEGORÍAS DE HOTELES ===== */
-.hotels-table-container .table .category-badge {
-    color: white !important;
-    border: none !important;
-    padding: 0.25rem 0.5rem !important;
-    border-radius: 0.75rem !important;
-    font-weight: 600 !important;
-    font-size: 0.7rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.025em !important;
-    white-space: nowrap !important;
-    display: inline-block !important;
-    min-width: 50px !important;
-    text-align: center !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
-    transition: all 0.2s ease !important;
-}
-
-.hotels-table-container .table .category-badge:hover {
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-}
-
-/* Colores por categoría */
-.hotels-table-container .table .category-badge.stars-1 {
-    background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
-}
-
-.hotels-table-container .table .category-badge.stars-2 {
-    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%) !important;
-}
-
-.hotels-table-container .table .category-badge.stars-3 {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-}
-
-.hotels-table-container .table .category-badge.stars-4 {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-}
-
-.hotels-table-container .table .category-badge.stars-5 {
-    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
-}
-
-.hotels-table-container .table .category-badge.luxury {
-    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
-    border: 2px solid #ffd700 !important;
-}
-
-.hotels-table-container .table .category-badge.default {
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
-}
-
-/* ===== UBICACIÓN ===== */
-.location-info strong {
-    color: #374151;
-    font-weight: 600;
-}
-
-.location-info small {
-    color: #9ca3af;
-    font-weight: 500;
-}
-
-/* ===== HABITACIONES ===== */
-.rooms-count {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #1f2937;
-}
-
-/* ===== PUNTUACIÓN GENERAL ===== */
-.score-display {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.score-container {
-    min-width: 80px;
-}
-
-.score-circle {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto;
-    font-weight: 700;
-    font-size: 0.875rem;
-    border: 3px solid;
-    transition: all 0.3s ease;
-}
-
-.score-circle:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.score-percentage {
-    color: inherit;
-    font-size: 0.8rem;
-    font-weight: 700;
-}
-
-.score-text {
-    color: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-}
-
-/* Estados de puntuación */
-.score-circle.score-success {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    color: #065f46;
-    border-color: #10b981;
-}
-
-.score-circle.score-warning {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    color: #92400e;
-    border-color: #f59e0b;
-}
-
-.score-circle.score-danger {
-    background: linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%);
-    color: #991b1b;
-    border-color: #ef4444;
-}
-
-.score-circle.score-pending {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    color: #6b7280;
-    border-color: #d1d5db;
-}
-
-/* ===== CONTACTO ===== */
-.contact-info {
-    font-size: 0.8125rem;
-}
-
-.contact-info small {
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    margin-bottom: 0.25rem;
-}
-
-.contact-info i {
-    width: 14px;
-    color: #9ca3af;
-}
-
-/* ===== ACCIONES ===== */
-.actions-cell {
-    text-align: center;
-}
-
-.btn-group {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    border-radius: 0.375rem;
-    overflow: hidden;
-}
-
-.btn-group .btn {
-    border-radius: 0;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-}
-
-.btn-group .btn:last-child {
-    border-right: none;
-    border-top-right-radius: 0.375rem;
-    border-bottom-right-radius: 0.375rem;
-}
-
-.btn-group .btn:first-child {
-    border-top-left-radius: 0.375rem;
-    border-bottom-left-radius: 0.375rem;
-}
-
-.btn-group .btn:hover {
-    transform: translateY(-1px);
-    z-index: 2;
-}
-
-/* ===== ESTADO VACÍO ===== */
-.empty-state {
-    padding: 4rem 2rem;
-    text-align: center;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 0.75rem;
-    border: 2px dashed #cbd5e1;
-}
-
-.empty-state i {
-    background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* ===== SKELETON LOADING ===== */
-.skeleton {
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s infinite;
-}
-
-@keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-.skeleton-row {
-    display: none;
-}
-
-.skeleton-row.show {
-    display: table-row;
-}
-
-.skeleton-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 0.75rem;
-}
-
-.skeleton-text {
-    height: 16px;
-    border-radius: 0.25rem;
-    margin: 0.25rem 0;
-}
-
-.skeleton-text.wide { width: 80%; }
-.skeleton-text.medium { width: 60%; }
-.skeleton-text.narrow { width: 40%; }
-
-/* ===== LOADING OVERLAY ===== */
-.loading-overlay {
+/* ── Page header ───────────────────────────────────────────────── */
+.hl-page-header {
+    background: linear-gradient(135deg, var(--hl-primary) 0%, var(--hl-primary-dark) 100%);
+    border-radius: var(--hl-radius);
+    padding: 1.125rem 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #fff;
     position: relative;
+    overflow: hidden;
 }
-
-.loading-overlay::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    display: none;
-    z-index: 10;
+.hl-page-header::before {
+    content:'';position:absolute;top:-40%;right:-5%;width:280px;height:280px;
+    background:rgba(255,255,255,.06);border-radius:50%;pointer-events:none;
 }
-
-.loading-overlay.loading::before {
-    display: block;
+.hl-page-header::after {
+    content:'';position:absolute;bottom:-60%;right:8%;width:200px;height:200px;
+    background:rgba(255,255,255,.04);border-radius:50%;pointer-events:none;
 }
+.hl-breadcrumb { font-size:.8125rem;color:rgba(255,255,255,.7);margin-bottom:.5rem;display:flex;align-items:center;gap:.375rem; }
+.hl-breadcrumb a { color:rgba(255,255,255,.8);text-decoration:none;transition:color .2s; }
+.hl-breadcrumb a:hover { color:#fff; }
+.hl-page-header h1 { font-size:1.25rem;font-weight:700;margin:0 0 .15rem;letter-spacing:-.3px; }
+.hl-page-header p  { font-size:.8125rem;color:rgba(255,255,255,.78);margin:0; }
+.hl-header-actions { display:flex;align-items:center;gap:.625rem;flex-wrap:wrap; }
 
-/* ===== RESPONSIVE DESIGN ===== */
-@media (max-width: 768px) {
-    .hotels-table-header {
-        padding: 1rem;
-    }
-    
-    .table th,
-    .table td {
-        padding: 0.75rem 0.5rem;
-        font-size: 0.8125rem;
-    }
-    
-    .hotel-info {
-        gap: 0.75rem;
-    }
-    
-    .hotel-avatar {
-        width: 32px;
-        height: 32px;
-        font-size: 0.875rem;
-    }
-    
-    .score-circle {
-        width: 50px;
-        height: 50px;
-        font-size: 0.75rem;
-    }
-    
-    .category-badge {
-        font-size: 0.6rem !important;
-        padding: 0.2rem 0.4rem !important;
-        min-width: 40px !important;
-    }
-    
-    .btn-group .btn {
-        padding: 0.375rem 0.5rem;
-        font-size: 0.8125rem;
-    }
-    
-    .search-section {
-        padding: 1rem;
-    }
+.btn-hl-primary {
+    background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);
+    padding:.5rem 1.125rem;border-radius:.625rem;font-weight:600;font-size:.875rem;
+    transition:all .2s;backdrop-filter:blur(4px);text-decoration:none;
+    display:inline-flex;align-items:center;
 }
+.btn-hl-primary:hover { background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.6);color:#fff;transform:translateY(-1px); }
 
-/* ===== FALLBACK CSS (SOLO SI ES NECESARIO) ===== */
-.table {
-    border-collapse: collapse !important;
-    width: 100% !important;
+.btn-hl-white {
+    background:#fff;color:var(--hl-primary-dark);border:none;padding:.5rem 1.125rem;
+    border-radius:.625rem;font-weight:700;font-size:.875rem;transition:all .2s;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);cursor:pointer;
 }
+.btn-hl-white:hover { background:#f0f0ff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.15); }
 
-.btn {
-    display: inline-block !important;
-    padding: 0.375rem 0.75rem !important;
-    border-radius: 0.375rem !important;
-    transition: all 0.15s ease-in-out !important;
+/* ── Stats bar ─────────────────────────────────────────────────── */
+.hl-stats-bar { display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem; }
+.hl-stat-card { background:var(--hl-surface);border:1px solid var(--hl-border);border-radius:var(--hl-radius);padding:1.125rem 1.25rem;display:flex;align-items:center;gap:1rem;box-shadow:var(--hl-shadow-sm);transition:all .2s; }
+.hl-stat-card:hover { transform:translateY(-2px);box-shadow:var(--hl-shadow); }
+.hl-stat-icon { width:46px;height:46px;border-radius:.75rem;display:flex;align-items:center;justify-content:center;font-size:1.125rem;flex-shrink:0; }
+.hl-stat-icon.blue  { background:#eff6ff;color:#3b82f6; }
+.hl-stat-icon.green { background:#f0fdf4;color:#10b981; }
+.hl-stat-icon.amber { background:#fffbeb;color:#f59e0b; }
+.hl-stat-icon.red   { background:#fef2f2;color:#ef4444; }
+.hl-stat-value { font-size:1.5rem;font-weight:800;color:var(--hl-text);line-height:1;margin-bottom:.2rem; }
+.hl-stat-label { font-size:.75rem;color:var(--hl-text-muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em; }
+
+/* ── Filters ───────────────────────────────────────────────────── */
+.hl-filters { background:var(--hl-surface);border:1px solid var(--hl-border);border-radius:var(--hl-radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--hl-shadow-sm); }
+.hl-filters-row { display:flex;align-items:flex-end;gap:.875rem;flex-wrap:wrap; }
+.hl-filter-group { flex:1;min-width:160px; }
+.hl-filter-group label { display:block;font-size:.75rem;font-weight:600;color:var(--hl-text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.4rem; }
+.hl-form-control { border:1.5px solid var(--hl-border);border-radius:.5rem;padding:.5rem .875rem;font-size:.875rem;color:var(--hl-text);background:var(--hl-surface-alt);width:100%;transition:border-color .2s,box-shadow .2s;height:40px; }
+.hl-form-control:focus { outline:none;border-color:var(--hl-primary);box-shadow:0 0 0 3px rgba(102,126,234,.15);background:#fff; }
+.hl-input-icon { position:relative; }
+.hl-input-icon > i { position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:var(--hl-text-muted);font-size:.8125rem;pointer-events:none; }
+.hl-input-icon .hl-form-control { padding-left:2.25rem; }
+.btn-filter-search { background:linear-gradient(135deg,var(--hl-primary),var(--hl-primary-dark));color:#fff;border:none;border-radius:.5rem;padding:.5rem 1.25rem;font-weight:600;font-size:.875rem;height:40px;white-space:nowrap;transition:all .2s;cursor:pointer; }
+.btn-filter-search:hover { opacity:.9;transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.3);color:#fff; }
+.btn-filter-clear { background:transparent;color:var(--hl-text-muted);border:1.5px solid var(--hl-border);border-radius:.5rem;padding:.5rem .875rem;font-size:.875rem;height:40px;transition:all .2s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:.35rem; }
+.btn-filter-clear:hover { border-color:var(--hl-danger);color:var(--hl-danger);background:#fef2f2; }
+.active-filter-tag { display:inline-flex;align-items:center;gap:.375rem;background:rgba(102,126,234,.1);color:var(--hl-primary-dark);border:1px solid rgba(102,126,234,.25);border-radius:50px;font-size:.75rem;font-weight:600;padding:.2rem .6rem; }
+
+/* ── Toolbar ───────────────────────────────────────────────────── */
+.hl-toolbar { display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1rem;flex-wrap:wrap; }
+.hl-results-info { font-size:.875rem;color:var(--hl-text-muted); }
+.hl-results-info strong { color:var(--hl-text); }
+.hl-toolbar-right { display:flex;align-items:center;gap:.75rem; }
+.hl-per-page { display:flex;align-items:center;gap:.5rem;font-size:.8125rem;color:var(--hl-text-muted); }
+.hl-per-page select { border:1.5px solid var(--hl-border);border-radius:.4rem;padding:.3rem .5rem;font-size:.8125rem;background:var(--hl-surface);color:var(--hl-text); }
+
+
+
+/* ── Category badges ───────────────────────────────────────────── */
+.cat-badge { display:inline-flex;align-items:center;gap:.25rem;padding:.25rem .6rem;border-radius:50px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;color:#fff; }
+.cat-badge.stars-1 { background:linear-gradient(135deg,#64748b,#475569); }
+.cat-badge.stars-2 { background:linear-gradient(135deg,#0891b2,#0e7490); }
+.cat-badge.stars-3 { background:linear-gradient(135deg,#10b981,#059669); }
+.cat-badge.stars-4 { background:linear-gradient(135deg,#f59e0b,#d97706); }
+.cat-badge.stars-5 { background:linear-gradient(135deg,#dc2626,#b91c1c); }
+.cat-badge.luxury  { background:linear-gradient(135deg,#7c3aed,#5b21b6);border:1.5px solid #ffd700; }
+.cat-badge.default { background:linear-gradient(135deg,#6b7280,#4b5563); }
+
+
+
+/* ── Table view ────────────────────────────────────────────────── */
+#hotelsTableView { background:var(--hl-surface);border:1px solid var(--hl-border);border-radius:var(--hl-radius);box-shadow:var(--hl-shadow-sm);overflow:hidden;margin-bottom:1.5rem; }
+.hl-table { width:100%;border-collapse:collapse;margin:0; }
+.hl-table thead th { background:var(--hl-surface-alt);color:#374151;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:.875rem 1rem;border-bottom:2px solid var(--hl-border);white-space:nowrap; }
+.hl-table thead th:first-child { padding-left:1.5rem; }
+.hl-table thead th:last-child  { padding-right:1.5rem;text-align:center; }
+.hl-table tbody td { padding:1rem;border-bottom:1px solid #f3f4f6;vertical-align:middle;font-size:.875rem; }
+.hl-table tbody td:first-child { padding-left:1.5rem; }
+.hl-table tbody td:last-child  { padding-right:1.5rem; }
+.hl-table tbody tr:last-child td { border-bottom:none; }
+.hl-table tbody tr { transition:background .2s; }
+.hl-table tbody tr:hover { background:linear-gradient(90deg,#f8fafc,#f1f5f9); }
+.tbl-hotel-info { display:flex;align-items:center;gap:.875rem; }
+.tbl-avatar { width:40px;height:40px;border-radius:.625rem;background:linear-gradient(135deg,var(--hl-primary),var(--hl-primary-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.9rem;flex-shrink:0;overflow:hidden;box-shadow:0 2px 6px rgba(102,126,234,.2); }
+.tbl-avatar img { width:100%;height:100%;object-fit:cover; }
+.tbl-hotel-name { font-weight:700;color:var(--hl-text);margin-bottom:.15rem;font-size:.9375rem; }
+.tbl-hotel-date { font-size:.75rem;color:var(--hl-text-muted); }
+.tbl-location strong { display:block;font-size:.875rem;color:#374151; }
+.tbl-location small  { color:var(--hl-text-muted);font-size:.78rem; }
+.tbl-rooms { font-size:1.1rem;font-weight:800;color:var(--hl-text); }
+.tbl-contact small { display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--hl-text-muted);margin-bottom:.2rem; }
+.tbl-contact i { width:12px;color:#9ca3af; }
+.tbl-actions { display:flex;align-items:center;justify-content:center;gap:.375rem; }
+.tbl-btn { width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;border-radius:.5rem;border:1.5px solid;font-size:.8125rem;cursor:pointer;transition:all .2s;background:transparent;text-decoration:none; }
+.tbl-btn.view    { border-color:#bfdbfe;color:#2563eb; }
+.tbl-btn.view:hover    { background:#eff6ff; }
+.tbl-btn.analyze { border-color:#a7f3d0;color:#059669; }
+.tbl-btn.analyze:hover { background:#ecfdf5; }
+.tbl-btn.edit    { border-color:#fde68a;color:#d97706; }
+.tbl-btn.edit:hover    { background:#fffbeb; }
+.tbl-btn.delete  { border-color:#fecaca;color:#dc2626; }
+.tbl-btn.delete:hover  { background:#fef2f2; }
+.tbl-btn.report  { border-color:#c4b5fd;color:#7c3aed; }
+.tbl-btn.report:hover  { background:#f5f3ff; }
+.tbl-btn[disabled] { border-color:#e5e7eb;color:#9ca3af;cursor:not-allowed; }
+.tbl-btn[disabled]:hover { background:transparent; }
+.hl-score-sm { width:46px;height:46px;border-radius:50%;border:3px solid;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:.75rem; }
+.hl-score-sm.s-success { border-color:#10b981;color:#065f46;background:#d1fae5; }
+.hl-score-sm.s-warning { border-color:#f59e0b;color:#92400e;background:#fef3c7; }
+.hl-score-sm.s-danger  { border-color:#ef4444;color:#991b1b;background:#fee2e2; }
+.hl-score-sm.s-pending { border-color:#d1d5db;color:#9ca3af;background:#f3f4f6; }
+
+/* ── Empty state ───────────────────────────────────────────────── */
+.hl-empty { background:var(--hl-surface);border:2px dashed var(--hl-border);border-radius:var(--hl-radius);padding:5rem 2rem;text-align:center;margin-bottom:1.5rem; }
+.hl-empty-icon { width:80px;height:80px;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;color:#94a3b8; }
+.hl-empty h4 { color:#374151;font-weight:700;margin-bottom:.5rem; }
+.hl-empty p  { color:var(--hl-text-muted);font-size:.9375rem;max-width:420px;margin:0 auto 1.5rem;line-height:1.6; }
+
+/* ── Pagination ────────────────────────────────────────────────── */
+.hl-pagination-wrap { background:var(--hl-surface);border:1px solid var(--hl-border);border-radius:var(--hl-radius);padding:1.25rem 1.5rem;box-shadow:var(--hl-shadow-sm);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap; }
+.hl-pagination-info { font-size:.8125rem;color:var(--hl-text-muted); }
+.hl-pagination { display:flex;align-items:center;gap:.25rem;list-style:none;margin:0;padding:0; }
+.hl-pagination li a,.hl-pagination li span { display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;padding:0 .5rem;border-radius:.5rem;border:1.5px solid var(--hl-border);font-size:.875rem;font-weight:500;color:#374151;background:var(--hl-surface);text-decoration:none;transition:all .2s; }
+.hl-pagination li a:hover { background:#f3f4f6;border-color:#9ca3af; }
+.hl-pagination li.active span { background:linear-gradient(135deg,var(--hl-primary),var(--hl-primary-dark));border-color:var(--hl-primary);color:#fff;box-shadow:0 3px 8px rgba(102,126,234,.3); }
+.hl-pagination li.disabled span { color:#d1d5db;cursor:not-allowed;background:#f9fafb;border-color:#f3f4f6; }
+.hl-jump-wrap { display:flex;align-items:center;gap:.5rem;font-size:.8125rem;color:var(--hl-text-muted); }
+.hl-jump-input { width:64px;height:36px;border:1.5px solid var(--hl-border);border-radius:.5rem;padding:0 .5rem;text-align:center;font-size:.875rem;color:var(--hl-text);background:var(--hl-surface-alt);transition:border-color .2s; }
+.hl-jump-input:focus { outline:none;border-color:var(--hl-primary);box-shadow:0 0 0 3px rgba(102,126,234,.12); }
+.hl-jump-btn { height:36px;padding:0 .875rem;background:var(--hl-surface-alt);border:1.5px solid var(--hl-border);border-radius:.5rem;font-size:.8125rem;font-weight:600;color:var(--hl-primary);cursor:pointer;transition:all .2s; }
+.hl-jump-btn:hover { background:var(--hl-primary);border-color:var(--hl-primary);color:#fff; }
+
+/* ── Modals ────────────────────────────────────────────────────── */
+.modal-header-gradient { background:linear-gradient(135deg,var(--hl-primary),var(--hl-primary-dark));color:#fff; }
+.modal-header-danger   { background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff; }
+.form-section { border:1.5px solid var(--hl-border);border-radius:var(--hl-radius);overflow:hidden;margin-bottom:1.25rem; }
+.form-section-header { padding:.75rem 1.25rem;font-weight:600;font-size:.875rem;display:flex;align-items:center;gap:.5rem; }
+.fsh-primary { background:linear-gradient(135deg,var(--hl-primary),var(--hl-primary-dark));color:#fff; }
+.fsh-warning { background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff; }
+.fsh-info    { background:linear-gradient(135deg,#0891b2,#0e7490);color:#fff; }
+.form-section-body { padding:1.25rem;background:var(--hl-surface); }
+
+/* ── Toast ─────────────────────────────────────────────────────── */
+.hl-toast { position:fixed;top:1.25rem;right:1.25rem;z-index:9999;min-width:320px;max-width:420px;padding:1rem 1.25rem;border-radius:.75rem;box-shadow:0 10px 30px rgba(0,0,0,.15);display:flex;align-items:flex-start;gap:.75rem;opacity:0;transform:translateX(20px);transition:all .3s cubic-bezier(.4,0,.2,1); }
+.hl-toast.show { opacity:1;transform:translateX(0); }
+.hl-toast.success { background:#f0fdf4;border-left:4px solid #10b981; }
+.hl-toast.error   { background:#fef2f2;border-left:4px solid #ef4444; }
+.hl-toast.info    { background:#eff6ff;border-left:4px solid #3b82f6; }
+.hl-toast-icon { font-size:1.125rem;margin-top:.1rem;flex-shrink:0; }
+.hl-toast.success .hl-toast-icon { color:#10b981; }
+.hl-toast.error   .hl-toast-icon { color:#ef4444; }
+.hl-toast.info    .hl-toast-icon { color:#3b82f6; }
+.hl-toast-msg   { font-size:.875rem;color:#1f2937;font-weight:500;flex:1; }
+.hl-toast-close { background:none;border:none;color:#9ca3af;cursor:pointer;padding:0;font-size:.875rem; }
+.hl-toast-close:hover { color:#374151; }
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width:1199px) {
+    .hl-stats-bar   { grid-template-columns:repeat(2,1fr); }
 }
-
-.btn-primary {
-    color: #fff !important;
-    background-color: #0d6efd !important;
-    border-color: #0d6efd !important;
+@media (max-width:767px) {
+    .hl-stats-bar   { grid-template-columns:repeat(2,1fr); }
+    .hl-page-header { padding:.875rem 1rem; }
+    .hl-page-header h1 { font-size:1.125rem; }
+    .hl-filters-row { flex-direction:column; }
+    .hl-filter-group { min-width:100%; }
+    .hl-toolbar { flex-direction:column;align-items:flex-start; }
+    .hl-pagination-wrap { flex-direction:column;align-items:center;text-align:center; }
+    .hl-jump-wrap { display:none; }
+    .hl-table th.hide-mobile,.hl-table td.hide-mobile { display:none; }
 }
-
-.btn-primary:hover {
-    background-color: #0b5ed7 !important;
-    border-color: #0a58ca !important;
-}
-
-/* ===== PAGINACIÓN MEJORADA ===== */
-.pagination-container {
-    background: white;
-    border-radius: 0.75rem;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e5e7eb;
-}
-
-.pagination-info {
-    color: #6b7280;
-    font-size: 0.875rem;
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.pagination {
-    margin: 0;
-    gap: 0.25rem;
-}
-
-.pagination .page-item {
-    margin: 0;
-}
-
-.pagination .page-link {
-    border: 1px solid #e5e7eb;
-    color: #374151;
-    padding: 0.5rem 0.875rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    background: white;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.pagination .page-link:hover {
-    background: #f3f4f6;
-    border-color: #d1d5db;
-    color: #1f2937;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-    color: white;
-    box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
-}
-
-.pagination .page-item.disabled .page-link {
-    color: #9ca3af;
-    background: #f9fafb;
-    border-color: #f3f4f6;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.pagination .page-item.disabled .page-link:hover {
-    background: #f9fafb;
-    transform: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-/* Paginación responsiva */
-@media (max-width: 768px) {
-    .pagination-container {
-        padding: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .pagination .page-link {
-        padding: 0.375rem 0.625rem;
-        font-size: 0.875rem;
-    }
-    
-    .pagination .page-item:not(.page-nav):not(.active) {
-        display: none;
-    }
-}
-
-.pagination-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-}
-
-.pagination-per-page {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #6b7280;
-}
-
-.pagination-per-page select {
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
-    padding: 0.25rem 0.5rem;
-    background: white;
-    color: #374151;
-    font-size: 0.875rem;
+@media (max-width:480px) {
+    .hl-stats-bar { grid-template-columns:1fr 1fr; }
+    .hl-stat-card { padding:.875rem 1rem; }
+    .hl-stat-value { font-size:1.25rem; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2><i class="fas fa-hotel text-primary"></i> Lista de Hoteles</h2>
-                <div class="btn-group">
-                    <a href="{% url 'risk_hoteles:dashboard' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Dashboard
-                    </a>
-                    {% has_module_permission user 'risk_hoteles' 'create' as can_create %}
-                    {% if can_create %}
-                    <button type="button" class="btn btn-primary" onclick="openCreateModal()">
-                        <i class="fas fa-plus"></i> Agregar Hotel
-                    </button>
-                    {% endif %}
-                    {% if settings.DEBUG %}
-                    <!-- Botones de diagnóstico solo en modo desarrollo -->
-                    <button type="button" class="btn btn-outline-info btn-sm" 
-                            onclick="diagnoseCSS()" title="Diagnosticar CSS">
-                        <i class="fas fa-stethoscope"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-warning btn-sm" 
-                            onclick="applyEmergencyStyles()" title="Aplicar Estilos de Emergencia">
-                        <i class="fas fa-wand-magic-sparkles"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-success btn-sm" 
-                            onclick="applyDirectStyling()" title="Aplicar Estilos Directos">
-                        <i class="fas fa-brush"></i>
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+{% has_module_permission user 'risk_hoteles' 'create' as can_create %}
+{% has_module_permission user 'risk_hoteles' 'update' as can_update %}
+{% has_module_permission user 'risk_hoteles' 'delete' as can_delete %}
 
-    <!-- Sección de búsqueda y filtros -->
-    <div class="row">
-        <div class="col-12">
-            <div class="search-section">
-                <form method="get" class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="search">Buscar Hotel:</label>
-                            <input type="text" id="search" name="search" value="{{ search_query }}" 
-                                   class="form-control" placeholder="Nombre, ciudad o país...">
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="category">Categoría:</label>
-                            <select id="category" name="category" class="form-control">
-                                <option value="">Todas las categorías</option>
-                                {% for value, label in hotel_categories %}
-                                <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="mb-3">
-                            <label for="sort">Ordenar por:</label>
-                            <select id="sort" name="sort" class="form-control">
-                                <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Nombre</option>
-                                <option value="city" {% if sort_by == 'city' %}selected{% endif %}>Ciudad</option>
-                                <option value="created_at" {% if sort_by == 'created_at' %}selected{% endif %}>Fecha de creación</option>
-                                <option value="total_rooms" {% if sort_by == 'total_rooms' %}selected{% endif %}>Número de habitaciones</option>
-                                <option value="risk_level" {% if sort_by == 'risk_level' %}selected{% endif %}>Nivel de riesgo</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-search"></i> Buscar
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<div class="container-fluid pb-4">
 
-    <!-- Lista de hoteles -->
-    <div class="row">
-        <div class="col-12">
-            {% if page_obj %}
-                <div class="hotels-table-container loading-overlay" id="hotelsContainer">
-                    <div class="hotels-table-header">
-                        <h5>
-                            <i class="fas fa-list"></i> 
-                            Hoteles Registrados 
-                            <span class="hotels-count-badge">{{ page_obj.paginator.count }}</span>
-                        </h5>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0" id="hotelsTable">
-                            <thead class="table-light">
-                                <tr>
-                                    <th><i class="fas fa-hotel"></i> Hotel</th>
-                                    <th><i class="fas fa-map-marker-alt"></i> Ubicación</th>
-                                    <th style="width: 80px;" class="text-center"><i class="fas fa-star"></i> Categoría</th>
-                                    <th><i class="fas fa-bed"></i> Habitaciones</th>
-                                    <th><i class="fas fa-percent"></i> Puntuación General</th>
-                                    <th><i class="fas fa-phone"></i> Contacto</th>
-                                    <th class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody id="hotelsTableBody">
-                                <!-- Skeleton Loading Rows -->
-                                {% for i in "123"|make_list %}
-                                <tr class="skeleton-row" id="skeletonRow{{ forloop.counter }}">
-                                    <td>
-                                        <div class="hotel-info">
-                                            <div class="skeleton skeleton-avatar"></div>
-                                            <div class="hotel-details">
-                                                <div class="skeleton skeleton-text wide"></div>
-                                                <div class="skeleton skeleton-text medium"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton skeleton-text wide"></div>
-                                        <div class="skeleton skeleton-text narrow"></div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton skeleton-text medium"></div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="skeleton skeleton-text narrow"></div>
-                                    </td>
-                                    <td>
-                                        <div class="text-center">
-                                            <div class="skeleton skeleton-avatar mx-auto mb-1" style="width: 60px; height: 60px; border-radius: 50%;"></div>
-                                            <div class="skeleton skeleton-text narrow mx-auto"></div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="skeleton skeleton-text medium"></div>
-                                    </td>
-                                    <td class="text-center">
-                                        <div class="skeleton skeleton-text wide"></div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                
-                                <!-- Content Rows -->
-                                {% for hotel in page_obj %}
-                                <tr>
-                                    <!-- Información del Hotel -->
-                                    <td>
-                                        <div class="hotel-info">
-                                            <div class="hotel-avatar">
-                                                {% if hotel.image %}
-                                                    <img data-src="{{ hotel.image.url }}" 
-                                                         alt="{{ hotel.name }}"
-                                                         class="lazy-image"
-                                                         loading="lazy">
-                                                {% else %}
-                                                    <i class="fas fa-hotel"></i>
-                                                {% endif %}
-                                            </div>
-                                            <div class="hotel-details">
-                                                <h6>{{ hotel.name }}</h6>
-                                                <div class="hotel-meta">
-                                                    <i class="fas fa-calendar"></i> 
-                                                    Creado {{ hotel.created_at|timesince }} ago
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Ubicación -->
-                                    <td>
-                                        <div class="location-info">
-                                            <strong>{{ hotel.city }}</strong><br>
-                                            <small>{{ hotel.country }}</small>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Categoría -->
-                                    <td class="text-center" style="width: 80px;">
-                                        {% if hotel.category == '1_star' %}
-                                            <span class="category-badge stars-1" title="1 Estrella">1★</span>
-                                        {% elif hotel.category == '2_star' %}
-                                            <span class="category-badge stars-2" title="2 Estrellas">2★</span>
-                                        {% elif hotel.category == '3_star' %}
-                                            <span class="category-badge stars-3" title="3 Estrellas">3★</span>
-                                        {% elif hotel.category == '4_star' %}
-                                            <span class="category-badge stars-4" title="4 Estrellas">4★</span>
-                                        {% elif hotel.category == '5_star' %}
-                                            <span class="category-badge stars-5" title="5 Estrellas">5★</span>
-                                        {% elif hotel.category == 'luxury' %}
-                                            <span class="category-badge luxury" title="Lujo">
-                                                <i class="fas fa-crown" style="font-size: 0.6rem;"></i>
-                                            </span>
-                                        {% else %}
-                                            <span class="category-badge">{{ hotel.get_category_display }}</span>
-                                        {% endif %}
-                                    </td>
-                                    
-                                    <!-- Habitaciones -->
-                                    <td class="text-center">
-                                        <span class="rooms-count">{{ hotel.total_rooms }}</span>
-                                    </td>
-                                    
-                                    <!-- Puntuación General -->
-                                    <td>
-                                        <div class="score-display">
-                                            {% with avg_percentage=hotel.get_average_assessment_percentage %}
-                                                {% if avg_percentage %}
-                                                    <div class="score-container text-center">
-                                                        <div class="score-circle score-{% if avg_percentage >= 80 %}success{% elif avg_percentage >= 60 %}warning{% else %}danger{% endif %}">
-                                                            <span class="score-percentage">{{ avg_percentage }}%</span>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-1">
-                                                            Promedio de {{ hotel.get_assessment_count }} evaluacion{{ hotel.get_assessment_count|pluralize:"es" }}
-                                                        </small>
-                                                    </div>
-                                                {% else %}
-                                                    <div class="score-container text-center">
-                                                        <div class="score-circle score-pending">
-                                                            <span class="score-text">--</span>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-1">Sin evaluar</small>
-                                                    </div>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Contacto -->
-                                    <td>
-                                        <div class="contact-info">
-                                            {% if hotel.phone or hotel.email %}
-                                                {% if hotel.phone %}
-                                                    <small>
-                                                        <i class="fas fa-phone"></i> {{ hotel.phone }}
-                                                    </small>
-                                                {% endif %}
-                                                {% if hotel.email %}
-                                                    <small>
-                                                        <i class="fas fa-envelope"></i> {{ hotel.email }}
-                                                    </small>
-                                                {% endif %}
-                                            {% else %}
-                                                <small class="text-muted">Sin contacto</small>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Acciones -->
-                                    <td class="actions-cell">
-                                        <div class="btn-group">
-                                            <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}" 
-                                               class="btn btn-outline-primary btn-sm" title="Ver Detalle">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            {% has_module_permission user 'risk_hoteles' 'create' as can_create_analysis %}
-                                            {% if can_create_analysis %}
-                                            {% if hotel.tiene_evaluaciones_progreso %}
-                                            <button type="button" class="btn btn-outline-secondary btn-sm" 
-                                                    disabled title="Este hotel tiene una evaluación en progreso. Completa la existente primero.">
-                                                <i class="fas fa-clock"></i>
-                                            </button>
-                                            {% else %}
-                                            <a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" 
-                                               class="btn btn-outline-success btn-sm" title="Analizar Riesgo">
-                                                <i class="fas fa-chart-line"></i>
-                                            </a>
-                                            {% endif %}
-                                            {% endif %}
-                                            {% has_module_permission user 'risk_hoteles' 'update' as can_update %}
-                                            {% if can_update %}
-                                            <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                    onclick="editHotel('{{ hotel.id }}')" title="Editar Hotel">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-                                            {% endif %}
-                                            {% has_module_permission user 'risk_hoteles' 'delete' as can_delete %}
-                                            {% if can_delete %}
-                                            <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                    onclick="confirmDelete('{{ hotel.id }}', '{{ hotel.name }}')" title="Eliminar Hotel">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-hotel fa-5x mb-4"></i>
-                    <h4 class="text-muted mb-3">No se encontraron hoteles</h4>
-                    <p class="text-muted mb-4">
-                        {% if search_query or category_filter %}
-                            No hay hoteles que coincidan con los filtros aplicados.<br>
-                            Intenta ajustar tus criterios de búsqueda.
-                        {% else %}
-                            Aún no has registrado ningún hotel en el sistema.<br>
-                            ¡Comienza agregando tu primer hotel para evaluación!
-                        {% endif %}
-                    </p>
-                    {% if can_create %}
-                    <button type="button" class="btn btn-primary btn-lg" onclick="openCreateModal()">
-                        <i class="fas fa-plus me-2"></i> 
-                        {% if search_query or category_filter %}
-                            Agregar Nuevo Hotel
-                        {% else %}
-                            Agregar Primer Hotel
-                        {% endif %}
-                    </button>
-                    {% endif %}
-                </div>
+    <!-- Page Header -->
+    <div class="hl-page-header d-flex justify-content-between align-items-end flex-wrap gap-3">
+        <div>
+            <div class="hl-breadcrumb">
+                <a href="{% url 'risk_hoteles:dashboard' %}"><i class="fas fa-home"></i> Dashboard</a>
+                <i class="fas fa-chevron-right" style="font-size:.65rem;"></i>
+                <span>Hoteles</span>
+            </div>
+            <h1><i class="fas fa-hotel me-2"></i>Lista de Hoteles</h1>
+            <p>Gestiona y evalúa el riesgo de seguridad de tus propiedades</p>
+        </div>
+        <div class="hl-header-actions">
+            <a href="{% url 'risk_hoteles:dashboard' %}" class="btn-hl-primary">
+                <i class="fas fa-chart-line me-1"></i> Dashboard
+            </a>
+            {% if can_create %}
+            <button type="button" class="btn-hl-white" onclick="openCreateModal()">
+                <i class="fas fa-plus me-1"></i> Agregar Hotel
+            </button>
             {% endif %}
         </div>
     </div>
 
-    <!-- Paginación Mejorada -->
-    <div class="pagination-container" data-current-page="{{ page_obj.number }}" data-max-pages="{{ page_obj.paginator.num_pages }}">
-        <!-- Información de paginación -->
-        <div class="pagination-info">
-            <i class="fas fa-info-circle"></i>
-            Mostrando {{ page_obj.start_index }}-{{ page_obj.end_index }} de {{ page_obj.paginator.count }} hotel{{ page_obj.paginator.count|pluralize:"es" }}
+    <!-- Stats Bar -->
+    {% if page_obj %}
+    <div class="hl-stats-bar">
+        <div class="hl-stat-card">
+            <div class="hl-stat-icon blue"><i class="fas fa-hotel"></i></div>
+            <div>
+                <div class="hl-stat-value">{{ page_obj.paginator.count }}</div>
+                <div class="hl-stat-label">Total Hoteles</div>
+            </div>
         </div>
+        <div class="hl-stat-card">
+            <div class="hl-stat-icon green"><i class="fas fa-clipboard-check"></i></div>
+            <div>
+                <div class="hl-stat-value" id="stat-evaluated">—</div>
+                <div class="hl-stat-label">Evaluados</div>
+            </div>
+        </div>
+        <div class="hl-stat-card">
+            <div class="hl-stat-icon amber"><i class="fas fa-clock"></i></div>
+            <div>
+                <div class="hl-stat-value" id="stat-pending">—</div>
+                <div class="hl-stat-label">Sin Evaluar</div>
+            </div>
+        </div>
+        <div class="hl-stat-card">
+            <div class="hl-stat-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+            <div>
+                <div class="hl-stat-value" id="stat-in-progress">—</div>
+                <div class="hl-stat-label">En Progreso</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
-        <!-- Controles de paginación -->
-        <div class="pagination-controls">
-            <!-- Items por página (siempre visible) -->
-            <div class="pagination-per-page">
-                <label for="itemsPerPage">Mostrar:</label>
-                <select id="itemsPerPage" onchange="changeItemsPerPage(this.value)">
-                    <option value="10" {% if request.GET.per_page == "10" %}selected{% endif %}>10</option>
-                    <option value="25" {% if request.GET.per_page == "25" or not request.GET.per_page %}selected{% endif %}>25</option>
-                    <option value="50" {% if request.GET.per_page == "50" %}selected{% endif %}>50</option>
+    <!-- Filters -->
+    <div class="hl-filters">
+        <form method="get" id="filterForm">
+            <div class="hl-filters-row">
+                <div class="hl-filter-group" style="flex:2;min-width:220px;">
+                    <label for="search"><i class="fas fa-search"></i> Buscar</label>
+                    <div class="hl-input-icon">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search" name="search" value="{{ search_query }}"
+                               class="hl-form-control" placeholder="Nombre, ciudad o país…" autocomplete="off">
+                    </div>
+                </div>
+                <div class="hl-filter-group">
+                    <label for="category"><i class="fas fa-star"></i> Categoría</label>
+                    <select id="category" name="category" class="hl-form-control">
+                        <option value="">Todas</option>
+                        {% for value, label in hotel_categories %}
+                        <option value="{{ value }}" {% if category_filter == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="hl-filter-group">
+                    <label for="sort"><i class="fas fa-sort"></i> Ordenar por</label>
+                    <select id="sort" name="sort" class="hl-form-control">
+                        <option value="name"        {% if sort_by == 'name' %}selected{% endif %}>Nombre</option>
+                        <option value="city"        {% if sort_by == 'city' %}selected{% endif %}>Ciudad</option>
+                        <option value="created_at"  {% if sort_by == 'created_at' %}selected{% endif %}>Fecha de creación</option>
+                        <option value="total_rooms" {% if sort_by == 'total_rooms' %}selected{% endif %}>Habitaciones</option>
+                        <option value="risk_level"  {% if sort_by == 'risk_level' %}selected{% endif %}>Nivel de riesgo</option>
+                    </select>
+                </div>
+                <input type="hidden" name="per_page" value="{{ request.GET.per_page|default:'25' }}">
+                <div class="d-flex gap-2 align-items-end">
+                    <button type="submit" class="btn-filter-search">
+                        <i class="fas fa-search me-1"></i> Buscar
+                    </button>
+                    {% if search_query or category_filter %}
+                    <a href="{% url 'risk_hoteles:hotel_list' %}" class="btn-filter-clear">
+                        <i class="fas fa-times"></i> Limpiar
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% if search_query or category_filter %}
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+                {% if search_query %}<span class="active-filter-tag"><i class="fas fa-search" style="font-size:.65rem;"></i> "{{ search_query }}"</span>{% endif %}
+                {% if category_filter %}<span class="active-filter-tag"><i class="fas fa-star" style="font-size:.65rem;"></i> {% for value, label in hotel_categories %}{% if value == category_filter %}{{ label }}{% endif %}{% endfor %}</span>{% endif %}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if page_obj %}
+
+    <!-- Toolbar -->
+    <div class="hl-toolbar">
+        <div class="hl-results-info">
+            Mostrando <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+            de <strong>{{ page_obj.paginator.count }}</strong>
+            hotel{{ page_obj.paginator.count|pluralize:"es" }}
+            {% if search_query or category_filter %}<span class="text-muted">(filtrado)</span>{% endif %}
+        </div>
+        <div class="hl-toolbar-right">
+            <div class="hl-per-page">
+                <label for="perPageSelect" class="mb-0">Mostrar:</label>
+                <select id="perPageSelect" onchange="changePerPage(this.value)">
+                    <option value="10"  {% if request.GET.per_page == "10"  %}selected{% endif %}>10</option>
+                    <option value="25"  {% if request.GET.per_page == "25" or not request.GET.per_page %}selected{% endif %}>25</option>
+                    <option value="50"  {% if request.GET.per_page == "50"  %}selected{% endif %}>50</option>
                     <option value="100" {% if request.GET.per_page == "100" %}selected{% endif %}>100</option>
                 </select>
                 <span>por página</span>
             </div>
-            
-        {% if page_obj.has_other_pages %}
-
-            <!-- Navegación -->
-            <nav aria-label="Paginación de hoteles">
-                <ul class="pagination justify-content-center">
-                    <!-- Primera página -->
-                    {% if page_obj.has_previous %}
-                        <li class="page-item page-nav">
-                            <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" 
-                               title="Primera página">
-                                <i class="fas fa-angle-double-left"></i>
-                            </a>
-                        </li>
-                        <li class="page-item page-nav">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
-                               title="Página anterior">
-                                <i class="fas fa-angle-left"></i>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled page-nav">
-                            <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
-                        </li>
-                        <li class="page-item disabled page-nav">
-                            <span class="page-link"><i class="fas fa-angle-left"></i></span>
-                        </li>
-                    {% endif %}
-
-                    <!-- Números de página -->
-                        {% for page_num in page_obj.paginator.page_range %}
-                            {% if page_num == page_obj.number %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ page_num }}</span>
-                                </li>
-                            {% elif page_num > page_obj.number|add:"-3" and page_num < page_obj.number|add:"3" %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">
-                                        {{ page_num }}
-                                    </a>
-                                </li>
-                            {% elif page_num == 1 or page_num == page_obj.paginator.num_pages %}
-                                {% if page_num == 1 and page_obj.number > 4 %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">1</a>
-                                    </li>
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                {% elif page_num == page_obj.paginator.num_pages and page_obj.number < page_obj.paginator.num_pages|add:"-3" %}
-                                    <li class="page-item disabled">
-                                        <span class="page-link">...</span>
-                                    </li>
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">
-                                            {{ page_obj.paginator.num_pages }}
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-
-                    <!-- Última página -->
-                    {% if page_obj.has_next %}
-                        <li class="page-item page-nav">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
-                               title="Página siguiente">
-                                <i class="fas fa-angle-right"></i>
-                            </a>
-                        </li>
-                        <li class="page-item page-nav">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}"
-                               title="Última página">
-                                <i class="fas fa-angle-double-right"></i>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled page-nav">
-                            <span class="page-link"><i class="fas fa-angle-right"></i></span>
-                        </li>
-                        <li class="page-item disabled page-nav">
-                            <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-
-            <!-- Ir a página específica -->
-            <div class="pagination-jump d-none d-md-flex align-items-center gap-2">
-                <span class="text-muted">Ir a:</span>
-                <input type="number" id="jumpToPage" class="form-control form-control-sm" 
-                       style="width: 80px;" min="1" max="{{ page_obj.paginator.num_pages }}" 
-                       placeholder="{{ page_obj.number }}">
-                <button onclick="jumpToPage()" class="btn btn-sm btn-outline-primary">
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
         </div>
-        {% endif %}
     </div>
-    
-    <!-- Datos de paginación para JavaScript -->
-    <div id="paginationData" style="display: none;" 
-         data-current-page="{% if page_obj %}{{ page_obj.number }}{% else %}1{% endif %}" 
-         data-max-pages="{% if page_obj %}{{ page_obj.paginator.num_pages }}{% else %}1{% endif %}"
-         data-total-items="{% if page_obj %}{{ page_obj.paginator.count }}{% else %}0{% endif %}">
+
+    <!-- Table view -->
+    <div id="hotelsTableView">
+        <div class="table-responsive">
+            <table class="hl-table">
+                <thead>
+                    <tr>
+                        <th>Hotel</th>
+                        <th class="hide-mobile">Ubicación</th>
+                        <th class="text-center">Categ.</th>
+                        <th class="text-center hide-mobile">Hab.</th>
+                        <th class="text-center">Puntuación</th>
+                        <th class="hide-mobile">Contacto</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for hotel in page_obj %}
+                    <tr>
+                        <td>
+                            <div class="tbl-hotel-info">
+                                <div class="tbl-avatar">{% if hotel.image %}<img data-src="{{ hotel.image.url }}" alt="{{ hotel.name }}" class="lazy-img" loading="lazy">{% else %}<i class="fas fa-hotel"></i>{% endif %}</div>
+                                <div>
+                                    <div class="tbl-hotel-name">{{ hotel.name }}</div>
+                                    <div class="tbl-hotel-date">{{ hotel.created_at|timesince }} ago</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="hide-mobile">
+                            <div class="tbl-location"><strong>{{ hotel.city }}</strong><small>{{ hotel.country }}</small></div>
+                        </td>
+                        <td class="text-center">
+                            {% if hotel.category == '1_star' %}<span class="cat-badge stars-1">1&#9733;</span>
+                            {% elif hotel.category == '2_star' %}<span class="cat-badge stars-2">2&#9733;</span>
+                            {% elif hotel.category == '3_star' %}<span class="cat-badge stars-3">3&#9733;</span>
+                            {% elif hotel.category == '4_star' %}<span class="cat-badge stars-4">4&#9733;</span>
+                            {% elif hotel.category == '5_star' %}<span class="cat-badge stars-5">5&#9733;</span>
+                            {% elif hotel.category == 'luxury' %}<span class="cat-badge luxury"><i class="fas fa-crown"></i></span>
+                            {% else %}<span class="cat-badge default">{{ hotel.get_category_display }}</span>{% endif %}
+                        </td>
+                        <td class="text-center hide-mobile"><span class="tbl-rooms">{{ hotel.total_rooms }}</span></td>
+                        <td class="text-center">
+                            {% with avg=hotel.get_average_assessment_percentage %}
+                            {% if avg %}<span class="hl-score-sm {% if avg >= 80 %}s-success{% elif avg >= 60 %}s-warning{% else %}s-danger{% endif %}">{{ avg }}%</span>
+                            {% else %}<span class="hl-score-sm s-pending">—</span>{% endif %}
+                            {% endwith %}
+                        </td>
+                        <td class="hide-mobile">
+                            <div class="tbl-contact">
+                                {% if hotel.phone %}<small><i class="fas fa-phone"></i> {{ hotel.phone }}</small>{% endif %}
+                                {% if hotel.email %}<small><i class="fas fa-envelope"></i> {{ hotel.email }}</small>{% endif %}
+                                {% if not hotel.phone and not hotel.email %}<small style="color:#9ca3af;"><i class="fas fa-minus"></i> Sin contacto</small>{% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="tbl-actions">
+                                <a href="{% url 'risk_hoteles:hotel_detail' hotel.id %}" class="tbl-btn view" title="Ver"><i class="fas fa-eye"></i></a>
+                                {% if hotel.get_assessment_count > 0 %}<a href="{% url 'risk_hoteles:reporte_general' hotel.id %}" class="tbl-btn report" title="Reporte General"><i class="fas fa-chart-bar"></i></a>{% else %}<button class="tbl-btn report" disabled title="Sin evaluaciones para reportar"><i class="fas fa-chart-bar"></i></button>{% endif %}
+                                {% if can_create %}{% if hotel.tiene_evaluaciones_progreso %}<button class="tbl-btn analyze" disabled title="En progreso"><i class="fas fa-clock"></i></button>
+                                {% else %}<a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" class="tbl-btn analyze" title="Evaluar"><i class="fas fa-chart-line"></i></a>{% endif %}{% endif %}
+                                {% if can_update %}<button class="tbl-btn edit" onclick="editHotel('{{ hotel.id }}')" title="Editar"><i class="fas fa-edit"></i></button>{% endif %}
+                                {% if can_delete %}<button class="tbl-btn delete" onclick="confirmDelete('{{ hotel.id }}', '{{ hotel.name|escapejs }}')" title="Eliminar"><i class="fas fa-trash"></i></button>{% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="hl-pagination-wrap">
+        <div class="hl-pagination-info">Página <strong>{{ page_obj.number }}</strong> de <strong>{{ page_obj.paginator.num_pages }}</strong></div>
+        <ul class="hl-pagination">
+            {% if page_obj.has_previous %}
+            <li><a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Primera"><i class="fas fa-angle-double-left"></i></a></li>
+            <li><a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Anterior"><i class="fas fa-angle-left"></i></a></li>
+            {% else %}
+            <li class="disabled"><span><i class="fas fa-angle-double-left"></i></span></li>
+            <li class="disabled"><span><i class="fas fa-angle-left"></i></span></li>
+            {% endif %}
+            {% for page_num in page_obj.paginator.page_range %}
+                {% if page_num == page_obj.number %}
+                    <li class="active"><span>{{ page_num }}</span></li>
+                {% elif page_num > page_obj.number|add:"-3" and page_num < page_obj.number|add:"3" %}
+                    <li><a href="?page={{ page_num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ page_num }}</a></li>
+                {% elif page_num == 1 and page_obj.number > 4 %}
+                    <li><a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">1</a></li>
+                    <li class="disabled"><span>…</span></li>
+                {% elif page_num == page_obj.paginator.num_pages and page_obj.number < page_obj.paginator.num_pages|add:"-3" %}
+                    <li class="disabled"><span>…</span></li>
+                    <li><a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}">{{ page_obj.paginator.num_pages }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Siguiente"><i class="fas fa-angle-right"></i></a></li>
+            <li><a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if category_filter %}&category={{ category_filter }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" title="Última"><i class="fas fa-angle-double-right"></i></a></li>
+            {% else %}
+            <li class="disabled"><span><i class="fas fa-angle-right"></i></span></li>
+            <li class="disabled"><span><i class="fas fa-angle-double-right"></i></span></li>
+            {% endif %}
+        </ul>
+        <div class="hl-jump-wrap">
+            <span>Ir a:</span>
+            <input type="number" id="jumpToPage" class="hl-jump-input" min="1" max="{{ page_obj.paginator.num_pages }}" placeholder="{{ page_obj.number }}">
+            <button onclick="jumpToPage()" class="hl-jump-btn"><i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty state -->
+    <div class="hl-empty">
+        <div class="hl-empty-icon"><i class="fas fa-hotel"></i></div>
+        <h4>{% if search_query or category_filter %}Sin resultados para tu búsqueda{% else %}Aún no tienes hoteles registrados{% endif %}</h4>
+        <p>
+            {% if search_query or category_filter %}No encontramos hoteles que coincidan con los filtros aplicados. Prueba con otros términos o limpia los filtros.
+            {% else %}Registra tu primer hotel y comienza a evaluar el riesgo de seguridad de tus propiedades hoteleras.{% endif %}
+        </p>
+        {% if search_query or category_filter %}<a href="{% url 'risk_hoteles:hotel_list' %}" class="btn btn-outline-secondary me-2"><i class="fas fa-times me-1"></i> Limpiar filtros</a>{% endif %}
+        {% if can_create %}<button type="button" class="btn btn-primary" onclick="openCreateModal()"><i class="fas fa-plus me-2"></i>{% if search_query or category_filter %}Agregar Hotel{% else %}Registrar primer hotel{% endif %}</button>{% endif %}
+    </div>
+    {% endif %}
+
 </div>
 
-<!-- Modal de confirmación para eliminar hotel -->
-<div class="modal fade" id="deleteHotelModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle"></i> Confirmar Eliminación
-                </h5>
+<div id="paginationMeta" style="display:none;"
+     data-current-page="{% if page_obj %}{{ page_obj.number }}{% else %}1{% endif %}"
+     data-max-pages="{% if page_obj %}{{ page_obj.paginator.num_pages }}{% else %}1{% endif %}">
+</div>
+
+<!-- Modal: Eliminar Hotel -->
+<div class="modal fade" id="deleteHotelModal" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-danger">
+                <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i> Confirmar eliminación</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <i class="fas fa-hotel fa-3x text-danger mb-3"></i>
-                    <h5>¿Está seguro de que desea eliminar el hotel?</h5>
-                    <p class="mb-3">
-                        <strong id="deleteHotelName" class="text-danger"></strong>
-                    </p>
-                    <div class="alert alert-warning" role="alert">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Advertencia:</strong> Esta acción no se puede deshacer. 
-                        Se eliminarán todos los análisis de riesgo asociados a este hotel.
-                    </div>
+            <div class="modal-body text-center py-4">
+                <div style="width:64px;height:64px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;font-size:1.75rem;color:#dc2626;">
+                    <i class="fas fa-hotel"></i>
+                </div>
+                <h5 class="mb-2">¿Eliminar este hotel?</h5>
+                <p class="text-muted mb-3">Vas a eliminar <strong id="deleteHotelName" class="text-danger"></strong></p>
+                <div class="alert alert-warning text-start" style="font-size:.875rem;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Advertencia:</strong> Esta acción es irreversible. Se eliminarán todos los análisis de riesgo asociados.
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Cancelar
-                </button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                    <i class="fas fa-trash"></i> Eliminar Hotel
-                </button>
+            <div class="modal-footer justify-content-center gap-2">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn"><i class="fas fa-trash me-1"></i> Sí, eliminar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal para agregar/editar hotel -->
-<div class="modal fade" id="addHotelModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="hotelModalTitle">
-                    <i class="fas fa-hotel"></i> <span id="modalTitleText">Registrar Hotel para Evaluación</span>
-                </h5>
+<!-- Modal: Agregar / Editar Hotel -->
+<div class="modal fade" id="addHotelModal" tabindex="-1" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header modal-header-gradient">
+                <h5 class="modal-title"><i class="fas fa-hotel me-2"></i><span id="modalTitleText">Registrar Hotel</span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form id="addHotelForm" method="post">
-                <div class="modal-body">
+            <form id="addHotelForm" method="post" novalidate>
+                <div class="modal-body p-4">
                     {% csrf_token %}
-                    <input type="hidden" id="hotelId" name="hotel_id" value="">
-                    <input type="hidden" id="formMode" name="mode" value="create">
-                    
-                    <!-- Información Básica (Obligatoria) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-primary mb-4">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-info-circle"></i> Información Básica
-                                        <small class="text-light ms-2">(Campos obligatorios)</small>
-                                    </h6>
+                    <input type="hidden" id="hotelId"  name="hotel_id" value="">
+                    <input type="hidden" id="formMode" name="mode"     value="create">
+                    <!-- Información básica -->
+                    <div class="form-section">
+                        <div class="form-section-header fsh-primary"><i class="fas fa-info-circle"></i> Información Básica <small class="opacity-75 ms-1">(obligatorio)</small></div>
+                        <div class="form-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="nombre" class="form-label fw-semibold">Nombre del Hotel <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="nombre" name="name" required placeholder="Ej: Hotel Paradise Resort">
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-8 mb-3">
-                                            <label for="nombre" class="form-label">Nombre del Hotel <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" id="nombre" name="name" required
-                                                   placeholder="Ej: Hotel Paradise Resort">
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="categoria_estrellas" class="form-label">Categoría <span class="text-danger">*</span></label>
-                                                <select class="form-select" id="categoria_estrellas" name="category" required>
-                                                    <option value="">Seleccionar...</option>
-                                                    {% for value, label in hotel_categories %}
-                                                    <option value="{{ value }}">{{ label }}</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="numero_habitaciones" class="form-label">N° Habitaciones <span class="text-danger">*</span></label>
-                                                <input type="number" class="form-control" id="numero_habitaciones" 
-                                                       name="total_rooms" min="1" required placeholder="Ej: 50">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="col-md-4">
+                                    <label for="categoria_estrellas" class="form-label fw-semibold">Categoría <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="categoria_estrellas" name="category" required>
+                                        <option value="">Seleccionar…</option>
+                                        {% for value, label in hotel_categories %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="numero_habitaciones" class="form-label fw-semibold">N.° Habitaciones <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" id="numero_habitaciones" name="total_rooms" min="1" required placeholder="Ej: 50">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Ubicación (Obligatoria) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-warning mb-4">
-                                <div class="card-header bg-warning text-dark">
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-map-marker-alt"></i> Ubicación
-                                        <small class="ms-2">(Campos obligatorios)</small>
-                                    </h6>
+                    <!-- Ubicación -->
+                    <div class="form-section">
+                        <div class="form-section-header fsh-warning"><i class="fas fa-map-marker-alt"></i> Ubicación <small class="opacity-75 ms-1">(obligatorio)</small></div>
+                        <div class="form-section-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="direccion" class="form-label fw-semibold">Dirección Completa <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="direccion" name="address" rows="2" required placeholder="Ej: Calle 123 #45-67, Zona Rosa"></textarea>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label for="direccion" class="form-label">Dirección Completa <span class="text-danger">*</span></label>
-                                            <textarea class="form-control" id="direccion" name="address" rows="2" required 
-                                                      placeholder="Ej: Calle 123 #45-67, Zona Rosa"></textarea>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="ciudad" class="form-label">Ciudad <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="ciudad" name="city" required
-                                                       placeholder="Ej: Bogotá">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="pais" class="form-label">País <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="pais" name="country" required
-                                                       placeholder="Ej: Colombia" value="Colombia">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="col-md-6">
+                                    <label for="ciudad" class="form-label fw-semibold">Ciudad <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="ciudad" name="city" required placeholder="Ej: Bogotá">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="pais" class="form-label fw-semibold">País <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="pais" name="country" required placeholder="Ej: Colombia" value="Colombia">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Información de Contacto (Opcional) -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card border-info mb-4">
-                                <div class="card-header bg-info text-white">
-                                    <h6 class="mb-0">
-                                        <i class="fas fa-phone"></i> Información de Contacto
-                                        <small class="text-light ms-2">(Campos opcionales)</small>
-                                    </h6>
+                    <!-- Contacto -->
+                    <div class="form-section mb-0">
+                        <div class="form-section-header fsh-info"><i class="fas fa-phone"></i> Contacto <small class="opacity-75 ms-1">(opcional)</small></div>
+                        <div class="form-section-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="telefono_principal" class="form-label fw-semibold">Teléfono</label>
+                                    <input type="tel" class="form-control" id="telefono_principal" name="phone" placeholder="Ej: +57 1 234 5678">
                                 </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="telefono_principal" class="form-label">Teléfono</label>
-                                                <input type="tel" class="form-control" id="telefono_principal" name="phone"
-                                                       placeholder="Ej: +57 1 234 5678">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="email_principal" class="form-label">Email</label>
-                                                <input type="email" class="form-control" id="email_principal" name="email"
-                                                       placeholder="Ej: contacto@hotel.com">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="mb-3">
-                                                <label for="sitio_web" class="form-label">Sitio Web</label>
-                                                <input type="url" class="form-control" id="sitio_web" name="website" 
-                                                       placeholder="https://www.hotel.com">
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div class="col-md-4">
+                                    <label for="email_principal" class="form-label fw-semibold">Email</label>
+                                    <input type="email" class="form-control" id="email_principal" name="email" placeholder="Ej: contacto@hotel.com">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="sitio_web" class="form-label fw-semibold">Sitio Web</label>
+                                    <input type="url" class="form-control" id="sitio_web" name="website" placeholder="https://www.hotel.com">
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Mensaje de respuesta -->
-                    <div id="modalMessage" class="alert" style="display: none;"></div>
+                    <div id="modalMessage" class="alert mt-3" style="display:none;"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="btnGuardarHotel">
-                        <i class="fas fa-save"></i> <span id="btnText">Registrar Hotel</span>
-                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-1"></i> Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardarHotel"><i class="fas fa-save me-1"></i> <span id="btnText">Registrar Hotel</span></button>
                 </div>
             </form>
         </div>
@@ -1214,954 +615,200 @@
 
 {% block extra_js %}
 <script>
-// =================== JAVASCRIPT OPTIMIZADO PARA HOTEL LIST ===================
+'use strict';
 
-// =================== CONFIGURACIÓN Y CONSTANTES ===================
-const CONFIG = {
-    CSS: {
-        BOOTSTRAP_CDN: 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
-        FONTAWESOME_CDN: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
-    },
-    ANIMATIONS: {
-        SKELETON_DURATION: 1500,
-        NOTIFICATION_DURATION: 5000,
-        HOVER_DELAY: 200
-    },
-    BADGE_COLORS: {
-        'stars-1': 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-        'stars-2': 'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)', 
-        'stars-3': 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        'stars-4': 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        'stars-5': 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-        'luxury': 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
-        'default': 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)'
+const DEBUG = {% if debug %}true{% else %}false{% endif %};
+const log = (msg, data) => { if (DEBUG) console.log('[HotelList] ' + msg, data ?? ''); };
+
+const Toast = {
+    show(type, message, duration) {
+        duration = duration ?? 4500;
+        document.querySelectorAll('.hl-toast').forEach(t => t.remove());
+        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle' };
+        const el = document.createElement('div');
+        el.className = 'hl-toast ' + type;
+        el.innerHTML = '<i class="fas ' + (icons[type] ?? icons.info) + ' hl-toast-icon"></i><span class="hl-toast-msg">' + message + '</span><button class="hl-toast-close" onclick="this.closest(\'.hl-toast\').remove()"><i class="fas fa-times"></i></button>';
+        document.body.appendChild(el);
+        requestAnimationFrame(() => el.classList.add('show'));
+        setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 350); }, duration);
     }
 };
 
-// =================== UTILIDADES GENERALES ===================
-const Utils = {
-    // Configuración de debug (controlar desde Django settings o URL params)
-    DEBUG_MODE: {% if debug %}true{% else %}false{% endif %} || window.location.search.includes('debug=1'),
-    
-    // Obtener CSRF token de forma segura
-    getCSRFToken() {
-        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (!csrfInput) {
-            if (this.DEBUG_MODE) console.error('❌ CSRF token no encontrado');
-            return null;
-        }
-        return csrfInput.value;
-    },
-
-    // Debounce para eventos frecuentes
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    },
-
-    // Logging inteligente (producción vs desarrollo)
-    log(level, message, data = null) {
-        if (!this.DEBUG_MODE) return; // Silenciar logs en producción
-        
-        const emoji = { info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌' };
-        const fn = console[level] || console.log;
-        fn(`${emoji[level]} ${message}`, data || '');
-    },
-
-    // Método para habilitar debug en tiempo de ejecución
-    enableDebug() {
-        this.DEBUG_MODE = true;
-        this.log('info', '🔧 Modo debug activado manualmente');
-        return 'Debug mode enabled. Los logs ahora son visibles.';
-    },
-
-    // Método para deshabilitar debug
-    disableDebug() {
-        this.log('info', '🔇 Desactivando modo debug');
-        this.DEBUG_MODE = false;
-        return 'Debug mode disabled. Los logs están silenciados.';
-    },
-
-    // Helper para logs de error críticos (siempre visibles)
-    logError(message, error = null) {
-        console.error(`❌ ${message}`, error || '');
-    },
-
-    // Helper para logs de performance (solo en debug)
-    logPerformance(label, startTime) {
-        if (!this.DEBUG_MODE) return;
-        const duration = performance.now() - startTime;
-        console.log(`⏱️ ${label}: ${duration.toFixed(2)}ms`);
+function initLazyLoad() {
+    const imgs = document.querySelectorAll('img.lazy-img[data-src]');
+    if (!imgs.length) return;
+    if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.src = e.target.dataset.src; e.target.removeAttribute('data-src'); obs.unobserve(e.target); } });
+        }, { rootMargin: '50px' });
+        imgs.forEach(img => obs.observe(img));
+    } else {
+        imgs.forEach(img => { img.src = img.dataset.src; img.removeAttribute('data-src'); });
     }
-};
-
-// =================== SISTEMA DE NOTIFICACIONES OPTIMIZADO ===================
-const NotificationSystem = {
-    show(type, message) {
-        // Remover notificaciones existentes
-        document.querySelectorAll('.toast-notification').forEach(n => n.remove());
-        
-        const notification = this.createElement(type, message);
-        document.body.appendChild(notification);
-        
-        // Animar entrada y auto-remover
-        requestAnimationFrame(() => {
-            notification.style.opacity = '1';
-            notification.style.transform = 'translateY(0)';
-        });
-        
-        setTimeout(() => this.hide(notification), CONFIG.ANIMATIONS.NOTIFICATION_DURATION);
-    },
-
-    createElement(type, message) {
-        const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'info' ? 'info' : 'danger'} toast-notification`;
-        notification.style.cssText = `
-            position: fixed; top: 20px; right: 20px; z-index: 9999;
-            min-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            border: none; border-radius: 8px; opacity: 0;
-            transform: translateY(-20px); transition: all 0.3s ease;
-        `;
-        
-        const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
-        notification.innerHTML = `
-            <i class="${icon}"></i> ${message}
-            <button type="button" class="btn-close ms-2" onclick="this.parentElement.remove()"></button>
-        `;
-        
-        return notification;
-    },
-
-    hide(notification) {
-        notification.style.opacity = '0';
-        notification.style.transform = 'translateY(-20px)';
-        setTimeout(() => notification.remove(), 300);
-    }
-};
-
-// =================== SISTEMA DE BADGES DE CATEGORÍA OPTIMIZADO ===================
-const CategoryBadgeSystem = {
-    styleCache: new Map(),
-
-    applyStyles() {
-        const badges = document.querySelectorAll('.category-badge');
-        Utils.log('info', `🎨 Aplicando estilos a ${badges.length} badges`);
-        
-        badges.forEach((badge, index) => {
-            this.styleBadge(badge, index);
-        });
-        
-        return badges.length;
-    },
-
-    styleBadge(badge, index = 0) {
-        const cacheKey = badge.className;
-        
-        // Usar caché si está disponible
-        if (this.styleCache.has(cacheKey)) {
-            const cachedStyle = this.styleCache.get(cacheKey);
-            Object.assign(badge.style, cachedStyle.base);
-            if (cachedStyle.background) badge.style.background = cachedStyle.background;
-            if (cachedStyle.border) badge.style.border = cachedStyle.border;
-            return;
-        }
-
-        // Aplicar estilos base
-        const baseStyles = {
-            display: 'inline-block',
-            padding: '0.25rem 0.5rem',
-            borderRadius: '12px',
-            fontSize: '0.7rem',
-            color: 'white',
-            fontWeight: '600',
-            textTransform: 'uppercase',
-            minWidth: '50px',
-            textAlign: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-            border: 'none',
-            whiteSpace: 'nowrap',
-            letterSpacing: '0.025em',
-            transition: 'all 0.2s ease'
-        };
-
-        Object.assign(badge.style, baseStyles);
-
-        // Aplicar color específico
-        const colorInfo = this.getColorForBadge(badge);
-        badge.style.background = colorInfo.background;
-        if (colorInfo.border) badge.style.border = colorInfo.border;
-
-        // Guardar en caché
-        this.styleCache.set(cacheKey, {
-            base: baseStyles,
-            background: colorInfo.background,
-            border: colorInfo.border
-        });
-
-        // Agregar eventos hover si no existen
-        if (!badge.hasAttribute('data-hover-attached')) {
-            this.attachHoverEvents(badge);
-            badge.setAttribute('data-hover-attached', 'true');
-        }
-    },
-
-    getColorForBadge(badge) {
-        for (const [className, color] of Object.entries(CONFIG.BADGE_COLORS)) {
-            if (badge.classList.contains(className)) {
-                return {
-                    background: color,
-                    border: className === 'luxury' ? '2px solid #ffd700' : null
-                };
-            }
-        }
-        return { background: CONFIG.BADGE_COLORS.default };
-    },
-
-    attachHoverEvents(badge) {
-        badge.addEventListener('mouseenter', () => {
-            badge.style.transform = 'translateY(-1px)';
-            badge.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
-        });
-
-        badge.addEventListener('mouseleave', () => {
-            badge.style.transform = 'translateY(0)';
-            badge.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
-        });
-    },
-
-    // Observador de mutaciones optimizado
-    setupObserver() {
-        const observer = new MutationObserver(Utils.debounce((mutations) => {
-            let newBadgesFound = false;
-            
-            mutations.forEach(mutation => {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        const badges = node.classList?.contains('category-badge') ? [node] : 
-                                     node.querySelectorAll?.('.category-badge') || [];
-                        
-                        if (badges.length > 0) {
-                            newBadgesFound = true;
-                        }
-                    }
-                });
-            });
-            
-            if (newBadgesFound) {
-                Utils.log('info', '🔄 Aplicando estilos a nuevos elementos');
-                this.applyStyles();
-            }
-        }, 100));
-
-        const hotelsContainer = document.getElementById('hotelsTableBody');
-        if (hotelsContainer) {
-            observer.observe(hotelsContainer, { childList: true, subtree: true });
-            Utils.log('success', '👁️ Observador configurado en #hotelsTableBody');
-        }
-    }
-};
-
-// =================== SISTEMA DE DIAGNÓSTICO CSS SIMPLIFICADO ===================
-const CSSManager = {
-    diagnose() {
-        Utils.log('info', '🔍 Iniciando diagnóstico CSS');
-        
-        const checks = {
-            bootstrap: this.checkBootstrap(),
-            fontAwesome: this.checkFontAwesome(),
-            badges: this.checkBadges()
-        };
-
-        const problems = Object.values(checks).filter(check => !check.status).length;
-        
-        if (problems === 0) {
-            Utils.log('success', '🎉 Todos los CSS funcionan correctamente');
-            NotificationSystem.show('success', '🎉 Todos los estilos funcionan perfectamente');
-        } else {
-            Utils.log('warning', `⚠️ ${problems} problema(s) detectado(s), aplicando correcciones`);
-            this.applyFixes(checks);
-        }
-
-        return checks;
-    },
-
-    checkBootstrap() {
-        const loaded = typeof bootstrap !== 'undefined' || !!document.querySelector('link[href*="bootstrap"]');
-        return { status: loaded, name: 'Bootstrap' };
-    },
-
-    checkFontAwesome() {
-        const loaded = !!document.querySelector('link[href*="font-awesome"]') || !!document.querySelector('i[class*="fa"]');
-        return { status: loaded, name: 'Font Awesome' };
-    },
-
-    checkBadges() {
-        const badges = document.querySelectorAll('.category-badge');
-        const styledBadges = document.querySelectorAll('.category-badge[style*="background"]');
-        return { 
-            status: badges.length === styledBadges.length && badges.length > 0, 
-            name: 'Category Badges',
-            count: badges.length,
-            styledCount: styledBadges.length
-        };
-    },
-
-    applyFixes(checks) {
-        if (!checks.bootstrap.status) this.loadBootstrap();
-        if (!checks.fontAwesome.status) this.loadFontAwesome();
-        if (!checks.badges.status) {
-            const styledCount = CategoryBadgeSystem.applyStyles();
-            Utils.log('success', `🎨 ${styledCount} badges corregidos`);
-            // Notificación removida: era demasiado intrusiva para auto-corrección
-        }
-    },
-
-    loadBootstrap() {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CONFIG.CSS.BOOTSTRAP_CDN;
-        link.onload = () => Utils.log('success', '✅ Bootstrap cargado como fallback');
-        link.onerror = () => Utils.log('error', '❌ Error cargando Bootstrap fallback');
-        document.head.appendChild(link);
-    },
-
-    loadFontAwesome() {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = CONFIG.CSS.FONTAWESOME_CDN;
-        link.onload = () => Utils.log('success', '✅ Font Awesome cargado como fallback');
-        link.onerror = () => Utils.log('error', '❌ Error cargando Font Awesome fallback');
-        document.head.appendChild(link);
-    }
-};
-
-// =================== SISTEMA DE LAZY LOADING Y SKELETON OPTIMIZADO ===================
-const LazyLoadingSystem = {
-    initialized: false,
-
-    init() {
-        if (this.initialized) return;
-        
-        const lazyImages = document.querySelectorAll('img[data-src]');
-        
-        if (!lazyImages.length) {
-            Utils.log('info', '📷 No hay imágenes lazy para cargar');
-            return;
-        }
-
-        if ('IntersectionObserver' in window) {
-            this.setupIntersectionObserver(lazyImages);
-        } else {
-            this.loadAllImages(lazyImages);
-        }
-        
-        this.initialized = true;
-        Utils.log('success', `📷 Lazy loading inicializado para ${lazyImages.length} imágenes`);
-    },
-
-    setupIntersectionObserver(images) {
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    this.loadImage(entry.target);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '50px' });
-
-        images.forEach(img => observer.observe(img));
-    },
-
-    loadAllImages(images) {
-        images.forEach(img => this.loadImage(img));
-    },
-
-    loadImage(img) {
-        img.src = img.dataset.src;
-        img.classList.add('loaded');
-        img.removeAttribute('data-src');
-        // Logging solo en modo debug
-        if (Utils.DEBUG_MODE) {
-            img.onload = () => Utils.log('info', `📷 Imagen cargada: ${img.src.substring(0, 50)}...`);
-        }
-    }
-};
-
-const SkeletonSystem = {
-    isVisible: false,
-
-    show() {
-        if (this.isVisible) return;
-        
-        const elements = this.getElements();
-        
-        // Mostrar skeleton y ocultar contenido
-        elements.skeletonRows.forEach(row => row.classList.add('show'));
-        elements.contentRows.forEach(row => row.style.display = 'none');
-        
-        if (elements.container) {
-            elements.container.classList.add('loading');
-        }
-        
-        this.isVisible = true;
-        Utils.log('info', '💀 Skeleton loading activado');
-    },
-
-    hide() {
-        if (!this.isVisible) return;
-        
-        const elements = this.getElements();
-        
-        // Ocultar skeleton y mostrar contenido
-        elements.skeletonRows.forEach(row => row.classList.remove('show'));
-        elements.contentRows.forEach(row => row.style.display = '');
-        
-        if (elements.container) {
-            elements.container.classList.remove('loading');
-        }
-        
-        this.isVisible = false;
-        Utils.log('info', '💀 Skeleton loading desactivado');
-        
-        // Re-inicializar lazy loading para nuevas imágenes
-        setTimeout(() => LazyLoadingSystem.init(), 100);
-    },
-
-    getElements() {
-        return {
-            skeletonRows: document.querySelectorAll('.skeleton-row'),
-            contentRows: document.querySelectorAll('#hotelsTableBody tr:not(.skeleton-row)'),
-            container: document.getElementById('hotelsContainer')
-        };
-    },
-
-    simulate() {
-        this.show();
-        setTimeout(() => this.hide(), CONFIG.ANIMATIONS.SKELETON_DURATION);
-    }
-};
-
-// =================== SISTEMA CRUD DE HOTELES OPTIMIZADO ===================
-const HotelCRUD = {
-    // Estado del formulario
-    formState: {
-        isSubmitting: false,
-        currentMode: 'create'
-    },
-
-    // Elementos del DOM cacheados
-    elements: {
-        form: null,
-        messageDiv: null,
-        submitBtn: null,
-        modal: null,
-        deleteModal: null,
-        
-        init() {
-            this.form = document.getElementById('addHotelForm');
-            this.messageDiv = document.getElementById('modalMessage');
-            this.submitBtn = document.getElementById('btnGuardarHotel');
-            this.modal = document.getElementById('addHotelModal');
-            this.deleteModal = document.getElementById('deleteHotelModal');
-        }
-    },
-
-    // URLs de endpoints
-    endpoints: {
-        create: '{% url "risk_hoteles:create_hotel_ajax" %}',
-        update: '{% url "risk_hoteles:update_hotel_ajax" %}',
-        get: (id) => `/risk-hoteles/ajax/obtener-hotel/${id}/`,
-        delete: (id) => `/risk-hoteles/ajax/eliminar-hotel/${id}/`
-    },
-
-    init() {
-        this.elements.init();
-        this.attachEventListeners();
-    },
-
-    attachEventListeners() {
-        // Envío del formulario
-        if (this.elements.form) {
-            this.elements.form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.save();
-            });
-        }
-
-        // Eventos del modal
-        if (this.elements.modal) {
-            this.elements.modal.addEventListener('hidden.bs.modal', () => this.resetForm());
-            this.elements.modal.addEventListener('shown.bs.modal', () => this.focusFirstField());
-        }
-
-        // Limpiar modal de eliminación
-        if (this.elements.deleteModal) {
-            this.elements.deleteModal.addEventListener('hidden.bs.modal', () => this.resetDeleteModal());
-        }
-    },
-
-    // Guardar hotel (crear o actualizar)
-    save() {
-        if (this.formState.isSubmitting) return;
-
-        const csrfToken = Utils.getCSRFToken();
-        if (!csrfToken) {
-            NotificationSystem.show('error', 'Error de seguridad. Recarga la página e inténtalo de nuevo.');
-            return;
-        }
-
-        this.setSubmittingState(true);
-        
-        const formData = new FormData(this.elements.form);
-        const mode = document.getElementById('formMode').value;
-        const url = mode === 'edit' ? this.endpoints.update : this.endpoints.create;
-
-        fetch(url, {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-CSRFToken': csrfToken }
-        })
-        .then(response => response.json())
-        .then(data => this.handleSaveResponse(data, mode))
-        .catch(error => this.handleSaveError(error))
-        .finally(() => this.setSubmittingState(false));
-    },
-
-    handleSaveResponse(data, mode) {
-        if (data.success) {
-            this.showMessage('success', data.message);
-            setTimeout(() => {
-                bootstrap.Modal.getOrCreateInstance(this.elements.modal).hide();
-                window.location.reload();
-            }, 2000);
-        } else {
-            this.showMessage('error', data.message);
-        }
-    },
-
-    handleSaveError(error) {
-        Utils.log('error', 'Error en CRUD:', error);
-        this.showMessage('error', 'No se pudo procesar la solicitud. Inténtalo de nuevo.');
-    },
-
-    // Editar hotel
-    edit(hotelId) {
-        const csrfToken = Utils.getCSRFToken();
-        if (!csrfToken) {
-            NotificationSystem.show('error', 'Error de seguridad. Recarga la página e inténtalo de nuevo.');
-            return;
-        }
-
-        this.configureModal('edit', 'Editar Hotel', 'Actualizar Hotel');
-        document.getElementById('hotelId').value = hotelId;
-
-        fetch(this.endpoints.get(hotelId), {
-            method: 'GET',
-            headers: { 'X-CSRFToken': csrfToken }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                this.populateForm(data.hotel);
-                bootstrap.Modal.getOrCreateInstance(this.elements.modal).show();
-            } else {
-                NotificationSystem.show('error', `Error al cargar datos: ${data.message}`);
-            }
-        })
-        .catch(error => {
-            Utils.log('error', 'Error cargando hotel:', error);
-            NotificationSystem.show('error', 'Error al cargar los datos del hotel');
-        });
-    },
-
-    // Crear nuevo hotel
-    create() {
-        this.configureModal('create', 'Registrar Hotel para Evaluación', 'Registrar Hotel');
-        this.resetForm();
-        document.getElementById('pais').value = 'Colombia';
-        bootstrap.Modal.getOrCreateInstance(this.elements.modal).show();
-    },
-
-    // Eliminar hotel
-    confirmDelete(hotelId, hotelName) {
-        Utils.log('info', `Preparando eliminación de hotel: ${hotelId} - ${hotelName}`);
-        
-        document.getElementById('deleteHotelName').textContent = `"${hotelName}"`;
-        
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        confirmBtn.onclick = () => this.delete(hotelId, hotelName);
-        
-        bootstrap.Modal.getOrCreateInstance(this.elements.deleteModal).show();
-    },
-
-    delete(hotelId, hotelName) {
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        const csrfToken = Utils.getCSRFToken();
-        
-        if (!csrfToken) {
-            NotificationSystem.show('error', 'Error de seguridad. Recarga la página e inténtalo de nuevo.');
-            return;
-        }
-
-        // Deshabilitar botón
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
-
-        fetch(this.endpoints.delete(hotelId), {
-            method: 'DELETE',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                this.elements.deleteModal.modal('hide');
-                NotificationSystem.show('success', `Hotel "${hotelName}" eliminado exitosamente`);
-                setTimeout(() => window.location.reload(), 1500);
-            } else {
-                NotificationSystem.show('error', data.message || 'Error al eliminar el hotel');
-            }
-        })
-        .catch(error => {
-            Utils.log('error', 'Error eliminando hotel:', error);
-            NotificationSystem.show('error', 'Error de conexión. Inténtalo de nuevo.');
-        })
-        .finally(() => {
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar Hotel';
-        });
-    },
-
-    // Utilidades
-    configureModal(mode, title, btnText) {
-        this.formState.currentMode = mode;
-        document.getElementById('modalTitleText').textContent = title;
-        document.getElementById('btnText').textContent = btnText;
-        document.getElementById('formMode').value = mode;
-        this.hideMessage();
-    },
-
-    populateForm(hotel) {
-        const fields = {
-            'nombre': hotel.name,
-            'direccion': hotel.address,
-            'ciudad': hotel.city,
-            'pais': hotel.country,
-            'categoria_estrellas': hotel.category,
-            'numero_habitaciones': hotel.total_rooms,
-            'telefono_principal': hotel.phone,
-            'email_principal': hotel.email,
-            'sitio_web': hotel.website
-        };
-
-        Object.entries(fields).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) element.value = value || '';
-        });
-    },
-
-    setSubmittingState(isSubmitting) {
-        this.formState.isSubmitting = isSubmitting;
-        
-        if (this.elements.submitBtn) {
-            this.elements.submitBtn.disabled = isSubmitting;
-            
-            if (isSubmitting) {
-                this.elements.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
-            } else {
-                const mode = this.formState.currentMode;
-                const btnText = mode === 'edit' ? 'Actualizar Hotel' : 'Registrar Hotel';
-                this.elements.submitBtn.innerHTML = `<i class="fas fa-save"></i> ${btnText}`;
-            }
-        }
-    },
-
-    showMessage(type, message) {
-        if (!this.elements.messageDiv) return;
-        
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
-        const title = type === 'success' ? '¡Éxito!' : 'Error:';
-        
-        this.elements.messageDiv.className = `alert ${alertClass}`;
-        this.elements.messageDiv.innerHTML = `<i class="${icon}"></i> <strong>${title}</strong> ${message}`;
-        this.elements.messageDiv.style.display = 'block';
-    },
-
-    hideMessage() {
-        if (this.elements.messageDiv) {
-            this.elements.messageDiv.style.display = 'none';
-        }
-    },
-
-    resetForm() {
-        if (this.elements.form) {
-            this.elements.form.reset();
-        }
-        
-        this.formState.currentMode = 'create';
-        document.getElementById('formMode').value = 'create';
-        document.getElementById('hotelId').value = '';
-        this.hideMessage();
-    },
-
-    resetDeleteModal() {
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        if (confirmBtn) {
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar Hotel';
-            confirmBtn.onclick = null;
-        }
-    },
-
-    focusFirstField() {
-        const firstField = document.getElementById('nombre');
-        if (firstField) firstField.focus();
-    }
-};
-
-// Funciones globales para compatibilidad (mantener API existente)
-function saveHotel() { HotelCRUD.save(); }
-function editHotel(hotelId) { HotelCRUD.edit(hotelId); }
-function openCreateModal() { HotelCRUD.create(); }
-function confirmDelete(hotelId, hotelName) { HotelCRUD.confirmDelete(hotelId, hotelName); }
-
-// =================== FUNCIONES DE PAGINACIÓN MEJORADA ===================
-function changeItemsPerPage(perPage) {
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('per_page', perPage);
-    urlParams.set('page', '1'); // Resetear a primera página
-    
-    // Mostrar skeleton loading durante la transición
-    SkeletonSystem.show();
-    
-    // Navegar a la nueva URL
-    window.location.href = window.location.pathname + '?' + urlParams.toString();
+}
+
+function computeStats() {
+    const rings = document.querySelectorAll('#hotelsTableView .hl-score-sm');
+    let evaluated = 0, pending = 0;
+    rings.forEach(r => r.classList.contains('s-pending') ? pending++ : evaluated++);
+    const inProgress = document.querySelectorAll('#hotelsTableView .tbl-btn.analyze[disabled]').length;
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('stat-evaluated',   evaluated);
+    set('stat-pending',     pending);
+    set('stat-in-progress', inProgress);
+}
+
+function changePerPage(val) {
+    const p = new URLSearchParams(window.location.search);
+    p.set('per_page', val); p.set('page', '1');
+    window.location.href = window.location.pathname + '?' + p;
 }
 
 function jumpToPage() {
     const input = document.getElementById('jumpToPage');
-    const pageNumber = parseInt(input.value);
-    
-    // Buscar datos en el contenedor de paginación o en el elemento fallback
-    const paginationContainer = document.querySelector('.pagination-container') || document.getElementById('paginationData');
-    const maxPages = parseInt(paginationContainer?.getAttribute('data-max-pages')) || 1;
-    const currentPage = parseInt(paginationContainer?.getAttribute('data-current-page')) || 1;
-    
-    if (!pageNumber || pageNumber < 1 || pageNumber > maxPages) {
-        NotificationSystem.show('error', `Por favor ingresa un número válido entre 1 y ${maxPages}`);
-        input.value = '';
-        return;
-    }
-    
-    if (pageNumber === currentPage) {
-        NotificationSystem.show('info', 'Ya estás en esa página');
-        input.value = '';
-        return;
-    }
-    
-    // Construir URL con parámetros existentes
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('page', pageNumber);
-    
-    // Mostrar skeleton loading
-    SkeletonSystem.show();
-    
-    // Navegar a la página especificada
-    window.location.href = window.location.pathname + '?' + urlParams.toString();
+    const meta  = document.getElementById('paginationMeta');
+    const max   = parseInt(meta ? meta.dataset.maxPages : '1');
+    const cur   = parseInt(meta ? meta.dataset.currentPage : '1');
+    const page  = parseInt(input ? input.value : '0');
+    if (!page || page < 1 || page > max) { Toast.show('error', 'Ingresa un número entre 1 y ' + max); return; }
+    if (page === cur) { Toast.show('info', 'Ya estás en esa página'); return; }
+    const p = new URLSearchParams(window.location.search);
+    p.set('page', page);
+    window.location.href = window.location.pathname + '?' + p;
 }
 
-// Manejar Enter en el campo de salto a página
-function setupPaginationEvents() {
+const ENDPOINTS = {
+    create: '{% url "risk_hoteles:create_hotel_ajax" %}',
+    update: '{% url "risk_hoteles:update_hotel_ajax" %}',
+    get:    function(id) { return '/risk-hoteles/ajax/obtener-hotel/' + id + '/'; },
+    del:    function(id) { return '/risk-hoteles/ajax/eliminar-hotel/' + id + '/'; }
+};
+let _submitting = false;
+
+function getCSRF() {
+    const el = document.querySelector('[name=csrfmiddlewaretoken]');
+    return el ? el.value : null;
+}
+
+function openCreateModal() {
+    _configModal('create', 'Registrar Hotel', 'Registrar Hotel');
+    _resetForm();
+    document.getElementById('pais').value = 'Colombia';
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('addHotelModal')).show();
+}
+
+function editHotel(id) {
+    _configModal('edit', 'Editar Hotel', 'Actualizar Hotel');
+    document.getElementById('hotelId').value = id;
+    fetch(ENDPOINTS.get(id), { headers: { 'X-CSRFToken': getCSRF() } })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) { _populateForm(data.hotel); bootstrap.Modal.getOrCreateInstance(document.getElementById('addHotelModal')).show(); }
+            else Toast.show('error', data.message ?? 'Error al cargar los datos');
+        })
+        .catch(() => Toast.show('error', 'Error de conexión.'));
+}
+
+function confirmDelete(id, name) {
+    document.getElementById('deleteHotelName').textContent = '"' + name + '"';
+    document.getElementById('confirmDeleteBtn').onclick = function() { _deleteHotel(id, name); };
+    bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteHotelModal')).show();
+}
+
+function _deleteHotel(id, name) {
+    const btn  = document.getElementById('confirmDeleteBtn');
+    const csrf = getCSRF();
+    if (!csrf) { Toast.show('error', 'Error de seguridad. Recarga la página.'); return; }
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Eliminando\u2026';
+    fetch(ENDPOINTS.del(id), { method: 'DELETE', headers: { 'X-CSRFToken': csrf, 'Content-Type': 'application/json' } })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) { bootstrap.Modal.getOrCreateInstance(document.getElementById('deleteHotelModal')).hide(); Toast.show('success', 'Hotel "' + name + '" eliminado'); setTimeout(() => window.location.reload(), 1500); }
+            else Toast.show('error', data.message ?? 'No se pudo eliminar');
+        })
+        .catch(() => Toast.show('error', 'Error de conexión.'))
+        .finally(() => { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash me-1"></i> S\xed, eliminar'; });
+}
+
+function _handleFormSubmit(e) {
+    e.preventDefault();
+    if (_submitting) return;
+    const csrf = getCSRF();
+    if (!csrf) { Toast.show('error', 'Error de seguridad.'); return; }
+    _submitting = true;
+    const btn  = document.getElementById('btnGuardarHotel');
+    const mode = document.getElementById('formMode').value;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Procesando\u2026';
+    fetch(mode === 'edit' ? ENDPOINTS.update : ENDPOINTS.create, {
+        method: 'POST', body: new FormData(document.getElementById('addHotelForm')),
+        headers: { 'X-CSRFToken': csrf }
+    })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) { _showModalMsg('success', data.message); setTimeout(() => { bootstrap.Modal.getOrCreateInstance(document.getElementById('addHotelModal')).hide(); window.location.reload(); }, 1800); }
+            else _showModalMsg('error', data.message);
+        })
+        .catch(() => _showModalMsg('error', 'No se pudo procesar la solicitud.'))
+        .finally(() => { _submitting = false; btn.disabled = false; btn.innerHTML = '<i class="fas fa-save me-1"></i> ' + (mode === 'edit' ? 'Actualizar Hotel' : 'Registrar Hotel'); });
+}
+
+function _configModal(mode, title, btnText) {
+    document.getElementById('modalTitleText').textContent = title;
+    document.getElementById('btnText').textContent = btnText;
+    document.getElementById('formMode').value = mode;
+    _hideModalMsg();
+}
+
+function _populateForm(h) {
+    var map = { nombre: h.name, direccion: h.address, ciudad: h.city, pais: h.country, categoria_estrellas: h.category, numero_habitaciones: h.total_rooms, telefono_principal: h.phone, email_principal: h.email, sitio_web: h.website };
+    Object.entries(map).forEach(function(entry) { var el = document.getElementById(entry[0]); if (el) el.value = entry[1] ?? ''; });
+}
+
+function _resetForm() {
+    document.getElementById('addHotelForm').reset();
+    document.getElementById('hotelId').value = '';
+    document.getElementById('formMode').value = 'create';
+    _hideModalMsg();
+}
+
+function _showModalMsg(type, msg) {
+    const el = document.getElementById('modalMessage');
+    if (!el) return;
+    el.className = 'alert alert-' + (type === 'success' ? 'success' : 'danger') + ' mt-3';
+    el.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + ' me-2"></i>' + msg;
+    el.style.display = 'block';
+}
+
+function _hideModalMsg() { const el = document.getElementById('modalMessage'); if (el) el.style.display = 'none'; }
+
+document.addEventListener('DOMContentLoaded', function() {
+    log('Iniciando...');
+    const form = document.getElementById('addHotelForm');
+    if (form) form.addEventListener('submit', _handleFormSubmit);
+    const modal = document.getElementById('addHotelModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', _resetForm);
+        modal.addEventListener('shown.bs.modal',  function() { var f = document.getElementById('nombre'); if (f) f.focus(); });
+    }
+    const delModal = document.getElementById('deleteHotelModal');
+    if (delModal) delModal.addEventListener('hidden.bs.modal', function() {
+        const btn = document.getElementById('confirmDeleteBtn');
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash me-1"></i> S\xed, eliminar'; btn.onclick = null; }
+    });
+    ['category', 'sort'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', function() { document.getElementById('filterForm').submit(); });
+    });
     const jumpInput = document.getElementById('jumpToPage');
     if (jumpInput) {
-        jumpInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                jumpToPage();
-            }
-        });
-        
-        // Auto-focus y select en click
-        jumpInput.addEventListener('focus', function() {
-            setTimeout(() => this.select(), 50);
-        });
+        jumpInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); jumpToPage(); } });
+        jumpInput.addEventListener('focus',   function() { setTimeout(function() { jumpInput.select(); }, 50); });
     }
-    
-    // Agregar tooltips informativos
-    const paginationTooltips = document.querySelectorAll('[title]');
-    paginationTooltips.forEach(element => {
-        element.addEventListener('mouseenter', function() {
-            // Bootstrap tooltip si está disponible
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                new bootstrap.Tooltip(this);
-            }
-        });
-    });
-}
-
-// Sistema de paginación con historial
-const PaginationHistory = {
-    stack: [],
-    maxSize: 10,
-    
-    push(page) {
-        this.stack.push(page);
-        if (this.stack.length > this.maxSize) {
-            this.stack.shift();
-        }
-        Utils.log('info', `📖 Historial de páginas: [${this.stack.join(', ')}]`);
-    },
-    
-    getPrevious() {
-        if (this.stack.length > 1) {
-            this.stack.pop(); // Remover página actual
-            return this.stack.pop(); // Retornar página anterior
-        }
-        return null;
-    },
-    
-    init() {
-        const paginationContainer = document.querySelector('.pagination-container') || document.getElementById('paginationData');
-        const currentPage = parseInt(paginationContainer?.getAttribute('data-current-page')) || 1;
-        this.push(currentPage);
-        
-        // Agregar botón de "página anterior" si hay historial
-        if (this.stack.length > 1) {
-            const backBtn = document.createElement('button');
-            backBtn.className = 'btn btn-outline-secondary btn-sm ms-2';
-            backBtn.innerHTML = '<i class="fas fa-history"></i> Anterior';
-            backBtn.onclick = () => this.goBack();
-            
-            const controlsDiv = document.querySelector('.pagination-controls');
-            if (controlsDiv) {
-                controlsDiv.appendChild(backBtn);
-            }
-        }
-    },
-    
-    goBack() {
-        const prevPage = this.getPrevious();
-        if (prevPage) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.set('page', prevPage);
-            window.location.href = window.location.pathname + '?' + urlParams.toString();
-        }
-    }
-};
-
-// =================== SISTEMA DE INICIALIZACIÓN OPTIMIZADO ===================
-const AppInitializer = {
-    initialized: false,
-
-    init() {
-        if (this.initialized) return;
-
-        // Inicializar todos los sistemas
-        this.initSystems();
-        this.attachGlobalEventListeners();
-        this.runDiagnostics();
-        this.setupSkeletonDemo();
-
-        this.initialized = true;
-        Utils.log('success', '🚀 Aplicación inicializada correctamente');
-    },
-
-    initSystems() {
-        // Inicializar sistemas principales
-        HotelCRUD.init();
-        LazyLoadingSystem.init();
-        CategoryBadgeSystem.setupObserver();
-        
-        // Inicializar sistema de paginación
-        setupPaginationEvents();
-        PaginationHistory.init();
-    },
-
-    attachGlobalEventListeners() {
-        // Auto-submit de filtros
-        const filterInputs = document.querySelectorAll('#category, #sort');
-        filterInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                this.closest('form').submit();
-            });
-        });
-
-        // Skeleton loading para formularios de búsqueda
-        const searchForms = document.querySelectorAll('form');
-        searchForms.forEach(form => {
-            const hasSearchFields = form.querySelector('input[name="search"], select[name="category"]');
-            if (hasSearchFields) {
-                form.addEventListener('submit', () => {
-                    SkeletonSystem.show();
-                });
-            }
-        });
-
-        // Skeleton loading para paginación
-        const paginationLinks = document.querySelectorAll('a[href*="page="]');
-        paginationLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                SkeletonSystem.show();
-                
-                setTimeout(() => {
-                    window.location.href = link.href;
-                }, 300);
-            });
-        });
-    },
-
-    runDiagnostics() {
-        setTimeout(() => {
-            CSSManager.diagnose();
-        }, 500);
-    },
-
-    setupSkeletonDemo() {
-        {% if page_obj %}
-        // Solo mostrar demo si hay hoteles y es primera visita
-        if (sessionStorage.getItem('hotelListSkeletonDemo') !== 'shown') {
-            SkeletonSystem.simulate();
-            sessionStorage.setItem('hotelListSkeletonDemo', 'shown');
-        }
-        {% endif %}
-    }
-};
-
-// =================== INICIALIZACIÓN PRINCIPAL ===================
-document.addEventListener('DOMContentLoaded', function() {
-    Utils.log('info', '📄 DOM cargado, iniciando aplicación');
-    AppInitializer.init();
-});
-
-// Inicialización jQuery (mantener para compatibilidad con Bootstrap)
-document.addEventListener('DOMContentLoaded', function() {
-    Utils.log('info', '💫 DOM ready, verificando sistemas');
-    
-    // Verificar que todos los elementos críticos estén disponibles
-    const criticalElements = [
-        '#addHotelForm',
-        '#addHotelModal', 
-        '#deleteHotelModal'
-    ];
-    
-    const missingElements = criticalElements.filter(selector => !document.querySelector(selector));
-    
-    if (missingElements.length > 0) {
-        Utils.log('warning', `⚠️ Elementos críticos faltantes: ${missingElements.join(', ')}`);
-    } else {
-        Utils.log('success', '✅ Todos los elementos críticos encontrados');
-    }
+    initLazyLoad();
+    computeStats();
+    log('Listo OK');
 });
 </script>
 {% endblock %}

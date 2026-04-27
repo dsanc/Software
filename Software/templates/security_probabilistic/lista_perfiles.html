@@ -2,436 +2,651 @@
 {% load humanize %}
 {% load evaluador_permissions %}
 
-{% block title %}Perfiles de Seguridad - Evaluación Probabilística{% endblock %}
+{% block title %}Perfiles de Seguridad — Evaluación Probabilística{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Estilos para los botones de acción horizontales */
-.btn-group .btn {
-    border-radius: 0.25rem;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    border: 1px solid;
-    margin: 0 1px;
+/* ================================================================
+   LISTA PERFILES — DISEÑO MODERNO (hereda sistema sp- del dashboard)
+   ================================================================ */
+:root {
+    --sp-primary:    #0d9488;
+    --sp-primary-d:  #0f766e;
+    --sp-dark:       #0f172a;
+    --sp-dark-mid:   #1e293b;
+    --sp-accent:     #059669;
+    --sp-success:    #10b981;
+    --sp-warning:    #f59e0b;
+    --sp-danger:     #ef4444;
+    --sp-info:       #3b82f6;
+    --sp-surface:    #ffffff;
+    --sp-border:     #e5e7eb;
+    --sp-text:       #111827;
+    --sp-text-muted: #6b7280;
+    --sp-radius:     0.875rem;
+    --sp-shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --sp-shadow:     0 4px 16px rgba(0,0,0,.1);
+    --sp-shadow-lg:  0 8px 32px rgba(0,0,0,.14);
 }
 
-.btn-group .btn:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    z-index: 1;
+/* ── HEADER ──────────────────────────────────────────────── */
+.sp-header {
+    background: linear-gradient(135deg, var(--sp-dark) 0%, var(--sp-dark-mid) 60%, #0d4a3a 100%);
+    border-radius: var(--sp-radius);
+    padding: .875rem 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative; overflow: hidden;
+    border-bottom: 3px solid var(--sp-accent);
+    box-shadow: var(--sp-shadow-lg);
+}
+.sp-header::before {
+    content: ''; position: absolute; top: -40%; right: -5%;
+    width: 200px; height: 200px;
+    background: rgba(5,150,105,.08); border-radius: 50%; pointer-events: none;
+}
+.sp-breadcrumb {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .75rem; color: rgba(255,255,255,.5); margin-bottom: .35rem;
+}
+.sp-breadcrumb a { color: rgba(255,255,255,.65); text-decoration: none; transition: color .2s; }
+.sp-breadcrumb a:hover { color: #fff; }
+.sp-breadcrumb i { font-size: .55rem; }
+.sp-header h1 {
+    font-size: 1.15rem; font-weight: 800;
+    color: #fff; margin: 0 0 .2rem; letter-spacing: -.3px;
+    display: flex; align-items: center; gap: .5rem;
+}
+.sp-header h1 .h1-icon {
+    width: 30px; height: 30px;
+    background: rgba(5,150,105,.2); border: 1.5px solid rgba(5,150,105,.4);
+    border-radius: .5rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .85rem; color: #6ee7b7; flex-shrink: 0;
+}
+.sp-header p { font-size: .78rem; color: rgba(255,255,255,.55); margin: 0; }
+.sp-header-actions { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.btn-sp-ghost {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.1); color: rgba(255,255,255,.85);
+    border: 1.5px solid rgba(255,255,255,.2); border-radius: .625rem;
+    padding: .45rem .9rem; font-size: .8rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+}
+.btn-sp-ghost:hover {
+    background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45);
+    color: #fff; transform: translateY(-1px);
+}
+.btn-sp-accent {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--sp-accent); color: #fff;
+    border: none; border-radius: .625rem;
+    padding: .45rem 1rem; font-size: .8rem; font-weight: 700;
+    text-decoration: none; transition: all .2s;
+    box-shadow: 0 3px 12px rgba(5,150,105,.35);
+}
+.btn-sp-accent:hover {
+    background: #047857; color: #fff;
+    transform: translateY(-1px); box-shadow: 0 6px 20px rgba(5,150,105,.45);
 }
 
-.btn-group .btn i {
-    font-size: 0.75rem;
+/* ── KPI CARDS ───────────────────────────────────────────── */
+.sp-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .875rem; margin-bottom: 1.25rem;
+}
+@media (max-width: 1200px) { .sp-kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .sp-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .sp-kpi-grid { grid-template-columns: 1fr; } }
+.sp-kpi-card {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius);
+    padding: 1rem 1.125rem;
+    display: flex; align-items: center; gap: .875rem;
+    box-shadow: var(--sp-shadow-sm); transition: all .2s;
+    position: relative; overflow: hidden;
+}
+.sp-kpi-card::after {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%;
+    border-radius: var(--sp-radius) 0 0 var(--sp-radius);
+}
+.sp-kpi-card:hover { transform: translateY(-2px); box-shadow: var(--sp-shadow); }
+.sp-kpi-card.kpi-blue::after   { background: var(--sp-info); }
+.sp-kpi-card.kpi-red::after    { background: var(--sp-danger); }
+.sp-kpi-card.kpi-amber::after  { background: var(--sp-warning); }
+.sp-kpi-card.kpi-teal::after   { background: var(--sp-primary); }
+.sp-kpi-card.kpi-green::after  { background: var(--sp-success); }
+.sp-kpi-icon {
+    width: 44px; height: 44px; border-radius: .75rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+}
+.kpi-blue  .sp-kpi-icon { background: #eff6ff; color: var(--sp-info); }
+.kpi-red   .sp-kpi-icon { background: #fef2f2; color: var(--sp-danger); }
+.kpi-amber .sp-kpi-icon { background: #fffbeb; color: var(--sp-warning); }
+.kpi-teal  .sp-kpi-icon { background: #f0fdfa; color: var(--sp-primary); }
+.kpi-green .sp-kpi-icon { background: #f0fdf4; color: var(--sp-success); }
+.sp-kpi-body { flex: 1; min-width: 0; }
+.sp-kpi-value {
+    font-size: 1.6rem; font-weight: 900; color: var(--sp-text);
+    line-height: 1; margin-bottom: .2rem; letter-spacing: -.02em;
+}
+.sp-kpi-label {
+    font-size: .7rem; font-weight: 600; color: var(--sp-text-muted);
+    text-transform: uppercase; letter-spacing: .05em;
 }
 
-/* Animación para las filas de la tabla */
-.table tbody tr {
-    transition: all 0.2s ease;
+/* ── FILTER PANEL ────────────────────────────────────────── */
+.sp-filter-panel {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    margin-bottom: 1.25rem; overflow: hidden;
 }
+.sp-filter-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .75rem 1.25rem;
+    border-bottom: 1px solid var(--sp-border); background: #fafbfc; gap: .5rem;
+    cursor: pointer; user-select: none;
+}
+.sp-filter-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .875rem; font-weight: 700; color: var(--sp-text);
+}
+.sp-filter-body { padding: 1rem 1.25rem 1.25rem; }
+.sp-filter-label {
+    font-size: .75rem; font-weight: 600; color: var(--sp-text-muted);
+    text-transform: uppercase; letter-spacing: .04em; margin-bottom: .375rem; display: block;
+}
+.sp-filter-select {
+    width: 100%; padding: .45rem .75rem;
+    border: 1.5px solid var(--sp-border); border-radius: .5rem;
+    font-size: .845rem; color: var(--sp-text);
+    background: var(--sp-surface); transition: border-color .2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right .6rem center;
+    padding-right: 2rem;
+}
+.sp-filter-select:focus { outline: none; border-color: var(--sp-primary); box-shadow: 0 0 0 3px rgba(13,148,136,.12); }
+.btn-sp-filter {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--sp-primary); color: #fff;
+    border: none; border-radius: .5rem;
+    padding: .5rem 1rem; font-size: .8rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+}
+.btn-sp-filter:hover { background: var(--sp-primary-d); }
+.btn-sp-clear {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: transparent; color: var(--sp-text-muted);
+    border: 1.5px solid var(--sp-border); border-radius: .5rem;
+    padding: .5rem 1rem; font-size: .8rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+}
+.btn-sp-clear:hover { border-color: var(--sp-danger); color: var(--sp-danger); }
 
-.table tbody tr:hover {
-    background-color: rgba(13, 110, 253, 0.05);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* ── TABLE CARD ──────────────────────────────────────────── */
+.sp-table-card {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    overflow: hidden; margin-bottom: 1.25rem;
 }
+.sp-table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .875rem 1.25rem;
+    border-bottom: 1px solid var(--sp-border); background: #fafbfc; gap: .75rem;
+}
+.sp-table-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .875rem; font-weight: 700; color: var(--sp-text);
+}
+.sp-count-badge {
+    font-size: .7rem; font-weight: 700; padding: .2rem .625rem;
+    border-radius: 50px; background: rgba(13,148,136,.1); color: var(--sp-primary);
+    border: 1px solid rgba(13,148,136,.2);
+}
+.sp-table { width: 100%; border-collapse: collapse; font-size: .845rem; }
+.sp-table th {
+    padding: .65rem 1rem; background: #f8fafc;
+    border-bottom: 2px solid var(--sp-border);
+    font-size: .72rem; font-weight: 700; color: var(--sp-text-muted);
+    text-transform: uppercase; letter-spacing: .05em; white-space: nowrap;
+}
+.sp-table th:first-child { padding-left: 1.25rem; }
+.sp-table th:last-child  { padding-right: 1.25rem; text-align: center; }
+.sp-table td {
+    padding: .75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle; color: var(--sp-text);
+}
+.sp-table td:first-child { padding-left: 1.25rem; }
+.sp-table td:last-child  { padding-right: 1.25rem; }
+.sp-table tbody tr { transition: background .15s; }
+.sp-table tbody tr:last-child td { border-bottom: none; }
+.sp-table tbody tr:hover { background: #f8fafc; }
 
-/* Estilos para los badges */
-.badge {
-    font-size: 0.75rem;
-    padding: 0.35em 0.65em;
+/* ── AVATAR ──────────────────────────────────────────────── */
+.sp-avatar {
+    width: 38px; height: 38px; border-radius: .625rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .73rem; font-weight: 800; flex-shrink: 0; color: #fff;
 }
+.av-teal   { background: linear-gradient(135deg,#0d9488,#0f766e); }
+.av-blue   { background: linear-gradient(135deg,#2563eb,#1d4ed8); }
+.av-purple { background: linear-gradient(135deg,#7c3aed,#5b21b6); }
+.av-rose   { background: linear-gradient(135deg,#e11d48,#be185d); }
+.av-slate  { background: linear-gradient(135deg,#475569,#334155); }
 
-/* Mejorar los avatares */
-.rounded-circle {
-    font-weight: 600;
-    font-size: 0.9rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* ── BADGES ──────────────────────────────────────────────── */
+.sp-badge {
+    display: inline-flex; align-items: center; gap: .25rem;
+    padding: .2rem .55rem; border-radius: 50px;
+    font-size: .69rem; font-weight: 700; white-space: nowrap;
 }
+.sp-badge-muy-alto  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+.sp-badge-alto      { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.sp-badge-medio     { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+.sp-badge-bajo      { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.sp-badge-activo    { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+.sp-badge-inactivo  { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+.sp-badge-suspendido{ background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+.sp-badge-archivado { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
+.sp-badge-cargo     { background: #e0e7ff; color: #3730a3; border: 1px solid #a5b4fc; }
 
-/* Ajustar ancho de la columna de acciones para diseño horizontal */
-.table th:last-child,
-.table td:last-child {
-    width: 100px;
-    min-width: 100px;
+/* ── ACTION BUTTONS ──────────────────────────────────────── */
+.sp-action-group { display: flex; gap: .3rem; justify-content: center; }
+.sp-btn-icon {
+    width: 30px; height: 30px; border-radius: .425rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .75rem; text-decoration: none; transition: all .18s;
+    border: 1.5px solid transparent; flex-shrink: 0;
 }
+.sp-btn-view   { background: #eff6ff; color: var(--sp-info);    border-color: #bfdbfe; }
+.sp-btn-edit   { background: #fffbeb; color: #d97706;           border-color: #fde68a; }
+.sp-btn-deact  { background: #fef2f2; color: var(--sp-danger);  border-color: #fecaca; }
+.sp-btn-activ  { background: #f0fdf4; color: var(--sp-success); border-color: #bbf7d0; }
+.sp-btn-eval   { background: #f0fdfa; color: var(--sp-primary); border-color: #99f6e4; }
+.sp-btn-icon:hover { transform: translateY(-2px); box-shadow: var(--sp-shadow-sm); }
 
-/* Mejorar el espaciado en btn-group */
-.btn-group {
-    gap: 2px;
+/* ── PAGINATION ──────────────────────────────────────────── */
+.sp-pagination {
+    display: flex; align-items: center; justify-content: center;
+    gap: .375rem; flex-wrap: wrap; padding: 1rem 0;
 }
+.sp-page-btn {
+    min-width: 34px; height: 34px; border-radius: .5rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 600; text-decoration: none;
+    border: 1.5px solid var(--sp-border); color: var(--sp-text-muted);
+    background: var(--sp-surface); transition: all .2s; padding: 0 .5rem;
+}
+.sp-page-btn:hover { border-color: var(--sp-primary); color: var(--sp-primary); background: #f0fdfa; }
+.sp-page-btn.active {
+    background: var(--sp-primary); color: #fff;
+    border-color: var(--sp-primary);
+    box-shadow: 0 2px 8px rgba(13,148,136,.3);
+}
+.sp-page-btn.disabled { opacity: .4; pointer-events: none; }
 
-.btn-group .btn:first-child {
-    border-top-right-radius: 0.25rem;
-    border-bottom-right-radius: 0.25rem;
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.sp-empty {
+    display: flex; flex-direction: column;
+    align-items: center; padding: 3rem 1rem;
+    gap: .875rem; text-align: center;
 }
+.sp-empty-icon {
+    width: 72px; height: 72px; border-radius: 1rem;
+    background: #f0fdfa; color: var(--sp-primary); opacity: .7;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem;
+}
+.sp-empty h4 { font-size: 1rem; font-weight: 700; color: var(--sp-text); margin: 0; }
+.sp-empty p  { font-size: .84rem; color: var(--sp-text-muted); margin: 0; max-width: 360px; }
 
-.btn-group .btn:last-child {
-    border-top-left-radius: 0.25rem;
-    border-bottom-left-radius: 0.25rem;
-}
+/* ── SHIELD ICON ─────────────────────────────────────────── */
+.shield-yes { color: var(--sp-success); }
+.shield-no  { color: #d1d5db; }
 </style>
 {% endblock %}
 
 {% block content %}
+{% has_module_permission user 'security_probabilistic' 'create' as can_create %}
+{% has_module_permission user 'security_probabilistic' 'update' as can_update %}
+{% has_module_permission user 'security_probabilistic' 'delete' as can_delete %}
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Page Header -->
-            <div class="mb-4">
-                <div class="row align-items-center">
-                    <div class="col">
-                        <h1 class="h3">
-                            <i class="fas fa-users text-primary me-3"></i>
-                            Perfiles de Seguridad
-                        </h1>
-                        <p class="text-muted">
-                            Sistema integral de gestión y evaluación de perfiles políticos para análisis de seguridad probabilística
-                        </p>
-                    </div>
-                    <div class="col-auto">
-                        {% has_module_permission user 'security_probabilistic' 'create' as can_create %}
-                        {% if can_create %}
-                        <a href="{% url 'security_probabilistic:crear_perfil' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Nuevo Perfil
-                        </a>
-                        {% endif %}
-                    </div>
+
+    <!-- ── HEADER ───────────────────────────────────────────── -->
+    <div class="sp-header">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="sp-breadcrumb">
+                    <a href="{% url 'dashboard:home' %}"><i class="fas fa-home"></i> Inicio</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:dashboard' %}">Seguridad Probabilística</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Perfiles</span>
                 </div>
+                <h1>
+                    <span class="h1-icon"><i class="fas fa-users"></i></span>
+                    Perfiles de Seguridad
+                </h1>
+                <p>Gestión y evaluación de perfiles políticos para análisis de riesgo probabilístico</p>
             </div>
-
-            <!-- Estadísticas -->
-            <div class="row mb-4">
-                <div class="col-md-3">
-                    <div class="card bg-primary text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title">Total Perfiles</h5>
-                                    <h2 class="mb-0">{{ total_perfiles }}</h2>
-                                </div>
-                                <div class="ms-3">
-                                    <i class="fas fa-users fa-2x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="card bg-danger text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title">Riesgo Muy Alto</h5>
-                                    <h2 class="mb-0">{{ stats_riesgo.muy_alto }}</h2>
-                                </div>
-                                <div class="ms-3">
-                                    <i class="fas fa-exclamation-triangle fa-2x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="card bg-warning text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title">Riesgo Alto</h5>
-                                    <h2 class="mb-0">{{ stats_riesgo.alto }}</h2>
-                                </div>
-                                <div class="ms-3">
-                                    <i class="fas fa-exclamation fa-2x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-3">
-                    <div class="card bg-success text-white">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
-                                    <h5 class="card-title">Riesgo Bajo</h5>
-                                    <h2 class="mb-0">{{ stats_riesgo.bajo }}</h2>
-                                </div>
-                                <div class="ms-3">
-                                    <i class="fas fa-check-circle fa-2x opacity-75"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filtros -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form method="get" class="row g-3">
-                        <div class="col-md-3">
-                            <label for="cargo" class="form-label">Cargo Político</label>
-                            <select name="cargo" id="cargo" class="form-select">
-                                <option value="">Todos los cargos</option>
-                                <option value="alcalde" {% if filtros_actuales.cargo == 'alcalde' %}selected{% endif %}>Alcalde/Alcaldesa</option>
-                                <option value="concejal" {% if filtros_actuales.cargo == 'concejal' %}selected{% endif %}>Concejal</option>
-                                <option value="diputado" {% if filtros_actuales.cargo == 'diputado' %}selected{% endif %}>Diputado/Diputada</option>
-                                <option value="senador" {% if filtros_actuales.cargo == 'senador' %}selected{% endif %}>Senador/Senadora</option>
-                                <option value="gobernador" {% if filtros_actuales.cargo == 'gobernador' %}selected{% endif %}>Gobernador/Gobernadora</option>
-                                <option value="ministro" {% if filtros_actuales.cargo == 'ministro' %}selected{% endif %}>Ministro/Ministra</option>
-                                <option value="candidato" {% if filtros_actuales.cargo == 'candidato' %}selected{% endif %}>Candidato/Candidata</option>
-                                <option value="lider_social" {% if filtros_actuales.cargo == 'lider_social' %}selected{% endif %}>Líder Social</option>
-                                <option value="activista" {% if filtros_actuales.cargo == 'activista' %}selected{% endif %}>Activista Político</option>
-                                <option value="funcionario" {% if filtros_actuales.cargo == 'funcionario' %}selected{% endif %}>Funcionario Público</option>
-                                <option value="otro" {% if filtros_actuales.cargo == 'otro' %}selected{% endif %}>Otro</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-3">
-                            <label for="estado" class="form-label">Estado</label>
-                            <select name="estado" id="estado" class="form-select">
-                                <option value="">Todos los estados</option>
-                                <option value="activo" {% if filtros_actuales.estado == 'activo' %}selected{% endif %}>Activo</option>
-                                <option value="inactivo" {% if filtros_actuales.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
-                                <option value="suspendido" {% if filtros_actuales.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
-                                <option value="archivado" {% if filtros_actuales.estado == 'archivado' %}selected{% endif %}>Archivado</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-3">
-                            <label for="riesgo" class="form-label">Nivel de Riesgo</label>
-                            <select name="riesgo" id="riesgo" class="form-select">
-                                <option value="">Todos los niveles</option>
-                                <option value="muy_alto" {% if filtros_actuales.riesgo == 'muy_alto' %}selected{% endif %}>Muy Alto</option>
-                                <option value="alto" {% if filtros_actuales.riesgo == 'alto' %}selected{% endif %}>Alto</option>
-                                <option value="medio" {% if filtros_actuales.riesgo == 'medio' %}selected{% endif %}>Medio</option>
-                                <option value="bajo" {% if filtros_actuales.riesgo == 'bajo' %}selected{% endif %}>Bajo</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-3">
-                            <label for="orden" class="form-label">Ordenar por</label>
-                            <select name="orden" id="orden" class="form-select">
-                                <option value="-creado_en" {% if filtros_actuales.orden == '-creado_en' %}selected{% endif %}>Más recientes</option>
-                                <option value="creado_en" {% if filtros_actuales.orden == 'creado_en' %}selected{% endif %}>Más antiguos</option>
-                                <option value="nombres" {% if filtros_actuales.orden == 'nombres' %}selected{% endif %}>Nombre A-Z</option>
-                                <option value="-nombres" {% if filtros_actuales.orden == '-nombres' %}selected{% endif %}>Nombre Z-A</option>
-                                <option value="cargo_politico" {% if filtros_actuales.orden == 'cargo_politico' %}selected{% endif %}>Cargo A-Z</option>
-                                <option value="-cargo_politico" {% if filtros_actuales.orden == '-cargo_politico' %}selected{% endif %}>Cargo Z-A</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-filter"></i> Aplicar Filtros
-                            </button>
-                            <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-secondary ms-2">
-                                <i class="fas fa-times"></i> Limpiar
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Lista de Perfiles -->
-            {% if perfiles %}
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-list"></i> 
-                            Perfiles Encontrados ({{ perfiles|length }})
-                        </h5>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th>Perfil</th>
-                                        <th>Cargo</th>
-                                        <th>Ubicación</th>
-                                        <th>Nivel de Riesgo</th>
-                                        <th>Estado</th>
-                                        <th>Seguridad</th>
-                                        <th class="text-center">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for perfil in perfiles %}
-                                    <tr>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                                    {{ perfil.iniciales }}
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold">{{ perfil.nombre_completo }}</div>
-                                                    <small class="text-muted">{{ perfil.get_tipo_documento_display }}: {{ perfil.numero_documento }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-info">{{ perfil.get_cargo_politico_display }}</span>
-                                            {% if perfil.partido_politico %}
-                                                <br><small class="text-muted">{{ perfil.partido_politico }}</small>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div>{{ perfil.municipio }}, {{ perfil.departamento }}</div>
-                                            <small class="text-muted">Edad: {{ perfil.edad }} años</small>
-                                        </td>
-                                        <td>
-                                            {% if perfil.nivel_riesgo_perfil == 'muy_alto' %}
-                                                <span class="badge bg-danger">Muy Alto</span>
-                                            {% elif perfil.nivel_riesgo_perfil == 'alto' %}
-                                                <span class="badge bg-warning">Alto</span>
-                                            {% elif perfil.nivel_riesgo_perfil == 'medio' %}
-                                                <span class="badge bg-info">Medio</span>
-                                            {% else %}
-                                                <span class="badge bg-success">Bajo</span>
-                                            {% endif %}
-                                            {% if perfil.amenazas_recibidas %}
-                                                <br><small class="text-warning"><i class="fas fa-exclamation-triangle"></i> Amenazas</small>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if perfil.estado_perfil == 'activo' %}
-                                                <span class="badge bg-success">{{ perfil.get_estado_perfil_display }}</span>
-                                            {% elif perfil.estado_perfil == 'suspendido' %}
-                                                <span class="badge bg-warning">{{ perfil.get_estado_perfil_display }}</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">{{ perfil.get_estado_perfil_display }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if perfil.tiene_esquema_seguridad %}
-                                                <span class="text-success">
-                                                    <i class="fas fa-shield-alt"></i> Sí
-                                                </span>
-                                                {% if perfil.nivel_esquema_seguridad %}
-                                                    <br><small class="text-muted">{{ perfil.nivel_esquema_seguridad }}</small>
-                                                {% endif %}
-                                            {% else %}
-                                                <span class="text-muted">
-                                                    <i class="fas fa-shield-alt"></i> No
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="verDetallePerfil({{ perfil.pk }})" title="Ver Detalle">
-                                                    <i class="fas fa-eye"></i>
-                                                </button>
-                                                {% has_module_permission user 'security_probabilistic' 'update' as can_update %}
-                                                {% if can_update %}
-                                                <button type="button" class="btn btn-outline-warning btn-sm" onclick="editarPerfil({{ perfil.pk }})" title="Editar Perfil">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                {% endif %}
-                                                {% has_module_permission user 'security_probabilistic' 'delete' as can_delete %}
-                                                {% if can_delete %}
-                                                {% if perfil.estado_perfil == 'activo' %}
-                                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="desactivarPerfil({{ perfil.pk }})" title="Desactivar">
-                                                    <i class="fas fa-ban"></i>
-                                                </button>
-                                                {% else %}
-                                                <button type="button" class="btn btn-outline-success btn-sm" onclick="activarPerfil({{ perfil.pk }})" title="Activar">
-                                                    <i class="fas fa-check-circle"></i>
-                                                </button>
-                                                {% endif %}
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Paginación -->
-                {% if is_paginated %}
-                <nav class="mt-4" aria-label="Navegación de perfiles">
-                    <ul class="pagination justify-content-center">
-                        {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ page_obj.previous_page_number }}">
-                                    <i class="fas fa-chevron-left"></i> Anterior
-                                </a>
-                            </li>
-                        {% endif %}
-                        
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.number == num %}
-                                <li class="page-item active">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?{% if request.GET.cargo %}cargo={{ request.GET.cargo }}&{% endif %}{% if request.GET.estado %}estado={{ request.GET.estado }}&{% endif %}{% if request.GET.riesgo %}riesgo={{ request.GET.riesgo }}&{% endif %}{% if request.GET.orden %}orden={{ request.GET.orden }}&{% endif %}page={{ page_obj.next_page_number }}">
-                                    Siguiente <i class="fas fa-chevron-right"></i>
-                                </a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
+            <div class="sp-header-actions">
+                <a href="{% url 'security_probabilistic:dashboard' %}" class="btn-sp-ghost">
+                    <i class="fas fa-arrow-left"></i> Dashboard
+                </a>
+                {% if can_create %}
+                <a href="{% url 'security_probabilistic:crear_perfil' %}" class="btn-sp-accent">
+                    <i class="fas fa-plus"></i> Nuevo Perfil
+                </a>
                 {% endif %}
-
-            {% else %}
-                <!-- Estado vacío -->
-                <div class="text-center py-5">
-                    <div class="mb-4">
-                        <i class="fas fa-users fa-5x text-muted opacity-50"></i>
-                    </div>
-                    <h3 class="text-muted">No se encontraron perfiles</h3>
-                    <p class="text-muted">No hay perfiles que coincidan con los criterios de búsqueda actuales.</p>
-                    <div class="mt-4">
-                        <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-times"></i> Limpiar Filtros
-                        </a>
-                    </div>
-                </div>
-            {% endif %}
+            </div>
         </div>
     </div>
+
+    <!-- ── KPI CARDS ────────────────────────────────────────── -->
+    <div class="sp-kpi-grid">
+        <div class="sp-kpi-card kpi-blue">
+            <div class="sp-kpi-icon"><i class="fas fa-users"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ total_perfiles }}</div>
+                <div class="sp-kpi-label">Total Perfiles</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-red">
+            <div class="sp-kpi-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ stats_riesgo.muy_alto }}</div>
+                <div class="sp-kpi-label">Riesgo Muy Alto</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-amber">
+            <div class="sp-kpi-icon"><i class="fas fa-exclamation"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ stats_riesgo.alto }}</div>
+                <div class="sp-kpi-label">Riesgo Alto</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-teal">
+            <div class="sp-kpi-icon"><i class="fas fa-minus-circle"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ stats_riesgo.medio }}</div>
+                <div class="sp-kpi-label">Riesgo Medio</div>
+            </div>
+        </div>
+        <div class="sp-kpi-card kpi-green">
+            <div class="sp-kpi-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="sp-kpi-body">
+                <div class="sp-kpi-value">{{ stats_riesgo.bajo }}</div>
+                <div class="sp-kpi-label">Riesgo Bajo</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FILTROS ───────────────────────────────────────────── -->
+    <div class="sp-filter-panel">
+        <div class="sp-filter-header" onclick="this.nextElementSibling.classList.toggle('d-none')">
+            <div class="sp-filter-title">
+                <i class="fas fa-filter" style="color:var(--sp-primary)"></i>
+                Filtros
+                {% if filtros_actuales.cargo or filtros_actuales.estado or filtros_actuales.riesgo %}
+                <span style="font-size:.68rem;background:#fef3c7;color:#92400e;border:1px solid #fcd34d;padding:.15rem .5rem;border-radius:50px;font-weight:700;">
+                    Activos
+                </span>
+                {% endif %}
+            </div>
+            <i class="fas fa-chevron-down" style="font-size:.75rem;color:var(--sp-text-muted)"></i>
+        </div>
+        <div class="sp-filter-body">
+            <form method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-sm-6 col-md-3">
+                        <label class="sp-filter-label">Cargo Político</label>
+                        <select name="cargo" class="sp-filter-select">
+                            <option value="">Todos los cargos</option>
+                            <option value="alcalde"     {% if filtros_actuales.cargo == 'alcalde' %}selected{% endif %}>Alcalde/Alcaldesa</option>
+                            <option value="concejal"    {% if filtros_actuales.cargo == 'concejal' %}selected{% endif %}>Concejal</option>
+                            <option value="diputado"    {% if filtros_actuales.cargo == 'diputado' %}selected{% endif %}>Diputado/Diputada</option>
+                            <option value="senador"     {% if filtros_actuales.cargo == 'senador' %}selected{% endif %}>Senador/Senadora</option>
+                            <option value="gobernador"  {% if filtros_actuales.cargo == 'gobernador' %}selected{% endif %}>Gobernador/Gobernadora</option>
+                            <option value="ministro"    {% if filtros_actuales.cargo == 'ministro' %}selected{% endif %}>Ministro/Ministra</option>
+                            <option value="candidato"   {% if filtros_actuales.cargo == 'candidato' %}selected{% endif %}>Candidato/Candidata</option>
+                            <option value="lider_social"{% if filtros_actuales.cargo == 'lider_social' %}selected{% endif %}>Líder Social</option>
+                            <option value="activista"   {% if filtros_actuales.cargo == 'activista' %}selected{% endif %}>Activista Político</option>
+                            <option value="funcionario" {% if filtros_actuales.cargo == 'funcionario' %}selected{% endif %}>Funcionario Público</option>
+                            <option value="otro"        {% if filtros_actuales.cargo == 'otro' %}selected{% endif %}>Otro</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-md-2">
+                        <label class="sp-filter-label">Estado</label>
+                        <select name="estado" class="sp-filter-select">
+                            <option value="">Todos</option>
+                            <option value="activo"    {% if filtros_actuales.estado == 'activo' %}selected{% endif %}>Activo</option>
+                            <option value="inactivo"  {% if filtros_actuales.estado == 'inactivo' %}selected{% endif %}>Inactivo</option>
+                            <option value="suspendido"{% if filtros_actuales.estado == 'suspendido' %}selected{% endif %}>Suspendido</option>
+                            <option value="archivado" {% if filtros_actuales.estado == 'archivado' %}selected{% endif %}>Archivado</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-md-2">
+                        <label class="sp-filter-label">Nivel de Riesgo</label>
+                        <select name="riesgo" class="sp-filter-select">
+                            <option value="">Todos</option>
+                            <option value="muy_alto"{% if filtros_actuales.riesgo == 'muy_alto' %}selected{% endif %}>Muy Alto</option>
+                            <option value="alto"    {% if filtros_actuales.riesgo == 'alto' %}selected{% endif %}>Alto</option>
+                            <option value="medio"   {% if filtros_actuales.riesgo == 'medio' %}selected{% endif %}>Medio</option>
+                            <option value="bajo"    {% if filtros_actuales.riesgo == 'bajo' %}selected{% endif %}>Bajo</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6 col-md-2">
+                        <label class="sp-filter-label">Ordenar por</label>
+                        <select name="orden" class="sp-filter-select">
+                            <option value="-creado_en"     {% if filtros_actuales.orden == '-creado_en' %}selected{% endif %}>Más recientes</option>
+                            <option value="creado_en"      {% if filtros_actuales.orden == 'creado_en' %}selected{% endif %}>Más antiguos</option>
+                            <option value="nombres"        {% if filtros_actuales.orden == 'nombres' %}selected{% endif %}>Nombre A→Z</option>
+                            <option value="-nombres"       {% if filtros_actuales.orden == '-nombres' %}selected{% endif %}>Nombre Z→A</option>
+                            <option value="cargo_politico" {% if filtros_actuales.orden == 'cargo_politico' %}selected{% endif %}>Cargo A→Z</option>
+                            <option value="-cargo_politico"{% if filtros_actuales.orden == '-cargo_politico' %}selected{% endif %}>Cargo Z→A</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-12 col-md-3 d-flex gap-2">
+                        <button type="submit" class="btn-sp-filter">
+                            <i class="fas fa-filter"></i> Aplicar
+                        </button>
+                        <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn-sp-clear">
+                            <i class="fas fa-times"></i> Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ── TABLA DE PERFILES ─────────────────────────────────── -->
+    {% if perfiles %}
+    <div class="sp-table-card">
+        <div class="sp-table-header">
+            <div class="sp-table-title">
+                <i class="fas fa-list" style="color:var(--sp-primary)"></i>
+                Perfiles Encontrados
+            </div>
+            <span class="sp-count-badge">{{ page_obj.paginator.count }} perfil{{ page_obj.paginator.count|pluralize:"es" }}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="sp-table">
+                <thead>
+                    <tr>
+                        <th>Perfil</th>
+                        <th>Cargo</th>
+                        <th>Ubicación</th>
+                        <th>Nivel de Riesgo</th>
+                        <th>Estado</th>
+                        <th>Seguridad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for perfil in perfiles %}
+                    <tr>
+                        <!-- Perfil -->
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="sp-avatar {% cycle 'av-teal' 'av-blue' 'av-purple' 'av-rose' 'av-slate' %}">
+                                    {{ perfil.iniciales }}
+                                </div>
+                                <div>
+                                    <div style="font-weight:700;font-size:.845rem;line-height:1.3">{{ perfil.nombre_completo }}</div>
+                                    <div style="font-size:.72rem;color:var(--sp-text-muted)">{{ perfil.get_tipo_documento_display }}: {{ perfil.numero_documento }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <!-- Cargo -->
+                        <td>
+                            <span class="sp-badge sp-badge-cargo">{{ perfil.get_cargo_politico_display }}</span>
+                            {% if perfil.partido_politico %}
+                            <div style="font-size:.72rem;color:var(--sp-text-muted);margin-top:.25rem">{{ perfil.partido_politico }}</div>
+                            {% endif %}
+                        </td>
+                        <!-- Ubicación -->
+                        <td>
+                            <div style="font-size:.845rem;font-weight:600">{{ perfil.municipio }}, {{ perfil.departamento }}</div>
+                            <div style="font-size:.72rem;color:var(--sp-text-muted)">{{ perfil.edad }} años</div>
+                        </td>
+                        <!-- Nivel de riesgo -->
+                        <td>
+                            {% if perfil.nivel_riesgo_perfil == 'muy_alto' %}
+                                <span class="sp-badge sp-badge-muy-alto"><i class="fas fa-circle" style="font-size:.4rem"></i> Muy Alto</span>
+                            {% elif perfil.nivel_riesgo_perfil == 'alto' %}
+                                <span class="sp-badge sp-badge-alto"><i class="fas fa-circle" style="font-size:.4rem"></i> Alto</span>
+                            {% elif perfil.nivel_riesgo_perfil == 'medio' %}
+                                <span class="sp-badge sp-badge-medio"><i class="fas fa-circle" style="font-size:.4rem"></i> Medio</span>
+                            {% else %}
+                                <span class="sp-badge sp-badge-bajo"><i class="fas fa-circle" style="font-size:.4rem"></i> Bajo</span>
+                            {% endif %}
+                            {% if perfil.amenazas_recibidas %}
+                            <div style="font-size:.7rem;color:#d97706;margin-top:.25rem;font-weight:600">
+                                <i class="fas fa-exclamation-triangle"></i> Con amenazas
+                            </div>
+                            {% endif %}
+                        </td>
+                        <!-- Estado -->
+                        <td>
+                            {% if perfil.estado_perfil == 'activo' %}
+                                <span class="sp-badge sp-badge-activo">{{ perfil.get_estado_perfil_display }}</span>
+                            {% elif perfil.estado_perfil == 'suspendido' %}
+                                <span class="sp-badge sp-badge-suspendido">{{ perfil.get_estado_perfil_display }}</span>
+                            {% elif perfil.estado_perfil == 'archivado' %}
+                                <span class="sp-badge sp-badge-archivado">{{ perfil.get_estado_perfil_display }}</span>
+                            {% else %}
+                                <span class="sp-badge sp-badge-inactivo">{{ perfil.get_estado_perfil_display }}</span>
+                            {% endif %}
+                        </td>
+                        <!-- Seguridad -->
+                        <td>
+                            {% if perfil.tiene_esquema_seguridad %}
+                                <span class="shield-yes" title="Tiene esquema de seguridad">
+                                    <i class="fas fa-shield-alt"></i>
+                                </span>
+                                {% if perfil.nivel_esquema_seguridad %}
+                                <div style="font-size:.7rem;color:var(--sp-text-muted)">{{ perfil.nivel_esquema_seguridad }}</div>
+                                {% endif %}
+                            {% else %}
+                                <span class="shield-no" title="Sin esquema de seguridad">
+                                    <i class="fas fa-shield-alt"></i>
+                                </span>
+                            {% endif %}
+                        </td>
+                        <!-- Acciones -->
+                        <td>
+                            <div class="sp-action-group">
+                                <a href="{% url 'security_probabilistic:detalle_perfil' perfil.pk %}"
+                                   class="sp-btn-icon sp-btn-view" title="Ver detalle">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if can_create %}
+                                <a href="{% url 'security_probabilistic:crear_evaluacion' perfil.pk %}"
+                                   class="sp-btn-icon sp-btn-eval" title="Nueva evaluación">
+                                    <i class="fas fa-clipboard-check"></i>
+                                </a>
+                                {% endif %}
+                                {% if can_update %}
+                                <a href="{% url 'security_probabilistic:editar_perfil' perfil.pk %}"
+                                   class="sp-btn-icon sp-btn-edit" title="Editar perfil">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ── PAGINACIÓN ────────────────────────────────────────── -->
+    {% if is_paginated %}
+    {% with cargo=request.GET.cargo estado=request.GET.estado riesgo=request.GET.riesgo orden=request.GET.orden %}
+    <nav class="sp-pagination" aria-label="Navegación de perfiles">
+        {% if page_obj.has_previous %}
+        <a class="sp-page-btn"
+           href="?{% if cargo %}cargo={{ cargo }}&{% endif %}{% if estado %}estado={{ estado }}&{% endif %}{% if riesgo %}riesgo={{ riesgo }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}page={{ page_obj.previous_page_number }}">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        {% else %}
+        <span class="sp-page-btn disabled"><i class="fas fa-chevron-left"></i></span>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <span class="sp-page-btn active">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a class="sp-page-btn"
+                   href="?{% if cargo %}cargo={{ cargo }}&{% endif %}{% if estado %}estado={{ estado }}&{% endif %}{% if riesgo %}riesgo={{ riesgo }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}page={{ num }}">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a class="sp-page-btn"
+           href="?{% if cargo %}cargo={{ cargo }}&{% endif %}{% if estado %}estado={{ estado }}&{% endif %}{% if riesgo %}riesgo={{ riesgo }}&{% endif %}{% if orden %}orden={{ orden }}&{% endif %}page={{ page_obj.next_page_number }}">
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        {% else %}
+        <span class="sp-page-btn disabled"><i class="fas fa-chevron-right"></i></span>
+        {% endif %}
+    </nav>
+    {% endwith %}
+    {% endif %}
+
+    {% else %}
+    <!-- ── ESTADO VACÍO ──────────────────────────────────────── -->
+    <div class="sp-table-card">
+        <div class="sp-empty">
+            <div class="sp-empty-icon"><i class="fas fa-users"></i></div>
+            <h4>No se encontraron perfiles</h4>
+            <p>
+                {% if filtros_actuales.cargo or filtros_actuales.estado or filtros_actuales.riesgo %}
+                    No hay perfiles que coincidan con los filtros aplicados.
+                {% else %}
+                    Aún no hay perfiles registrados en el sistema.
+                {% endif %}
+            </p>
+            <div class="d-flex gap-2 flex-wrap justify-content-center mt-1">
+                {% if filtros_actuales.cargo or filtros_actuales.estado or filtros_actuales.riesgo %}
+                <a href="{% url 'security_probabilistic:lista_perfiles' %}" class="btn-sp-clear">
+                    <i class="fas fa-times"></i> Limpiar filtros
+                </a>
+                {% endif %}
+                {% if can_create %}
+                <a href="{% url 'security_probabilistic:crear_perfil' %}" class="btn-sp-accent">
+                    <i class="fas fa-plus"></i> Crear primer perfil
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
 </div>
-
-<script>
-// Funciones para manejar las acciones de los perfiles
-
-function verDetallePerfil(perfilId) {
-    // Redirigir a la vista de detalle del perfil
-    window.location.href = `/security-probabilistic/perfiles/${perfilId}/`;
-}
-
-function editarPerfil(perfilId) {
-    // Redirigir a la vista de edición
-    window.location.href = `/security-probabilistic/perfiles/${perfilId}/editar/`;
-}
-
-function desactivarPerfil(perfilId) {
-    if (confirm('¿Está seguro de que desea desactivar este perfil?')) {
-        alert(`Desactivar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-    }
-}
-
-function activarPerfil(perfilId) {
-    if (confirm('¿Está seguro de que desea activar este perfil?')) {
-        alert(`Activar perfil ID: ${perfilId}\n\n(Funcionalidad pendiente de implementar)`);
-    }
-}
-</script>
 {% endblock %}

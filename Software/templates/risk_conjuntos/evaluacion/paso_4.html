@@ -1,351 +1,257 @@
-﻿{% extends 'risk_conjuntos/evaluacion/base_evaluacion.html' %}
+{% extends 'risk_conjuntos/evaluacion/base_evaluacion.html' %}
 {% load static %}
 {% load evaluacion_filters %}
 
+{% block extra_css %}
+{{ block.super }}
+<style>
+.info-banner {
+    background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+.info-banner i { font-size: 1.5rem; opacity: .85; flex-shrink: 0; }
+.info-banner h6 { font-size: .95rem; font-weight: 700; margin-bottom: 3px; }
+.info-banner p { font-size: .82rem; opacity: .85; margin: 0; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .75rem; margin-bottom: 1.25rem; }
+@media (max-width: 768px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.kpi-box {
+    background: #fff;
+    border: 1px solid #e0e7f3;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+.kpi-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.kpi-box.kpi-primary::before { background: linear-gradient(90deg, #1e3a6e, #e94560); }
+.kpi-box.kpi-green::before { background: #28a745; }
+.kpi-box.kpi-yellow::before { background: #ffc107; }
+.kpi-box.kpi-red::before { background: #dc3545; }
+.kpi-value { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
+.kpi-value.kpi-primary { color: #1e3a6e; }
+.kpi-value.kpi-green { color: #28a745; }
+.kpi-value.kpi-yellow { color: #e0960e; }
+.kpi-value.kpi-red { color: #dc3545; }
+.kpi-label { font-size: .72rem; color: #6c757d; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; margin-top: 4px; }
+.kpi-sub { font-size: .75rem; color: #6c757d; margin-top: 3px; }
+.risk-detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: .75rem; }
+.risk-mini-card {
+    background: #fff;
+    border: 1px solid #e0e7f3;
+    border-radius: 8px;
+    padding: .875rem;
+    border-left-width: 4px;
+    border-left-style: solid;
+}
+.risk-mini-name { font-size: .83rem; font-weight: 700; color: #212529; margin-bottom: .25rem; }
+.risk-mini-questions { font-size: .72rem; color: #6c757d; margin-bottom: .5rem; }
+.risk-mini-score { font-size: 1.1rem; font-weight: 800; }
+.risk-mini-bar { height: 5px; border-radius: 3px; background: #e0e7f3; margin: .4rem 0; overflow: hidden; }
+.risk-mini-bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.obs-block { background: #f0f4f8; border: 1px solid #e0e7f3; border-radius: 7px; padding: .875rem; font-size: .85rem; color: #212529; min-height: 60px; line-height: 1.6; }
+.confirm-area {
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    padding: 1.25rem;
+    margin-top: 1rem;
+}
+.confirm-check { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem; background: #fff; border-radius: 8px; margin-bottom: .625rem; border: 1px solid #e0e7f3; }
+.confirm-check input[type=checkbox] { width: 18px; height: 18px; margin-top: 2px; flex-shrink: 0; accent-color: #1e3a6e; }
+.confirm-check label { font-size: .875rem; color: #212529; margin: 0; cursor: pointer; line-height: 1.5; }
+.what-happens { background: #f0f4f8; border: 1px solid #e0e7f3; border-radius: 8px; padding: .875rem 1rem; margin-top: .875rem; }
+.what-happens h6 { font-size: .82rem; font-weight: 700; color: #1e3a6e; margin-bottom: .5rem; }
+.what-happens li { font-size: .8rem; color: #495057; margin-bottom: .3rem; }
+</style>
+{% endblock %}
+
 {% block evaluation_content %}
-    <form method="post" id="paso4Form">
-        {% csrf_token %}
-        
-        <!-- Mostrar errores del formulario -->
-        {% if form.errors %}
-        <div class="alert alert-danger">
-            <h6>Errores en el formulario:</h6>
-            {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                    <div>{{ error }}</div>
+<form method="post" id="paso4Form">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger mb-3" style="border-radius:8px;">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        {% for field, errors in form.errors.items %}{% for error in errors %}<span>{{ error }}</span>{% endfor %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="info-banner">
+        <i class="fas fa-info-circle"></i>
+        <div>
+            <h6>Revision Final</h6>
+            <p>Revise cuidadosamente toda la informacion antes de crear la evaluacion. Una vez creada no podra modificar las respuestas.</p>
+        </div>
+    </div>
+
+    <div class="kpi-grid">
+        <div class="kpi-box kpi-primary">
+            <div class="kpi-value kpi-primary">{{ promedio_general|floatformat:1 }}%</div>
+            <div class="kpi-label">Nivel de Riesgo</div>
+            <div class="kpi-sub" style="color:{{ promedio_obj.get_color_semaforo }};">{{ promedio_obj.get_texto_nivel_riesgo }}</div>
+        </div>
+        <div class="kpi-box kpi-green">
+            <div class="kpi-value kpi-green">{{ riesgos_aceptables }}</div>
+            <div class="kpi-label">Riesgos Bajos</div>
+            <div class="kpi-sub">Nivel aceptable</div>
+        </div>
+        <div class="kpi-box kpi-yellow">
+            <div class="kpi-value kpi-yellow">{{ riesgos_moderados }}</div>
+            <div class="kpi-label">Riesgos Moderados</div>
+            <div class="kpi-sub">Requieren mejoras</div>
+        </div>
+        <div class="kpi-box kpi-red">
+            <div class="kpi-value kpi-red">{{ riesgos_criticos }}</div>
+            <div class="kpi-label">Riesgos Altos</div>
+            <div class="kpi-sub">Atencion inmediata</div>
+        </div>
+    </div>
+
+    <div class="eval-card mb-3">
+        <div class="eval-card-header">
+            <h5><i class="fas fa-list-alt me-2"></i>Detalle por Tipo de Riesgo</h5>
+            <span class="header-badge">{{ riesgos_evaluados|length }} tipos</span>
+        </div>
+        <div class="eval-card-body">
+            <div class="risk-detail-grid">
+                {% for riesgo_info in riesgos_evaluados %}
+                <div class="risk-mini-card" style="border-left-color: {{ riesgo_info.semaforo_color }};">
+                    <div class="risk-mini-name">{{ riesgo_info.nombre }}</div>
+                    <div class="risk-mini-questions"><i class="fas fa-question-circle me-1"></i>{{ riesgo_info.preguntas_respondidas }} preguntas</div>
+                    <div class="risk-mini-score" style="color: {{ riesgo_info.semaforo_color }};">
+                        {{ riesgo_info.porcentaje|floatformat:1 }}%
+                        <small style="font-size:.7rem;font-weight:600;">{{ riesgo_info.semaforo_texto }}</small>
+                    </div>
+                    <div class="risk-mini-bar">
+                        <div class="risk-mini-bar-fill" style="width:{{ riesgo_info.porcentaje|stringformat:"g" }}%;background:{{ riesgo_info.semaforo_color }};" data-width="{{ riesgo_info.porcentaje|stringformat:"g" }}"></div>
+                    </div>
+                    <small style="font-size:.7rem;color:#6c757d;">{{ riesgo_info.nivel_texto }}</small>
+                </div>
                 {% endfor %}
-            {% endfor %}
+            </div>
         </div>
-        {% endif %}
-        
-        <!-- Alerta de confirmación -->
-        <div class="alert alert-info">
-            <div class="d-flex align-items-center">
-                <i class="fas fa-info-circle fa-2x me-3"></i>
-                <div>
-                    <h5 class="alert-heading mb-1">¡Casi terminamos!</h5>
-                    <p class="mb-0">
-                        Revisa cuidadosamente toda la información antes de crear la evaluación. 
-                        Una vez creada, podrás generar reportes pero no podrás modificar las respuestas.
+    </div>
+
+    <div class="eval-card mb-3">
+        <div class="eval-card-header">
+            <h5><i class="fas fa-clipboard-list me-2"></i>Observaciones y Recomendaciones</h5>
+        </div>
+        <div class="eval-card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <p style="font-size:.8rem;font-weight:700;color:#1e3a6e;margin-bottom:.5rem;">
+                        <i class="fas fa-eye me-1"></i>Observaciones Generales
                     </p>
+                    <div class="obs-block">
+                        {{ observaciones.observaciones_generales|safe|default:"No se proporcionaron observaciones." }}
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Resumen de Resultados -->
-        <div class="card mb-4">
-            <div class="card-header text-white" 
-                 style="background-color: {{ promedio_obj.get_color_semaforo }};">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-bar"></i>
-                    Resumen de Resultados
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <!-- Nivel de Riesgo General -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="text-center p-3 bg-light rounded h-100">
-                            <div class="mb-3">
-                                <!-- Semáforo de riesgo general usando CSS inline -->
-                                <div class="d-flex align-items-center justify-content-center">
-                                    <div class="semaforo-circle me-2" 
-                                         style="width: 30px; height: 30px; border-radius: 50%; background-color: {{ promedio_obj.get_color_semaforo }}; border: 2px solid #ddd; display: inline-block;">
-                                    </div>
-                                    <span class="fw-bold h5 mb-0">{{ promedio_general|floatformat:1 }}%</span>
-                                </div>
-                                <div class="mt-2">
-                                    <strong style="color: {{ promedio_obj.get_color_semaforo }};">
-                                        {{ promedio_obj.get_texto_nivel_riesgo }}
-                                    </strong>
-                                </div>
-                            </div>
-                            <div class="text-muted">Nivel de Riesgo General</div>
-                            <small class="text-muted d-block mt-2">
-                                {% if promedio_obj.get_nivel_riesgo == 'bajo' %}
-                                    Vulnerabilidades mínimas identificadas.
-                                {% elif promedio_obj.get_nivel_riesgo == 'medio' %}
-                                    Requiere atención a algunas vulnerabilidades.
-                                {% else %}
-                                    Requiere acción inmediata.
-                                {% endif %}
-                            </small>
-                        </div>
-                    </div>
-                    
-                    <!-- Riesgos Bajos -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="text-center p-3 bg-light rounded h-100">
-                            <div class="d-flex align-items-center justify-content-center mb-2">
-                                <div class="semaforo-circle me-2" 
-                                     style="width: 20px; height: 20px; border-radius: 50%; background-color: #28a745; border: 2px solid #ddd;">
-                                </div>
-                                <div class="display-6" style="color: #28a745;">{{ riesgos_aceptables }}</div>
-                            </div>
-                            <div class="text-muted">Riesgos Bajos</div>
-                            <small class="text-muted d-block mt-2">
-                                Nivel de seguridad aceptable
-                            </small>
-                        </div>
-                    </div>
-                    
-                    <!-- Riesgos Moderados -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="text-center p-3 bg-light rounded h-100">
-                            <div class="d-flex align-items-center justify-content-center mb-2">
-                                <div class="semaforo-circle me-2" 
-                                     style="width: 20px; height: 20px; border-radius: 50%; background-color: #ffc107; border: 2px solid #ddd;">
-                                </div>
-                                <div class="display-6" style="color: #ffc107;">{{ riesgos_moderados }}</div>
-                            </div>
-                            <div class="text-muted">Riesgos Moderados</div>
-                            <small class="text-muted d-block mt-2">
-                                Requieren mejoras
-                            </small>
-                        </div>
-                    </div>
-                    
-                    <!-- Riesgos Altos -->
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="text-center p-3 bg-light rounded h-100">
-                            <div class="d-flex align-items-center justify-content-center mb-2">
-                                <div class="semaforo-circle me-2" 
-                                     style="width: 20px; height: 20px; border-radius: 50%; background-color: #dc3545; border: 2px solid #ddd;">
-                                </div>
-                                <div class="display-6" style="color: #dc3545;">{{ riesgos_criticos }}</div>
-                            </div>
-                            <div class="text-muted">Riesgos Altos</div>
-                            <small class="text-muted d-block mt-2">
-                                Requieren atención inmediata
-                            </small>
-                        </div>
+                <div class="col-md-6">
+                    <p style="font-size:.8rem;font-weight:700;color:#1e3a6e;margin-bottom:.5rem;">
+                        <i class="fas fa-lightbulb me-1"></i>Recomendaciones Generales
+                    </p>
+                    <div class="obs-block">
+                        {{ observaciones.recomendaciones_generales|safe|default:"No se proporcionaron recomendaciones." }}
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Detalle por Tipo de Riesgo -->
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-list-alt"></i>
-                    Detalle por Tipo de Riesgo
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for riesgo_info in riesgos_evaluados %}
-                    <div class="col-md-6 col-lg-4 mb-3">
-                        <div class="card border-left-{{ riesgo_info.nivel_clase }}">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h6 class="card-title mb-1">{{ riesgo_info.nombre }}</h6>
-                                        <p class="card-text small text-muted mb-2">
-                                            {{ riesgo_info.preguntas_respondidas }} preguntas evaluadas
-                                        </p>
-                                    </div>
-                                    <span class="badge text-white" 
-                                          style="background-color: {{ riesgo_info.semaforo_color }};">
-                                        {{ riesgo_info.promedio|floatformat:3 }}
-                                    </span>
-                                </div>
-                                
-                                <!-- Semáforo para riesgo individual -->
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="semaforo-circle me-2" 
-                                         style="width: 20px; height: 20px; border-radius: 50%; background-color: {{ riesgo_info.semaforo_color }}; border: 2px solid #ddd; display: inline-block;">
-                                    </div>
-                                    <span class="fw-bold small">{{ riesgo_info.porcentaje|floatformat:1 }}% - {{ riesgo_info.semaforo_texto }}</span>
-                                </div>
-                                
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar" 
-                                         style="width: {{ riesgo_info.porcentaje|stringformat:"g" }}%; background-color: {{ riesgo_info.semaforo_color }};"
-                                         data-width="{{ riesgo_info.porcentaje|stringformat:"g" }}"></div>
-                                </div>
-                                <small class="text-muted">{{ riesgo_info.nivel_texto }}</small>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
+    {% if archivos_temporales %}
+    <div class="eval-card mb-3">
+        <div class="eval-card-header">
+            <h5><i class="fas fa-paperclip me-2"></i>Archivos de Evidencia</h5>
+            <span class="header-badge">{{ archivos_temporales|length }} archivo{{ archivos_temporales|length|pluralize:",s" }}</span>
         </div>
-
-        <!-- Observaciones y Recomendaciones -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">
-                    <i class="fas fa-clipboard-list"></i>
-                    Observaciones y Recomendaciones
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6><i class="fas fa-eye text-info"></i> Observaciones Generales</h6>
-                        <div class="border rounded p-3 bg-light">
-                            {{ observaciones.observaciones_generales|safe|default:"No se proporcionaron observaciones." }}
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h6><i class="fas fa-lightbulb text-warning"></i> Recomendaciones Generales</h6>
-                        <div class="border rounded p-3 bg-light">
-                            {{ observaciones.recomendaciones_generales|safe|default:"No se proporcionaron recomendaciones." }}
+        <div class="eval-card-body">
+            <div class="row g-2">
+                {% for archivo in archivos_temporales %}
+                <div class="col-md-4">
+                    <div style="display:flex;align-items:center;gap:.75rem;background:#f0f4f8;border:1px solid #e0e7f3;border-radius:8px;padding:.75rem;">
+                        {% if '.jpg' in archivo.nombre_original or '.jpeg' in archivo.nombre_original or '.png' in archivo.nombre_original or '.gif' in archivo.nombre_original or '.webp' in archivo.nombre_original %}
+                        <i class="fas fa-image fa-lg" style="color:#1e3a6e;"></i>
+                        {% else %}
+                        <i class="fas fa-file fa-lg" style="color:#6c757d;"></i>
+                        {% endif %}
+                        <div>
+                            <div style="font-size:.8rem;font-weight:600;color:#212529;">{{ archivo.nombre_original }}</div>
+                            <div style="font-size:.72rem;color:#6c757d;">{{ archivo.tamaño|filesizeformat }}</div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
+    </div>
+    {% endif %}
 
-        <!-- Archivos Cargados -->
-        {% if archivos_temporales %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-paperclip"></i>
-                    Archivos de Evidencia ({{ archivos_temporales|length }})
-                </h5>
+    <div class="eval-card">
+        <div class="eval-card-header" style="background:linear-gradient(135deg,#b7860f,#c9940f);">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Confirmacion Final</h5>
+        </div>
+        <div class="eval-card-body">
+            <div class="confirm-check">
+                {{ form.confirmar }}
+                <label for="{{ form.confirmar.id_for_label }}">{{ form.confirmar.label }}</label>
+                {% if form.confirmar.errors %}
+                <div class="text-danger small">{% for error in form.confirmar.errors %}{{ error }}{% endfor %}</div>
+                {% endif %}
             </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for archivo in archivos_temporales %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card border">
-                            <div class="card-body p-3">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        {% if '.jpg' in archivo.nombre_original or '.jpeg' in archivo.nombre_original or '.png' in archivo.nombre_original or '.gif' in archivo.nombre_original or '.webp' in archivo.nombre_original %}
-                                            <i class="fas fa-image fa-2x text-primary"></i>
-                                        {% else %}
-                                            <i class="fas fa-file fa-2x text-secondary"></i>
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1">{{ archivo.nombre_original }}</h6>
-                                        <small class="text-muted d-block">{{ archivo.descripcion|default:"Sin descripción" }}</small>
-                                        <small class="text-info">{{ archivo.tamaño|filesizeformat }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
+            <div class="confirm-check">
+                {{ form.enviar_notificacion }}
+                <label for="{{ form.enviar_notificacion.id_for_label }}">{{ form.enviar_notificacion.label }}</label>
+            </div>
+            <div class="what-happens">
+                <h6><i class="fas fa-info-circle me-1"></i>Al crear la evaluacion:</h6>
+                <ul class="mb-0">
+                    <li>Se generara automaticamente un reporte completo</li>
+                    <li>Se calculara el nivel de riesgo general del conjunto</li>
+                    <li>Se podran generar reportes en PDF</li>
+                    <li>Los datos quedaran registrados permanentemente</li>
+                </ul>
             </div>
         </div>
-        {% endif %}
-
-        <!-- Confirmación -->
-        <div class="card mb-4">
-            <div class="card-header bg-warning">
-                <h5 class="mb-0 text-dark">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Confirmación Final
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="form-check">
-                    {{ form.confirmar }}
-                    <label class="form-check-label" for="{{ form.confirmar.id_for_label }}">
-                        {{ form.confirmar.label }}
-                    </label>
-                    {% if form.confirmar.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.confirmar.errors %}
-                                {{ error }}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-                
-                <div class="form-check mt-3">
-                    {{ form.enviar_notificacion }}
-                    <label class="form-check-label" for="{{ form.enviar_notificacion.id_for_label }}">
-                        {{ form.enviar_notificacion.label }}
-                    </label>
-                </div>
-                
-                <div class="mt-3 alert alert-light">
-                    <h6>Al crear la evaluación:</h6>
-                    <ul class="mb-0">
-                        <li>Se generará automáticamente un reporte completo</li>
-                        <li>Se calculará el nivel de riesgo general del conjunto</li>
-                        <li>Se podrán generar reportes en PDF</li>
-                        <li>Los datos quedarán registrados permanentemente</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-    </form>
+    </div>
+</form>
 {% endblock %}
 
 {% block back_button %}
-<a href="{% url 'risk_conjuntos:paso_3_observaciones' conjunto.id %}" class="btn btn-secondary">
+<a href="{% url 'risk_conjuntos:paso_3_observaciones' conjunto.id %}" class="btn-nav-back">
     <i class="fas fa-arrow-left"></i> Volver al Paso 3
 </a>
 {% endblock %}
 
 {% block next_button %}
-<button type="submit" form="paso4Form" class="btn btn-success btn-lg">
-    <i class="fas fa-check-circle"></i> Crear Evaluación Final
+<button type="submit" form="paso4Form" class="btn-nav-finish" id="btn-finalizar">
+    <i class="fas fa-check-circle me-2"></i> Crear Evaluacion Final
 </button>
 {% endblock %}
 
-{% block extra_css %}
-<style>
-/* Asegurar que los botones estén al frente */
-.btn-secondary, .btn-success {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
-}
-
-/* Forzar el estilo del header de observaciones */
-.card-header.bg-primary {
-    background-color: #007bff !important;
-    color: white !important;
-    border-bottom: 1px solid rgba(0,0,0,.125) !important;
-}
-
-.card-header.bg-primary h5 {
-    color: white !important;
-    margin-bottom: 0 !important;
-}
-
-.card-header.bg-primary i {
-    color: white !important;
-}
-</style>
-{% endblock %}
-
 {% block extra_js %}
+{{ block.super }}
 <script>
 $(document).ready(function() {
-    // Corregir las barras de progreso
-    $('.progress-bar').each(function() {
-        var width = $(this).data('width');
-        if (width) {
-            // Convertir coma a punto para CSS
-            var correctedWidth = width.toString().replace(',', '.');
-            $(this).css('width', correctedWidth + '%');
-        }
+    $(".risk-mini-bar-fill").each(function() {
+        var w = $(this).data("width");
+        if (w) { $(this).css("width", w.toString().replace(",", ".") + "%"); }
     });
-    
-    // Validar formulario antes de envío
-    $('#paso4Form').on('submit', function(e) {
-        var confirmar = $('input[name="confirmar"]').is(':checked');
-        if (!confirmar) {
+
+    $("#paso4Form").on("submit", function(e) {
+        if (!$("input[name=confirmar]").is(":checked")) {
             e.preventDefault();
-            alert('Debe confirmar que ha revisado todos los datos antes de finalizar la evaluación.');
+            alert("Debe confirmar que ha revisado todos los datos antes de finalizar la evaluacion.");
             return false;
         }
-        
-        // Mostrar loading en el botón
-        var btn = $('button[type="submit"]');
-        btn.prop('disabled', true);
-        btn.html('<i class="fas fa-spinner fa-spin"></i> Creando evaluación...');
-        
+        var btn = $("#btn-finalizar");
+        btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i>Creando...');
         return true;
     });
 });

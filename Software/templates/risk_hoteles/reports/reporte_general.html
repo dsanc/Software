@@ -1,0 +1,1847 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte General de Seguridad — {{ hotel.name }}</title>
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ═══════════════════════════════════════════════
+           VARIABLES Y TOKENS DE DISEÑO
+        ═══════════════════════════════════════════════ */
+        :root {
+            --rg-dark:        #1a1a2e;
+            --rg-dark-mid:    #16213e;
+            --rg-dark-deep:   #0f3460;
+            --rg-accent:      #e94560;
+            --rg-accent-soft: rgba(233, 69, 96, 0.20);
+            --rg-accent-dim:  rgba(233, 69, 96, 0.55);
+            --rg-white:       #ffffff;
+            --rg-white-70:    rgba(255, 255, 255, 0.70);
+            --rg-white-50:    rgba(255, 255, 255, 0.50);
+            --rg-white-15:    rgba(255, 255, 255, 0.15);
+            --rg-border:      #e2e8f0;
+            --rg-surface:     #f8fafc;
+            --rg-text:        #1a1a2e;
+            --rg-text-muted:  #64748b;
+            --rg-radius:      6px;
+
+            /* Tamaño de página — se sobreescribe por context variable */
+            --page-width:  210mm;   /* A4 default */
+            --page-height: 297mm;
+        }
+
+        /* ═══════════════════════════════════════════════
+           CONFIGURACIÓN @page (A4 / Carta)
+        ═══════════════════════════════════════════════ */
+        {% if page_size == 'letter' %}
+        @page {
+            size: letter;          /* 215.9mm × 279.4mm */
+            margin: 0;
+        }
+        {% else %}
+        @page {
+            size: A4;              /* 210mm × 297mm */
+            margin: 0;
+        }
+        {% endif %}
+
+        /* ═══════════════════════════════════════════════
+           RESET & BASE
+        ═══════════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 11pt;
+            color: var(--rg-text);
+            background: #e8edf2;
+            {% if page_size == 'letter' %}
+            width: 215.9mm;
+            {% else %}
+            width: 210mm;
+            {% endif %}
+        }
+
+        /* ═══════════════════════════════════════════════
+           BARRA DE CONTROLES (no se imprime)
+        ═══════════════════════════════════════════════ */
+        .no-print {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: #1a1a2e;
+            border-bottom: 3px solid var(--rg-accent);
+        }
+
+        @media print {
+            .no-print { display: none !important; }
+        }
+
+        .ctrl-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 9pt;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.3px;
+            text-decoration: none;
+            transition: filter 0.15s;
+        }
+
+        .ctrl-btn:hover { filter: brightness(1.12); }
+
+        .ctrl-btn-primary {
+            background: var(--rg-accent);
+            color: #fff;
+        }
+
+        .ctrl-btn-secondary {
+            background: rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.85);
+            border: 1px solid rgba(255,255,255,0.20);
+        }
+
+        .ctrl-badge {
+            font-size: 7.5pt;
+            color: rgba(255,255,255,0.50);
+            margin-right: auto;
+            padding-left: 4px;
+        }
+
+        .ctrl-size-tag {
+            display: inline-block;
+            background: rgba(233,69,96,0.20);
+            border: 1px solid rgba(233,69,96,0.45);
+            color: #ff8fa3;
+            font-size: 7pt;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+        }
+
+        /* ═══════════════════════════════════════════════
+           WRAPPER DE PÁGINA
+        ═══════════════════════════════════════════════ */
+        .page-wrapper {
+            {% if page_size == 'letter' %}
+            width: 215.9mm;
+            min-height: 279.4mm;
+            {% else %}
+            width: 210mm;
+            min-height: 297mm;
+            {% endif %}
+            background: var(--rg-white);
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            box-shadow: 0 4px 40px rgba(0,0,0,0.18);
+        }
+
+        /* ═══════════════════════════════════════════════
+           ÁREA DE CONTENIDO (entre header y footer)
+        ═══════════════════════════════════════════════ */
+        .page-content {
+            flex: 1;
+            padding: 8mm 12mm 6mm;
+            /* El contenido del reporte irá aquí */
+        }
+
+        /* ═══════════════════════════════════════════════
+           HEADER
+        ═══════════════════════════════════════════════ */
+        .pdf-header {
+            background: linear-gradient(135deg, var(--rg-dark) 0%, var(--rg-dark-mid) 50%, var(--rg-dark-deep) 100%);
+            color: var(--rg-white);
+            padding: 14px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            border-bottom: 4px solid var(--rg-accent);
+        }
+
+        /* --- Columna izquierda: marca del sistema --- */
+        .hdr-brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            flex-shrink: 0;
+            min-width: 0;
+        }
+
+        .hdr-brand-icon {
+            width: 38px;
+            height: 38px;
+            background: var(--rg-accent-soft);
+            border: 2px solid var(--rg-accent-dim);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: var(--rg-accent);
+            flex-shrink: 0;
+        }
+
+        .hdr-brand-text {
+            line-height: 1.25;
+        }
+
+        .hdr-brand-text .brand-name {
+            font-size: 11pt;
+            font-weight: 800;
+            color: var(--rg-white);
+            letter-spacing: -0.2px;
+            display: block;
+        }
+
+        .hdr-brand-text .brand-sub {
+            font-size: 6.5pt;
+            color: var(--rg-white-50);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            display: block;
+        }
+
+        /* --- Columna central: hotel + título del reporte --- */
+        .hdr-center {
+            flex: 1;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .hdr-report-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--rg-accent-soft);
+            border: 1px solid var(--rg-accent-dim);
+            color: #ff8fa3;
+            font-size: 7pt;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .hdr-hotel-name {
+            font-size: 12.5pt;
+            font-weight: 700;
+            color: var(--rg-white);
+            margin: 0 0 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hdr-hotel-meta {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .hdr-hotel-meta .meta-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 7pt;
+            color: var(--rg-white-70);
+        }
+
+        .hdr-hotel-meta .meta-chip i {
+            color: var(--rg-accent);
+            font-size: 6.5pt;
+            width: 9px;
+        }
+
+        .hdr-hotel-meta .meta-chip span {
+            font-weight: 600;
+            color: var(--rg-white);
+        }
+
+        /* Separador tipo dot */
+        .hdr-hotel-meta .dot-sep {
+            width: 3px;
+            height: 3px;
+            background: var(--rg-white-15);
+            border-radius: 50%;
+        }
+
+        /* --- Columna derecha: metadatos del reporte --- */
+        .hdr-meta {
+            text-align: right;
+            flex-shrink: 0;
+            min-width: 110px;
+        }
+
+        .hdr-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 5px;
+            font-size: 6.5pt;
+            color: var(--rg-white-70);
+            margin-bottom: 3px;
+            white-space: nowrap;
+        }
+
+        .hdr-meta-row:last-child { margin-bottom: 0; }
+
+        .hdr-meta-row i {
+            color: var(--rg-accent);
+            width: 10px;
+            font-size: 6pt;
+        }
+
+        .hdr-meta-row strong {
+            color: var(--rg-white);
+            font-weight: 600;
+        }
+
+        /* Línea separadora vertical entre columnas del header */
+        .hdr-vline {
+            width: 1px;
+            height: 44px;
+            background: var(--rg-white-15);
+            flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════════════
+           FOOTER
+        ═══════════════════════════════════════════════ */
+        .pdf-footer {
+            background: linear-gradient(135deg, var(--rg-dark) 0%, var(--rg-dark-mid) 100%);
+            color: var(--rg-white-70);
+            padding: 10px 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            border-top: 3px solid var(--rg-accent);
+            font-size: 7.5pt;
+        }
+
+        /* --- Izquierda: sistema --- */
+        .ftr-left {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-shrink: 0;
+        }
+
+        .ftr-left-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--rg-accent-soft);
+            border: 1.5px solid var(--rg-accent-dim);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--rg-accent);
+            flex-shrink: 0;
+        }
+
+        .ftr-left-text .ftr-sys-name {
+            font-weight: 700;
+            color: var(--rg-white);
+            font-size: 8pt;
+            display: block;
+            line-height: 1.3;
+        }
+
+        .ftr-left-text .ftr-sys-sub {
+            font-size: 6.5pt;
+            color: var(--rg-white-50);
+            letter-spacing: 0.2px;
+        }
+
+        /* --- Centro: confidencialidad + número de página --- */
+        .ftr-center {
+            text-align: center;
+            color: var(--rg-white-50);
+            line-height: 1.5;
+        }
+
+        .ftr-center .ftr-confidential {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 7pt;
+        }
+
+        .ftr-center .ftr-confidential i {
+            color: var(--rg-accent);
+            font-size: 7pt;
+        }
+
+        .ftr-center .ftr-page {
+            font-size: 6.5pt;
+            color: var(--rg-white-50);
+            margin-top: 2px;
+        }
+
+        /* --- Derecha: hotel + fecha --- */
+        .ftr-right {
+            text-align: right;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+
+        .ftr-right div {
+            font-size: 6.5pt;
+            color: var(--rg-white-70);
+        }
+
+        .ftr-right strong {
+            color: var(--rg-white);
+            font-weight: 600;
+        }
+
+        .ftr-right .ftr-hotel-name {
+            font-size: 7.5pt;
+            font-weight: 700;
+            color: var(--rg-white);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        /* Línea separadora vertical footer */
+        .ftr-vline {
+            width: 1px;
+            height: 30px;
+            background: var(--rg-white-15);
+            flex-shrink: 0;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SECCIÓN — ENCABEZADO DE SECCIÓN
+        ═══════════════════════════════════════════════ */
+        .sec-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 14px;
+            background: linear-gradient(135deg, var(--rg-dark) 0%, var(--rg-dark-mid) 100%);
+            border-left: 4px solid var(--rg-accent);
+            border-radius: var(--rg-radius) var(--rg-radius) 0 0;
+            margin-bottom: 0;
+        }
+
+        .sec-header-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--rg-accent-soft);
+            border: 1.5px solid var(--rg-accent-dim);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--rg-accent);
+            flex-shrink: 0;
+        }
+
+        .sec-header-text {
+            flex: 1;
+            line-height: 1.25;
+        }
+
+        .sec-header-title {
+            font-size: 9pt;
+            font-weight: 700;
+            color: var(--rg-white);
+            display: block;
+        }
+
+        .sec-header-sub {
+            font-size: 6.5pt;
+            color: rgba(255,255,255,0.50);
+            display: block;
+            letter-spacing: 0.2px;
+        }
+
+        .sec-header-badge {
+            background: var(--rg-accent-soft);
+            border: 1px solid var(--rg-accent-dim);
+            color: #ff8fa3;
+            font-size: 6.5pt;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 20px;
+            letter-spacing: 0.4px;
+        }
+
+        .sec-body {
+            border: 1px solid var(--rg-border);
+            border-top: none;
+            border-radius: 0 0 var(--rg-radius) var(--rg-radius);
+            background: var(--rg-white);
+            overflow: hidden;
+        }
+
+        .report-section {
+            margin-bottom: 14px;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SECCIÓN — INFO BÁSICA DEL HOTEL
+        ═══════════════════════════════════════════════ */
+
+        /* Fila de tarjetas de datos */
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--rg-border);
+        }
+
+        .info-card {
+            padding: 10px 13px;
+            border-right: 1px solid var(--rg-border);
+        }
+
+        .info-card:last-child { border-right: none; }
+
+        .info-card-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 6pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 5px;
+        }
+
+        .info-card-label i {
+            color: var(--rg-accent);
+            width: 10px;
+            font-size: 7pt;
+        }
+
+        .info-card-value {
+            font-size: 9.5pt;
+            font-weight: 700;
+            color: var(--rg-text);
+            line-height: 1.2;
+        }
+
+        .info-card-value.muted {
+            font-weight: 400;
+            color: var(--rg-text-muted);
+            font-size: 8.5pt;
+        }
+
+        /* Categoría badge */
+        .cat-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 8pt;
+            font-weight: 700;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
+            color: #fff;
+        }
+
+        /* Puntuación destacada */
+        .score-badge {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .score-badge .score-num {
+            font-size: 16pt;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-badge .score-unit {
+            font-size: 7.5pt;
+            font-weight: 600;
+            color: var(--rg-text-muted);
+        }
+
+        .score-badge.s-success .score-num { color: #059669; }
+        .score-badge.s-warning .score-num { color: #d97706; }
+        .score-badge.s-danger  .score-num { color: #dc2626; }
+        .score-badge.s-none    .score-num { color: #94a3b8; }
+
+        /* Descripción / dirección */
+        .info-detail-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .info-detail-cell {
+            padding: 9px 13px;
+            border-right: 1px solid var(--rg-border);
+        }
+
+        .info-detail-cell:last-child { border-right: none; }
+
+        .info-detail-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 6pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 4px;
+        }
+
+        .info-detail-label i {
+            color: var(--rg-accent);
+            width: 10px;
+            font-size: 7pt;
+        }
+
+        .info-detail-value {
+            font-size: 8.5pt;
+            color: var(--rg-text);
+            line-height: 1.4;
+        }
+
+        /* Fila de contactos */
+        .contact-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid var(--rg-border);
+            background: var(--rg-surface);
+        }
+
+        .contact-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border-right: 1px solid var(--rg-border);
+        }
+
+        .contact-cell:last-child { border-right: none; }
+
+        .contact-cell-icon {
+            width: 24px;
+            height: 24px;
+            background: var(--rg-accent-soft);
+            border: 1px solid var(--rg-accent-dim);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: var(--rg-accent);
+            flex-shrink: 0;
+        }
+
+        .contact-cell-text .c-label {
+            font-size: 5.5pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+        }
+
+        .contact-cell-text .c-value {
+            font-size: 7.5pt;
+            color: var(--rg-text);
+            font-weight: 500;
+        }
+
+        .contact-cell-text .c-value.none {
+            color: #94a3b8;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SECCIÓN — RESULTADOS DE EVALUACIONES
+        ═══════════════════════════════════════════════ */
+
+        /* Resumen KPI row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: 1px solid var(--rg-border);
+        }
+
+        .kpi-card {
+            padding: 11px 14px;
+            border-right: 1px solid var(--rg-border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .kpi-card:last-child { border-right: none; }
+
+        .kpi-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .kpi-icon.k-blue   { background:#dbeafe; color:#1d4ed8; }
+        .kpi-icon.k-green  { background:#d1fae5; color:#059669; }
+        .kpi-icon.k-yellow { background:#fef3c7; color:#d97706; }
+        .kpi-icon.k-red    { background:#fee2e2; color:#dc2626; }
+        .kpi-icon.k-purple { background:#ede9fe; color:#7c3aed; }
+
+        .kpi-data .kpi-label {
+            font-size: 6pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .kpi-data .kpi-value {
+            font-size: 14pt;
+            font-weight: 800;
+            color: var(--rg-text);
+            line-height: 1;
+        }
+
+        .kpi-data .kpi-value .kpi-unit {
+            font-size: 7.5pt;
+            font-weight: 500;
+            color: var(--rg-text-muted);
+        }
+
+        .kpi-data .kpi-value.v-success { color: #059669; }
+        .kpi-data .kpi-value.v-warning { color: #d97706; }
+        .kpi-data .kpi-value.v-danger  { color: #dc2626; }
+        .kpi-data .kpi-value.v-none    { color: #94a3b8; }
+
+        /* Barra de progreso */
+        .score-bar-wrap {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--rg-border);
+            background: var(--rg-surface);
+        }
+
+        .score-bar-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 5px;
+        }
+
+        .score-bar-label .sbl-title {
+            font-size: 7pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .score-bar-label .sbl-pct {
+            font-size: 9pt;
+            font-weight: 800;
+            color: var(--rg-text);
+        }
+
+        .score-bar-track {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .score-bar-fill.f-success { background: linear-gradient(90deg, #10b981, #34d399); }
+        .score-bar-fill.f-warning { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .score-bar-fill.f-danger  { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        /* Tabla de evaluaciones */
+        .eval-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }
+
+        .eval-table thead tr {
+            background: var(--rg-surface);
+        }
+
+        .eval-table th {
+            padding: 7px 10px;
+            font-size: 6.5pt;
+            font-weight: 700;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--rg-border);
+            white-space: nowrap;
+        }
+
+        .eval-table th:first-child { padding-left: 14px; }
+        .eval-table th:last-child  { padding-right: 14px; text-align: center; }
+
+        .eval-table td {
+            padding: 7px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            color: var(--rg-text);
+            vertical-align: middle;
+        }
+
+        .eval-table td:first-child { padding-left: 14px; }
+        .eval-table td:last-child  { padding-right: 14px; text-align: center; }
+
+        .eval-table tbody tr:last-child td { border-bottom: none; }
+        .eval-table tbody tr:nth-child(even) td { background: #fafbfc; }
+
+        .eval-type-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 6.5pt;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        .type-inicial   { background:#dbeafe; color:#1d4ed8; }
+        .type-periodico { background:#d1fae5; color:#059669; }
+        .type-especial  { background:#fef3c7; color:#d97706; }
+        .type-auditoria { background:#ede9fe; color:#7c3aed; }
+
+        .risk-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .risk-muy_bajo { background:#d1fae5; color:#065f46; }
+        .risk-bajo     { background:#dcfce7; color:#166534; }
+        .risk-medio    { background:#fef3c7; color:#92400e; }
+        .risk-alto     { background:#fee2e2; color:#991b1b; }
+        .risk-muy_alto { background:#fce7f3; color:#9d174d; }
+
+        .score-inline {
+            display: inline-flex;
+            align-items: baseline;
+            gap: 1px;
+            font-weight: 700;
+        }
+
+        .score-inline .si-num {
+            font-size: 10pt;
+            line-height: 1;
+        }
+
+        .score-inline .si-unit {
+            font-size: 6.5pt;
+            color: var(--rg-text-muted);
+            font-weight: 500;
+        }
+
+        .score-inline.s-success .si-num { color: #059669; }
+        .score-inline.s-warning .si-num { color: #d97706; }
+        .score-inline.s-danger  .si-num { color: #dc2626; }
+
+        /* Mini barra inline en tabla */
+        .mini-bar {
+            height: 5px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 60px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+
+        .mini-bar-fill {
+            display: block;
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .mini-bar-fill.f-success { background: #10b981; }
+        .mini-bar-fill.f-warning { background: #f59e0b; }
+        .mini-bar-fill.f-danger  { background: #ef4444; }
+
+        /* Sin datos */
+        .no-data-row td {
+            text-align: center;
+            padding: 24px;
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 8pt;
+        }
+
+        /* ═══════════════════════════════════════════════
+           SECCIÓN — ANÁLISIS GENERAL
+        ═══════════════════════════════════════════════ */
+
+        /* Panel de nivel de riesgo global */
+        .risk-global-panel {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            border-bottom: 1px solid var(--rg-border);
+        }
+
+        .risk-global-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 22px;
+            gap: 6px;
+            min-width: 120px;
+            flex-shrink: 0;
+        }
+
+        .risk-global-badge.bg-success { background: linear-gradient(135deg, #d1fae5, #a7f3d0); border-right: 1px solid #6ee7b7; }
+        .risk-global-badge.bg-warning { background: linear-gradient(135deg, #fef3c7, #fde68a); border-right: 1px solid #fcd34d; }
+        .risk-global-badge.bg-danger  { background: linear-gradient(135deg, #fee2e2, #fecaca); border-right: 1px solid #fca5a5; }
+
+        .risk-global-badge .rgb-icon {
+            font-size: 22pt;
+        }
+
+        .risk-global-badge.bg-success .rgb-icon { color: #059669; }
+        .risk-global-badge.bg-warning .rgb-icon { color: #d97706; }
+        .risk-global-badge.bg-danger  .rgb-icon { color: #dc2626; }
+
+        .risk-global-badge .rgb-label {
+            font-size: 7.5pt;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .risk-global-badge.bg-success .rgb-label { color: #065f46; }
+        .risk-global-badge.bg-warning .rgb-label { color: #92400e; }
+        .risk-global-badge.bg-danger  .rgb-label { color: #991b1b; }
+
+        .risk-global-badge .rgb-pct {
+            font-size: 18pt;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .risk-global-badge.bg-success .rgb-pct { color: #059669; }
+        .risk-global-badge.bg-warning .rgb-pct { color: #d97706; }
+        .risk-global-badge.bg-danger  .rgb-pct { color: #dc2626; }
+
+        .risk-global-desc {
+            flex: 1;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .risk-global-desc .rgd-title {
+            font-size: 9pt;
+            font-weight: 700;
+            color: var(--rg-text);
+        }
+
+        .risk-global-desc .rgd-body {
+            font-size: 8pt;
+            color: var(--rg-text-muted);
+            line-height: 1.5;
+        }
+
+        .risk-trend-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 18px;
+            border-left: 1px solid var(--rg-border);
+            gap: 4px;
+            min-width: 90px;
+            flex-shrink: 0;
+        }
+
+        .risk-trend-box .rtb-icon {
+            font-size: 16pt;
+        }
+
+        .rtb-improving .rtb-icon { color: #059669; }
+        .rtb-stable    .rtb-icon { color: #6b7280; }
+        .rtb-declining .rtb-icon { color: #dc2626; }
+
+        .risk-trend-box .rtb-label {
+            font-size: 7pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rtb-improving .rtb-label { color: #059669; }
+        .rtb-stable    .rtb-label { color: #6b7280; }
+        .rtb-declining .rtb-label { color: #dc2626; }
+
+        .risk-trend-box .rtb-delta {
+            font-size: 7.5pt;
+            color: var(--rg-text-muted);
+        }
+
+        /* Fortalezas y debilidades */
+        .sw-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            border-bottom: 1px solid var(--rg-border);
+        }
+
+        .sw-col {
+            padding: 10px 14px;
+        }
+
+        .sw-col:first-child {
+            border-right: 1px solid var(--rg-border);
+        }
+
+        .sw-col-title {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 7pt;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--rg-border);
+        }
+
+        .sw-col-title.t-success { color: #059669; }
+        .sw-col-title.t-success i { color: #059669; }
+        .sw-col-title.t-danger  { color: #dc2626; }
+        .sw-col-title.t-danger  i { color: #dc2626; }
+
+        .sw-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sw-item:last-child { border-bottom: none; }
+
+        .sw-rank {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 7pt;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .sw-rank.r-success { background: #d1fae5; color: #065f46; }
+        .sw-rank.r-danger  { background: #fee2e2; color: #991b1b; }
+
+        .sw-item-name {
+            flex: 1;
+            font-size: 7.5pt;
+            color: var(--rg-text);
+            line-height: 1.3;
+        }
+
+        .sw-item-pct {
+            font-size: 9pt;
+            font-weight: 800;
+        }
+
+        .sw-item-pct.p-success { color: #059669; }
+        .sw-item-pct.p-warning { color: #d97706; }
+        .sw-item-pct.p-danger  { color: #dc2626; }
+
+        /* Tabla de análisis por categoría */
+        .cat-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 8pt;
+        }
+
+        .cat-table thead tr { background: var(--rg-surface); }
+
+        .cat-table th {
+            padding: 7px 10px;
+            font-size: 6pt;
+            font-weight: 800;
+            color: var(--rg-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border-bottom: 1px solid var(--rg-border);
+            white-space: nowrap;
+        }
+
+        .cat-table th:first-child { padding-left: 14px; }
+
+        .cat-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .cat-table td:first-child { padding-left: 14px; }
+        .cat-table tbody tr:last-child td { border-bottom: none; }
+        .cat-table tbody tr:nth-child(even) td { background: #fafbfc; }
+
+        .cat-name-cell {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .cat-name-icon {
+            width: 22px;
+            height: 22px;
+            background: var(--rg-accent-soft);
+            border: 1px solid var(--rg-accent-dim);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            color: var(--rg-accent);
+            flex-shrink: 0;
+        }
+
+        .trend-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 6.5pt;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .trend-chip.tc-improving { background: #d1fae5; color: #065f46; }
+        .trend-chip.tc-stable    { background: #f1f5f9; color: #475569; }
+        .trend-chip.tc-declining { background: #fee2e2; color: #991b1b; }
+
+        .risk-chip {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 20px;
+            font-size: 6.5pt;
+            font-weight: 700;
+        }
+
+        .risk-chip.rc-bajo    { background: #d1fae5; color: #065f46; }
+        .risk-chip.rc-medio   { background: #fef3c7; color: #92400e; }
+        .risk-chip.rc-alto    { background: #fee2e2; color: #991b1b; }
+        .risk-chip.rc-critico { background: #fce7f3; color: #9d174d; }
+
+        /* ═══════════════════════════════════════════════
+           PRINT OVERRIDES
+        ═══════════════════════════════════════════════ */
+        @media print {
+            html, body {
+                background: transparent;
+            }
+
+            .page-wrapper {
+                box-shadow: none;
+                min-height: 100vh;
+            }
+
+            /* Footer fijo al final de cada hoja impresa */
+            .pdf-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+            }
+
+            /* Reservar espacio para que el contenido no quede oculto bajo el footer */
+            .page-content {
+                padding-bottom: 28mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ══════════════ BARRA DE CONTROLES ══════════════ -->
+    <div class="no-print">
+        <span class="ctrl-badge">
+            Reporte General — {{ hotel.name }}
+            &nbsp;&nbsp;
+            <span class="ctrl-size-tag">{% if page_size == 'letter' %}CARTA{% else %}A4{% endif %}</span>
+        </span>
+        <button class="ctrl-btn ctrl-btn-primary" onclick="window.print()">
+            <i class="fas fa-print"></i> Imprimir / Guardar PDF
+        </button>
+        <a class="ctrl-btn ctrl-btn-secondary" href="{{ back_url|default:'javascript:history.back()' }}">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+    <!-- ══════════════ /BARRA DE CONTROLES ══════════════ -->
+
+
+    <!-- ══════════════════════════ PÁGINA ══════════════════════════ -->
+    <div class="page-wrapper">
+
+        <!-- ──────────────────── HEADER ──────────────────── -->
+        <header class="pdf-header">
+
+            <!-- Columna izquierda: marca del sistema -->
+            <div class="hdr-brand">
+                <div class="hdr-brand-icon">
+                    <i class="fas fa-shield-halved"></i>
+                </div>
+                <div class="hdr-brand-text">
+                    <span class="brand-name">Risk Manager</span>
+                    <span class="brand-sub">Sistema de Gestión de Riesgos</span>
+                </div>
+            </div>
+
+            <div class="hdr-vline"></div>
+
+            <!-- Columna central: hotel + título -->
+            <div class="hdr-center">
+                <div class="hdr-report-label">
+                    <i class="fas fa-chart-bar"></i>
+                    Reporte General de Seguridad
+                </div>
+                <h1 class="hdr-hotel-name">{{ hotel.name }}</h1>
+                <div class="hdr-hotel-meta">
+                    {% if hotel.city or hotel.country %}
+                    <span class="meta-chip">
+                        <i class="fas fa-location-dot"></i>
+                        <span>{{ hotel.city }}{% if hotel.city and hotel.country %}, {% endif %}{{ hotel.country }}</span>
+                    </span>
+                    <span class="dot-sep"></span>
+                    {% endif %}
+                    <span class="meta-chip">
+                        <i class="fas fa-star"></i>
+                        <span>{{ hotel.get_category_display }}</span>
+                    </span>
+                    {% if hotel.total_rooms %}
+                    <span class="dot-sep"></span>
+                    <span class="meta-chip">
+                        <i class="fas fa-bed"></i>
+                        <span>{{ hotel.total_rooms }} hab.</span>
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="hdr-vline"></div>
+
+            <!-- Columna derecha: metadatos -->
+            <div class="hdr-meta">
+                <div class="hdr-meta-row">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Generado:&nbsp;<strong>{{ generated_at|date:"d/m/Y" }}</strong></span>
+                </div>
+                <div class="hdr-meta-row">
+                    <i class="fas fa-clock"></i>
+                    <span>Hora:&nbsp;<strong>{{ generated_at|date:"H:i" }}</strong></span>
+                </div>
+                {% if request.user %}
+                <div class="hdr-meta-row">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Por:&nbsp;<strong>{{ request.user.get_full_name|default:request.user.username }}</strong></span>
+                </div>
+                {% endif %}
+                <div class="hdr-meta-row">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Formato:&nbsp;<strong>{% if page_size == 'letter' %}Carta{% else %}A4{% endif %}</strong></span>
+                </div>
+            </div>
+
+        </header>
+        <!-- ──────────────────── /HEADER ──────────────────── -->
+
+
+        <!-- ──────────────────── CONTENIDO ──────────────────── -->
+        <main class="page-content">
+
+            <!-- ══ SECCIÓN 1: INFORMACIÓN BÁSICA DEL HOTEL ══ -->
+            <section class="report-section">
+
+                <!-- Encabezado de sección -->
+                <div class="sec-header">
+                    <div class="sec-header-icon">
+                        <i class="fas fa-hotel"></i>
+                    </div>
+                    <div class="sec-header-text">
+                        <span class="sec-header-title">Información del Hotel</span>
+                        <span class="sec-header-sub">Datos generales, contacto y estadísticas de evaluación</span>
+                    </div>
+                    <span class="sec-header-badge">PERFIL</span>
+                </div>
+
+                <div class="sec-body">
+
+                    <!-- Fila 1: 4 tarjetas de datos clave -->
+                    <div class="info-cards">
+
+                        <!-- Categoría -->
+                        <div class="info-card">
+                            <div class="info-card-label">
+                                <i class="fas fa-star"></i> Categoría
+                            </div>
+                            <div class="info-card-value">
+                                <span class="cat-pill">
+                                    <i class="fas fa-award"></i>
+                                    {{ hotel.get_category_display }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Habitaciones -->
+                        <div class="info-card">
+                            <div class="info-card-label">
+                                <i class="fas fa-bed"></i> Habitaciones
+                            </div>
+                            <div class="info-card-value">{{ hotel.total_rooms }}</div>
+                        </div>
+
+                        <!-- Puntuación promedio -->
+                        <div class="info-card">
+                            <div class="info-card-label">
+                                <i class="fas fa-chart-line"></i> Puntuación Promedio
+                            </div>
+                            {% with pct=hotel.get_average_assessment_percentage %}
+                            {% if pct is not None %}
+                                {% if pct >= 70 %}
+                                <div class="score-badge s-success">
+                                {% elif pct >= 40 %}
+                                <div class="score-badge s-warning">
+                                {% else %}
+                                <div class="score-badge s-danger">
+                                {% endif %}
+                                    <span class="score-num">{{ pct|floatformat:0 }}</span>
+                                    <span class="score-unit">%</span>
+                                </div>
+                            {% else %}
+                                <div class="score-badge s-none">
+                                    <span class="score-num">—</span>
+                                </div>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <!-- Total evaluaciones -->
+                        <div class="info-card">
+                            <div class="info-card-label">
+                                <i class="fas fa-clipboard-check"></i> Evaluaciones
+                            </div>
+                            <div class="info-card-value">
+                                {{ hotel.get_assessment_count }}
+                                <span style="font-size:7.5pt;font-weight:400;color:var(--rg-text-muted);">completadas</span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /Fila 1 -->
+
+                    <!-- Fila 2: Dirección + Ubicación -->
+                    <div class="info-detail-row">
+
+                        <div class="info-detail-cell">
+                            <div class="info-detail-label">
+                                <i class="fas fa-map-marker-alt"></i> Dirección
+                            </div>
+                            <div class="info-detail-value">
+                                {% if hotel.address %}{{ hotel.address }}{% else %}<span style="color:#94a3b8;font-style:italic;">No registrada</span>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-detail-cell">
+                            <div class="info-detail-label">
+                                <i class="fas fa-location-dot"></i> Ubicación
+                            </div>
+                            <div class="info-detail-value">
+                                {% if hotel.city %}{{ hotel.city }}{% endif %}
+                                {% if hotel.city and hotel.country %} &mdash; {% endif %}
+                                {% if hotel.country %}{{ hotel.country }}{% endif %}
+                                {% if not hotel.city and not hotel.country %}<span style="color:#94a3b8;font-style:italic;">No registrada</span>{% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /Fila 2 -->
+
+                    <!-- Fila 3: Contacto (teléfono · email · web) -->
+                    <div class="contact-row">
+
+                        <div class="contact-cell">
+                            <div class="contact-cell-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-cell-text">
+                                <span class="c-label">Teléfono</span>
+                                <span class="c-value {% if not hotel.phone %}none{% endif %}">
+                                    {{ hotel.phone|default:"No registrado" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="contact-cell">
+                            <div class="contact-cell-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-cell-text">
+                                <span class="c-label">Correo electrónico</span>
+                                <span class="c-value {% if not hotel.email %}none{% endif %}">
+                                    {{ hotel.email|default:"No registrado" }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="contact-cell">
+                            <div class="contact-cell-icon">
+                                <i class="fas fa-globe"></i>
+                            </div>
+                            <div class="contact-cell-text">
+                                <span class="c-label">Sitio web</span>
+                                <span class="c-value {% if not hotel.website %}none{% endif %}">
+                                    {{ hotel.website|default:"No registrado" }}
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /Fila 3 -->
+
+                </div>
+                <!-- /sec-body -->
+
+            </section>
+            <!-- ══ /SECCIÓN 1 ══ -->
+
+            <!-- ══ SECCIÓN 2: RESULTADOS DE EVALUACIONES ══ -->
+            <section class="report-section">
+
+                <!-- Encabezado de sección -->
+                <div class="sec-header">
+                    <div class="sec-header-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="sec-header-text">
+                        <span class="sec-header-title">Resultados de Evaluaciones</span>
+                        <span class="sec-header-sub">Historial completo de evaluaciones de seguridad completadas</span>
+                    </div>
+                    <span class="sec-header-badge">{{ total_assessments }} EVALUACI{% if total_assessments == 1 %}ÓN{% else %}ONES{% endif %}</span>
+                </div>
+
+                <div class="sec-body">
+
+                    <!-- KPI row -->
+                    <div class="kpi-row">
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon k-blue"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="kpi-data">
+                                <span class="kpi-label">Total evaluaciones</span>
+                                <span class="kpi-value">{{ total_assessments }}</span>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon k-purple"><i class="fas fa-chart-line"></i></div>
+                            <div class="kpi-data">
+                                <span class="kpi-label">Promedio general</span>
+                                {% with pct=hotel.get_average_assessment_percentage %}
+                                {% if pct is not None %}
+                                    <span class="kpi-value {% if pct >= 70 %}v-success{% elif pct >= 40 %}v-warning{% else %}v-danger{% endif %}">
+                                        {{ pct|floatformat:0 }}<span class="kpi-unit">&thinsp;%</span>
+                                    </span>
+                                {% else %}
+                                    <span class="kpi-value v-none">&mdash;</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon k-green"><i class="fas fa-trophy"></i></div>
+                            <div class="kpi-data">
+                                <span class="kpi-label">Mejor puntuación</span>
+                                {% if best_score is not None %}
+                                    <span class="kpi-value {% if best_score >= 70 %}v-success{% elif best_score >= 40 %}v-warning{% else %}v-danger{% endif %}">
+                                        {{ best_score|floatformat:0 }}<span class="kpi-unit">&thinsp;%</span>
+                                    </span>
+                                {% else %}
+                                    <span class="kpi-value v-none">&mdash;</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="kpi-card">
+                            <div class="kpi-icon k-red"><i class="fas fa-arrow-trend-down"></i></div>
+                            <div class="kpi-data">
+                                <span class="kpi-label">Peor puntuación</span>
+                                {% if worst_score is not None %}
+                                    <span class="kpi-value {% if worst_score >= 70 %}v-success{% elif worst_score >= 40 %}v-warning{% else %}v-danger{% endif %}">
+                                        {{ worst_score|floatformat:0 }}<span class="kpi-unit">&thinsp;%</span>
+                                    </span>
+                                {% else %}
+                                    <span class="kpi-value v-none">&mdash;</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- /KPI row -->
+
+                    <!-- Barra de promedio general -->
+                    {% with pct=hotel.get_average_assessment_percentage %}
+                    {% if pct is not None %}
+                    <div class="score-bar-wrap">
+                        <div class="score-bar-label">
+                            <span class="sbl-title"><i class="fas fa-gauge-high me-1"></i>Nivel de seguridad promedio</span>
+                            <span class="sbl-pct">{{ pct|floatformat:1 }}%</span>
+                        </div>
+                        <div class="score-bar-track">
+                            <div class="score-bar-fill {% if pct >= 70 %}f-success{% elif pct >= 40 %}f-warning{% else %}f-danger{% endif %}"
+                                 style="width:{{ pct|floatformat:0 }}%"></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    <!-- /Barra promedio -->
+
+                    <!-- Tabla de evaluaciones -->
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fecha</th>
+                                <th>Tipo</th>
+                                <th>Nivel de riesgo</th>
+                                <th>Realizado por</th>
+                                <th class="text-right">Puntuación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if assessments_data %}
+                                {% for item in assessments_data %}
+                                <tr>
+                                    <td style="color:var(--rg-text-muted);font-size:7.5pt;">{{ forloop.counter }}</td>
+                                    <td>
+                                        <div style="font-weight:600;">{{ item.obj.assessment_date|date:"d/m/Y" }}</div>
+                                        <div style="font-size:6.5pt;color:var(--rg-text-muted);">{{ item.obj.assessment_date|date:"H:i" }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="eval-type-pill type-{{ item.obj.assessment_type }}">
+                                            {{ item.obj.get_assessment_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if item.obj.risk_level %}
+                                        <span class="risk-pill risk-{{ item.obj.risk_level }}">
+                                            {{ item.obj.get_risk_level_display }}
+                                        </span>
+                                        {% else %}
+                                        <span style="color:#94a3b8;font-size:7.5pt;">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="font-size:7.5pt;">{{ item.obj.created_by.get_full_name|default:item.obj.created_by.username }}</td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                                            <span class="mini-bar">
+                                                <span class="mini-bar-fill f-{{ item.level }}" style="width:{{ item.percentage|floatformat:0 }}%"></span>
+                                            </span>
+                                            <span class="score-inline s-{{ item.level }}">
+                                                <span class="si-num">{{ item.percentage|floatformat:0 }}</span>
+                                                <span class="si-unit">%</span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                            <tr class="no-data-row">
+                                <td colspan="6">
+                                    <i class="fas fa-inbox" style="font-size:16pt;display:block;margin-bottom:6px;"></i>
+                                    No hay evaluaciones completadas para este hotel
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                    <!-- /Tabla -->
+
+                </div>
+                <!-- /sec-body -->
+
+            </section>
+            <!-- ══ /SECCIÓN 2 ══ -->
+
+            {% if category_analysis %}
+            <!-- ══ SECCIÓN 3: ANÁLISIS GENERAL ══ -->
+            <section class="report-section">
+
+                <div class="sec-header">
+                    <div class="sec-header-icon">
+                        <i class="fas fa-magnifying-glass-chart"></i>
+                    </div>
+                    <div class="sec-header-text">
+                        <span class="sec-header-title">Análisis General de Seguridad</span>
+                        <span class="sec-header-sub">Nivel de riesgo, tendencia global y desempeño por categoría</span>
+                    </div>
+                    <span class="sec-header-badge">{{ category_analysis|length }} CATEGORÍA{{ category_analysis|length|pluralize:'S' }}</span>
+                </div>
+
+                <div class="sec-body">
+
+                    <!-- ── Panel de riesgo global ── -->
+                    {% if global_risk %}
+                    <div class="risk-global-panel">
+
+                        <div class="risk-global-badge bg-{{ global_risk.css }}">
+                            <i class="{{ global_risk.icon }} rgb-icon"></i>
+                            <div class="rgb-pct">{{ avg_pct_global|floatformat:0 }}<span style="font-size:9pt;font-weight:600;">&thinsp;%</span></div>
+                            <div class="rgb-label">{{ global_risk.label }}</div>
+                        </div>
+
+                        <div class="risk-global-desc">
+                            <div class="rgd-title">
+                                <i class="fas fa-circle-info" style="color:var(--rg-accent);margin-right:5px;"></i>
+                                Diagnóstico de seguridad
+                            </div>
+                            <div class="rgd-body">{{ global_risk.desc }}</div>
+                        </div>
+
+                        {% if global_trend %}
+                        <div class="risk-trend-box rtb-{{ global_trend.direction }}">
+                            {% if global_trend.direction == 'improving' %}
+                                <i class="fas fa-arrow-trend-up rtb-icon"></i>
+                                <span class="rtb-label">Mejorando</span>
+                            {% elif global_trend.direction == 'declining' %}
+                                <i class="fas fa-arrow-trend-down rtb-icon"></i>
+                                <span class="rtb-label">Bajando</span>
+                            {% else %}
+                                <i class="fas fa-minus rtb-icon"></i>
+                                <span class="rtb-label">Estable</span>
+                            {% endif %}
+                            <span class="rtb-delta">
+                                {% if global_trend.delta > 0 %}+{% endif %}{{ global_trend.delta }}%
+                            </span>
+                            <span style="font-size:5.5pt;color:#94a3b8;text-align:center;">vs. primera<br>evaluación</span>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                    {% endif %}
+                    <!-- /Panel riesgo global -->
+
+                    <!-- ── Fortalezas y debilidades ── -->
+                    {% if strengths or weaknesses %}
+                    <div class="sw-grid">
+
+                        <!-- Fortalezas -->
+                        <div class="sw-col">
+                            <div class="sw-col-title t-success">
+                                <i class="fas fa-thumbs-up"></i> Fortalezas principales
+                            </div>
+                            {% for item in strengths %}
+                            <div class="sw-item">
+                                <span class="sw-rank r-success">{{ forloop.counter }}</span>
+                                <span class="sw-item-name">{{ item.name }}</span>
+                                <span class="sw-item-pct p-{{ item.level }}">{{ item.avg_pct|floatformat:0 }}%</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Debilidades -->
+                        <div class="sw-col">
+                            <div class="sw-col-title t-danger">
+                                <i class="fas fa-thumbs-down"></i> Áreas de mejora prioritaria
+                            </div>
+                            {% for item in weaknesses %}
+                            <div class="sw-item">
+                                <span class="sw-rank r-danger">{{ forloop.counter }}</span>
+                                <span class="sw-item-name">{{ item.name }}</span>
+                                <span class="sw-item-pct p-{{ item.level }}">{{ item.avg_pct|floatformat:0 }}%</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    {% endif %}
+                    <!-- /Fortalezas y debilidades -->
+
+                    <!-- ── Tabla de desempeño por categoría ── -->
+                    <table class="cat-table">
+                        <thead>
+                            <tr>
+                                <th>Categoría de seguridad</th>
+                                <th style="text-align:center;">Evaluaciones</th>
+                                <th style="text-align:center;">Tendencia</th>
+                                <th style="text-align:center;">Nivel de riesgo</th>
+                                <th style="text-align:right;padding-right:14px;">Promedio</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in category_analysis %}
+                            <tr>
+                                <td>
+                                    <div class="cat-name-cell">
+                                        <div class="cat-name-icon">
+                                            <i class="{{ item.icon }}"></i>
+                                        </div>
+                                        <span style="font-weight:600;font-size:7.5pt;">{{ item.name }}</span>
+                                    </div>
+                                </td>
+                                <td style="text-align:center;color:var(--rg-text-muted);font-size:7.5pt;">{{ item.count }}</td>
+                                <td style="text-align:center;">
+                                    {% if item.trend == 'improving' %}
+                                    <span class="trend-chip tc-improving">
+                                        <i class="fas fa-arrow-up" style="font-size:5pt;"></i> Mejora
+                                    </span>
+                                    {% elif item.trend == 'declining' %}
+                                    <span class="trend-chip tc-declining">
+                                        <i class="fas fa-arrow-down" style="font-size:5pt;"></i> Baja
+                                    </span>
+                                    {% else %}
+                                    <span class="trend-chip tc-stable">
+                                        <i class="fas fa-minus" style="font-size:5pt;"></i> Estable
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;">
+                                    <span class="risk-chip rc-{{ item.risk }}">
+                                        {% if item.risk == 'bajo' %}Bajo
+                                        {% elif item.risk == 'medio' %}Moderado
+                                        {% elif item.risk == 'alto' %}Alto
+                                        {% else %}Crítico{% endif %}
+                                    </span>
+                                </td>
+                                <td style="text-align:right;padding-right:14px;">
+                                    <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                                        <span class="mini-bar">
+                                            <span class="mini-bar-fill f-{{ item.level }}" style="width:{{ item.avg_pct|floatformat:0 }}%"></span>
+                                        </span>
+                                        <span class="score-inline s-{{ item.level }}">
+                                            <span class="si-num">{{ item.avg_pct|floatformat:0 }}</span>
+                                            <span class="si-unit">%</span>
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- /Tabla categorías -->
+
+                </div>
+                <!-- /sec-body -->
+
+            </section>
+            <!-- ══ /SECCIÓN 3 ══ -->
+            {% endif %}
+
+        </main>
+        <!-- ──────────────────── /CONTENIDO ──────────────────── -->
+
+
+        <!-- ──────────────────── FOOTER ──────────────────── -->
+        <footer class="pdf-footer">
+
+            <!-- Izquierda: sistema -->
+            <div class="ftr-left">
+                <div class="ftr-left-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="ftr-left-text">
+                    <span class="ftr-sys-name">Risk Manager &mdash; Gestión de Riesgos</span>
+                    <span class="ftr-sys-sub">Evaluación de Seguridad Hotelera &nbsp;|&nbsp; Estándar ISO 31000</span>
+                </div>
+            </div>
+
+            <div class="ftr-vline"></div>
+
+            <!-- Centro: confidencialidad -->
+            <div class="ftr-center">
+                <div class="ftr-confidential">
+                    <i class="fas fa-lock"></i>
+                    Documento Confidencial &mdash; Uso Interno
+                </div>
+                <div class="ftr-page">
+                    Reporte General de Seguridad
+                </div>
+            </div>
+
+            <div class="ftr-vline"></div>
+
+            <!-- Derecha: hotel + fecha -->
+            <div class="ftr-right">
+                <span class="ftr-hotel-name">{{ hotel.name|truncatechars:28 }}</span>
+                <div>Categoría: <strong>{{ hotel.get_category_display }}</strong></div>
+                <div>Generado: <strong>{{ generated_at|date:"d/m/Y H:i" }}</strong></div>
+            </div>
+
+        </footer>
+        <!-- ──────────────────── /FOOTER ──────────────────── -->
+
+    </div>
+    <!-- ══════════════════════════ /PÁGINA ══════════════════════════ -->
+
+    {% if auto_print %}
+    <script>
+        window.addEventListener('load', function () {
+            setTimeout(function () { window.print(); }, 500);
+        });
+    </script>
+    {% endif %}
+
+</body>
+</html>

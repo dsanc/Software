@@ -5,391 +5,424 @@
 
 {% block extra_css %}
 <style>
-/* Estilos personalizados para la evaluación */
-.evaluation-header {
-    background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%);
-    color: white;
-    border-radius: 0.5rem;
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
+/* ================================================================
+   REALIZAR EVALUACIÓN — DISEÑO MODERNO (sistema sp-)
+   ================================================================ */
+:root {
+    --sp-primary:    #0d9488;
+    --sp-primary-d:  #0f766e;
+    --sp-dark:       #0f172a;
+    --sp-dark-mid:   #1e293b;
+    --sp-accent:     #059669;
+    --sp-success:    #10b981;
+    --sp-warning:    #f59e0b;
+    --sp-danger:     #ef4444;
+    --sp-info:       #3b82f6;
+    --sp-surface:    #ffffff;
+    --sp-border:     #e5e7eb;
+    --sp-text:       #111827;
+    --sp-text-muted: #6b7280;
+    --sp-radius:     0.875rem;
+    --sp-shadow-sm:  0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+    --sp-shadow:     0 4px 16px rgba(0,0,0,.1);
+    --sp-shadow-lg:  0 8px 32px rgba(0,0,0,.14);
 }
 
-.evaluation-header .text-sm {
-    font-size: 0.875rem;
-    opacity: 0.95;
+/* ── HEADER ──────────────────────────────────────────────── */
+.sp-header {
+    background: linear-gradient(135deg, var(--sp-dark) 0%, var(--sp-dark-mid) 60%, #0d4a3a 100%);
+    border-radius: var(--sp-radius);
+    padding: .875rem 1.25rem;
+    margin-bottom: 1rem;
+    position: relative; overflow: hidden;
+    border-bottom: 3px solid var(--sp-accent);
+    box-shadow: var(--sp-shadow-lg);
+}
+.sp-header::before {
+    content: ''; position: absolute; top: -40%; right: -5%;
+    width: 200px; height: 200px;
+    background: rgba(5,150,105,.08); border-radius: 50%; pointer-events: none;
+}
+.sp-breadcrumb {
+    display: flex; align-items: center; gap: .375rem;
+    font-size: .75rem; color: rgba(255,255,255,.5); margin-bottom: .35rem;
+}
+.sp-breadcrumb a { color: rgba(255,255,255,.65); text-decoration: none; transition: color .2s; }
+.sp-breadcrumb a:hover { color: #fff; }
+.sp-breadcrumb i { font-size: .55rem; }
+.sp-header h1 {
+    font-size: 1.1rem; font-weight: 800; color: #fff;
+    margin: 0 0 .15rem; letter-spacing: -.3px;
+    display: flex; align-items: center; gap: .5rem;
+}
+.sp-header h1 .h1-icon {
+    width: 28px; height: 28px;
+    background: rgba(5,150,105,.2); border: 1.5px solid rgba(5,150,105,.4);
+    border-radius: .45rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .8rem; color: #6ee7b7; flex-shrink: 0;
+}
+.sp-header p { font-size: .775rem; color: rgba(255,255,255,.5); margin: 0; }
+.btn-sp-ghost {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,255,255,.1); color: rgba(255,255,255,.85);
+    border: 1.5px solid rgba(255,255,255,.2); border-radius: .5rem;
+    padding: .4rem .85rem; font-size: .78rem; font-weight: 600;
+    text-decoration: none; transition: all .2s;
+}
+.btn-sp-ghost:hover {
+    background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.4);
+    color: #fff; transform: translateY(-1px);
 }
 
-.evaluation-header .badge {
-    font-size: 0.75rem;
+/* ── INFO STRIP ──────────────────────────────────────────── */
+.sp-eval-strip {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    padding: .6rem 1rem; margin-bottom: .875rem;
+    display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+    position: relative; overflow: hidden;
+}
+.sp-eval-strip::before {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 4px;
+    background: linear-gradient(180deg, var(--sp-primary), var(--sp-accent));
+    border-radius: var(--sp-radius) 0 0 var(--sp-radius);
+}
+.sp-eval-meta {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .75rem; color: var(--sp-text-muted);
+    padding: .15rem .55rem; background: #f8fafc;
+    border: 1px solid var(--sp-border); border-radius: 50px;
+}
+.sp-eval-meta strong { color: var(--sp-text); font-weight: 700; }
+.sp-estado-badge {
+    font-size: .68rem; font-weight: 700; padding: .2rem .6rem;
+    border-radius: 50px; background: #fef3c7; color: #92400e;
+    border: 1px solid #fcd34d; margin-left: auto; flex-shrink: 0;
 }
 
-.progress-container {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+/* ── PROGRESS BAR ────────────────────────────────────────── */
+.sp-progress-wrap {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    padding: .7rem 1rem; margin-bottom: .875rem;
+    display: flex; align-items: center; gap: .875rem;
+}
+.sp-progress-track {
+    flex: 1; height: 8px; background: #f1f5f9;
+    border-radius: 50px; overflow: hidden;
+}
+.sp-progress-bar {
+    height: 100%; border-radius: 50px;
+    background: linear-gradient(90deg, var(--sp-primary), var(--sp-accent));
+    transition: width .6s ease;
+}
+.sp-progress-label {
+    font-size: .75rem; font-weight: 700; color: var(--sp-primary);
+    white-space: nowrap; flex-shrink: 0; min-width: 3.5rem; text-align: right;
+}
+.sp-progress-count {
+    font-size: .72rem; color: var(--sp-text-muted); flex-shrink: 0; white-space: nowrap;
 }
 
-.question-card {
-    border: none;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    border-radius: 1rem;
-    margin-bottom: 2rem;
-    overflow: hidden;
-    transition: transform 0.2s ease;
+/* ── QUESTION CARD ───────────────────────────────────────── */
+.sp-question-card {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow);
+    overflow: hidden; margin-bottom: .875rem;
+    animation: spFadeIn .35s ease;
+}
+.sp-question-header {
+    padding: 1rem 1.25rem; background: #fafbfc;
+    border-bottom: 1px solid var(--sp-border);
+    display: flex; align-items: flex-start; gap: .875rem;
+}
+.sp-question-num {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--sp-primary), var(--sp-accent));
+    color: #fff; border-radius: .6rem;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: .9rem;
+    box-shadow: 0 3px 8px rgba(13,148,136,.3);
+}
+.sp-question-text {
+    font-size: 1rem; font-weight: 600; color: var(--sp-text);
+    line-height: 1.55; padding-top: .125rem;
 }
 
-.question-card:hover {
-    transform: translateY(-2px);
-}
-
-.question-header {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    padding: 1.5rem;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.question-number {
-    width: 50px;
-    height: 50px;
-    background: linear-gradient(135deg, #6f42c1, #e83e8c);
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-right: 1rem;
-}
-
-.question-text {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #2c3e50;
-    line-height: 1.6;
-}
-
-.option-container {
-    padding: 1rem;
-}
-
+/* ── OPTIONS ─────────────────────────────────────────────── */
+.sp-options-grid { padding: 1rem 1.25rem; }
 .option-item {
-    border: 2px solid #e9ecef;
-    border-radius: 0.5rem;
-    padding: 0.75rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
-    position: relative;
-    overflow: hidden;
-    min-height: 50px;
-    display: flex;
-    align-items: center;
+    border: 2px solid var(--sp-border); border-radius: .75rem;
+    padding: .75rem; cursor: pointer;
+    transition: all .22s ease; background: var(--sp-surface);
+    position: relative; overflow: hidden;
+    min-height: 52px; display: flex; align-items: center;
+    user-select: none;
 }
-
-.option-item:hover {
-    border-color: #6f42c1;
-    background: rgba(111, 66, 193, 0.05);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.15);
-}
-
-.option-item.selected {
-    border-color: #6f42c1;
-    background: linear-gradient(135deg, rgba(111, 66, 193, 0.1), rgba(232, 62, 140, 0.1));
-    box-shadow: 0 4px 12px rgba(111, 66, 193, 0.2);
-    transform: translateY(-2px);
-}
-
 .option-item::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: transparent;
-    transition: background 0.3s ease;
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 0;
+    background: linear-gradient(180deg, var(--sp-primary), var(--sp-accent));
+    transition: width .22s ease; border-radius: .75rem 0 0 .75rem;
 }
-
-.option-item.selected::before {
-    background: linear-gradient(135deg, #6f42c1, #e83e8c);
+.option-item:hover {
+    border-color: var(--sp-primary);
+    background: #f0fdfa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(13,148,136,.14);
 }
-
+.option-item.selected {
+    border-color: var(--sp-primary);
+    background: linear-gradient(135deg, rgba(13,148,136,.07), rgba(5,150,105,.04));
+    box-shadow: 0 4px 14px rgba(13,148,136,.18);
+    transform: translateY(-2px);
+}
+.option-item.selected::before { width: 4px; }
 .option-radio {
-    transform: scale(1.2);
-    margin: 0;
+    position: absolute; opacity: 0; pointer-events: none;
 }
-
+.option-check {
+    width: 20px; height: 20px; flex-shrink: 0;
+    border: 2px solid var(--sp-border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: .625rem; transition: all .2s; background: #fff;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.06);
+}
+.option-item.selected .option-check {
+    border-color: var(--sp-primary);
+    background: var(--sp-primary);
+}
+.option-item.selected .option-check::after {
+    content: ''; width: 6px; height: 6px;
+    background: #fff; border-radius: 50%;
+    display: block;
+}
 .option-text {
-    font-size: 0.85rem;
-    color: #495057;
-    font-weight: 500;
-    line-height: 1.3;
-    text-align: center;
+    font-size: .84rem; color: var(--sp-text);
+    font-weight: 500; line-height: 1.4; flex: 1;
+}
+.option-item.selected .option-text { font-weight: 700; color: var(--sp-primary-d); }
+
+/* needs-selection highlight */
+.needs-selection .option-item {
+    border-color: var(--sp-warning) !important;
+    animation: spShake .4s ease;
+}
+@keyframes spShake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-4px); }
+    75%      { transform: translateX(4px); }
 }
 
-.option-value {
-    color: #6c757d;
-    font-size: 0.75rem;
-    font-weight: 400;
-    margin-top: 0.125rem;
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.sp-empty-state {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow-sm);
+    padding: 3rem 2rem; text-align: center; margin-bottom: .875rem;
+}
+.sp-empty-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #d1fae5; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem; font-size: 1.75rem; color: var(--sp-accent);
 }
 
-.evaluation-controls {
-    background: white;
-    border-radius: 0.5rem;
-    padding: 1rem 1.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    bottom: 1rem;
-    z-index: 100;
-    border-top: 3px solid #6f42c1;
+/* ── NAV CONTROLS ────────────────────────────────────────── */
+.sp-nav-bar {
+    background: var(--sp-surface); border: 1px solid var(--sp-border);
+    border-radius: var(--sp-radius); box-shadow: var(--sp-shadow);
+    padding: .75rem 1rem;
+    position: sticky; bottom: .75rem; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+}
+.btn-sp-back {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: transparent; color: var(--sp-text-muted);
+    border: 1.5px solid var(--sp-border); border-radius: .5rem;
+    padding: .45rem .95rem; font-size: .8rem; font-weight: 600;
+    cursor: pointer; transition: all .2s;
+}
+.btn-sp-back:hover { border-color: #94a3b8; color: var(--sp-text); }
+.btn-sp-next {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--sp-accent); color: #fff;
+    border: none; border-radius: .5rem;
+    padding: .5rem 1.25rem; font-size: .84rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 3px 10px rgba(5,150,105,.35);
+}
+.btn-sp-next:hover:not(:disabled) {
+    background: #047857; transform: translateY(-1px);
+    box-shadow: 0 5px 16px rgba(5,150,105,.45);
+}
+.btn-sp-next:disabled {
+    background: #d1d5db; color: #9ca3af;
+    box-shadow: none; cursor: not-allowed;
+}
+.sp-nav-center {
+    font-size: .78rem; color: var(--sp-text-muted);
+    font-weight: 600; text-align: center;
 }
 
-.evaluation-info {
-    background: linear-gradient(135deg, #17a2b8, #138496);
-    color: white;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-.variable-badge {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.progress-bar {
-    height: 12px;
-    border-radius: 6px;
-    background: linear-gradient(90deg, #6f42c1, #e83e8c);
-    transition: width 0.6s ease;
-}
-
-.btn-next {
-    background: linear-gradient(135deg, #28a745, #20c997);
-    border: none;
-    padding: 0.5rem 1.5rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.btn-next:hover {
-    background: linear-gradient(135deg, #218838, #1ea080);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-    color: white;
-}
-
-.btn-back {
-    background: linear-gradient(135deg, #6c757d, #495057);
-    border: none;
-    color: white;
-    padding: 0.5rem 1.5rem;
-    font-weight: 600;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.btn-back:hover {
-    background: linear-gradient(135deg, #5a6268, #343a40);
-    transform: translateY(-1px);
-    color: white;
+@keyframes spFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
-    .evaluation-header {
-        text-align: center;
-        padding: 1.5rem;
-    }
-    
-    .question-header {
-        padding: 1rem;
-        text-align: center;
-    }
-    
-    .question-number {
-        margin: 0 auto 1rem auto;
-    }
-    
-    .option-container {
-        padding: 1rem;
-    }
-    
-    .evaluation-controls {
-        position: relative;
-        bottom: auto;
-    }
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    .sp-eval-strip { flex-direction: column; align-items: flex-start; gap: .4rem; }
+    .sp-estado-badge { margin-left: 0; }
+    .sp-nav-bar { position: relative; bottom: auto; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <!-- Header de la Evaluación -->
-    <div class="evaluation-header">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <i class="fas fa-clipboard-check fa-2x"></i>
-            </div>
-            <div class="col">
-                <h1 class="h4 mb-1">Evaluación de Seguridad</h1>
-                <div class="d-flex flex-wrap align-items-center text-sm">
-                    <span class="me-3">
-                        <strong>Perfil:</strong> {{ evaluacion.perfil.nombre_completo }}
-                    </span>
-                    <span class="me-3">
-                        <strong>Tipo:</strong> {{ evaluacion.arbol.nombre }}
-                    </span>
-                    <span>
-                        <strong>Evaluador:</strong> {{ evaluacion.evaluador_nombre }}
-                    </span>
+
+    <!-- ── HEADER ───────────────────────────────────────────── -->
+    <div class="sp-header">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="sp-breadcrumb">
+                    <a href="{% url 'dashboard:home' %}"><i class="fas fa-home"></i> Inicio</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:dashboard' %}">Seguridad Probabilística</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:lista_perfiles' %}">Perfiles</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <a href="{% url 'security_probabilistic:detalle_perfil' evaluacion.perfil.pk %}">{{ evaluacion.perfil.iniciales }}</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Evaluación #{{ evaluacion.id }}</span>
                 </div>
+                <h1>
+                    <span class="h1-icon"><i class="fas fa-clipboard-check"></i></span>
+                    Evaluación de Seguridad
+                </h1>
+                <p>{{ evaluacion.arbol.nombre }}</p>
             </div>
-            <div class="col-auto">
-                <div class="text-end">
-                    <div class="badge bg-warning">
-                        {{ evaluacion.get_estado_display }}
-                    </div>
-                </div>
+            <div>
+                <a href="{% url 'security_probabilistic:detalle_perfil' evaluacion.perfil.pk %}" class="btn-sp-ghost">
+                    <i class="fas fa-arrow-left"></i> Regresar
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Progreso de la Evaluación -->
-    <div class="progress-container">
-        <div class="row align-items-center">
-            <div class="col-md-12">
-                <h6 class="mb-2">Progreso de la Evaluación</h6>
-                <div class="progress" style="height: 12px; background-color: #e9ecef; border-radius: 6px;">
-                    <div class="progress-bar" 
-                         style="width: {{ progreso_porcentaje|default:0|unlocalize }}%; background: linear-gradient(90deg, #6f42c1, #e83e8c); border-radius: 6px; transition: width 0.6s ease;"
-                         role="progressbar"
-                         data-progress="{{ progreso_porcentaje|default:0 }}"
-                         aria-valuenow="{{ progreso_porcentaje|default:0|floatformat:1 }}" 
-                         aria-valuemin="0" 
-                         aria-valuemax="100">
-                        <span class="visually-hidden">{{ progreso_porcentaje|default:0|floatformat:1 }}% completado</span>
-                    </div>
-                </div>
-                <small class="text-muted mt-1">{{ progreso_porcentaje|default:0|floatformat:1 }}% completado</small>
-            </div>
-        </div>
+    <!-- ── INFO STRIP ───────────────────────────────────────── -->
+    <div class="sp-eval-strip">
+        <span class="sp-eval-meta">
+            <i class="fas fa-user"></i>
+            <strong>Perfil:</strong> {{ evaluacion.perfil.nombre_completo }}
+        </span>
+        <span class="sp-eval-meta">
+            <i class="fas fa-sitemap"></i>
+            <strong>Tipo:</strong> {{ evaluacion.arbol.nombre }}
+        </span>
+        <span class="sp-eval-meta">
+            <i class="fas fa-user-check"></i>
+            <strong>Evaluador:</strong> {{ evaluacion.evaluador_nombre }}
+        </span>
+        <span class="sp-estado-badge">{{ evaluacion.get_estado_display }}</span>
     </div>
 
+    <!-- ── BARRA DE PROGRESO ─────────────────────────────────── -->
+    <div class="sp-progress-wrap">
+        <span class="sp-progress-count">
+            <i class="fas fa-tasks me-1" style="color:var(--sp-primary)"></i>
+            {{ preguntas_respondidas }} / {{ total_preguntas }}
+        </span>
+        <div class="sp-progress-track">
+            <div class="sp-progress-bar progress-bar"
+                 style="width: {{ progreso_porcentaje|default:0|unlocalize }}%;"
+                 role="progressbar"
+                 data-progress="{{ progreso_porcentaje|default:0 }}"
+                 aria-valuenow="{{ progreso_porcentaje|default:0|floatformat:1 }}"
+                 aria-valuemin="0"
+                 aria-valuemax="100">
+            </div>
+        </div>
+        <span class="sp-progress-label">{{ progreso_porcentaje|default:0|floatformat:1 }}%</span>
+    </div>
+
+    <!-- ── FORMULARIO ────────────────────────────────────────── -->
     <form method="post" id="evaluationForm">
         {% csrf_token %}
-        
-        <!-- Campo oculto para la acción -->
         <input type="hidden" name="accion" id="hiddenAccion" value="">
-        
+
         {% if pregunta_actual %}
         <!-- Tarjeta de Pregunta -->
-        <div class="question-card fade-in">
-            <div class="question-header">
-                <div class="d-flex align-items-center">
-                    <div class="question-number">
-                        {{ numero_pregunta }}
-                    </div>
-                    <div class="flex-grow-1">
-                        <div class="question-text">
-                            {{ pregunta_actual.texto }}
-                        </div>
-                    </div>
-                </div>
+        <div class="sp-question-card">
+            <div class="sp-question-header">
+                <div class="sp-question-num">{{ numero_pregunta }}</div>
+                <div class="sp-question-text">{{ pregunta_actual.texto }}</div>
             </div>
-            
-            <div class="option-container">
+            <div class="sp-options-grid">
                 <div class="row g-2">
                     {% for opcion in opciones %}
                     <div class="{% if opciones|length <= 2 %}col-md-6{% elif opciones|length == 3 %}col-md-4{% else %}col-md-3{% endif %}">
-                        <div class="option-item h-100" onclick="selectOption({{ opcion.id }})">
-                            <div class="d-flex flex-column align-items-center justify-content-center h-100 w-100">
-                                <input type="radio" 
-                                       name="respuesta" 
-                                       value="{{ opcion.id }}" 
-                                       id="option_{{ opcion.id }}"
-                                       class="option-radio mb-2"
-                                       {% if respuesta_seleccionada == opcion.id %}checked{% endif %}>
-                                <label for="option_{{ opcion.id }}" class="option-text mb-0 fw-semibold">
-                                    {{ opcion.texto }}
-                                </label>
-                            </div>
+                        <div class="option-item h-100">
+                            <input type="radio"
+                                   name="respuesta"
+                                   value="{{ opcion.id }}"
+                                   id="option_{{ opcion.id }}"
+                                   class="option-radio"
+                                   {% if respuesta_seleccionada == opcion.id %}checked{% endif %}>
+                            <span class="option-check"></span>
+                            <label for="option_{{ opcion.id }}" class="option-text mb-0">
+                                {{ opcion.texto }}
+                            </label>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
+
         {% else %}
-        <!-- Mensaje si no hay pregunta actual -->
-        <div class="card">
-            <div class="card-body text-center py-5">
-                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                <h4>¡Evaluación Completada!</h4>
-                <p class="text-muted">Has respondido todas las preguntas de esta evaluación.</p>
-                <a href="{% url 'security_probabilistic:detalle_perfil' evaluacion.perfil.pk %}" 
-                   class="btn btn-primary">
-                    <i class="fas fa-arrow-left me-2"></i>Volver al Perfil
-                </a>
-            </div>
+        <!-- Estado: evaluación completada -->
+        <div class="sp-empty-state">
+            <div class="sp-empty-icon"><i class="fas fa-check"></i></div>
+            <h5 style="font-weight:800;color:var(--sp-text);margin-bottom:.5rem">¡Evaluación Completada!</h5>
+            <p style="color:var(--sp-text-muted);font-size:.875rem;margin-bottom:1.25rem">
+                Has respondido todas las preguntas de esta evaluación.
+            </p>
+            <a href="{% url 'security_probabilistic:detalle_perfil' evaluacion.perfil.pk %}"
+               style="display:inline-flex;align-items:center;gap:.4rem;background:var(--sp-primary);color:#fff;border:none;border-radius:.5rem;padding:.5rem 1.25rem;font-size:.84rem;font-weight:700;text-decoration:none;box-shadow:0 3px 10px rgba(13,148,136,.3)">
+                <i class="fas fa-arrow-left"></i> Volver al Perfil
+            </a>
         </div>
         {% endif %}
 
-        <!-- Controles de Navegación -->
+        <!-- ── BARRA DE NAVEGACIÓN ──────────────────────────── -->
         {% if pregunta_actual %}
-        <div class="evaluation-controls">
-            <div class="d-flex justify-content-between align-items-center">
-                <!-- Botón Anterior -->
-                {% if hay_pregunta_anterior %}
-                <button type="submit" name="accion" value="anterior" class="btn btn-back">
-                    <i class="fas fa-arrow-left me-1"></i>Anterior
-                </button>
-                {% else %}
-                <div></div>
-                {% endif %}
-                
-                <!-- Información Central -->
-                <small class="text-muted">
-                    Pregunta {{ numero_pregunta }}
-                </small>
-                
-                <!-- Botón Siguiente -->
-                <button type="submit" 
-                        name="accion" 
-                        value="siguiente" 
-                        class="btn btn-next"
-                        id="btnSiguiente"
-                        disabled>
-                    <span id="btnTexto">
-                        {% if es_ultima_pregunta %}
-                            <i class="fas fa-check me-1"></i>Finalizar
-                        {% else %}
-                            Siguiente<i class="fas fa-arrow-right ms-1"></i>
-                        {% endif %}
-                    </span>
-                </button>
-            </div>
+        <div class="sp-nav-bar">
+            {% if hay_pregunta_anterior %}
+            <button type="submit" name="accion" value="anterior" class="btn-sp-back">
+                <i class="fas fa-arrow-left"></i> Anterior
+            </button>
+            {% else %}
+            <div></div>
+            {% endif %}
+
+            <div class="sp-nav-center">Pregunta {{ numero_pregunta }}</div>
+
+            <button type="submit"
+                    name="accion"
+                    value="siguiente"
+                    class="btn-sp-next"
+                    id="btnSiguiente"
+                    disabled>
+                <span id="btnTexto">
+                    {% if es_ultima_pregunta %}
+                        <i class="fas fa-check"></i> Finalizar
+                    {% else %}
+                        Siguiente <i class="fas fa-arrow-right"></i>
+                    {% endif %}
+                </span>
+            </button>
         </div>
         {% endif %}
+
     </form>
 </div>
 
@@ -397,168 +430,100 @@
 // Variables globales
 let selectedOption = {% if respuesta_seleccionada %}{{ respuesta_seleccionada }}{% else %}null{% endif %};
 
-// Función para seleccionar una opción
 function selectOption(optionId) {
-    console.log('Seleccionando opción:', optionId);
-    
-    // Remover selección anterior
-    document.querySelectorAll('.option-item').forEach(item => {
+    document.querySelectorAll('.option-item').forEach(function(item) {
         item.classList.remove('selected');
     });
-    
-    // Seleccionar nueva opción
-    const optionElement = document.querySelector(`#option_${optionId}`).closest('.option-item');
-    optionElement.classList.add('selected');
-    
-    // Marcar radio button
-    const radioButton = document.querySelector(`#option_${optionId}`);
-    radioButton.checked = true;
-    console.log('Radio button marcado:', radioButton.name, '=', radioButton.value);
-    
-    // Actualizar variable global
+    var radio = document.getElementById('option_' + optionId);
+    if (radio) {
+        radio.checked = true;
+        radio.closest('.option-item').classList.add('selected');
+    }
+    var btnSiguiente = document.getElementById('btnSiguiente');
+    if (btnSiguiente) {
+        btnSiguiente.disabled = false;
+    }
     selectedOption = optionId;
-    
-    // Habilitar botón siguiente
-    const btnSiguiente = document.getElementById('btnSiguiente');
-    btnSiguiente.disabled = false;
-    console.log('Botón siguiente habilitado');
-    
-    // Efecto visual
-    optionElement.style.transform = 'translateY(-4px) scale(1.02)';
-    setTimeout(() => {
-        optionElement.style.transform = 'translateY(-2px)';
-    }, 150);
 }
 
-// Inicializar estado de la página
 document.addEventListener('DOMContentLoaded', function() {
-    // Asegurar que la barra de progreso se muestre correctamente
-    const progressBar = document.querySelector('.progress-bar');
+
+    // Corregir ancho de barra de progreso (decimales con coma en locale ES)
+    var progressBar = document.querySelector('[data-progress]');
     if (progressBar) {
-        const progresoStr = progressBar.getAttribute('data-progress');
-        // Convertir coma a punto si es necesario
-        const progreso = parseFloat(progresoStr.replace(',', '.')) || 0;
-        progressBar.style.width = progreso + '%';
-        console.log('Progreso establecido:', progreso + '%', 'desde valor:', progresoStr);
+        var raw = progressBar.getAttribute('data-progress');
+        var pct = parseFloat(String(raw).replace(',', '.')) || 0;
+        progressBar.style.width = pct + '%';
     }
-    
-    // Si hay una respuesta preseleccionada, marcar la opción
+
+    // Preseleccionar si ya habia respuesta previa
     if (selectedOption) {
         selectOption(selectedOption);
     }
-    
-    // Agregar eventos a las opciones
-    document.querySelectorAll('.option-item').forEach(item => {
+
+    // Click en cualquier opcion
+    document.querySelectorAll('.option-item').forEach(function(item) {
         item.addEventListener('click', function() {
-            const radio = this.querySelector('input[type="radio"]');
-            if (radio) {
-                selectOption(radio.value);
-            }
+            var r = this.querySelector('.option-radio');
+            if (r) { selectOption(parseInt(r.value, 10)); }
         });
     });
-    
-    // Validación del formulario
-    document.getElementById('evaluationForm').addEventListener('submit', function(e) {
-        const submitter = e.submitter;
-        const accion = submitter ? submitter.value : null;
-        console.log('Enviando formulario con acción:', accion);
-        console.log('Submitter:', submitter);
-        
-        // Asegurar que la acción se envíe correctamente
-        const hiddenAccion = document.getElementById('hiddenAccion');
-        if (accion) {
-            hiddenAccion.value = accion;
-            console.log('Acción asignada al campo oculto:', accion);
-        }
-        
-        if (accion === 'siguiente') {
-            const respuestaSeleccionada = document.querySelector('input[name="respuesta"]:checked');
-            console.log('Respuesta seleccionada:', respuestaSeleccionada ? respuestaSeleccionada.value : 'ninguna');
-            
-            if (!respuestaSeleccionada) {
+
+    // Validar seleccion antes de enviar (sin alert)
+    var btnSiguiente = document.getElementById('btnSiguiente');
+    if (btnSiguiente) {
+        btnSiguiente.addEventListener('click', function(e) {
+            if (!selectedOption) {
                 e.preventDefault();
-                alert('Por favor, seleccione una opción antes de continuar.');
-                return false;
-            }
-            
-            // Deshabilitar botón para evitar doble envío
-            console.log('Deshabilitando botón y cambiando texto...');
-            submitter.disabled = true;
-            
-            // Cambiar solo el contenido del span, no el botón completo
-            const btnTexto = submitter.querySelector('#btnTexto');
-            if (btnTexto) {
-                btnTexto.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Procesando...';
-            }
-            
-            console.log('Formulario enviado correctamente');
-        }
-    });
-    
-    // Atajos de teclado
-    document.addEventListener('keydown', function(e) {
-        // Números 1-9 para seleccionar opciones
-        if (e.key >= '1' && e.key <= '9') {
-            const optionIndex = parseInt(e.key) - 1;
-            const options = document.querySelectorAll('input[name="respuesta"]');
-            if (options[optionIndex]) {
-                selectOption(options[optionIndex].value);
-            }
-        }
-        
-        // Enter para continuar (si hay opción seleccionada)
-        if (e.key === 'Enter' && selectedOption) {
-            e.preventDefault();
-            const btnSiguiente = document.getElementById('btnSiguiente');
-            if (btnSiguiente && !btnSiguiente.disabled) {
-                // Establecer acción antes de hacer submit
-                document.getElementById('hiddenAccion').value = 'siguiente';
-                btnSiguiente.click();
-            }
-        }
-        
-        // Escape o Backspace para volver
-        if ((e.key === 'Escape' || e.key === 'Backspace') && !e.ctrlKey && !e.altKey) {
-            e.preventDefault();
-            const btnAnterior = document.querySelector('button[value="anterior"]');
-            if (btnAnterior) {
-                if (confirm('¿Desea volver a la pregunta anterior?')) {
-                    btnAnterior.click();
+                var grid = document.querySelector('.sp-options-grid');
+                if (grid) {
+                    grid.classList.add('needs-selection');
+                    grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(function() {
+                        grid.classList.remove('needs-selection');
+                    }, 1500);
                 }
             }
+        });
+    }
+
+    // Atajos de teclado
+    document.addEventListener('keydown', function(e) {
+        var tag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
+
+        // 1-9: seleccionar opcion por numero
+        if (e.key >= '1' && e.key <= '9' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+            var idx = parseInt(e.key, 10) - 1;
+            var radios = document.querySelectorAll('.option-radio');
+            if (radios[idx]) { selectOption(parseInt(radios[idx].value, 10)); }
         }
-        
-        // Flecha izquierda para pregunta anterior
-        if (e.key === 'ArrowLeft' && e.ctrlKey) {
-            e.preventDefault();
-            const btnAnterior = document.querySelector('button[value="anterior"]');
-            if (btnAnterior) {
-                document.getElementById('hiddenAccion').value = 'anterior';
-                btnAnterior.click();
-            }
+
+        // Enter: confirmar y avanzar
+        if (e.key === 'Enter' && selectedOption && tag !== 'BUTTON') {
+            var btn = document.getElementById('btnSiguiente');
+            if (btn && !btn.disabled) { btn.click(); }
         }
-        
-        // Flecha derecha para siguiente pregunta
-        if (e.key === 'ArrowRight' && e.ctrlKey && selectedOption) {
-            e.preventDefault();
-            const btnSiguiente = document.getElementById('btnSiguiente');
-            if (btnSiguiente && !btnSiguiente.disabled) {
-                document.getElementById('hiddenAccion').value = 'siguiente';
-                btnSiguiente.click();
-            }
+
+        // Escape / Backspace: volver a pregunta anterior (sin confirm)
+        if ((e.key === 'Escape' || e.key === 'Backspace') &&
+                tag !== 'INPUT' && tag !== 'TEXTAREA') {
+            var btnAnt = document.querySelector('button[value="anterior"]');
+            if (btnAnt) { btnAnt.click(); }
+        }
+
+        // Ctrl+ArrowRight: avanzar
+        if (e.ctrlKey && e.key === 'ArrowRight' && selectedOption) {
+            var btn2 = document.getElementById('btnSiguiente');
+            if (btn2 && !btn2.disabled) { btn2.click(); }
+        }
+
+        // Ctrl+ArrowLeft: retroceder
+        if (e.ctrlKey && e.key === 'ArrowLeft') {
+            var btnAnt2 = document.querySelector('button[value="anterior"]');
+            if (btnAnt2) { btnAnt2.click(); }
         }
     });
+
 });
-
-// Auto-guardar respuesta (opcional)
-function autoSave() {
-    if (selectedOption) {
-        // Aquí se podría implementar auto-guardado con AJAX
-        console.log('Auto-guardando respuesta:', selectedOption);
-    }
-}
-
-// Guardar cada 30 segundos
-setInterval(autoSave, 30000);
 </script>
 {% endblock %}

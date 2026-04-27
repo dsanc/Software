@@ -107,7 +107,7 @@ def assessment_pdf_preview(request, assessment_id):
         'assessment': assessment,
         'preview_mode': True,
     })
-    return render(request, 'risk_hoteles/reports/pdf_preview_simple.html', context)
+    return render(request, 'risk_hoteles/reports/pdf_print_exact.html', context)
 
 
 @login_required

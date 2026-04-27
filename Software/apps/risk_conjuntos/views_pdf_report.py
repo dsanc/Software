@@ -67,7 +67,7 @@ def generar_reporte_pdf(request, evaluacion_id):
             'fecha_generacion': timezone.now(),
             'usuario_generador': request.user,
             'configuracion_impresion': {
-                'auto_print': True,
+                'auto_print': False,
                 'formato': 'A4',
                 'orientacion': 'retrato',
                 'margenes': {
@@ -86,7 +86,7 @@ def generar_reporte_pdf(request, evaluacion_id):
             f'Usuario: {request.user.username}'
         )
         
-        return render(request, 'risk_conjuntos/pdf/pdf_print_exact.html', context)
+        return render(request, 'risk_conjuntos/pdf/pdf_print_conjuntos.html', context)
         
     except Exception as e:
         logger.error(f'Error generando reporte PDF: {str(e)}')
@@ -128,7 +128,7 @@ def preview_reporte_pdf(request, evaluacion_id):
             }
         }
         
-        return render(request, 'risk_conjuntos/pdf/pdf_print_exact.html', context)
+        return render(request, 'risk_conjuntos/pdf/pdf_print_conjuntos.html', context)
         
     except Exception as e:
         logger.error(f'Error en preview de reporte PDF: {str(e)}')
@@ -308,7 +308,7 @@ def generar_reporte_general_pdf(request, conjunto_id):
             f'Evaluaciones: {total_evaluaciones}, Usuario: {request.user.username}'
         )
 
-        return render(request, 'risk_conjuntos/pdf/pdf_general_report.html', context)
+        return render(request, 'risk_conjuntos/pdf/pdf_reporte_general.html', context)
 
     except Exception as e:
         logger.error(f'Error generando Reporte General PDF: {str(e)}')

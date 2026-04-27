@@ -1,0 +1,825 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte General — {{ conjunto.nombre }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* ── Página A4 ──────────────────────────────────────── */
+        @page          { size: A4; margin: 10mm 0 0 0; }
+        @page :first   { margin-top: 0; }
+
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0; padding: 0;
+            width: 210mm;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 10.5pt;
+            color: #1a1a2e;
+            background: #f0f0f0;
+        }
+
+        .page-wrapper {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .page-content {
+            flex: 1;
+            padding: 5mm 8mm;
+            padding-bottom: 17mm;
+        }
+
+        /* ── Header ─────────────────────────────────────────── */
+        .pdf-header {
+            background: linear-gradient(135deg, #1e3a6e 0%, #1a3060 50%, #162a54 100%);
+            color: #fff;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            border-bottom: 4px solid #e94560;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .header-brand-icon {
+            width: 34px; height: 34px;
+            background: rgba(233,69,96,0.2);
+            border: 2px solid rgba(233,69,96,0.55);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 15px; color: #e94560;
+        }
+
+        .header-brand-text h1 { font-size: 10pt; font-weight: 700; margin: 0; color: #fff; }
+        .header-brand-text span { font-size: 6.5pt; color: rgba(255,255,255,0.6); text-transform: uppercase; letter-spacing: 0.8px; }
+
+        .header-center { flex: 1; text-align: center; }
+        .header-center h2 { font-size: 11.5pt; font-weight: 700; margin: 0 0 4px; color: #fff; }
+
+        .header-badge {
+            display: inline-block;
+            background: rgba(233,69,96,0.2);
+            border: 1px solid rgba(233,69,96,0.5);
+            color: #ff8fa3;
+            font-size: 7pt; padding: 2px 10px;
+            border-radius: 20px; letter-spacing: 0.5px;
+        }
+
+        .header-meta { text-align: right; flex-shrink: 0; }
+        .header-meta .meta-row {
+            font-size: 6.5pt; color: rgba(255,255,255,0.7);
+            margin-bottom: 2px; display: flex;
+            align-items: center; justify-content: flex-end; gap: 4px; white-space: nowrap;
+        }
+        .header-meta .meta-row i { color: #e94560; width: 9px; font-size: 6pt; }
+        .header-meta .meta-row strong { color: #fff; }
+
+        /* ── Footer fijo ─────────────────────────────────────── */
+        .pdf-footer {
+            position: fixed; bottom: 0; left: 0; width: 210mm;
+            background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+            color: rgba(255,255,255,0.75);
+            padding: 7px 24px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-top: 3px solid #e94560;
+            font-size: 7pt; gap: 16px; z-index: 100;
+        }
+
+        .footer-left { display: flex; align-items: center; gap: 8px; }
+        .footer-left > i { color: #e94560; font-size: 11pt; }
+        .footer-left .footer-title { font-weight: 700; color: #fff; margin-bottom: 1px; }
+        .footer-left .footer-subtitle { color: rgba(255,255,255,0.5); font-size: 6.5pt; }
+        .footer-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.2); }
+        .footer-center { text-align: center; color: rgba(255,255,255,0.5); white-space: nowrap; }
+        .footer-right { text-align: right; color: rgba(255,255,255,0.65); }
+        .footer-right div { margin-bottom: 1px; }
+        .footer-right strong { color: #fff; }
+
+        /* ── Secciones generales ─────────────────────────────── */
+        .report-section { margin-bottom: 10px; }
+
+        .section-header-bar {
+            background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 6px 6px 0 0;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .section-header-bar h2 { font-size: 9pt; font-weight: 700; margin: 0; }
+        .section-header-bar .sec-badge {
+            font-size: 6.5pt; background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 1px 7px; border-radius: 10px; color: rgba(255,255,255,0.85);
+        }
+
+        .section-body {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            padding: 8px 10px;
+            background: #fff;
+        }
+
+        /* ── Sección 1: KPI Banner ───────────────────────────── */
+        .kpi-banner {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0;
+            border-radius: 0 0 6px 6px;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+            border-top: none;
+        }
+
+        .kpi-cell {
+            padding: 8px 6px;
+            text-align: center;
+            border-right: 1px solid #dee2e6;
+            background: #fff;
+        }
+        .kpi-cell:last-child { border-right: none; }
+
+        .kpi-icon-wrap {
+            width: 28px; height: 28px;
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 4px;
+            font-size: 11px;
+        }
+
+        .kpi-value {
+            font-size: 14pt; font-weight: 800;
+            line-height: 1; margin-bottom: 2px;
+        }
+
+        .kpi-label {
+            font-size: 6.5pt; text-transform: uppercase;
+            letter-spacing: 0.7px; font-weight: 700; color: #6c757d;
+        }
+
+        .kpi-sub { font-size: 6pt; color: #adb5bd; margin-top: 2px; }
+
+        /* ── Sección 2: Resumen ejecutivo ────────────────────── */
+        .exec-grid {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 8px;
+        }
+
+        .exec-gauge {
+            background: linear-gradient(160deg, #f8f9fa, #fff);
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 10px 8px;
+            text-align: center;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .gauge-circle {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            margin: 0 auto 6px;
+            position: relative;
+        }
+
+        .gauge-value {
+            font-size: 18pt; font-weight: 800;
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 6.5pt; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-top: 1px;
+            font-weight: 600;
+        }
+
+        .gauge-title { font-size: 7.5pt; font-weight: 700; color: #495057; margin-bottom: 4px; }
+
+        .gauge-tag {
+            font-size: 7pt; font-weight: 600;
+            padding: 2px 8px; border-radius: 10px;
+            display: inline-block;
+        }
+
+        .exec-info { display: flex; flex-direction: column; gap: 6px; }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 6px 8px;
+        }
+
+        .info-card-label {
+            font-size: 6.5pt; color: #6c757d;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            font-weight: 600; margin-bottom: 2px;
+        }
+
+        .info-card-value { font-size: 9pt; font-weight: 700; color: #212529; }
+
+        .info-card-sub { font-size: 6pt; color: #adb5bd; margin-top: 1px; }
+
+        /* Tendencia inline */
+        .trend-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 7.5pt; font-weight: 600;
+            padding: 3px 9px; border-radius: 20px;
+        }
+
+        /* ── Sección 3: Historial de evaluaciones ───────────── */
+        .hist-table {
+            width: 100%; border-collapse: collapse;
+            font-size: 8pt;
+        }
+
+        .hist-table th {
+            background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
+            color: #fff;
+            padding: 5px 7px;
+            text-align: left;
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            font-weight: 600;
+        }
+
+        .hist-table th:first-child { border-radius: 4px 0 0 0; }
+        .hist-table th:last-child  { border-radius: 0 4px 0 0; }
+
+        .hist-table td {
+            padding: 5px 7px;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        .hist-table tr:last-child td { border-bottom: none; }
+        .hist-table tr:nth-child(even) td { background: #f9f9f9; }
+
+        .score-dot {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 7pt; font-weight: 700; color: #fff;
+        }
+
+        .nivel-badge {
+            font-size: 6.5pt; font-weight: 600;
+            padding: 1px 6px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 0.4px;
+        }
+
+        .nivel-bajo    { background: #d4edda; color: #155724; }
+        .nivel-medio   { background: #fff3cd; color: #856404; }
+        .nivel-alto    { background: #f8d7da; color: #721c24; }
+
+        /* ── Sección 4: Categorías de riesgo ─────────────────── */
+        .cat-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px 8px;
+        }
+
+        .cat-row {
+            display: flex; align-items: center; gap: 6px;
+            padding: 5px 6px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #dee2e6;
+        }
+
+        .cat-row.nivel-alto   { border-left-color: #dc3545; }
+        .cat-row.nivel-medio  { border-left-color: #ffc107; }
+        .cat-row.nivel-bajo   { border-left-color: #28a745; }
+
+        .cat-name { flex: 1; font-size: 8pt; font-weight: 600; color: #212529; }
+        .cat-pct  { font-size: 8.5pt; font-weight: 700; width: 38px; text-align: right; }
+
+        .cat-row.nivel-alto   .cat-pct { color: #dc3545; }
+        .cat-row.nivel-medio  .cat-pct { color: #856404; }
+        .cat-row.nivel-bajo   .cat-pct { color: #155724; }
+
+        .cat-bar-bg {
+            width: 60px; height: 6px;
+            background: #e9ecef; border-radius: 3px; overflow: hidden; flex-shrink: 0;
+        }
+
+        .cat-bar-fill { height: 100%; border-radius: 3px; }
+        .cat-row.nivel-alto   .cat-bar-fill { background: #dc3545; }
+        .cat-row.nivel-medio  .cat-bar-fill { background: #ffc107; }
+        .cat-row.nivel-bajo   .cat-bar-fill { background: #28a745; }
+
+        /* ── Sección 5: IA/ML ───────────────────────────────── */
+        .ml-banner {
+            display: flex; align-items: flex-start; gap: 10px;
+            background: linear-gradient(135deg, #f8f9ff, #fff);
+            border: 1px solid #dee2e6;
+            border-left: 4px solid #1e3a6e;
+            border-radius: 0 6px 6px 0;
+            padding: 8px 10px;
+            margin-bottom: 7px;
+        }
+
+        .ml-banner-icon {
+            width: 32px; height: 32px; flex-shrink: 0;
+            background: linear-gradient(135deg, #1e3a6e, #162a54);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 13px;
+        }
+
+        .ml-banner-body { flex: 1; }
+
+        .ml-level-badge {
+            display: inline-block;
+            font-size: 7pt; font-weight: 700;
+            padding: 1px 8px; border-radius: 10px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .ml-banner-text { font-size: 8pt; color: #495057; line-height: 1.4; }
+
+        .ml-conf-bar {
+            height: 4px; background: #e9ecef;
+            border-radius: 2px; overflow: hidden; margin-top: 5px;
+        }
+
+        .ml-conf-fill { height: 100%; background: linear-gradient(90deg, #1e3a6e, #4a90d9); border-radius: 2px; }
+
+        .ml-conf-label { font-size: 6pt; color: #6c757d; margin-top: 2px; }
+
+        .ml-reco-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 5px;
+            margin-bottom: 7px;
+        }
+
+        .ml-reco-card {
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 6px 8px;
+            border-left: 3px solid #1e3a6e;
+        }
+
+        .ml-reco-title { font-size: 7.5pt; font-weight: 700; color: #1e3a6e; margin-bottom: 2px; }
+        .ml-reco-text  { font-size: 7pt; color: #495057; line-height: 1.35; }
+
+        .ml-pred-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 5px;
+        }
+
+        .ml-pred-cell {
+            text-align: center;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 6px 4px;
+        }
+
+        .ml-pred-period { font-size: 6.5pt; color: #6c757d; text-transform: uppercase; font-weight: 600; }
+        .ml-pred-value  { font-size: 11pt; font-weight: 700; margin: 2px 0 1px; }
+        .ml-pred-label  { font-size: 6pt; color: #adb5bd; }
+
+        /* ── Print: breaks ───────────────────────────────────── */
+        @media print {
+            body { background: #fff; }
+            .section-header-bar { break-after: avoid; }
+            .kpi-banner          { break-inside: avoid; }
+            .exec-grid           { break-inside: avoid; }
+            .hist-table          { break-inside: avoid; }
+            .hist-table tr       { break-inside: avoid; }
+            .cat-row             { break-inside: avoid; }
+            .ml-banner           { break-inside: avoid; }
+            .ml-reco-card        { break-inside: avoid; }
+            .ml-pred-row         { break-inside: avoid; }
+            .report-section:nth-child(n+3) { break-before: page; }
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+    <!-- ══════════════════════════════════════════
+         HEADER
+    ══════════════════════════════════════════ -->
+    <header class="pdf-header">
+        <!-- Marca -->
+        <div class="header-brand">
+            <div class="header-brand-icon"><i class="fas fa-shield-alt"></i></div>
+            <div class="header-brand-text">
+                <h1>Risk Analytics</h1>
+                <span>Sistema de Evaluación de Riesgos</span>
+            </div>
+        </div>
+
+        <!-- Título central -->
+        <div class="header-center">
+            <h2>{{ conjunto.nombre }}</h2>
+            <div class="header-badge">
+                <i class="fas fa-chart-bar me-1"></i>Reporte General de Historial
+            </div>
+        </div>
+
+        <!-- Meta datos -->
+        <div class="header-meta">
+            <div class="meta-row"><i class="fas fa-calendar-alt"></i><span>Generado: <strong>{{ fecha_generacion|date:"d/m/Y H:i" }}</strong></span></div>
+            <div class="meta-row"><i class="fas fa-user"></i><span>Por: <strong>{{ usuario_generador.get_full_name|default:usuario_generador.username }}</strong></span></div>
+            <div class="meta-row"><i class="fas fa-map-marker-alt"></i><span><strong>{{ conjunto.ciudad }}, {{ conjunto.departamento }}</strong></span></div>
+            <div class="meta-row"><i class="fas fa-clipboard-check"></i><span><strong>{{ total_evaluaciones }} evaluaciones</strong> analizadas</span></div>
+        </div>
+    </header>
+
+    <!-- ══════════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ══════════════════════════════════════════ -->
+    <div class="page-content">
+
+        <!-- ── Sección 1: KPI Banner ──────────────── -->
+        <div class="report-section">
+            <div class="section-header-bar">
+                <h2><i class="fas fa-tachometer-alt me-1"></i>Panel de Indicadores Clave</h2>
+                <span class="sec-badge">Resumen Ejecutivo</span>
+            </div>
+            <div class="kpi-banner">
+                <!-- Score promedio histórico -->
+                <div class="kpi-cell">
+                    <div class="kpi-icon-wrap" style="background:#e8f0fe; color:#1e3a6e;">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="kpi-value" style="color:#1e3a6e;">{{ promedio_historico }}%</div>
+                    <div class="kpi-label">Promedio Histórico</div>
+                    <div class="kpi-sub">Todas las evaluaciones</div>
+                </div>
+
+                <!-- Mejor score -->
+                <div class="kpi-cell">
+                    <div class="kpi-icon-wrap" style="background:#d4edda; color:#155724;">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="kpi-value" style="color:#155724;">{{ mejor_evaluacion.get_promedio_porcentaje|floatformat:1 }}%</div>
+                    <div class="kpi-label">Mejor Evaluación</div>
+                    <div class="kpi-sub">{{ mejor_evaluacion.fecha_evaluacion|date:"d/m/Y" }}</div>
+                </div>
+
+                <!-- Peor score -->
+                <div class="kpi-cell">
+                    <div class="kpi-icon-wrap" style="background:#f8d7da; color:#721c24;">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <div class="kpi-value" style="color:#dc3545;">{{ peor_evaluacion.get_promedio_porcentaje|floatformat:1 }}%</div>
+                    <div class="kpi-label">Peor Evaluación</div>
+                    <div class="kpi-sub">{{ peor_evaluacion.fecha_evaluacion|date:"d/m/Y" }}</div>
+                </div>
+
+                <!-- Score actual -->
+                <div class="kpi-cell">
+                    <div class="kpi-icon-wrap" style="background:#fff3cd; color:#856404;">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="kpi-value" style="color:#856404;">{{ ultima_evaluacion.get_promedio_porcentaje|floatformat:1 }}%</div>
+                    <div class="kpi-label">Score Actual</div>
+                    <div class="kpi-sub">{{ ultima_evaluacion.fecha_evaluacion|date:"d/m/Y" }}</div>
+                </div>
+
+                <!-- Tendencia -->
+                <div class="kpi-cell">
+                    <div class="kpi-icon-wrap" style="background:#e2e3e5; color:#495057;">
+                        <i class="{{ tendencia_icono }}"></i>
+                    </div>
+                    <div class="kpi-value" style="color:{{ tendencia_color }};">{{ tendencia|capfirst }}</div>
+                    <div class="kpi-label">Tendencia</div>
+                    <div class="kpi-sub">Δ {{ tendencia_diff }}% últ. eval.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Sección 2: Resumen Ejecutivo ───────── -->
+        <div class="report-section">
+            <div class="section-header-bar">
+                <h2><i class="fas fa-info-circle me-1"></i>Información del Conjunto</h2>
+                <span class="sec-badge">Datos Generales</span>
+            </div>
+            <div class="section-body" style="padding: 8px 10px;">
+                <div class="exec-grid">
+                    <!-- Gauge Score -->
+                    <div class="exec-gauge">
+                        <div class="gauge-title">Score Promedio General</div>
+                        <div class="gauge-circle" style="
+                            background: conic-gradient(
+                                {% if promedio_historico > 60 %}#dc3545{% elif promedio_historico > 30 %}#ffc107{% else %}#28a745{% endif %}
+                                {{ promedio_historico }}%,
+                                #e9ecef {{ promedio_historico }}%
+                            );
+                            padding: 8px;
+                        ">
+                            <div style="width:64px; height:64px; border-radius:50%; background:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                                <div class="gauge-value" style="color:{% if promedio_historico > 60 %}#dc3545{% elif promedio_historico > 30 %}#856404{% else %}#155724{% endif %};">{{ promedio_historico }}%</div>
+                                <div class="gauge-label" style="color:#6c757d;">riesgo</div>
+                            </div>
+                        </div>
+                        {% if promedio_historico > 60 %}
+                        <span class="gauge-tag" style="background:#f8d7da; color:#721c24;">Alto Riesgo</span>
+                        {% elif promedio_historico > 30 %}
+                        <span class="gauge-tag" style="background:#fff3cd; color:#856404;">Riesgo Moderado</span>
+                        {% else %}
+                        <span class="gauge-tag" style="background:#d4edda; color:#155724;">Bajo Riesgo</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Info del conjunto -->
+                    <div class="exec-info">
+                        <div class="info-row">
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-building me-1"></i>Tipo</div>
+                                <div class="info-card-value">{{ conjunto.tipo_conjunto.get_nombre_display|default:"N/A" }}</div>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-id-card me-1"></i>NIT</div>
+                                <div class="info-card-value">{{ conjunto.nit }}</div>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-home me-1"></i>Unidades</div>
+                                <div class="info-card-value">{{ conjunto.numero_unidades }}</div>
+                                <div class="info-card-sub">{{ conjunto.numero_torres }} torre{{ conjunto.numero_torres|pluralize:"s" }}</div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-map-marker-alt me-1"></i>Dirección</div>
+                                <div class="info-card-value" style="font-size:8pt;">{{ conjunto.direccion }}</div>
+                            </div>
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-city me-1"></i>Ciudad</div>
+                                <div class="info-card-value">{{ conjunto.ciudad }}</div>
+                                <div class="info-card-sub">{{ conjunto.departamento }}</div>
+                            </div>
+                            {% if conjunto.administrador_nombre %}
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-user-tie me-1"></i>Administrador</div>
+                                <div class="info-card-value" style="font-size:8pt;">{{ conjunto.administrador_nombre }}</div>
+                                {% if conjunto.administrador_telefono %}
+                                <div class="info-card-sub">{{ conjunto.administrador_telefono }}</div>
+                                {% endif %}
+                            </div>
+                            {% else %}
+                            <div class="info-card">
+                                <div class="info-card-label"><i class="fas fa-calendar-plus me-1"></i>Primera Eval.</div>
+                                <div class="info-card-value">{{ primera_evaluacion.fecha_evaluacion|date:"d/m/Y" }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="info-row">
+                            <div class="info-card" style="grid-column: span 3;">
+                                <div class="info-card-label"><i class="fas fa-chart-bar me-1"></i>Período Analizado &amp; Tendencia</div>
+                                <div style="display:flex; align-items:center; gap:10px; margin-top:3px;">
+                                    <span style="font-size:8pt; color:#495057;">
+                                        {{ primera_evaluacion.fecha_evaluacion|date:"d/m/Y" }}
+                                        &nbsp;→&nbsp;
+                                        {{ ultima_evaluacion.fecha_evaluacion|date:"d/m/Y" }}
+                                    </span>
+                                    <span class="trend-pill" style="background:{% if tendencia == 'mejorando' %}#d4edda{% elif tendencia == 'empeorando' %}#f8d7da{% else %}#fff3cd{% endif %}; color:{% if tendencia == 'mejorando' %}#155724{% elif tendencia == 'empeorando' %}#721c24{% else %}#856404{% endif %};">
+                                        <i class="{{ tendencia_icono }}"></i> {{ tendencia|capfirst }} (Δ{{ tendencia_diff }}%)
+                                    </span>
+                                    <span style="font-size:7.5pt; color:#6c757d;">{{ total_evaluaciones }} evaluaciones en período</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Sección 3: Historial de Evaluaciones ── -->
+        <div class="report-section">
+            <div class="section-header-bar">
+                <h2><i class="fas fa-history me-1"></i>Historial de Evaluaciones</h2>
+                <span class="sec-badge">{{ total_evaluaciones }} registros</span>
+            </div>
+            <div class="section-body" style="padding: 0;">
+                <table class="hist-table">
+                    <thead>
+                        <tr>
+                            <th style="width:20px;">#</th>
+                            <th>Fecha</th>
+                            <th>Evaluador</th>
+                            <th style="text-align:center;">Score</th>
+                            <th style="text-align:center;">Nivel</th>
+                            <th style="text-align:center;">Variación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in historial %}
+                        <tr>
+                            <td style="color:#adb5bd; font-size:7.5pt;">{{ forloop.counter }}</td>
+                            <td style="font-size:8pt; font-weight:600;">{{ item.fecha|date:"d/m/Y" }}<br><span style="font-size:6.5pt; color:#adb5bd; font-weight:400;">{{ item.fecha|date:"H:i" }}</span></td>
+                            <td style="font-size:8pt;">{{ item.creado_por.get_full_name|default:item.creado_por.username }}</td>
+                            <td style="text-align:center;">
+                                <div class="score-dot" style="background:{{ item.color }}; margin:0 auto;">{{ item.score|floatformat:0 }}%</div>
+                            </td>
+                            <td style="text-align:center;">
+                                <span class="nivel-badge nivel-{{ item.nivel }}">{{ item.texto_nivel }}</span>
+                            </td>
+                            <td style="text-align:center; font-size:8pt; font-weight:600;">
+                                {% if forloop.first %}
+                                <span style="color:#adb5bd;">—</span>
+                                {% else %}
+                                    {% with prev=historial|slice:forloop.counter0 %}
+                                    {% with prev_item=prev|last %}
+                                    {% with diff=item.score|add:"-"|add:prev_item.score %}
+                                        {% if diff > 0 %}
+                                        <span style="color:#dc3545;">+{{ diff|floatformat:1 }}%</span>
+                                        {% elif diff < 0 %}
+                                        <span style="color:#28a745;">{{ diff|floatformat:1 }}%</span>
+                                        {% else %}
+                                        <span style="color:#adb5bd;">0%</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                    {% endwith %}
+                                    {% endwith %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ── Sección 4: Análisis por Categorías ──── -->
+        {% if categorias_promedio %}
+        <div class="report-section">
+            <div class="section-header-bar">
+                <h2><i class="fas fa-layer-group me-1"></i>Análisis por Categorías de Riesgo</h2>
+                <span class="sec-badge">{{ categorias_promedio|length }} categorías</span>
+            </div>
+            <div class="section-body">
+                <div class="cat-grid">
+                    {% for nombre, datos in categorias_promedio.items %}
+                    <div class="cat-row nivel-{{ datos.nivel }}">
+                        <div class="cat-name">{{ nombre }}</div>
+                        <div class="cat-bar-bg">
+                            <div class="cat-bar-fill" style="width:{{ datos.porcentaje }}%;"></div>
+                        </div>
+                        <div class="cat-pct">{{ datos.porcentaje }}%</div>
+                        <span class="nivel-badge nivel-{{ datos.nivel }}" style="font-size:6pt;">{{ datos.nivel|capfirst }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ── Sección 5: Análisis IA/ML ─────────────── -->
+        {% if analisis_ia and analisis_ia.analisis_base %}
+        {% with ia=analisis_ia.analisis_base %}
+        <div class="report-section">
+            <div class="section-header-bar">
+                <h2><i class="fas fa-brain me-1"></i>Análisis Predictivo IA/ML</h2>
+                <span class="sec-badge">Basado en última evaluación</span>
+            </div>
+            <div class="section-body">
+
+                <!-- Banner resumen IA -->
+                <div class="ml-banner">
+                    <div class="ml-banner-icon"><i class="fas fa-robot"></i></div>
+                    <div class="ml-banner-body">
+                        {% if ia.resumen_ejecutivo %}
+                        <div class="ml-level-badge" style="background:#e8f0fe; color:#1e3a6e;">
+                            <i class="fas fa-microchip me-1"></i>
+                            Nivel: {{ ia.resumen_ejecutivo.nivel_general|default:"N/A" }} —
+                            Confianza: {{ ia.resumen_ejecutivo.confianza_resultado|default:"N/A" }}
+                        </div>
+                        <div class="ml-banner-text">{{ ia.resumen_ejecutivo.descripcion_situacion|default:"Análisis generado por el sistema de inteligencia artificial." }}</div>
+                        {% if ia.resumen_ejecutivo.accion_principal_recomendada %}
+                        <div class="ml-banner-text" style="margin-top:3px; font-style:italic; color:#6c757d; font-size:7.5pt;">
+                            <i class="fas fa-lightbulb me-1"></i>{{ ia.resumen_ejecutivo.accion_principal_recomendada }}
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                        {% if ia.confianza_analisis %}
+                        <div class="ml-conf-bar" style="margin-top:5px;"><div class="ml-conf-fill" style="width:{{ ia.confianza_analisis.porcentaje|default:75 }}%;"></div></div>
+                        <div class="ml-conf-label">Confianza del análisis: {{ ia.confianza_analisis.porcentaje|default:75 }}% — {{ ia.confianza_analisis.nivel|default:"Media"|capfirst }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recomendaciones — campo 'urgencia' (Alta/Media/Baja), campo 'descripcion' -->
+                {% if analisis_ia.recomendaciones_ml %}
+                <div style="font-size:7.5pt; font-weight:700; color:#495057; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px;">
+                    <i class="fas fa-tasks me-1" style="color:#1e3a6e;"></i>Recomendaciones Prioritarias
+                </div>
+                <div class="ml-reco-grid">
+                    {% for reco in analisis_ia.recomendaciones_ml|slice:":4" %}
+                    <div class="ml-reco-card"
+                         style="border-left-color:{% if reco.urgencia == 'Alta' %}#dc3545{% elif reco.urgencia == 'Media' %}#ffc107{% else %}#28a745{% endif %};">
+                        <div class="ml-reco-title">
+                            {% if reco.urgencia == 'Alta' %}<i class="fas fa-exclamation-triangle text-danger me-1"></i>
+                            {% elif reco.urgencia == 'Media' %}<i class="fas fa-info-circle text-warning me-1"></i>
+                            {% else %}<i class="fas fa-check-circle text-success me-1"></i>{% endif %}
+                            {{ reco.categoria|default:"Recomendación"|capfirst }} — <span style="font-weight:400;">{{ reco.urgencia|default:"" }}</span>
+                        </div>
+                        <div class="ml-reco-text">{{ reco.descripcion|default:"Sin detalle disponible" }}</div>
+                        {% if reco.tiempo_estimado %}
+                        <div style="font-size:6pt; color:#adb5bd; margin-top:2px;"><i class="fas fa-clock me-1"></i>{{ reco.tiempo_estimado }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Predicciones futuras — estructura: analisis_ia.predicciones_futuras.predicciones_temporales
+                     claves: '30_dias', '90_dias', '180_dias', '365_dias' — iteramos con .items -->
+                {% if analisis_ia.predicciones_futuras.predicciones_temporales %}
+                <div style="font-size:7.5pt; font-weight:700; color:#495057; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:5px; margin-top:7px;">
+                    <i class="fas fa-calendar-alt me-1" style="color:#1e3a6e;"></i>Proyección de Riesgo
+                </div>
+                <div class="ml-pred-row">
+                    {% for periodo, pred_data in analisis_ia.predicciones_futuras.predicciones_temporales.items %}
+                    <div class="ml-pred-cell">
+                        <div class="ml-pred-period">{{ periodo|cut:"_dias" }} días</div>
+                        <div class="ml-pred-value" style="color:{% if pred_data.score_esperado > 60 %}#dc3545{% elif pred_data.score_esperado > 30 %}#856404{% else %}#155724{% endif %};">
+                            {{ pred_data.score_esperado|floatformat:1 }}%
+                        </div>
+                        <div class="ml-pred-label">Confianza: {{ pred_data.confianza|default:"—" }}%</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if analisis_ia.predicciones_futuras.proxima_actualizacion %}
+                <div style="font-size:6pt; color:#adb5bd; margin-top:4px; text-align:right;">
+                    <i class="fas fa-sync-alt me-1"></i>Próxima actualización sugerida: {{ analisis_ia.predicciones_futuras.proxima_actualizacion }}
+                </div>
+                {% endif %}
+                {% endif %}
+
+            </div>
+        </div>
+        {% endwith %}
+        {% endif %}
+
+    </div><!-- /page-content -->
+
+    <!-- ══════════════════════════════════════════
+         FOOTER FIJO
+    ══════════════════════════════════════════ -->
+    <footer class="pdf-footer">
+        <div class="footer-left">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+                <div class="footer-title">Risk Analytics</div>
+                <div class="footer-subtitle">Sistema de Evaluación de Riesgos para Conjuntos Residenciales</div>
+            </div>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-center">
+            Reporte General — {{ conjunto.nombre }}<br>
+            <span style="font-size:6pt;">{{ total_evaluaciones }} evaluaciones analizadas • Período: {{ primera_evaluacion.fecha_evaluacion|date:"d/m/Y" }} – {{ ultima_evaluacion.fecha_evaluacion|date:"d/m/Y" }}</span>
+        </div>
+        <div class="footer-divider"></div>
+        <div class="footer-right">
+            <div>Generado: <strong>{{ fecha_generacion|date:"d/m/Y H:i" }}</strong></div>
+            <div>Por: <strong>{{ usuario_generador.get_full_name|default:usuario_generador.username }}</strong></div>
+        </div>
+    </footer>
+
+</div><!-- /page-wrapper -->
+
+{% if configuracion_impresion.auto_print %}
+<script>window.addEventListener('load', function(){ setTimeout(function(){ window.print(); }, 500); });</script>
+{% endif %}
+</body>
+</html>

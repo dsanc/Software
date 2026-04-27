@@ -3,6 +3,21 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.querySelector('.navbar-professional');
+
+    // Efecto scroll: aplicar clase .scrolled al bajar de 50px
+    if (navbar) {
+        var handleScroll = function() {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Aplicar estado inicial al cargar
+    }
+
     // Fix para navbar responsive: cerrar el menú collapse al hacer clic en un enlace
     const navbarToggler = document.querySelector('.navbar-toggler-professional');
     const navbarCollapse = document.querySelector('#navbarNav');

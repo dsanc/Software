@@ -214,6 +214,7 @@ def dashboard_view(request):
         dash_hoteles = {
             'tiene_datos': False,
             'evaluaciones_por_tipo': [],
+            'evaluaciones_tipo_max': 1,
             'hoteles_por_categoria': [],
             'geo_dist': [],
             'tendencia_meses': [],
@@ -225,6 +226,7 @@ def dashboard_view(request):
             'riesgo_dist': [],
             'riesgo_max': 1,
             'funnel_estados': [],
+            'funnel_max': 1,
             'hoteles_sin_cobertura': [],
             'pct_cobertura': 0,
             'total_hoteles': 0,
@@ -272,6 +274,9 @@ def dashboard_view(request):
                     {'tipo': k, 'label': v[0], 'color': v[1], 'total': tipo_index.get(k, 0)}
                     for k, v in tipo_map.items() if tipo_index.get(k, 0) > 0
                 ]
+                dash_hoteles['evaluaciones_tipo_max'] = max(
+                    (e['total'] for e in dash_hoteles['evaluaciones_por_tipo']), default=1
+                )
 
                 # -- Distribución por categoría de hotel --
                 hoteles_ids = all_assessments.values_list('hotel_id', flat=True).distinct()
@@ -427,6 +432,9 @@ def dashboard_view(request):
                     {'key': k, 'label': lbl, 'color': col, 'total': estado_index.get(k, 0)}
                     for k, lbl, col in estado_map
                 ]
+                dash_hoteles['funnel_max'] = max(
+                    (e['total'] for e in dash_hoteles['funnel_estados']), default=1
+                )
 
                 # ── Estadística 5: Rendimiento por evaluador ──────────────────
                 rendimiento_evaluadores = list(
@@ -528,6 +536,232 @@ def dashboard_view(request):
         except ImportError:
             pass  # risk_hoteles no instalado
 
+        # ── Risk Conjuntos Dashboard ──────────────────────────────────────────
+        dash_conjuntos = {'tiene_datos': False}
+        conjuntos_recientes = []
+        conjuntos_alto_riesgo = []
+        try:
+            from apps.risk_conjuntos.models import Conjunto, EvaluacionRiesgo
+            from django.db.models import (
+                Avg as _CAvg, Count as _CCount, Max as _CMax, Subquery as _CSub, OuterRef as _COut
+            )
+            from django.utils import timezone as _tz_conj
+            from datetime import timedelta as _td_conj
+
+            conj_qs = Conjunto.objects.filter(propietario=request.user, activo=True)
+            total_conjuntos = conj_qs.count()
+            dash_conjuntos['total_conjuntos'] = total_conjuntos
+
+            # EvaluacionRiesgo usa SoftDeleteModel — el manager por defecto ya excluye borrados
+            evals_qs = EvaluacionRiesgo.objects.filter(conjunto__propietario=request.user)
+            completadas = evals_qs.filter(estado__in=['completada', 'revisada'])
+
+            dash_conjuntos['tiene_datos'] = True
+            dash_conjuntos['total_evaluaciones'] = evals_qs.count()
+            dash_conjuntos['evaluaciones_completadas'] = completadas.count()
+            dash_conjuntos['evaluaciones_en_progreso'] = evals_qs.filter(estado='en_progreso').count()
+            dash_conjuntos['evaluaciones_borrador'] = evals_qs.filter(estado='borrador').count()
+
+            # Promedio de riesgo (0-1 → porcentaje; mayor = más riesgo)
+            avg_prm = completadas.filter(
+                promedio_general__isnull=False
+            ).aggregate(avg=_CAvg('promedio_general'))['avg']
+            dash_conjuntos['promedio_riesgo_pct'] = round(float(avg_prm) * 100, 1) if avg_prm else 0.0
+
+            # Distribución por nivel de riesgo
+            riesgo_bajo = riesgo_medio = riesgo_alto = 0
+            for prm in completadas.filter(
+                promedio_general__isnull=False
+            ).values_list('promedio_general', flat=True):
+                pct = float(prm) * 100
+                if pct <= 30:
+                    riesgo_bajo += 1
+                elif pct <= 60:
+                    riesgo_medio += 1
+                else:
+                    riesgo_alto += 1
+            dash_conjuntos['riesgo_dist'] = [
+                {'label': 'Bajo',   'total': riesgo_bajo,  'color': 'success'},
+                {'label': 'Medio',  'total': riesgo_medio, 'color': 'warning'},
+                {'label': 'Alto',   'total': riesgo_alto,  'color': 'danger'},
+            ]
+
+            # Conjuntos sin ninguna evaluación
+            conjs_con_eval_ids = evals_qs.values_list('conjunto_id', flat=True).distinct()
+            dash_conjuntos['conjuntos_sin_evaluar'] = conj_qs.exclude(id__in=conjs_con_eval_ids).count()
+
+            # Conjuntos con mayor riesgo (última eval completada, promedio_general desc)
+            latest_eval_sub = completadas.filter(
+                conjunto=_COut('pk'), promedio_general__isnull=False
+            ).order_by('-fecha_evaluacion').values('promedio_general')[:1]
+            top_riesgo_qs = conj_qs.annotate(
+                ultimo_riesgo=_CSub(latest_eval_sub)
+            ).filter(ultimo_riesgo__isnull=False).order_by('-ultimo_riesgo')[:5]
+            conjuntos_alto_riesgo = [
+                {
+                    'nombre': c.nombre,
+                    'ciudad': c.ciudad,
+                    'pct': round(float(c.ultimo_riesgo) * 100, 1),
+                    'nivel': ('alto' if float(c.ultimo_riesgo) * 100 > 60 else
+                              'medio' if float(c.ultimo_riesgo) * 100 > 30 else 'bajo'),
+                    'id': c.id,
+                }
+                for c in top_riesgo_qs
+            ]
+
+            # Conjuntos sin reevaluar (última eval completada hace >30 días)
+            treinta_atras = _tz_conj.now() - _td_conj(days=30)
+            conjs_sin_reeval = list(
+                conj_qs.annotate(
+                    ultima_eval=_CMax('evaluaciones_riesgo__fecha_evaluacion')
+                ).filter(
+                    ultima_eval__isnull=False,
+                    ultima_eval__lt=treinta_atras,
+                ).values('nombre', 'ciudad', 'ultima_eval')[:5]
+            )
+            dash_conjuntos['conjuntos_sin_reevaluar'] = conjs_sin_reeval
+
+            # Funnel de estados
+            estados_labels = [
+                ('borrador',   'Borrador',   'secondary'),
+                ('en_progreso','En Progreso', 'warning'),
+                ('completada', 'Completada',  'success'),
+                ('revisada',   'Revisada',    'info'),
+            ]
+            funnel = [
+                {'label': lbl, 'total': evals_qs.filter(estado=est).count(), 'color': col}
+                for est, lbl, col in estados_labels
+            ]
+            dash_conjuntos['funnel'] = funnel
+            dash_conjuntos['funnel_max'] = max((f['total'] for f in funnel), default=1) or 1
+
+            # Últimas 5 evaluaciones completadas
+            ultimas = completadas.select_related('conjunto').order_by('-fecha_evaluacion')[:5]
+            dash_conjuntos['ultimas_evaluaciones'] = [
+                {
+                    'conjunto_nombre': ev.conjunto.nombre,
+                    'conjunto_id': ev.conjunto.id,
+                    'fecha': ev.fecha_evaluacion,
+                    'pct': ev.get_promedio_porcentaje(),
+                    'nivel': ev.get_nivel_riesgo(),
+                    'tipo': ev.get_tipo_evaluacion_display(),
+                }
+                for ev in ultimas
+            ]
+
+            conjuntos_recientes = list(conj_qs.order_by('-fecha_creacion')[:5])
+        except ImportError:
+            pass
+
+        # ── Security Probabilistic Dashboard ─────────────────────────────────
+        dash_sp = {'tiene_datos': False}
+        perfiles_recientes = []
+        perfiles_alto_riesgo_sp = []
+        try:
+            from apps.security_probabilistic.models import PerfilSeguridad, EvaluacionSeguridad as EvalSP
+            from django.db.models import Count as _Count2, Avg as _AvgSP
+            from django.utils import timezone as _tz_sp
+            from datetime import timedelta as _td_sp
+
+            perfiles_qs = PerfilSeguridad.objects.filter(owner=request.user)
+            total_perfiles = perfiles_qs.count()
+            dash_sp['total_perfiles'] = total_perfiles
+            dash_sp['tiene_datos'] = True
+
+            # Perfiles KPIs
+            dash_sp['perfiles_activos'] = perfiles_qs.filter(estado_perfil='activo').count()
+            dash_sp['perfiles_con_amenazas'] = perfiles_qs.filter(amenazas_recibidas=True).count()
+            dash_sp['perfiles_sin_esquema'] = perfiles_qs.filter(
+                estado_perfil='activo', tiene_esquema_seguridad=False
+            ).count()
+            # Amenaza reciente (últimos 90 días)
+            noventa_atras = _tz_sp.now().date() - _td_sp(days=90)
+            dash_sp['amenaza_reciente'] = perfiles_qs.filter(
+                amenazas_recibidas=True,
+                fecha_ultima_amenaza__isnull=False,
+                fecha_ultima_amenaza__gte=noventa_atras,
+            ).count()
+
+            # Distribución por nivel de exposición
+            dash_sp['exposicion_dist'] = list(
+                perfiles_qs.values('nivel_exposicion')
+                .annotate(total=_Count2('id'))
+                .order_by('-total')
+            )
+            # Distribución por cargo (top 5)
+            dash_sp['cargo_dist'] = list(
+                perfiles_qs.values('cargo_politico')
+                .annotate(total=_Count2('id'))
+                .order_by('-total')[:5]
+            )
+
+            # Evaluaciones
+            evals_sp = EvalSP.objects.filter(perfil__owner=request.user)
+            completadas_sp = evals_sp.filter(estado='completada')
+            dash_sp['total_evaluaciones'] = evals_sp.count()
+            dash_sp['evaluaciones_completadas'] = completadas_sp.count()
+            dash_sp['evaluaciones_en_progreso'] = evals_sp.filter(
+                estado__in=['iniciada', 'en_progreso']
+            ).count()
+
+            # Probabilidad promedio (0-1 → porcentaje)
+            avg_prob = completadas_sp.aggregate(
+                avg=_AvgSP('probabilidad_con_geografia')
+            )['avg']
+            dash_sp['probabilidad_promedio'] = round(float(avg_prob) * 100, 1) if avg_prob else 0.0
+
+            # Distribución por nivel de riesgo
+            riesgo_meta = [
+                ('muy_bajo', 'Muy Bajo', 'success'),
+                ('bajo',     'Bajo',     'info'),
+                ('medio',    'Medio',    'warning'),
+                ('alto',     'Alto',     'danger'),
+                ('muy_alto', 'Muy Alto', 'danger'),
+            ]
+            dash_sp['riesgo_dist'] = [
+                {'key': key, 'label': lbl, 'color': col,
+                 'total': completadas_sp.filter(nivel_riesgo=key).count()}
+                for key, lbl, col in riesgo_meta
+            ]
+
+            # Funnel de estados evaluaciones
+            estados_sp = [
+                ('iniciada',   'Iniciada',   'secondary'),
+                ('en_progreso','En Progreso','warning'),
+                ('completada', 'Completada', 'success'),
+                ('cancelada',  'Cancelada',  'danger'),
+            ]
+            funnel_sp = [
+                {'label': lbl, 'total': evals_sp.filter(estado=est).count(), 'color': col}
+                for est, lbl, col in estados_sp
+            ]
+            dash_sp['funnel'] = funnel_sp
+            dash_sp['funnel_max'] = max((f['total'] for f in funnel_sp), default=1) or 1
+
+            # Últimas 5 evaluaciones completadas
+            ultimas_sp = completadas_sp.select_related('perfil').order_by('-completada_en')[:5]
+            dash_sp['ultimas_evaluaciones'] = [
+                {
+                    'perfil_nombre': ev.perfil.nombre_completo,
+                    'perfil_id': ev.perfil.pk,
+                    'probabilidad_pct': round(float(ev.probabilidad_con_geografia) * 100, 1),
+                    'nivel_riesgo': ev.nivel_riesgo,
+                    'fecha': ev.completada_en or ev.creada_en,
+                }
+                for ev in ultimas_sp
+            ]
+
+            # Perfiles de alto riesgo (exposición alta/muy_alta + amenazas)
+            perfiles_alto_riesgo_sp = list(
+                perfiles_qs.filter(
+                    nivel_exposicion__in=['muy_alta', 'alta'],
+                    amenazas_recibidas=True,
+                ).order_by('-creado_en')[:5]
+            )
+            perfiles_recientes = list(perfiles_qs.order_by('-creado_en')[:5])
+        except ImportError:
+            pass
+
         # Calcular porcentaje del día transcurrido (0-100)
         from django.utils import timezone as tz
         now_local = tz.localtime(tz.now())
@@ -561,6 +795,14 @@ def dashboard_view(request):
             'pendientes_revision': pendientes_revision,
             'mejor_hotel_global': mejor_hotel_global,
             'peor_hotel_global': peor_hotel_global,
+            # Métricas Risk Conjuntos
+            'dash_conjuntos': dash_conjuntos,
+            'conjuntos_recientes': conjuntos_recientes,
+            'conjuntos_alto_riesgo': conjuntos_alto_riesgo,
+            # Métricas Security Probabilistic
+            'dash_sp': dash_sp,
+            'perfiles_recientes': perfiles_recientes,
+            'perfiles_alto_riesgo_sp': perfiles_alto_riesgo_sp,
         }
         
         # Validación final de seguridad: verificar que todos los datos pertenecen al usuario autenticado
@@ -608,15 +850,26 @@ def dashboard_view(request):
             # Valores por defecto para actividades
             'recent_evaluator_activities': [],
             'daily_activities_count': 0,
+            'weekly_activities_count': 0,
+            'monthly_activities_count': 0,
             'completed_evaluations_today': 0,
             'in_progress_evaluations': 0,
             'active_evaluators_today': 0,
+            'total_evaluators': 0,
             # Métricas globales Risk Hoteles (vacías)
-            'dash_hoteles': {'tiene_datos': False, 'evaluaciones_por_tipo': [], 'hoteles_por_categoria': [], 'geo_dist': [], 'tendencia_meses': [], 'tendencia_max': 1, 'categorias_ranking': [], 'categoria_mas_debil': None, 'categoria_mas_fuerte': None, 'riesgo_dist': [], 'riesgo_max': 1, 'funnel_estados': [], 'hoteles_sin_cobertura': [], 'hoteles_alto_riesgo': [], 'rendimiento_evaluadores': [], 'evolucion_hoteles': [], 'histograma': [], 'histograma_max': 1, 'pct_cobertura': 0, 'total_hoteles': 0, 'total_hoteles_eval': 0, 'gauge_30d': 0, 'tiempo_promedio_dias': None},
+            'dash_hoteles': {'tiene_datos': False, 'evaluaciones_por_tipo': [], 'evaluaciones_tipo_max': 1, 'hoteles_por_categoria': [], 'geo_dist': [], 'tendencia_meses': [], 'tendencia_max': 1, 'categorias_ranking': [], 'categoria_mas_debil': None, 'categoria_mas_fuerte': None, 'riesgo_dist': [], 'riesgo_max': 1, 'funnel_estados': [], 'funnel_max': 1, 'hoteles_sin_cobertura': [], 'hoteles_alto_riesgo': [], 'rendimiento_evaluadores': [], 'evolucion_hoteles': [], 'histograma': [], 'histograma_max': 1, 'pct_cobertura': 0, 'total_hoteles': 0, 'total_hoteles_eval': 0, 'gauge_30d': 0, 'tiempo_promedio_dias': None},
             'hoteles_sin_reevaluar': [],
             'pendientes_revision': [],
             'mejor_hotel_global': None,
             'peor_hotel_global': None,
+            # Métricas Risk Conjuntos (vacías)
+            'dash_conjuntos': {'tiene_datos': False},
+            'conjuntos_recientes': [],
+            'conjuntos_alto_riesgo': [],
+            # Métricas Security Probabilistic (vacías)
+            'dash_sp': {'tiene_datos': False},
+            'perfiles_recientes': [],
+            'perfiles_alto_riesgo_sp': [],
         }
     
     return render(request, 'dashboard/dashboard.html', context)

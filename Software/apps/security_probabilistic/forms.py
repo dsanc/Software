@@ -307,9 +307,10 @@ class CrearEvaluacionForm(forms.ModelForm):
         if self.perfil:
             evaluacion.perfil = self.perfil
         
-        # Asignar automáticamente el nombre del evaluador del usuario autenticado
+        # Asignar automáticamente el nombre del evaluador y el creador
         if user and user.is_authenticated:
             evaluacion.evaluador_nombre = user.get_full_name() or user.username
+            evaluacion.created_by = user
         
         # Establecer el estado inicial
         evaluacion.estado = 'iniciada'

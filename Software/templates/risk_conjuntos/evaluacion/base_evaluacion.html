@@ -1,188 +1,359 @@
 ﻿{% extends "base_with_sidebar.html" %}
 {% load static %}
 
-{% block title %}Evaluación de Riesgos - {{ conjunto.nombre }}{% endblock %}
+{% block title %}Evaluación de Riesgos — {{ conjunto.nombre }}{% endblock %}
 
 {% block extra_css %}
 <style>
-/* Indicador de pasos simple y profesional */
-.step-progress {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    border-left: 4px solid #007bff;
+/* ── Variables de color navy ──────────────────────────── */
+:root {
+    --navy-dark:   #1e3a6e;
+    --navy-mid:    #1a3060;
+    --navy-light:  #162a54;
+    --navy-accent: #e94560;
+    --navy-bg:     #f0f4f8;
 }
 
-.step-nav {
+/* ── Header de la evaluación ─────────────────────────── */
+.eval-header {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-light) 100%);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.25rem;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 2rem;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.step-current {
-    flex: 1;
-}
-
-.step-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #2c3e50;
-    margin: 0;
-}
-
-.step-subtitle {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin: 0.25rem 0 0 0;
-}
-
-.step-counter {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #007bff;
-    font-weight: 500;
-}
-
-.step-dots {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.step-dot {
-    width: 8px;
-    height: 8px;
+.eval-header::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
     border-radius: 50%;
-    background: #dee2e6;
+    background: rgba(255,255,255,0.05);
+    pointer-events: none;
+}
+
+.eval-header-icon {
+    width: 44px; height: 44px;
+    background: rgba(233,69,96,0.2);
+    border: 2px solid rgba(233,69,96,0.5);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--navy-accent);
+    flex-shrink: 0;
+}
+
+.eval-header-info { flex: 1; }
+.eval-header-info h2 {
+    font-size: 1.15rem; font-weight: 700;
+    margin: 0 0 2px; color: #fff;
+}
+.eval-header-info p {
+    margin: 0; font-size: 0.82rem;
+    color: rgba(255,255,255,0.65);
+}
+
+.eval-header-meta {
+    text-align: right; flex-shrink: 0;
+}
+.eval-header-meta .meta-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.75rem; color: rgba(255,255,255,0.85);
+    margin-bottom: 4px;
+}
+.eval-header-meta .meta-chip i { color: var(--navy-accent); font-size: 0.7rem; }
+
+/* ── Stepper ─────────────────────────────────────────── */
+.eval-stepper {
+    background: #fff;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 1px 6px rgba(30,58,110,0.08);
+    border: 1px solid #e8edf5;
+}
+
+.stepper-track {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.stepper-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+
+/* línea conectora */
+.stepper-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #e0e7f3;
+    z-index: 0;
+}
+
+.stepper-step.completed:not(:last-child)::after {
+    background: var(--navy-dark);
+}
+
+.stepper-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700;
+    position: relative; z-index: 1;
+    border: 2px solid #dee2e6;
+    background: #fff;
+    color: #6c757d;
     transition: all 0.3s ease;
 }
 
-.step-dot.completed {
-    background: #28a745;
+.stepper-step.completed .stepper-circle {
+    background: var(--navy-dark);
+    border-color: var(--navy-dark);
+    color: #fff;
 }
 
-.step-dot.active {
-    background: #007bff;
-    transform: scale(1.5);
+.stepper-step.active .stepper-circle {
+    background: var(--navy-accent);
+    border-color: var(--navy-accent);
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(233,69,96,0.2);
 }
+
+.stepper-label {
+    margin-top: 6px;
+    font-size: 0.7rem;
+    text-align: center;
+    color: #adb5bd;
+    font-weight: 500;
+    line-height: 1.2;
+    max-width: 80px;
+}
+
+.stepper-step.active .stepper-label {
+    color: var(--navy-dark);
+    font-weight: 700;
+}
+
+.stepper-step.completed .stepper-label {
+    color: var(--navy-dark);
+}
+
+/* Barra de progreso global */
+.eval-progress-bar {
+    height: 3px;
+    background: #e0e7f3;
+    border-radius: 2px;
+    margin-top: 0.75rem;
+    overflow: hidden;
+}
+
+.eval-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--navy-dark), var(--navy-accent));
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* ── Navegación inferior ─────────────────────────────── */
+.eval-nav-bar {
+    background: #fff;
+    border-radius: 10px;
+    padding: 0.875rem 1.25rem;
+    margin-top: 1.5rem;
+    box-shadow: 0 1px 6px rgba(30,58,110,0.08);
+    border: 1px solid #e8edf5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Botones de navegación */
+.btn-nav-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.5rem 1.25rem;
+    border-radius: 7px;
+    font-size: 0.875rem; font-weight: 600;
+    border: 2px solid #dee2e6;
+    background: #fff; color: #495057;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+.btn-nav-back:hover {
+    border-color: var(--navy-dark);
+    color: var(--navy-dark);
+    background: #f0f4f8;
+}
+
+.btn-nav-next {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 7px;
+    font-size: 0.875rem; font-weight: 600;
+    border: none;
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
+    color: #fff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(30,58,110,0.3);
+}
+.btn-nav-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(30,58,110,0.4);
+    color: #fff;
+}
+.btn-nav-next:disabled {
+    opacity: 0.6; cursor: not-allowed; transform: none;
+}
+
+.btn-nav-finish {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 7px;
+    font-size: 0.875rem; font-weight: 600;
+    border: none;
+    background: linear-gradient(135deg, #155724, #28a745);
+    color: #fff;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(21,87,36,0.3);
+}
+.btn-nav-finish:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(21,87,36,0.4);
+    color: #fff;
+}
+
+/* ── Cards de contenido ──────────────────────────────── */
+.eval-card {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e8edf5;
+    box-shadow: 0 1px 6px rgba(30,58,110,0.06);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+}
+
+.eval-card-header {
+    background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy-light) 100%);
+    padding: 0.75rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between;
+}
+
+.eval-card-header h5, .eval-card-header h6 {
+    color: #fff;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.eval-card-header .header-badge {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.9);
+    padding: 2px 8px; border-radius: 10px;
+}
+
+.eval-card-body { padding: 1.25rem; }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .step-nav {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-    }
-    
-    .step-progress {
-        padding: 1rem;
-    }
+    .stepper-label { display: none; }
+    .eval-header { flex-direction: column; text-align: center; }
+    .eval-header-meta { text-align: center; }
+    .eval-nav-bar { flex-direction: column; gap: 0.75rem; }
+    .btn-nav-back, .btn-nav-next, .btn-nav-finish { width: 100%; justify-content: center; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <!-- Header de evaluación -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="h4 mb-1">Evaluación de Riesgos</h2>
-                    <p class="text-muted mb-0">{{ conjunto.nombre }}</p>
-                </div>
-                <div class="text-end">
-                    <small class="text-muted">
-                        <i class="fas fa-clock me-1"></i>
-                        {% now "d/m/Y H:i" %}
-                    </small>
-                </div>
-            </div>
+<div class="container-fluid px-3">
+
+    <!-- Header de la evaluación -->
+    <div class="eval-header">
+        <div class="eval-header-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="eval-header-info">
+            <h2>Evaluación de Riesgos</h2>
+            <p><i class="fas fa-building me-1"></i>{{ conjunto.nombre }}{% if conjunto.ciudad %} — {{ conjunto.ciudad }}{% endif %}</p>
+        </div>
+        <div class="eval-header-meta">
+            <div class="meta-chip"><i class="fas fa-clock"></i>{% now "d/m/Y H:i" %}</div>
+            <div class="meta-chip"><i class="fas fa-user"></i>{{ request.user.get_full_name|default:request.user.username }}</div>
         </div>
     </div>
 
-    <!-- Indicador de pasos simple -->
-    <div class="step-progress">
-        <div class="step-nav">
-            <div class="step-current">
-                <h3 class="step-title">
-                    {% if paso == 1 %}
-                        Paso 1: Selección de Riesgos
-                    {% elif paso == 2 %}
-                        Paso 2: Evaluación de Riesgos
-                    {% elif paso == 3 %}
-                        Paso 3: Observaciones y Recomendaciones
-                    {% elif paso == 4 %}
-                        Paso 4: Resumen Final
-                    {% endif %}
-                </h3>
-                <p class="step-subtitle">
-                    {% if paso == 1 %}
-                        Seleccione los tipos de riesgos que desea evaluar
-                    {% elif paso == 2 %}
-                        Califique cada pregunta de evaluación según su criterio
-                    {% elif paso == 3 %}
-                        Agregue observaciones, recomendaciones e imágenes de evidencia
-                    {% elif paso == 4 %}
-                        Revise los resultados y complete la evaluación
-                    {% endif %}
-                </p>
+    <!-- Stepper de pasos -->
+    <div class="eval-stepper">
+        <div class="stepper-track">
+            <div class="stepper-step {% if paso == 1 %}active{% elif paso > 1 %}completed{% endif %}">
+                <div class="stepper-circle">
+                    {% if paso > 1 %}<i class="fas fa-check" style="font-size:0.7rem;"></i>{% else %}1{% endif %}
+                </div>
+                <div class="stepper-label">Selección<br>de Riesgos</div>
             </div>
-            
-            <div class="step-counter">
-                <span>{{ paso }} de {{ total_pasos|default:4 }}</span>
+            <div class="stepper-step {% if paso == 2 %}active{% elif paso > 2 %}completed{% endif %}">
+                <div class="stepper-circle">
+                    {% if paso > 2 %}<i class="fas fa-check" style="font-size:0.7rem;"></i>{% else %}2{% endif %}
+                </div>
+                <div class="stepper-label">Evaluación<br>de Riesgos</div>
             </div>
-            
-            <div class="step-dots">
-                <div class="step-dot {% if paso >= 1 %}{% if paso == 1 %}active{% else %}completed{% endif %}{% endif %}"></div>
-                <div class="step-dot {% if paso >= 2 %}{% if paso == 2 %}active{% else %}completed{% endif %}{% endif %}"></div>
-                <div class="step-dot {% if paso >= 3 %}{% if paso == 3 %}active{% else %}completed{% endif %}{% endif %}"></div>
-                <div class="step-dot {% if paso >= 4 %}{% if paso == 4 %}active{% else %}completed{% endif %}{% endif %}"></div>
+            <div class="stepper-step {% if paso == 3 %}active{% elif paso > 3 %}completed{% endif %}">
+                <div class="stepper-circle">
+                    {% if paso > 3 %}<i class="fas fa-check" style="font-size:0.7rem;"></i>{% else %}3{% endif %}
+                </div>
+                <div class="stepper-label">Observaciones<br>y Evidencias</div>
             </div>
+            <div class="stepper-step {% if paso == 4 %}active{% endif %}">
+                <div class="stepper-circle">4</div>
+                <div class="stepper-label">Resumen<br>Final</div>
+            </div>
+        </div>
+        <div class="eval-progress-bar">
+            <div class="eval-progress-fill" style="width: {% if paso == 1 %}25{% elif paso == 2 %}50{% elif paso == 3 %}75{% else %}100{% endif %}%;"></div>
         </div>
     </div>
 
     {% block evaluation_content %}
     {% endblock %}
 
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between">
-                <div>
-                    {% block back_button %}{% endblock %}
-                </div>
-                <div>
-                    {% block next_button %}{% endblock %}
-                </div>
-            </div>
-        </div>
+    <!-- Barra de navegación inferior -->
+    <div class="eval-nav-bar">
+        <div>{% block back_button %}{% endblock %}</div>
+        <div>{% block next_button %}{% endblock %}</div>
     </div>
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
 $(document).ready(function() {
-    // Animación simple para los dots
-    $('.step-dot').each(function(index) {
-        $(this).css('opacity', '0').delay(index * 100).animate({
-            opacity: 1
-        }, 300);
+    // Animación de entrada del stepper
+    $('.stepper-step').each(function(i) {
+        $(this).css('opacity', 0).delay(i * 80).animate({ opacity: 1 }, 250);
     });
-    
-    // Efecto hover suave en el indicador
-    $('.step-progress').hover(
-        function() {
-            $(this).css('transform', 'translateY(-1px)');
-        },
-        function() {
-            $(this).css('transform', 'translateY(0)');
-        }
-    );
 });
 </script>
 {% endblock %}

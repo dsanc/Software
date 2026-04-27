@@ -21,37 +21,10 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
     
-    <!-- Fallback para Font Awesome -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.4.0/css/all.css" crossorigin="anonymous">
-    
     <!-- CSS personalizado -->
     <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1.1">
     <link rel="stylesheet" href="{% static 'css/navbar-consolidated.css' %}?v=1.1">
     <link rel="stylesheet" href="{% static 'css/subscriptions.css' %}?v=1.1">
-    
-    <style>
-    /* Estilos para botón de login en navbar */
-    .action-link.login-btn {
-        width: 100%;
-        text-align: left;
-        font-family: inherit;
-        font-size: inherit;
-        line-height: inherit;
-        color: rgba(255, 255, 255, 0.9);
-        transition: var(--transition);
-    }
-    
-    .action-link.login-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
-        transform: translateX(5px);
-    }
-    
-    .action-link.login-btn:focus {
-        outline: 2px solid rgba(255, 255, 255, 0.3);
-        outline-offset: 2px;
-    }
-    </style>
     
     {% block extra_css %}{% endblock %}
 </head>
@@ -127,7 +100,11 @@
                     <li class="action-item dropdown">
                         <a class="action-link user-menu dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <div class="user-avatar">
-                                <i class="fas fa-user"></i>
+                                {% if user.avatar %}
+                                    <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" class="user-avatar-img">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
                             </div>
                             <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
                         </a>
@@ -254,50 +231,77 @@
     <!-- Navegación inteligente para navbar -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Detectar si estamos en la página home
         const isHomePage = window.location.pathname === '/' || window.location.pathname === '/dashboard/' || window.location.pathname.includes('/dashboard/home');
-        
-        // Obtener todos los enlaces de navegación con data-section
-        const navLinks = document.querySelectorAll('.nav-link-professional[data-section]');
-        
-        navLinks.forEach(link => {
+        const currentPath = window.location.pathname;
+
+        const sectionLinks = document.querySelectorAll('.nav-link-professional[data-section]');
+        const allNavLinks = document.querySelectorAll('.nav-link-professional');
+
+        // Marcar activo por URL para enlaces sin data-section (ej. Dashboard)
+        allNavLinks.forEach(function(link) {
+            const href = link.getAttribute('href');
+            if (href && href !== '#' && !link.hasAttribute('data-section')) {
+                if (currentPath === href || (href.length > 1 && currentPath.startsWith(href))) {
+                    link.classList.add('active');
+                }
+            }
+        });
+
+        // Click en enlaces de sección con scroll suave
+        sectionLinks.forEach(function(link) {
             link.addEventListener('click', function(e) {
                 const section = this.getAttribute('data-section');
-                
                 if (isHomePage) {
-                    // Si estamos en home, hacer scroll suave
                     e.preventDefault();
+                    sectionLinks.forEach(function(l) { l.classList.remove('active'); });
+                    this.classList.add('active');
                     const targetElement = document.getElementById(section);
                     if (targetElement) {
-                        const offsetTop = targetElement.offsetTop - 80; // Ajuste para navbar fijo
-                        window.scrollTo({
-                            top: offsetTop,
-                            behavior: 'smooth'
-                        });
-                        
-                        // Actualizar la URL sin recargar la página
+                        const offsetTop = targetElement.offsetTop - 80;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
                         history.pushState(null, null, '#' + section);
                     }
-                } else {
-                    // Si estamos en otra página, el href ya tiene la URL correcta con el ancla
-                    // Dejar que funcione normalmente (redirigir al home con la sección)
                 }
+                // En otras páginas el href ya tiene la URL con ancla, funciona normalmente
             });
         });
-        
-        // Si llegamos desde otra página con un hash, hacer scroll al cargar
-        if (isHomePage && window.location.hash) {
-            const targetSection = window.location.hash.substring(1);
-            setTimeout(() => {
-                const targetElement = document.getElementById(targetSection);
-                if (targetElement) {
-                    const offsetTop = targetElement.offsetTop - 80;
-                    window.scrollTo({
-                        top: offsetTop,
-                        behavior: 'smooth'
-                    });
-                }
-            }, 100);
+
+        // Scroll spy: resaltar la sección visible en home
+        if (isHomePage) {
+            var sections = ['servicios', 'soluciones', 'nosotros', 'precios', 'contacto'];
+
+            var updateActiveSection = function() {
+                var currentSection = '';
+                sections.forEach(function(sectionId) {
+                    var el = document.getElementById(sectionId);
+                    if (el) {
+                        var rect = el.getBoundingClientRect();
+                        if (rect.top <= 120 && rect.bottom > 120) {
+                            currentSection = sectionId;
+                        }
+                    }
+                });
+                sectionLinks.forEach(function(link) {
+                    link.classList.remove('active');
+                    if (currentSection && link.getAttribute('data-section') === currentSection) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            window.addEventListener('scroll', updateActiveSection, { passive: true });
+
+            // Si llegamos con hash, scroll al cargar
+            if (window.location.hash) {
+                var targetSection = window.location.hash.substring(1);
+                setTimeout(function() {
+                    var targetElement = document.getElementById(targetSection);
+                    if (targetElement) {
+                        var offsetTop = targetElement.offsetTop - 80;
+                        window.scrollTo({ top: offsetTop, behavior: 'smooth' });
+                    }
+                }, 100);
+            }
         }
     });
     </script>

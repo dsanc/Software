@@ -102,204 +102,224 @@
     padding: 0.75rem;
 }
 
-/* HEADER COMPACTO OPTIMIZADO */
+/* ===== HEADER COMPACTO ===== */
 .hotel-header {
     background: var(--primary-gradient);
     color: white;
-    border-radius: var(--border-radius);
-    padding: 0.5rem 0.75rem;
+    border-radius: var(--border-radius-lg);
+    padding: 0.625rem 1rem;
     margin-bottom: 0.75rem;
-    box-shadow: var(--card-shadow);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
-.header-top {
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
-.hotel-info h1 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
+/* Fila única: avatar + info + pills + acciones */
+.hotel-header-row {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-}
-
-.hotel-info .location {
-    font-size: 0.9rem;
-    opacity: 0.9;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.hotel-actions {
-    display: flex;
-    gap: 0.375rem;
-    flex-shrink: 0;
-}
-
-.action-btn {
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    text-decoration: none;
-    transition: var(--transition);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    white-space: nowrap;
-}
-
-.action-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
-    color: white;
-    transform: translateY(-1px);
-}
-
-.action-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.action-btn:disabled:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: none;
-}
-
-/* MÉTRICAS COMPACTAS OPTIMIZADAS */
-.metrics-compact {
-    display: flex;
-    gap: 0.375rem;
-    justify-content: flex-start;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
-.metric-item {
-    background: rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
-    padding: 0.375rem 0.5rem;
-    text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    min-width: 70px;
+/* Avatar ícono del hotel */
+.hotel-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
-.metric-value {
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1.2;
+/* Bloque de texto principal */
+.hotel-header-info {
+    flex: 1;
+    min-width: 0;
 }
 
-.metric-label {
-    font-size: 0.625rem;
-    opacity: 0.8;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.hotel-header-info h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hotel-header-sub {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.15rem;
+}
+
+.hotel-header-sub .sub-item {
+    font-size: 0.7rem;
+    opacity: 0.82;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.hotel-header-sub .sub-sep {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+}
+
+/* Pills de métricas inline */
+.header-pills {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.h-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.2);
+    white-space: nowrap;
+    line-height: 1.4;
+}
+
+.h-pill i { font-size: 0.6rem; opacity: 0.85; }
+
+.h-pill.pill-score {
+    background: rgba(255,255,255,0.22);
+    border-color: rgba(255,255,255,0.35);
+    font-weight: 700;
+}
+
+.h-pill.pill-excellent { background: rgba(16,185,129,0.28); border-color: rgba(16,185,129,0.45); }
+.h-pill.pill-good      { background: rgba(59,130,246,0.28);  border-color: rgba(59,130,246,0.45); }
+.h-pill.pill-moderate  { background: rgba(245,158,11,0.28);  border-color: rgba(245,158,11,0.45); }
+.h-pill.pill-critical  { background: rgba(239,68,68,0.28);   border-color: rgba(239,68,68,0.45); }
+.h-pill.pill-active    { background: rgba(16,185,129,0.22);  border-color: rgba(16,185,129,0.4);  color: #a7f3d0; }
+.h-pill.pill-inactive  { background: rgba(245,158,11,0.22);  border-color: rgba(245,158,11,0.4);  color: #fde68a; }
+
+.status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse-dot 2s infinite;
+}
+.h-pill.pill-inactive .status-dot { animation: none; }
+
+@keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
 }
 
 .category-stars {
     display: inline-flex;
-    gap: 0.1rem;
-    margin-bottom: 0.125rem;
-    font-size: 0.7rem;
+    gap: 0.08rem;
+    font-size: 0.6rem;
+}
+.star-filled { color: #fbbf24; }
+.star-empty  { color: rgba(255,255,255,0.3); }
+
+/* Separador vertical */
+.header-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.2);
+    flex-shrink: 0;
 }
 
-.star-filled { color: #fbbf24; }
-.star-empty { color: rgba(255, 255, 255, 0.4); }
+/* Botones de acción */
+.hotel-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    align-items: center;
+}
 
-.status-active { color: var(--success-color); }
-.status-inactive { color: var(--warning-color); }
+.action-btn {
+    padding: 0.3rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    border: 1px solid rgba(255,255,255,0.28);
+    background: rgba(255,255,255,0.13);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    white-space: nowrap;
+    cursor: pointer;
+    line-height: 1.4;
+}
 
-/* RESPONSIVE OPTIMIZADO */
+.action-btn:hover {
+    background: rgba(255,255,255,0.24);
+    border-color: rgba(255,255,255,0.45);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.action-btn.btn-primary {
+    background: rgba(255,255,255,0.92);
+    color: #667eea;
+    border-color: transparent;
+    font-weight: 700;
+}
+.action-btn.btn-primary:hover {
+    background: white;
+    color: #5a67d8;
+}
+
+.action-btn:disabled,
+.action-btn[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    .hotel-header {
-        padding: 0.5rem 0.75rem;
+    .hotel-header-row {
+        gap: 0.5rem;
     }
-    
-    .header-top {
-        flex-direction: column;
-        gap: 0.75rem;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .hotel-info h1 {
-        font-size: 1.1rem;
-        justify-content: center;
-    }
-    
+    .hotel-avatar { display: none; }
+    .header-divider { display: none; }
     .hotel-actions {
         width: 100%;
-        justify-content: center;
         flex-wrap: wrap;
     }
-    
     .action-btn {
         flex: 1;
-        min-width: 80px;
         justify-content: center;
-        font-size: 0.7rem;
-        padding: 0.25rem 0.375rem;
+        min-width: 70px;
     }
-    
-    .metrics-compact {
-        justify-content: center;
-        gap: 0.25rem;
-    }
-    
-    .metric-item {
-        min-width: 60px;
-        padding: 0.25rem 0.375rem;
-    }
-    
-    .metric-value {
-        font-size: 0.7rem;
-    }
-    
-    .metric-label {
-        font-size: 0.6rem;
-    }
-    
-    .metric-item {
-        min-width: 80px;
-        padding: 0.375rem 0.5rem;
-    }
+    .header-pills { gap: 0.25rem; }
 }
 
 @media (max-width: 480px) {
-    .hotel-header {
-        padding: 0.75rem;
-    }
-    
-    .hotel-info h1 {
-        font-size: 1.25rem;
-    }
-    
-    .metrics-compact {
-        justify-content: flex-start;
-        gap: 0.25rem;
-    }
-    
-    .metric-item {
-        min-width: 70px;
-        padding: 0.25rem 0.375rem;
-    }
-    
-    .metric-value {
-        font-size: 0.75rem;
-    }
-    
-    .metric-label {
-        font-size: 0.55rem;
-    }
+    .hotel-header { padding: 0.5rem 0.75rem; }
+    .hotel-header-info h1 { font-size: 0.9rem; }
+    .h-pill { font-size: 0.62rem; padding: 0.15rem 0.4rem; }
 }
+
+.status-active   { color: var(--success-color); }
+.status-inactive { color: var(--warning-color); }
 
 /* ANIMACIONES SIMPLES */
 .hotel-header {
@@ -398,198 +418,129 @@
 }
 
 /* EVOLUCIÓN HISTÓRICA */
+/* ===== EVOLUCIÓN HISTÓRICA REDISEÑO ===== */
 .evolution-container {
     flex: 1;
-    overflow: visible;
     width: 100%;
     max-width: 100%;
 }
 
-.evolution-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #374151;
-    margin-bottom: 0.75rem;
+/* Card contenedor principal */
+.evo-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Header de la card */
+.evo-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
+    padding: 0.875rem 1.125rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e5e7eb;
+    gap: 0.75rem;
+    flex-wrap: wrap;
 }
 
-.title-left {
+.evo-title-group {
     display: flex;
     align-items: center;
     gap: 0.5rem;
 }
 
-.comparison-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.comparison-card {
-    background: #f8fafc;
+.evo-title-group .evo-icon {
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    text-align: center;
-}
-
-.comparison-card.first {
-    border-left: 4px solid #ef4444;
-}
-
-.comparison-card.latest {
-    border-left: 4px solid #10b981;
-}
-
-.comparison-date {
-    font-size: 0.75rem;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-}
-
-.comparison-score {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.25rem;
-}
-
-.comparison-score.first {
-    color: #ef4444;
-}
-
-.comparison-score.latest {
-    color: #10b981;
-}
-
-.comparison-percentage {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-}
-
-.comparison-label {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.evolution-indicator {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: #f0f9ff;
-    border-radius: 8px;
-    border: 1px solid #bae6fd;
+    font-size: 0.75rem;
+    flex-shrink: 0;
 }
 
-.evolution-icon {
-    font-size: 1.25rem;
+.evo-title-group h3 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
-.evolution-icon.positive {
-    color: #10b981;
-}
-
-.evolution-icon.negative {
-    color: #ef4444;
-}
-
-.evolution-icon.neutral {
-    color: #6b7280;
-}
-
-.evolution-text {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-/* LINE CHART COMPACTO */
-.line-chart-container {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #e5e7eb;
-    position: relative;
-    overflow: hidden;
-}
-
-.line-chart-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 12px 12px 0 0;
-}
-
-.line-chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-}
-
-.line-chart-label {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.line-chart-label i {
+.evo-count-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 20px;
+    background: rgba(102, 126, 234, 0.12);
     color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    white-space: nowrap;
 }
 
-.line-chart-stats {
+.evo-header-right {
     display: flex;
     align-items: center;
+    gap: 0.5rem;
 }
 
+/* Trend badge rediseñado */
 .trend-badge {
     display: inline-flex;
     align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.trend-badge.positive { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.trend-badge.negative { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+.trend-badge.neutral  { background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; }
+
+/* Botón detalle */
+.detail-btn {
+    display: inline-flex;
+    align-items: center;
     gap: 0.25rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 1rem;
-    font-size: 0.75rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 600;
+    border: 1px solid #d1d5db;
+    background: white;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
 }
-
-.trend-badge.positive {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.trend-badge.negative {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.trend-badge.neutral {
+.detail-btn:hover {
     background: #f3f4f6;
-    color: #6b7280;
+    border-color: #9ca3af;
+    color: #111827;
+}
+
+/* Zona del gráfico */
+.evo-chart-zone {
+    padding: 1rem 1rem 0.5rem;
+    background: #fafbfc;
 }
 
 .line-chart-wrapper {
     background: #ffffff;
-    border-radius: 8px;
-    padding: 1rem;
+    border-radius: 10px;
     border: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 0.75rem;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
     width: 100%;
+    overflow: hidden;
 }
 
 #evolutionLineChart {
@@ -598,6 +549,107 @@
     height: auto !important;
     display: block;
 }
+
+/* Franja de stats (Primera → Delta → Última) */
+.evo-stats-strip {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0.875rem 1.125rem;
+    border-top: 1px solid #f1f5f9;
+    background: #ffffff;
+    gap: 0.5rem;
+}
+
+.evo-stat {
+    text-align: center;
+    padding: 0.375rem 0.5rem;
+    border-radius: 10px;
+    transition: background 0.15s;
+}
+.evo-stat:hover { background: #f8fafc; }
+
+.evo-stat-label {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+    margin-bottom: 0.2rem;
+}
+
+.evo-stat-score {
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+.evo-stat-score.score-first   { color: #ef4444; }
+.evo-stat-score.score-latest  { color: #10b981; }
+.evo-stat-score.score-neutral { color: #6b7280; }
+
+.evo-stat-pct {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+    margin-top: 0.1rem;
+}
+
+.evo-stat-date {
+    font-size: 0.62rem;
+    color: #cbd5e1;
+    margin-top: 0.15rem;
+}
+
+/* Columna central: delta/flecha */
+.evo-delta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0 0.5rem;
+    border-left: 1px dashed #e2e8f0;
+    border-right: 1px dashed #e2e8f0;
+}
+
+.evo-delta-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+.evo-delta-icon.positive { color: #10b981; }
+.evo-delta-icon.negative { color: #ef4444; }
+.evo-delta-icon.neutral  { color: #94a3b8; }
+
+.evo-delta-val {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #374151;
+}
+.evo-delta-val.positive { color: #059669; }
+.evo-delta-val.negative { color: #dc2626; }
+.evo-delta-val.neutral  { color: #6b7280; }
+
+.evo-delta-lbl {
+    font-size: 0.6rem;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Estado vacío */
+.evo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: #94a3b8;
+    gap: 0.5rem;
+}
+.evo-empty i { font-size: 2rem; opacity: 0.5; }
+.evo-empty p { margin: 0; font-size: 0.85rem; }
+.evo-empty .evo-empty-hint { font-size: 0.75rem; opacity: 0.75; }
 
 /* RESPONSIVE PARA ANÁLISIS */
 @media (max-width: 768px) {
@@ -628,6 +680,33 @@
         min-height: 100px;
     }
     
+    .line-chart-wrapper {
+        padding: 0.5rem;
+        overflow: visible;
+        min-height: 140px;
+        width: 100%;
+    }
+    
+    .evo-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .evo-header-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .evo-stats-strip {
+        grid-template-columns: 1fr auto 1fr;
+        padding: 0.75rem;
+    }
+
+    .evo-stat-score { font-size: 1rem; }
+
+    .evo-chart-zone { padding: 0.75rem 0.75rem 0.25rem; }
+
     .line-chart-container {
         padding: 1rem;
         margin-bottom: 1.25rem;
@@ -642,17 +721,9 @@
         margin-bottom: 0.75rem;
     }
     
-    .line-chart-wrapper {
-        padding: 0.5rem;
-        overflow: visible;
-        min-height: 160px;
-        height: 160px;
-        width: 100%;
-    }
-    
     #evolutionLineChart {
         width: 100% !important;
-        height: 100% !important;
+        height: auto !important;
         max-width: 100%;
         display: block;
     }
@@ -898,54 +969,6 @@
 .chart-container {
     flex: 1;
     position: relative;
-    min-height: 300px;
-    max-height: 350px;
-    margin: 1rem 0;
-}
-
-.chart-container canvas {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto !important;
-    height: auto !important;
-}
-
-.chart-score {
-    text-align: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    padding: 0.375rem;
-    border-radius: var(--border-radius);
-    margin-top: auto;
-    border: 1px solid;
-    line-height: 1.1;
-}
-
-.chart-score.first {
-    background: rgba(239, 68, 68, 0.1);
-    color: #dc2626;
-    border-color: rgba(239, 68, 68, 0.3);
-}
-
-.chart-score.latest {
-    background: rgba(16, 185, 129, 0.1);
-    color: #059669;
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
-.score-value {
-    font-weight: 700;
-    font-size: 0.8rem;
-}
-
-.score-na {
-    color: #6b7280;
-    font-style: italic;
-}
-
-.chart-container {
-    flex: 1;
-    position: relative;
     min-height: 350px;
     max-height: 400px;
     margin: 1rem 0;
@@ -971,6 +994,17 @@
     background: rgba(16, 185, 129, 0.1);
     color: #059669;
     border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* Tamaño reducido para score dentro del modal comparativo */
+.chart-score .score-value {
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.score-na {
+    color: #6b7280;
+    font-style: italic;
 }
 
 .detail-btn {
@@ -1112,216 +1146,531 @@
     padding: 1rem;
 }
 
-/* ANÁLISIS IA */
+/* ═══════════════════════════════════════════════════════
+   SECCIÓN ANÁLISIS IA — Rediseño moderno
+   ═══════════════════════════════════════════════════════ */
+
+/* Wrapper principal */
 .ai-analysis-section {
     background: white;
-    border-radius: var(--border-radius);
-    padding: 1rem;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     margin-bottom: 1rem;
-    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    border: 1px solid #f1f5f9;
 }
 
-.section-header {
-    margin-bottom: 1rem;
-    text-align: center;
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #1f2937;
+/* Cabecera de sección */
+.ia-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    margin: 0 0 0.5rem 0;
-}
-
-.section-title i {
-    color: #667eea;
-}
-
-.section-subtitle {
-    font-size: 1rem;
-    color: #6b7280;
-    text-align: center;
-    margin: 0 0 1rem 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.legend-container {
-    display: flex;
-    justify-content: center;
+    justify-content: space-between;
     gap: 1rem;
-    margin-bottom: 1rem;
+    padding: 0.875rem 1.125rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.ia-title-group {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.ia-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.ia-title-group h2 {
+    font-size: 0.925rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.ia-title-group p {
+    font-size: 0.7rem;
+    color: #64748b;
+    margin: 0;
+}
+
+/* Legend pills en el header */
+.ia-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
-.legend-item {
+.ia-legend-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #64748b;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 0.2rem 0.6rem;
+}
+
+.ia-legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.ia-legend-dot.excellent { background: #10b981; }
+.ia-legend-dot.good      { background: #3b82f6; }
+.ia-legend-dot.moderate  { background: #f59e0b; }
+.ia-legend-dot.critical  { background: #ef4444; }
+
+/* ─── Tabs ─────────────────────────────────────────────── */
+.ia-tabs-nav {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.625rem 1rem;
+    background: #fafbfc;
+    border-bottom: 1px solid #f1f5f9;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.ia-tabs-nav::-webkit-scrollbar { display: none; }
+
+.ia-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.ia-tab-btn:hover {
+    background: #f1f5f9;
+    color: #475569;
+}
+.ia-tab-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 2px 6px rgba(102,126,234,0.3);
+}
+.ia-tab-btn i { font-size: 0.7rem; }
+
+/* ─── Contenidos de tab ─────────────────────────────────── */
+.ia-tab-pane {
+    display: none;
+    padding: 1rem 1.125rem;
+}
+.ia-tab-pane.active { display: block; }
+
+/* ─── Tab Resumen General: Filas de categorías ──────────── */
+.ia-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.ia-cat-row {
+    display: grid;
+    grid-template-columns: 1fr 260px 80px;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 0.6rem 0.875rem;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+    border-radius: 10px;
+    transition: box-shadow 0.18s, transform 0.18s;
+}
+.ia-cat-row:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transform: translateX(2px);
+}
+
+.ia-cat-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ia-cat-bar-wrap {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #374151;
 }
-
-.legend-color {
-    width: 20px;
+.ia-cat-bar-bg {
+    flex: 1;
     height: 8px;
     border-radius: 4px;
+    background: #e2e8f0;
+    overflow: hidden;
 }
-
-.legend-color.excellent {
-    background: linear-gradient(90deg, #10b981, #059669);
+.ia-cat-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.25,0.46,0.45,0.94);
+    width: 0%;
 }
+.ia-cat-bar-fill.excellent { background: linear-gradient(90deg,#10b981,#059669); }
+.ia-cat-bar-fill.good      { background: linear-gradient(90deg,#3b82f6,#1d4ed8); }
+.ia-cat-bar-fill.moderate  { background: linear-gradient(90deg,#f59e0b,#d97706); }
+.ia-cat-bar-fill.critical  { background: linear-gradient(90deg,#ef4444,#dc2626); }
 
-.legend-color.good {
-    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-}
-
-.legend-color.moderate {
-    background: linear-gradient(90deg, #f59e0b, #d97706);
-}
-
-.legend-color.critical {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
-}
-
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1rem;
-}
-
-.category-card {
-    background: #f8fafc;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    border: 1px solid #e5e7eb;
-    transition: var(--transition);
-}
-
-.category-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.category-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-}
-
-.category-name {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0;
-    flex: 1;
-}
-
-.category-score {
+.ia-cat-pct {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #475569;
+    min-width: 30px;
     text-align: right;
     flex-shrink: 0;
 }
 
-.score-number {
-    display: block;
-    font-size: 0.875rem;
-    color: #6b7280;
-    font-weight: 500;
-}
-
-.score-percentage {
-    display: block;
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #1f2937;
-}
-
-.progress-bar-container {
-    background: #e5e7eb;
-    height: 12px;
-    border-radius: 6px;
-    overflow: hidden;
-    margin-bottom: 0.75rem;
-    position: relative;
-}
-
-.progress-bar {
-    height: 100%;
-    border-radius: 6px;
-    transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    position: relative;
-    width: 0%; /* Iniciar en 0% para la animación */
-}
-
-/* Colores tipo semáforo */
-.progress-bar.excellent {
-    background: linear-gradient(90deg, #10b981, #059669);
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
-}
-
-.progress-bar.good {
-    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
-    box-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
-}
-
-.progress-bar.moderate {
-    background: linear-gradient(90deg, #f59e0b, #d97706);
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
-}
-
-.progress-bar.critical {
-    background: linear-gradient(90deg, #ef4444, #dc2626);
-    box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-}
-
-/* Efecto de brillo en hover */
-.category-card:hover .progress-bar {
-    filter: brightness(1.1);
-    transform: scaleY(1.1);
-}
-
-.risk-level {
-    display: flex;
-    justify-content: center;
-}
-
-.risk-badge {
+.ia-cat-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 12px;
     text-transform: uppercase;
+    letter-spacing: .03em;
+}
+.ia-cat-badge.excellent { background: #d1fae5; color: #065f46; }
+.ia-cat-badge.good      { background: #dbeafe; color: #1e40af; }
+.ia-cat-badge.moderate  { background: #fef3c7; color: #92400e; }
+.ia-cat-badge.critical  { background: #fee2e2; color: #991b1b; }
+
+/* ─── Tab Críticos: ranking compacto ────────────────────── */
+.ia-ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 
-.risk-badge.excellent {
-    background: #d1fae5;
-    color: #065f46;
+.ia-rank-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    border-left: 4px solid;
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-left-width: 4px;
+    transition: box-shadow 0.18s;
+}
+.ia-rank-row:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.08); }
+.ia-rank-row.critical-zone  { border-left-color: #ef4444; background: linear-gradient(135deg,#fff5f5,#fff); }
+.ia-rank-row.moderate-zone  { border-left-color: #f59e0b; background: linear-gradient(135deg,#fffbeb,#fff); }
+.ia-rank-row.warning-zone   { border-left-color: #3b82f6; background: linear-gradient(135deg,#eff6ff,#fff); }
+
+.ia-rank-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+}
+.ia-rank-row.critical-zone .ia-rank-num { background: #ef4444; }
+.ia-rank-row.moderate-zone .ia-rank-num { background: #f59e0b; }
+.ia-rank-row.warning-zone  .ia-rank-num { background: #3b82f6; }
+
+.ia-rank-info { flex: 1; min-width: 0; }
+.ia-rank-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ia-rank-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+}
+.ia-rank-bar-bg {
+    flex: 1;
+    height: 5px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+.ia-rank-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+    width: 0%;
+}
+.ia-rank-row.critical-zone .ia-rank-bar-fill { background: #ef4444; }
+.ia-rank-row.moderate-zone .ia-rank-bar-fill { background: #f59e0b; }
+.ia-rank-row.warning-zone  .ia-rank-bar-fill { background: #3b82f6; }
+
+.ia-rank-score {
+    font-size: 1rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+.ia-rank-row.critical-zone .ia-rank-score { color: #dc2626; }
+.ia-rank-row.moderate-zone .ia-rank-score { color: #d97706; }
+.ia-rank-row.warning-zone  .ia-rank-score { color: #2563eb; }
+
+/* ─── Recomendaciones IA — nuevas tarjetas ──────────────── */
+.ia-recs-header {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 1rem;
+}
+.ia-recs-header i { font-size: 1rem; }
+.ia-recs-header h4 {
+    font-size: 0.875rem;
+    font-weight: 700;
+    margin: 0;
+}
+.ia-recs-header p {
+    font-size: 0.7rem;
+    opacity: 0.85;
+    margin: 0.15rem 0 0 0;
 }
 
-.risk-badge.good {
-    background: #dbeafe;
-    color: #1e40af;
+.ia-rec-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 0.875rem;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.ia-rec-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+
+.ia-rec-card-head {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafbfc;
+}
+.ia-rec-rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.ia-rec-rank.rank-1 { background: #ef4444; }
+.ia-rec-rank.rank-2 { background: #f59e0b; }
+.ia-rec-rank.rank-3 { background: #f97316; }
+.ia-rec-rank.rank-4 { background: #3b82f6; }
+.ia-rec-rank.rank-5 { background: #6366f1; }
+
+.ia-rec-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.15rem 0;
+    flex: 1;
+}
+.ia-rec-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ia-rec-score {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #dc2626;
+}
+.ia-urgency-badge {
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.ia-urgency-badge.emergency { background: #fee2e2; color: #991b1b; }
+.ia-urgency-badge.critical  { background: #fef3c7; color: #92400e; }
+.ia-urgency-badge.moderate  { background: #dbeafe; color: #1e40af; }
+
+.ia-rec-body { padding: 0.875rem 1rem; }
+
+.ia-insights-block {
+    background: #f8fafc;
+    border-left: 3px solid #667eea;
+    border-radius: 0 8px 8px 0;
+    padding: 0.625rem 0.875rem;
+    margin-bottom: 0.875rem;
+}
+.ia-insights-block h6 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #374151;
+    margin: 0 0 0.4rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.ia-insights-block ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.ia-insights-block li {
+    font-size: 0.78rem;
+    color: #4b5563;
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+.ia-insights-block li:last-child { border-bottom: none; }
+
+.ia-plans {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
 }
 
-.risk-badge.moderate {
-    background: #fef3c7;
-    color: #92400e;
+.ia-plan {
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
 }
+.ia-plan.immediate { background: #fef2f2; border-top: 2px solid #ef4444; }
+.ia-plan.short     { background: #fffbeb; border-top: 2px solid #f59e0b; }
+.ia-plan.long      { background: #eff6ff; border-top: 2px solid #3b82f6; }
 
-.risk-badge.critical {
+.ia-plan h6 {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin: 0 0 0.4rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.ia-plan.immediate h6 { color: #dc2626; }
+.ia-plan.short h6     { color: #d97706; }
+.ia-plan.long h6      { color: #1d4ed8; }
+
+.ia-plan ul { list-style: none; margin: 0; padding: 0; }
+.ia-plan li {
+    font-size: 0.72rem;
+    color: #374151;
+    padding: 0.2rem 0 0.2rem 0.8rem;
+    position: relative;
+}
+.ia-plan li::before { content: "→"; position: absolute; left: 0; color: #667eea; font-size: 0.65rem; }
+
+.ia-metrics-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+.ia-metric {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.5rem 0.875rem;
+    text-align: center;
+    flex: 1;
+    min-width: 100px;
+}
+.ia-metric-lbl {
+    display: block;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.2rem;
+    letter-spacing: .03em;
+}
+.ia-metric-val {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+.ia-metric-val.improvement { color: #10b981; }
+.ia-metric-val.investment  { color: #f59e0b; }
+
+.ia-risk-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.625rem;
+}
+.ia-risk-tag {
     background: #fee2e2;
     color: #991b1b;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
 }
+
+/* ─── Sin datos ─────────────────────────────────────────── */
+.ia-no-data {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #94a3b8;
+}
+.ia-no-data i { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; }
+.ia-no-data h3 { font-size: 1rem; color: #475569; margin: 0 0 0.4rem 0; }
+.ia-no-data p  { font-size: 0.8rem; margin: 0; }
+
+/* ─── Mantener compatibilidad con clases usadas por JS ──── */
+.categories-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.category-card   { display: none; } /* reemplazado por ia-cat-row */
+.progress-bar-container { background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 0.4rem; }
+.progress-bar { height: 100%; border-radius: 4px; transition: width 1.2s cubic-bezier(0.25,0.46,0.45,0.94); width: 0%; }
+.progress-bar.excellent { background: linear-gradient(90deg,#10b981,#059669); }
+.progress-bar.good      { background: linear-gradient(90deg,#3b82f6,#1d4ed8); }
+.progress-bar.moderate  { background: linear-gradient(90deg,#f59e0b,#d97706); }
+.progress-bar.critical  { background: linear-gradient(90deg,#ef4444,#dc2626); }
+.risk-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+.risk-badge.excellent { background: #d1fae5; color: #065f46; }
+.risk-badge.good      { background: #dbeafe; color: #1e40af; }
+.risk-badge.moderate  { background: #fef3c7; color: #92400e; }
+.risk-badge.critical  { background: #fee2e2; color: #991b1b; }
 
 .no-data-message {
     text-align: center;
@@ -1362,59 +1711,41 @@
     }
 }
 
-/* TABS SYSTEM */
-.tabs-container {
-    width: 100%;
-}
-
-.tabs-nav {
-    display: flex;
-    background: #f8fafc;
-    border-radius: 12px 12px 0 0;
-    padding: 0.5rem;
-    gap: 0.25rem;
-    border-bottom: 2px solid #e5e7eb;
-}
+/* TABS SYSTEM — mantener compatibilidad JS con ia-tab-pane */
+.tabs-container { width: 100%; }
+.tabs-nav { display: none; } /* reemplazado por ia-tabs-nav */
 
 .tab-btn {
-    flex: 1;
-    padding: 0.875rem 1rem;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
+    gap: 0.35rem;
+    padding: 0.4rem 0.875rem;
+    border: 1px solid transparent;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
-
-.tab-btn:hover {
-    background: rgba(102, 126, 234, 0.1);
-    color: #667eea;
-}
-
+.tab-btn:hover { background: #f1f5f9; color: #475569; }
 .tab-btn.active {
     background: #667eea;
     color: white;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+    box-shadow: 0 2px 6px rgba(102,126,234,0.3);
 }
 
 .tab-content {
     display: none;
-    padding: 2rem 1rem;
+    padding: 1rem 1.125rem;
     background: white;
     border-radius: 0 0 12px 12px;
-    min-height: 400px;
+    min-height: 300px;
 }
-
-.tab-content.active {
-    display: block;
-}
+.tab-content.active { display: block; }
 
 /* CATEGORÍAS CRÍTICAS */
 .critical-analysis {
@@ -1461,445 +1792,33 @@
     height: 350px !important;
 }
 
-/* RECOMENDACIONES DE IA */
-.ai-recommendations-section {
-    margin-top: 2rem;
-}
-
-.ai-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 1.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 12px;
-    color: white;
-}
-
-.ai-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-}
-
-.ai-subtitle {
-    margin: 0;
-    opacity: 0.9;
-    font-size: 0.95rem;
-}
-
-.ai-recommendations-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-}
-
-.ai-recommendation-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    border: 2px solid #e5e7eb;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.ai-recommendation-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: linear-gradient(180deg, #ef4444, #f59e0b, #3b82f6);
-}
-
-.ai-recommendation-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.recommendation-header {
-    margin-bottom: 1.5rem;
-}
-
-.category-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.ranking-badge {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
-    color: white;
-    flex-shrink: 0;
-}
-
-.ranking-badge.rank-1 { background: #ef4444; }
-.ranking-badge.rank-2 { background: #f59e0b; }
-.ranking-badge.rank-3 { background: #f97316; }
-.ranking-badge.rank-4 { background: #3b82f6; }
-.ranking-badge.rank-5 { background: #6366f1; }
-
-.category-details {
-    flex: 1;
-}
-
-.category-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0 0 0.5rem 0;
-}
-
-.category-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.current-score {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #dc2626;
-}
-
-.urgency-badge {
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.urgency-badge.emergency {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.urgency-badge.critical {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.urgency-badge.moderate {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.ai-insights {
-    background: #f8fafc;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1.5rem;
-    border-left: 4px solid #667eea;
-}
-
-.insights-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #374151;
-    margin: 0 0 0.75rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.insights-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.insight-item {
-    padding: 0.5rem 0;
-    font-size: 0.875rem;
-    color: #4b5563;
-    border-bottom: 1px solid #e5e7eb;
-}
-
-.insight-item:last-child {
-    border-bottom: none;
-}
-
-.action-plan {
-    margin-bottom: 1.5rem;
-}
-
-.plan-section {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    border-radius: 8px;
-}
-
-.plan-section.immediate {
-    background: #fef2f2;
-    border-left: 4px solid #ef4444;
-}
-
-.plan-section.short-term {
-    background: #fffbeb;
-    border-left: 4px solid #f59e0b;
-}
-
-.plan-section.long-term {
-    background: #eff6ff;
-    border-left: 4px solid #3b82f6;
-}
-
-.plan-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin: 0 0 0.75rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.plan-section.immediate .plan-title { color: #dc2626; }
-.plan-section.short-term .plan-title { color: #d97706; }
-.plan-section.long-term .plan-title { color: #1d4ed8; }
-
-.action-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.action-item {
-    padding: 0.5rem 0;
-    font-size: 0.875rem;
-    color: #374151;
-    position: relative;
-    padding-left: 1.5rem;
-}
-
-.action-item::before {
-    content: "→";
-    position: absolute;
-    left: 0;
-    color: #667eea;
-    font-weight: 600;
-}
-
-.predictive-metrics {
-    background: #f9fafb;
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid #e5e7eb;
-}
-
-.metrics-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.metric-item {
-    text-align: center;
-}
-
-.metric-label {
-    display: block;
-    font-size: 0.75rem;
-    color: #6b7280;
-    text-transform: uppercase;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-}
-
-.metric-value {
-    display: block;
-    font-size: 1rem;
-    font-weight: 700;
-}
-
-.metric-value.improvement {
-    color: #10b981;
-}
-
-.metric-value.investment {
-    color: #f59e0b;
-    font-size: 0.875rem;
-}
-
-.risk-factors {
-    margin-top: 1rem;
-}
-
-.risk-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #dc2626;
-    margin: 0 0 0.75rem 0;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.risk-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.risk-tag {
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.no-recommendations-message {
-    text-align: center;
-    padding: 3rem;
-    color: #6b7280;
-}
-
-.no-recommendations-message i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: #667eea;
-}
-
-.critical-summary {
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 1px solid #e5e7eb;
-}
-
-.summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1rem;
-}
-
-.summary-item {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    border: 2px solid #e5e7eb;
-    transition: all 0.3s ease;
-}
-
-.summary-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.summary-item.critical {
-    border-color: #ef4444;
-    background: linear-gradient(135deg, #fef2f2, white);
-}
-
-.summary-item.moderate {
-    border-color: #f59e0b;
-    background: linear-gradient(135deg, #fffbeb, white);
-}
-
-.summary-item.warning {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, #eff6ff, white);
-}
-
-.summary-rank {
-    background: #667eea;
-    color: white;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-.summary-info {
-    flex: 1;
-}
-
-.summary-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin: 0 0 0.25rem 0;
-    line-height: 1.2;
-}
-
-.summary-score {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: #dc2626;
-}
-
-.summary-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.25rem;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.summary-indicator i {
-    font-size: 1.25rem;
-}
-
-.summary-indicator span {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.summary-item.critical .summary-indicator {
-    color: #dc2626;
-}
-
-.summary-item.moderate .summary-indicator {
-    color: #f59e0b;
-}
-
-.summary-item.warning .summary-indicator {
-    color: #3b82f6;
-}
-
-.no-critical-message {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #6b7280;
-}
-
-.no-critical-message i {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    color: #9ca3af;
-}
-
-.no-critical-message h3 {
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: #374151;
-}
+/* ─── Sección recomendaciones IA (legacy — reemplazado por ia-*) */
+.ai-recommendations-section { margin-top: 1rem; }
+.ai-header { display: none; } /* reemplazado por ia-recs-header */
+.ai-recommendations-grid { display: flex; flex-direction: column; gap: 0.875rem; }
+.ai-recommendation-card { display: none; } /* reemplazado por ia-rec-card */
+.no-recommendations-message { text-align: center; padding: 2rem; color: #6b7280; }
+.no-recommendations-message i { font-size: 2rem; margin-bottom: 0.5rem; color: #667eea; }
+
+/* ─── Critical summary (legacy, reemplazado por ia-ranking-list) */
+.critical-summary { background: #f8fafc; border-radius: 10px; padding: 1rem; border: 1px solid #e5e7eb; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem; }
+.summary-item { background: white; border-radius: 8px; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.75rem; border: 1.5px solid #e5e7eb; }
+.summary-item.critical  { border-color: #ef4444; background: #fff5f5; }
+.summary-item.moderate  { border-color: #f59e0b; background: #fffbeb; }
+.summary-item.warning   { border-color: #3b82f6; background: #eff6ff; }
+.summary-rank { background: #667eea; color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
+.summary-info { flex: 1; min-width: 0; }
+.summary-name { font-size: 0.8rem; font-weight: 600; color: #1f2937; margin: 0 0 0.2rem 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.summary-score { font-size: 1rem; font-weight: 700; color: #dc2626; }
+.summary-indicator { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; text-align: center; flex-shrink: 0; }
+.summary-indicator span { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+.summary-item.critical .summary-indicator { color: #dc2626; }
+.summary-item.moderate .summary-indicator { color: #f59e0b; }
+.summary-item.warning  .summary-indicator { color: #3b82f6; }
+.no-critical-message { text-align: center; padding: 3rem 1rem; color: #6b7280; }
+.no-critical-message i { font-size: 3rem; margin-bottom: 0.75rem; color: #9ca3af; }
+.no-critical-message h3 { font-size: 1.25rem; margin-bottom: 0.75rem; color: #374151; }
 
 /* LEGACY CRITICAL STYLES */
 .critical-grid {
@@ -2592,6 +2511,12 @@
 }
 
 @media (max-width: 768px) {
+    /* IA section responsive */
+    .ia-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    .ia-legend { display: none; }
+    .ia-cat-row { grid-template-columns: 1fr 160px 70px; }
+    .ia-plans { grid-template-columns: 1fr; }
+
     .radar-chart-wrapper {
         padding: 1rem;
         min-height: 400px;
@@ -2758,69 +2683,113 @@
 
 {% block content %}
 <div class="hotel-detail-container">
-    <!-- HEADER COMPACTO DEL HOTEL -->
+    <!-- HEADER DEL HOTEL -->
     <header class="hotel-header">
-        <!-- Información Principal -->
-        <div class="header-top flex-between">
-            <div class="hotel-info">
-                <h1 class="flex-center gap-sm">
-                    <i class="fas fa-hotel"></i>
-                    {{ hotel.name }}
-                </h1>
-                <div class="location flex-center gap-sm">
-                    <i class="fas fa-map-marker-alt"></i>
-                    {{ hotel.city }}, {{ hotel.country }}
+        <div class="hotel-header-row">
+
+            <!-- Avatar icono -->
+            <div class="hotel-avatar">
+                <i class="fas fa-hotel"></i>
+            </div>
+
+            <!-- Nombre + subtítulo -->
+            <div class="hotel-header-info">
+                <h1>{{ hotel.name }}</h1>
+                <div class="hotel-header-sub">
+                    <span class="sub-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ hotel.city }}{% if hotel.country %}, {{ hotel.country }}{% endif %}
+                    </span>
+                    {% if hotel.address %}
+                    <span class="sub-sep"></span>
+                    <span class="sub-item">
+                        <i class="fas fa-building"></i>
+                        {{ hotel.address|truncatechars:35 }}
+                    </span>
+                    {% endif %}
                 </div>
             </div>
-            
-            <!-- Acciones Compactas -->
-            <div class="hotel-actions">
-                {% if latest_assessment and latest_assessment.status == 'completed' %}
-                <button class="action-btn" type="button" onclick="generateGeneralReport()" title="Generar reporte general">
-                    <i class="fas fa-file-alt"></i>
-                    Reporte
-                </button>
-                {% else %}
-                <button class="action-btn" disabled title="No hay evaluaciones completadas">
-                    <i class="fas fa-file-alt"></i>
-                    Reporte
-                </button>
+
+            <!-- Pills de métricas -->
+            <div class="header-pills">
+                <!-- Estado activo/inactivo -->
+                <span class="h-pill {% if hotel.is_active %}pill-active{% else %}pill-inactive{% endif %}">
+                    <span class="status-dot"></span>
+                    {% if hotel.is_active %}Activo{% else %}Inactivo{% endif %}
+                </span>
+
+                <!-- Categoría con estrellas -->
+                {% if hotel.category %}
+                <span class="h-pill">
+                    <span class="category-stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= category_rating %}
+                                <i class="fas fa-star star-filled"></i>
+                            {% else %}
+                                <i class="far fa-star star-empty"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                    {{ category_label|default:hotel.category }}
+                </span>
                 {% endif %}
-                
+
+                <!-- Habitaciones -->
+                {% if hotel.total_rooms %}
+                <span class="h-pill">
+                    <i class="fas fa-bed"></i>
+                    {{ hotel.total_rooms }} hab.
+                </span>
+                {% endif %}
+
+                <!-- Total evaluaciones -->
+                <span class="h-pill">
+                    <i class="fas fa-clipboard-check"></i>
+                    {{ total_assessments_count|default:"0" }} eval.
+                </span>
+
+                <!-- Score con nivel de riesgo -->
+                {% if latest_assessment and latest_assessment.overall_score %}
+                <span class="h-pill pill-score
+                    {% if latest_assessment.overall_score >= 4 %}pill-excellent
+                    {% elif latest_assessment.overall_score >= 3 %}pill-good
+                    {% elif latest_assessment.overall_score >= 2 %}pill-moderate
+                    {% else %}pill-critical{% endif %}">
+                    {% if latest_assessment.overall_score >= 4 %}
+                        <i class="fas fa-shield-alt"></i>
+                    {% elif latest_assessment.overall_score >= 3 %}
+                        <i class="fas fa-check-circle"></i>
+                    {% elif latest_assessment.overall_score >= 2 %}
+                        <i class="fas fa-exclamation-triangle"></i>
+                    {% else %}
+                        <i class="fas fa-exclamation-circle"></i>
+                    {% endif %}
+                    {{ latest_assessment.overall_score|floatformat:1 }}/5
+                </span>
+                <!-- Fecha última eval -->
+                <span class="h-pill">
+                    <i class="fas fa-calendar-alt"></i>
+                    {{ latest_assessment.assessment_date|date:"d/m/Y" }}
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Separador -->
+            <div class="header-divider"></div>
+
+            <!-- Acciones -->
+            <div class="hotel-actions">
+
                 <a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" class="action-btn" title="Nueva evaluación">
                     <i class="fas fa-plus"></i>
                     Nueva
                 </a>
-                <a href="{% url 'risk_hoteles:hotel_list' %}" class="action-btn" title="Volver a la lista">
+                <a href="{% url 'risk_hoteles:hotel_list' %}" class="action-btn" title="Volver al listado">
                     <i class="fas fa-arrow-left"></i>
                     Volver
                 </a>
             </div>
-        </div>
-        
-        <!-- Métricas Compactas -->
-        <div class="metrics-compact">
-            <!-- Categoría -->
-            <div class="metric-item">
-                <div class="metric-value">
-                    {% if hotel.category %}<div class="category-stars">{% for i in "12345" %}{% if forloop.counter <= category_rating %}<i class="fas fa-star star-filled"></i>{% else %}<i class="far fa-star star-empty"></i>{% endif %}{% endfor %}</div>{{ category_label|default:hotel.category }}{% else %}Sin categoría{% endif %}
-                </div>
-                <div class="metric-label">Categoría</div>
-            </div>
-            
-            <!-- Habitaciones -->
-            <div class="metric-item">
-                <div class="metric-value">{{ hotel.total_rooms|default:"N/A" }}</div>
-                <div class="metric-label">Habitaciones</div>
-            </div>
-            
-            <!-- Última Evaluación -->
-            {% if latest_assessment %}
-            <div class="metric-item">
-                <div class="metric-value">{% if latest_assessment.overall_score %}{{ latest_assessment.overall_score|floatformat:1 }}/5{% else %}Pendiente{% endif %}</div>
-                <div class="metric-label">Evaluación</div>
-            </div>
-            {% endif %}
+
         </div>
     </header>
 
@@ -2843,37 +2812,31 @@
 
             <!-- Evolución Histórica -->
             <div class="evolution-container">
-                <h3 class="evolution-title">
-                    <div class="title-left">
-                        <i class="fas fa-chart-line"></i>
-                        Evolución Histórica
-                    </div>
-                    {% if first_assessment and latest_assessment %}
-                    <button class="detail-btn" onclick="openDetailModal()">
-                        <i class="fas fa-magnifying-glass-plus"></i>
-                        Detalle
-                    </button>
-                    {% endif %}
-                </h3>
-                
-                {% if first_assessment and latest_assessment %}
-                <!-- Line Chart Compacto -->
-                <div class="line-chart-container">
-                    <div class="line-chart-header">
-                        <span class="line-chart-label">
-                            <i class="fas fa-chart-line"></i>
-                            Evolución de Evaluaciones ({{ assessments_history|length }} evaluaciones)
-                        </span>
-                        <span class="line-chart-stats">
+                <div class="evo-card">
+
+                    <!-- Header de la card -->
+                    <div class="evo-header">
+                        <div class="evo-title-group">
+                            <div class="evo-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3>Evolución Histórica</h3>
+                            <span class="evo-count-badge">
+                                {{ assessments_history|length }}
+                                evaluaci{% if assessments_history|length == 1 %}ón{% else %}ones{% endif %}
+                            </span>
+                        </div>
+                        <div class="evo-header-right">
+                            {% if first_assessment and latest_assessment %}
                             {% with evolution_diff=latest_assessment.overall_score|subtract:first_assessment.overall_score %}
                                 {% if evolution_diff > 0.1 %}
                                     <span class="trend-badge positive">
-                                        <i class="fas fa-arrow-up"></i>
+                                        <i class="fas fa-arrow-trend-up"></i>
                                         +{{ evolution_diff|floatformat:1 }} pts
                                     </span>
                                 {% elif evolution_diff < -0.1 %}
                                     <span class="trend-badge negative">
-                                        <i class="fas fa-arrow-down"></i>
+                                        <i class="fas fa-arrow-trend-down"></i>
                                         {{ evolution_diff|floatformat:1 }} pts
                                     </span>
                                 {% else %}
@@ -2883,416 +2846,346 @@
                                     </span>
                                 {% endif %}
                             {% endwith %}
-                        </span>
+                            <button class="detail-btn" onclick="openDetailModal()">
+                                <i class="fas fa-expand-alt"></i>
+                                Ver detalle
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
-                    
-                    <div class="line-chart-wrapper">
-                        <svg id="evolutionLineChart" viewBox="0 0 1000 180" preserveAspectRatio="none" style="width: 100%; height: 100%; min-width: 100%;">
-                            <!-- Fondo del gráfico -->
-                            <defs>
-                                <!-- Degradado tipo semáforo para el área -->
-                                <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />   <!-- Verde arriba -->
-                                    <stop offset="50%" style="stop-color:#f59e0b;stop-opacity:0.2" />  <!-- Amarillo medio -->
-                                    <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.1" /> <!-- Rojo abajo -->
-                                </linearGradient>
-                                
-                                <!-- Degradado dinámico para la línea basado en puntuación -->
-                                <linearGradient id="lineStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" style="stop-color:#ef4444" id="lineStart" />      <!-- Rojo inicial -->
-                                    <stop offset="50%" style="stop-color:#f59e0b" id="lineMiddle" />    <!-- Amarillo medio -->
-                                    <stop offset="100%" style="stop-color:#10b981" id="lineEnd" />      <!-- Verde final -->
-                                </linearGradient>
-                                
-                                <!-- Degradado para los puntos basado en score individual -->
-                                <radialGradient id="pointGradientLow" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" style="stop-color:#fee2e2;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#ef4444;stop-opacity:1" />
-                                </radialGradient>
-                                
-                                <radialGradient id="pointGradientMedium" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" style="stop-color:#fef3c7;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
-                                </radialGradient>
-                                
-                                <radialGradient id="pointGradientHigh" cx="50%" cy="50%" r="50%">
-                                    <stop offset="0%" style="stop-color:#d1fae5;stop-opacity:1" />
-                                    <stop offset="100%" style="stop-color:#10b981;stop-opacity:1" />
-                                </radialGradient>
-                                
-                                <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
-                                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.2"/>
-                                </filter>
-                            </defs>
-                            
-                            <!-- Grid lines con colores semáforo sutiles -->
-                            <g class="grid-lines" stroke-width="0.5" opacity="0.4">
-                                <!-- Zona Verde (4-5 puntos) -->
-                                <line x1="100" y1="40" x2="950" y2="40" stroke="#10b981"></line>
-                                <!-- Zona Amarilla (3-4 puntos) -->  
-                                <line x1="100" y1="65" x2="950" y2="65" stroke="#f59e0b"></line>
-                                <!-- Zona Amarilla-Naranja (2-3 puntos) -->
-                                <line x1="100" y1="90" x2="950" y2="90" stroke="#f59e0b"></line>
-                                <!-- Zona Roja (1-2 puntos) -->
-                                <line x1="100" y1="115" x2="950" y2="115" stroke="#ef4444"></line>
-                                <!-- Zona Roja Crítica (0-1 puntos) -->
-                                <line x1="100" y1="140" x2="950" y2="140" stroke="#dc2626"></line>
-                            </g>
-                            
-                            <!-- Y-axis labels -->
-                            <g class="y-labels" fill="#6b7280" font-size="14" font-family="Arial, sans-serif">
-                                <text x="95" y="145" text-anchor="end">0/5</text>
-                                <text x="95" y="120" text-anchor="end">1/5</text>
-                                <text x="95" y="95" text-anchor="end">2/5</text>
-                                <text x="95" y="70" text-anchor="end">3/5</text>
-                                <text x="95" y="45" text-anchor="end">4/5</text>
-                                <text x="95" y="20" text-anchor="end">5/5</text>
-                            </g>
-                            
-                            <!-- Área del gráfico -->
-                            <path id="areaPath" fill="url(#lineGradient)" stroke="none"></path>
-                            
-                            <!-- Línea principal con degradado semáforo -->
-                            <path id="linePath" fill="none" stroke="url(#lineStroke)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
-                            
-                            <!-- Puntos de datos -->
-                            <g id="dataPoints"></g>
-                            
-                            <!-- X-axis labels -->
-                            <g id="xLabels" fill="#6b7280" font-size="10" font-family="Arial, sans-serif"></g>
-                        </svg>
-                    </div>
-                </div>
-                
-                <div class="comparison-cards">
-                    <!-- Primera Evaluación -->
-                    <div class="comparison-card first">
-                        <div class="comparison-date">Primera Evaluación<br>{{ first_assessment.assessment_date|date:"d/m/Y" }}</div>
-                        <div class="comparison-score first">{{ first_assessment.overall_score|floatformat:1 }}/5.0</div>
-                        <div class="comparison-percentage">{{ first_assessment.overall_score|mul:20|floatformat:1 }}%</div>
-                        <div class="comparison-label">Puntuación Inicial</div>
-                    </div>
-                    
-                    <!-- Última Evaluación -->
-                    <div class="comparison-card latest">
-                        <div class="comparison-date">Última Evaluación<br>{{ latest_assessment.assessment_date|date:"d/m/Y" }}</div>
-                        <div class="comparison-score latest">{{ latest_assessment.overall_score|floatformat:1 }}/5.0</div>
-                        <div class="comparison-percentage">{{ latest_assessment.overall_score|mul:20|floatformat:1 }}%</div>
-                        <div class="comparison-label">Puntuación Actual</div>
-                    </div>
-                </div>
 
-                <!-- Indicador de Evolución -->
-                <div class="evolution-indicator">
-                    {% with evolution_diff=latest_assessment.overall_score|subtract:first_assessment.overall_score %}
-                        {% if evolution_diff > 0.1 %}
-                            <i class="fas fa-arrow-up evolution-icon positive"></i>
-                            <span class="evolution-text">
-                                Mejora de {% widthratio evolution_diff 5 100 %}%
-                            </span>
-                        {% elif evolution_diff < -0.1 %}
-                            <i class="fas fa-arrow-down evolution-icon negative"></i>
-                            <span class="evolution-text">
-                                Disminución de {% widthratio evolution_diff|cut:"-" 5 100 %}%
-                            </span>
-                        {% else %}
-                            <i class="fas fa-minus evolution-icon neutral"></i>
-                            <span class="evolution-text">
-                                Sin cambios significativos
-                            </span>
-                        {% endif %}
-                    {% endwith %}
-                </div>
-                {% else %}
-                <div style="text-align: center; padding: 2rem; color: #6b7280;">
-                    <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-                    <p>No hay suficientes evaluaciones para mostrar la evolución histórica.</p>
-                    <p style="font-size: 0.875rem;">Se necesitan al menos 2 evaluaciones.</p>
-                </div>
-                {% endif %}
+                    {% if first_assessment and latest_assessment %}
+
+                    <!-- Gráfico SVG -->
+                    <div class="evo-chart-zone">
+                        <div class="line-chart-wrapper">
+                            <svg id="evolutionLineChart" viewBox="0 0 1000 220" preserveAspectRatio="none" style="width:100%;height:auto;display:block;">
+                                <defs>
+                                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%"   style="stop-color:#10b981;stop-opacity:0.22"/>
+                                        <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.04"/>
+                                    </linearGradient>
+                                    <linearGradient id="lineStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%"   style="stop-color:#ef4444" id="lineStart"/>
+                                        <stop offset="50%"  style="stop-color:#f59e0b" id="lineMiddle"/>
+                                        <stop offset="100%" style="stop-color:#10b981" id="lineEnd"/>
+                                    </linearGradient>
+                                    <clipPath id="chartClip">
+                                        <rect x="58" y="0" width="898" height="182"/>
+                                    </clipPath>
+                                </defs>
+                                <!-- Bandas de zona de riesgo (verde/azul/naranja/rojo) -->
+                                <g id="riskZones"></g>
+                                <!-- Líneas de cuadrícula + benchmark -->
+                                <g id="gridLines"></g>
+                                <!-- Etiquetas eje Y coloreadas por zona -->
+                                <g id="yLabels"></g>
+                                <!-- Área relleno -->
+                                <path id="areaPath" fill="url(#lineGradient)" stroke="none" clip-path="url(#chartClip)"></path>
+                                <!-- Línea principal -->
+                                <path id="linePath" fill="none" stroke="url(#lineStroke)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+                                <!-- Puntos con badge de score -->
+                                <g id="dataPoints"></g>
+                                <!-- Etiquetas eje X -->
+                                <g id="xLabels"></g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Franja de stats: Primera → Delta → Última -->
+                    <div class="evo-stats-strip">
+
+                        <!-- Primera evaluación -->
+                        <div class="evo-stat">
+                            <div class="evo-stat-label">Primera evaluación</div>
+                            <div class="evo-stat-score score-first">
+                                {{ first_assessment.overall_score|floatformat:1 }}
+                                <span style="font-size:0.65rem;font-weight:600;opacity:0.7;">/5</span>
+                            </div>
+                            <div class="evo-stat-pct">{{ first_assessment.overall_score|mul:20|floatformat:0 }}%</div>
+                            <div class="evo-stat-date">{{ first_assessment.assessment_date|date:"d/m/Y" }}</div>
+                        </div>
+
+                        <!-- Delta central -->
+                        <div class="evo-delta">
+                            {% with evolution_diff=latest_assessment.overall_score|subtract:first_assessment.overall_score %}
+                                {% if evolution_diff > 0.1 %}
+                                    <div class="evo-delta-icon positive"><i class="fas fa-arrow-up"></i></div>
+                                    <div class="evo-delta-val positive">+{{ evolution_diff|floatformat:1 }}</div>
+                                    <div class="evo-delta-lbl">pts de<br>mejora</div>
+                                {% elif evolution_diff < -0.1 %}
+                                    <div class="evo-delta-icon negative"><i class="fas fa-arrow-down"></i></div>
+                                    <div class="evo-delta-val negative">{{ evolution_diff|floatformat:1 }}</div>
+                                    <div class="evo-delta-lbl">pts de<br>descenso</div>
+                                {% else %}
+                                    <div class="evo-delta-icon neutral"><i class="fas fa-equals"></i></div>
+                                    <div class="evo-delta-val neutral">0.0</div>
+                                    <div class="evo-delta-lbl">sin<br>cambio</div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+
+                        <!-- Última evaluación -->
+                        <div class="evo-stat">
+                            <div class="evo-stat-label">Última evaluación</div>
+                            <div class="evo-stat-score score-latest">
+                                {{ latest_assessment.overall_score|floatformat:1 }}
+                                <span style="font-size:0.65rem;font-weight:600;opacity:0.7;">/5</span>
+                            </div>
+                            <div class="evo-stat-pct">{{ latest_assessment.overall_score|mul:20|floatformat:0 }}%</div>
+                            <div class="evo-stat-date">{{ latest_assessment.assessment_date|date:"d/m/Y" }}</div>
+                        </div>
+
+                    </div>
+
+                    {% else %}
+                    <!-- Estado vacío -->
+                    <div class="evo-empty">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Sin historial de evolución</p>
+                        <p class="evo-empty-hint">Se necesitan al menos 2 evaluaciones para ver la evolución.</p>
+                    </div>
+                    {% endif %}
+
+                </div><!-- /.evo-card -->
             </div>
         </div>
     </section>
 
     <!-- SECCIÓN DE ANÁLISIS IA -->
     <section class="ai-analysis-section">
-        <div class="section-header">
-            <h2 class="section-title">
-                <i class="fas fa-brain"></i>
-                Análisis IA
-            </h2>
-            <p class="section-subtitle">
-                <i class="fas fa-chart-bar"></i>
-                Evaluación por Categorías con Sistema de Semáforo
-            </p>
-            <div class="legend-container">
-                <div class="legend-item"><div class="legend-color excellent"></div><span>Excelente (≥80%)</span></div>
-                <div class="legend-item"><div class="legend-color good"></div><span>Bueno (60-79%)</span></div>
-                <div class="legend-item"><div class="legend-color moderate"></div><span>Moderado (40-59%)</span></div>
-                <div class="legend-item"><div class="legend-color critical"></div><span>Crítico (<40%)</span></div>
+
+        <!-- ── Cabecera ─────────────────────────────────────────── -->
+        <div class="ia-header">
+            <div class="ia-title-group">
+                <div class="ia-icon"><i class="fas fa-brain"></i></div>
+                <div>
+                    <h2>Análisis IA</h2>
+                    <p>Evaluación por Categorías · Sistema Semáforo</p>
+                </div>
+            </div>
+            <div class="ia-legend">
+                <div class="ia-legend-pill"><div class="ia-legend-dot excellent"></div>Excelente ≥80%</div>
+                <div class="ia-legend-pill"><div class="ia-legend-dot good"></div>Bueno 60-79%</div>
+                <div class="ia-legend-pill"><div class="ia-legend-dot moderate"></div>Moderado 40-59%</div>
+                <div class="ia-legend-pill"><div class="ia-legend-dot critical"></div>Crítico &lt;40%</div>
             </div>
         </div>
 
-        {% if category_averages %}
-        <!-- Tabs Navigation -->
-        <div class="tabs-container">
-            <nav class="tabs-nav">
-                <button class="tab-btn active" data-tab="evaluations">
-                    <i class="fas fa-clipboard-list"></i>
-                    Historial de Evaluaciones
-                </button>
-                <button class="tab-btn" data-tab="general">
-                    <i class="fas fa-chart-pie"></i>
-                    Resumen General
-                </button>
-                <button class="tab-btn" data-tab="critical">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Categorías Críticas
-                </button>
-                <button class="tab-btn" data-tab="heatmap">
-                    <i class="fas fa-fire"></i>
-                    Gráfica Avanzada
-                </button>
-            </nav>
+        {% if assessments_history or category_averages %}
 
-            <!-- Tab Content: Resumen General -->
-            <div class="tab-content" id="tab-general">
-                <div class="categories-grid">
+        <!-- ── Tabs nav ──────────────────────────────────────────── -->
+        <div class="ia-tabs-nav" role="tablist">
+            <button class="ia-tab-btn tab-btn active" data-tab="evaluations" role="tab">
+                <i class="fas fa-clipboard-list"></i> Historial
+            </button>
+            {% if category_averages %}
+            <button class="ia-tab-btn tab-btn" data-tab="general" role="tab">
+                <i class="fas fa-chart-pie"></i> Resumen
+            </button>
+            <button class="ia-tab-btn tab-btn" data-tab="critical" role="tab">
+                <i class="fas fa-exclamation-triangle"></i> Críticos
+            </button>
+            <button class="ia-tab-btn tab-btn" data-tab="heatmap" role="tab">
+                <i class="fas fa-chart-radar"></i> Radar
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Wrapper de contenidos de tab (mantiene JS existente) -->
+        <div class="tabs-container">
+            <nav class="tabs-nav" style="display:none;"></nav>
+
+            <!-- ═══ TAB: Resumen General ═══════════════════════════ -->
+            <div class="tab-content ia-tab-pane" id="tab-general">
+                {% if category_averages %}
+                <div class="ia-cat-list" id="iaCatList">
                     {% for code, data in category_averages.items %}
-                    <div class="category-card">
-                        <div class="category-header">
-                            <h4 class="category-name">{{ data.name }}</h4>
-                            <div class="category-score">
-                                <span class="score-number">{{ data.average_score|floatformat:1 }}/5.0</span>
-                                <span class="score-percentage">{{ data.percentage }}%</span>
+                    {% if data.percentage >= 80 %}
+                    <div class="ia-cat-row" data-pct="{{ data.percentage|js_number:1 }}">
+                        <span class="ia-cat-name">{{ data.name }}</span>
+                        <div class="ia-cat-bar-wrap">
+                            <div class="ia-cat-bar-bg">
+                                <div class="ia-cat-bar-fill excellent" style="width:0%" data-target="{{ data.percentage|js_number:1 }}"></div>
+                            </div>
+                            <span class="ia-cat-pct">{{ data.percentage|js_number:0 }}%</span>
+                        </div>
+                        <span class="ia-cat-badge excellent"><i class="fas fa-shield-alt"></i> Excelente</span>
+                    </div>
+                    {% elif data.percentage >= 60 %}
+                    <div class="ia-cat-row" data-pct="{{ data.percentage|js_number:1 }}">
+                        <span class="ia-cat-name">{{ data.name }}</span>
+                        <div class="ia-cat-bar-wrap">
+                            <div class="ia-cat-bar-bg">
+                                <div class="ia-cat-bar-fill good" style="width:0%" data-target="{{ data.percentage|js_number:1 }}"></div>
+                            </div>
+                            <span class="ia-cat-pct">{{ data.percentage|js_number:0 }}%</span>
+                        </div>
+                        <span class="ia-cat-badge good"><i class="fas fa-check-circle"></i> Bueno</span>
+                    </div>
+                    {% elif data.percentage >= 40 %}
+                    <div class="ia-cat-row" data-pct="{{ data.percentage|js_number:1 }}">
+                        <span class="ia-cat-name">{{ data.name }}</span>
+                        <div class="ia-cat-bar-wrap">
+                            <div class="ia-cat-bar-bg">
+                                <div class="ia-cat-bar-fill moderate" style="width:0%" data-target="{{ data.percentage|js_number:1 }}"></div>
+                            </div>
+                            <span class="ia-cat-pct">{{ data.percentage|js_number:0 }}%</span>
+                        </div>
+                        <span class="ia-cat-badge moderate"><i class="fas fa-exclamation-triangle"></i> Moderado</span>
+                    </div>
+                    {% else %}
+                    <div class="ia-cat-row" data-pct="{{ data.percentage|js_number:1 }}">
+                        <span class="ia-cat-name">{{ data.name }}</span>
+                        <div class="ia-cat-bar-wrap">
+                            <div class="ia-cat-bar-bg">
+                                <div class="ia-cat-bar-fill critical" style="width:0%" data-target="{{ data.percentage|js_number:1 }}"></div>
+                            </div>
+                            <span class="ia-cat-pct">{{ data.percentage|js_number:0 }}%</span>
+                        </div>
+                        <span class="ia-cat-badge critical"><i class="fas fa-exclamation-circle"></i> Crítico</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="ia-no-data">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Sin datos de categorías</h3>
+                    <p>Completa una evaluación para ver el resumen por categorías.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ═══ TAB: Categorías Críticas ═══════════════════════ -->
+            <div class="tab-content ia-tab-pane" id="tab-critical">
+
+                {% if top_5_critical_categories %}
+
+                <!-- Gráfica de barras horizontales -->
+                <div class="critical-chart-container" style="margin-bottom:1.25rem;">
+                    <canvas id="criticalCategoriesChart" style="height:280px;max-height:280px;"></canvas>
+                </div>
+
+                <!-- Ranking compacto -->
+                <div class="ia-ranking-list">
+                    {% for category in top_5_critical_categories %}
+                    <div class="ia-rank-row {% if category.percentage < 40 %}critical-zone{% elif category.percentage < 60 %}moderate-zone{% else %}warning-zone{% endif %}">
+                        <div class="ia-rank-num">{{ forloop.counter }}</div>
+                        <div class="ia-rank-info">
+                            <div class="ia-rank-name">{{ category.name }}</div>
+                            <div class="ia-rank-bar-wrap">
+                                <div class="ia-rank-bar-bg">
+                                    <div class="ia-rank-bar-fill" style="width:0%" data-target="{{ category.percentage|js_number:1 }}"></div>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Barra de progreso -->
-                        <div class="progress-bar-container">
-                            <div class="progress-bar 
-                                {% if data.percentage >= 80 %}excellent
-                                {% elif data.percentage >= 60 %}good  
-                                {% elif data.percentage >= 40 %}moderate
-                                {% else %}critical{% endif %}" 
-                                style="width: {{ data.percentage|js_number:1 }}%"
-                                data-percentage="{{ data.percentage|js_number:1 }}">
-                            </div>
-                        </div>
-                        
-                        <!-- Nivel de riesgo -->
-                        <div class="risk-level">
-                            {% if data.percentage >= 80 %}
-                                <span class="risk-badge excellent">
-                                    <i class="fas fa-shield-alt"></i> Excelente
-                                </span>
-                            {% elif data.percentage >= 60 %}
-                                <span class="risk-badge good">
-                                    <i class="fas fa-check-circle"></i> Bueno
-                                </span>
-                            {% elif data.percentage >= 40 %}
-                                <span class="risk-badge moderate">
-                                    <i class="fas fa-exclamation-triangle"></i> Moderado
-                                </span>
-                            {% else %}
-                                <span class="risk-badge critical">
-                                    <i class="fas fa-exclamation-circle"></i> Crítico
-                                </span>
-                            {% endif %}
-                        </div>
+                        <div class="ia-rank-score">{{ category.percentage }}%</div>
                     </div>
                     {% endfor %}
                 </div>
-            </div>
 
-            <!-- Tab Content: Categorías Críticas -->
-            <div class="tab-content" id="tab-critical">
-                <div class="critical-analysis">
-                    <div class="critical-header">
-                        <h3 class="critical-title">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            Top 5 Categorías Más Críticas
-                        </h3>
-                        <p class="critical-subtitle">Las 5 categorías con menor puntuación que requieren atención prioritaria</p>
-                    </div>
-                    
-                    {% if top_5_critical_categories %}
-                    <div class="critical-chart-container">
-                        <canvas id="criticalCategoriesChart" style="height: 350px; max-height: 350px;"></canvas>
-                    </div>
+                {% else %}
+                <div class="ia-no-data">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Sin datos suficientes</h3>
+                    <p>Realiza al menos una evaluación para ver las categorías críticas.</p>
+                </div>
+                {% endif %}
 
-                                        <!-- Resumen de categorías críticas -->
-                    <div class="critical-summary">
-                        <div class="summary-grid">
-                            {% for category in top_5_critical_categories %}
-                            <div class="summary-item 
-                                {% if category.percentage < 40 %}critical
-                                {% elif category.percentage < 60 %}moderate
-                                {% else %}warning{% endif %}">
-                                <div class="summary-rank">{{ forloop.counter }}</div>
-                                <div class="summary-info">
-                                    <h5 class="summary-name">{{ category.name }}</h5>
-                                    <div class="summary-score">{{ category.percentage }}%</div>
-                                </div>
-                                <div class="summary-indicator">
-                                    {% if category.percentage < 40 %}
-                                        <i class="fas fa-exclamation-circle"></i>
-                                        <span>Crítico</span>
-                                    {% elif category.percentage < 60 %}
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        <span>Moderado</span>
-                                    {% else %}
-                                        <i class="fas fa-info-circle"></i>
-                                        <span>Atención</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
+                <!-- ── Recomendaciones IA ── -->
+                <div class="ai-recommendations-section">
+                    <div class="ia-recs-header">
+                        <i class="fas fa-brain"></i>
+                        <div>
+                            <h4>Recomendaciones de IA/ML</h4>
+                            <p>Plan de acción personalizado para cada categoría crítica</p>
                         </div>
                     </div>
-                    {% else %}
-                    <div class="no-critical-message">
-                        <i class="fas fa-chart-bar"></i>
-                        <h3>Sin Datos Suficientes</h3>
-                        <p>No hay evaluaciones disponibles para mostrar las categorías críticas.</p>
-                        <p>Realiza al menos una evaluación para ver este análisis.</p>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Recomendaciones de IA para Categorías Críticas -->
-                    <div class="ai-recommendations-section">
-                        <div class="ai-header">
-                            <h4 class="ai-title">
-                                <i class="fas fa-brain"></i>
-                                Recomendaciones de IA/ML
-                            </h4>
-                            <p class="ai-subtitle">Análisis inteligente y plan de acción personalizado para cada categoría crítica</p>
-                        </div>
-                        
-                        {% if ai_critical_recommendations %}
-                        <div class="ai-recommendations-grid">
-                            {% for category_code, recommendation in ai_critical_recommendations.items %}
-                            <div class="ai-recommendation-card" data-ranking="{{ recommendation.ranking }}">
-                                <div class="recommendation-header">
-                                    <div class="category-info">
-                                        <div class="ranking-badge rank-{{ recommendation.ranking }}">
-                                            #{{ recommendation.ranking }}
-                                        </div>
-                                        <div class="category-details">
-                                            <h5 class="category-title">{{ recommendation.category_name }}</h5>
-                                            <div class="category-meta">
-                                                <span class="current-score">{{ recommendation.current_score }}</span>
-                                                <span class="urgency-badge {{ recommendation.priority_level }}">
-                                                    {{ recommendation.urgency }}
-                                                </span>
-                                            </div>
-                                        </div>
+
+                    {% if ai_critical_recommendations %}
+                    <div style="display:flex;flex-direction:column;gap:0.875rem;">
+                        {% for category_code, rec in ai_critical_recommendations.items %}
+                        <div class="ia-rec-card">
+                            <!-- Cabecera de la tarjeta -->
+                            <div class="ia-rec-card-head">
+                                <div class="ia-rec-rank rank-{{ rec.ranking }}">#{{ rec.ranking }}</div>
+                                <div style="flex:1;min-width:0;">
+                                    <div class="ia-rec-card-title">{{ rec.category_name }}</div>
+                                    <div class="ia-rec-meta">
+                                        <span class="ia-rec-score">{{ rec.current_score }}</span>
+                                        <span class="ia-urgency-badge {{ rec.priority_level }}">{{ rec.urgency }}</span>
                                     </div>
                                 </div>
-                                
-                                <!-- Insights de IA -->
-                                <div class="ai-insights">
-                                    <h6 class="insights-title">
-                                        <i class="fas fa-lightbulb"></i>
-                                        Análisis de IA
-                                    </h6>
-                                    <ul class="insights-list">
-                                        {% for insight in recommendation.ai_insights %}
-                                        <li class="insight-item">{{ insight|safe }}</li>
+                            </div>
+                            <!-- Cuerpo -->
+                            <div class="ia-rec-body">
+                                <!-- Insights -->
+                                <div class="ia-insights-block">
+                                    <h6><i class="fas fa-lightbulb"></i> Análisis de IA</h6>
+                                    <ul>
+                                        {% for insight in rec.ai_insights %}
+                                        <li>{{ insight }}</li>
                                         {% endfor %}
                                     </ul>
                                 </div>
-                                
-                                <!-- Plan de Acción -->
-                                <div class="action-plan">
-                                    <div class="plan-section immediate">
-                                        <h6 class="plan-title">
-                                            <i class="fas fa-bolt"></i>
-                                            Acciones Inmediatas ({{ recommendation.timeline }})
-                                        </h6>
-                                        <ul class="action-list">
-                                            {% for action in recommendation.immediate_actions %}
-                                            <li class="action-item">{{ action }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="plan-section short-term">
-                                        <h6 class="plan-title">
-                                            <i class="fas fa-calendar-alt"></i>
-                                            Mediano Plazo (1-3 meses)
-                                        </h6>
-                                        <ul class="action-list">
-                                            {% for action in recommendation.short_term_actions %}
-                                            <li class="action-item">{{ action }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                    
-                                    <div class="plan-section long-term">
-                                        <h6 class="plan-title">
-                                            <i class="fas fa-road"></i>
-                                            Largo Plazo (6+ meses)
-                                        </h6>
-                                        <ul class="action-list">
-                                            {% for action in recommendation.long_term_actions %}
-                                            <li class="action-item">{{ action }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    </div>
-                                </div>
-                                
-                                <!-- Métricas Predictivas -->
-                                <div class="predictive-metrics">
-                                    <div class="metrics-row">
-                                        <div class="metric-item">
-                                            <span class="metric-label">Mejora Esperada (30d)</span>
-                                            <span class="metric-value improvement">{{ recommendation.expected_improvement.30_days }}</span>
-                                        </div>
-                                        <div class="metric-item">
-                                            <span class="metric-label">Inversión Estimada</span>
-                                            <span class="metric-value investment">{{ recommendation.investment_level }}</span>
-                                        </div>
-                                    </div>
-                                    
-                                    {% if recommendation.risk_factors %}
-                                    <div class="risk-factors">
-                                        <h6 class="risk-title">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            Factores de Riesgo
-                                        </h6>
-                                        <div class="risk-tags">
-                                            {% for risk in recommendation.risk_factors %}
-                                            <span class="risk-tag">{{ risk }}</span>
-                                            {% endfor %}
-                                        </div>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        {% else %}
-                        <div class="no-recommendations-message">
-                            <i class="fas fa-robot"></i>
-                            <h4>IA en Proceso</h4>
-                            <p>El sistema de IA está analizando los datos para generar recomendaciones personalizadas.</p>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
 
+                                <!-- Plan de acción 3 columnas -->
+                                <div class="ia-plans">
+                                    <div class="ia-plan immediate">
+                                        <h6><i class="fas fa-bolt"></i> Inmediato ({{ rec.timeline }})</h6>
+                                        <ul>{% for a in rec.immediate_actions %}<li>{{ a }}</li>{% endfor %}</ul>
+                                    </div>
+                                    <div class="ia-plan short">
+                                        <h6><i class="fas fa-calendar-alt"></i> 1-3 meses</h6>
+                                        <ul>{% for a in rec.short_term_actions %}<li>{{ a }}</li>{% endfor %}</ul>
+                                    </div>
+                                    <div class="ia-plan long">
+                                        <h6><i class="fas fa-road"></i> 6+ meses</h6>
+                                        <ul>{% for a in rec.long_term_actions %}<li>{{ a }}</li>{% endfor %}</ul>
+                                    </div>
+                                </div>
+
+                                <!-- Métricas + factores de riesgo -->
+                                <div class="ia-metrics-row">
+                                    <div class="ia-metric">
+                                        <span class="ia-metric-lbl">Mejora 30d</span>
+                                        <span class="ia-metric-val improvement">{{ rec.expected_improvement.30_days }}</span>
+                                    </div>
+                                    <div class="ia-metric">
+                                        <span class="ia-metric-lbl">Inversión</span>
+                                        <span class="ia-metric-val investment">{{ rec.investment_level }}</span>
+                                    </div>
+                                </div>
+
+                                {% if rec.risk_factors %}
+                                <div class="ia-risk-tags" style="margin-top:0.625rem;">
+                                    {% for risk in rec.risk_factors %}
+                                    <span class="ia-risk-tag">{{ risk }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="no-recommendations-message">
+                        <i class="fas fa-robot"></i>
+                        <h4>IA en Proceso</h4>
+                        <p>El sistema está analizando los datos para generar recomendaciones.</p>
+                    </div>
+                    {% endif %}
                 </div>
+
             </div>
 
-            <!-- Tab Content: Historial de Evaluaciones -->
-            <div class="tab-content active" id="tab-evaluations">
-                <div class="section-header">
-                    <div class="section-title">
-                        <h3>
-                            <i class="fas fa-clipboard-list"></i>
-                            Historial de Evaluaciones
-                        </h3>
+            <!-- ═══ TAB: Historial de Evaluaciones ════════════════ -->
+            <div class="tab-content ia-tab-pane active" id="tab-evaluations">
+                <div class="section-header" style="margin-bottom:0.75rem;">
+                    <div class="section-title" style="font-size:0.95rem;justify-content:flex-start;gap:0.5rem;">
+                        <i class="fas fa-clipboard-list" style="color:#667eea;"></i>
+                        Historial de Evaluaciones
                     </div>
                 </div>
 
@@ -3323,34 +3216,12 @@
                         <table class="evaluations-table">
                             <thead>
                                 <tr>
-                                    <th class="sortable" data-sort="date">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        Fecha
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </th>
-                                    <th class="sortable" data-sort="evaluator">
-                                        <i class="fas fa-user"></i>
-                                        Evaluador
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </th>
-                                    <th class="sortable" data-sort="score">
-                                        <i class="fas fa-star"></i>
-                                        Puntuación
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </th>
-                                    <th class="sortable" data-sort="categories">
-                                        <i class="fas fa-list"></i>
-                                        Categorías
-                                        <i class="fas fa-sort sort-icon"></i>
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-info-circle"></i>
-                                        Estado
-                                    </th>
-                                    <th>
-                                        <i class="fas fa-cogs"></i>
-                                        Acciones
-                                    </th>
+                                    <th class="sortable" data-sort="date"><i class="fas fa-calendar-alt"></i> Fecha <i class="fas fa-sort sort-icon"></i></th>
+                                    <th class="sortable" data-sort="evaluator"><i class="fas fa-user"></i> Evaluador <i class="fas fa-sort sort-icon"></i></th>
+                                    <th class="sortable" data-sort="score"><i class="fas fa-star"></i> Puntuación <i class="fas fa-sort sort-icon"></i></th>
+                                    <th class="sortable" data-sort="categories"><i class="fas fa-list"></i> Categorías <i class="fas fa-sort sort-icon"></i></th>
+                                    <th><i class="fas fa-info-circle"></i> Estado</th>
+                                    <th><i class="fas fa-cogs"></i> Acciones</th>
                                 </tr>
                             </thead>
                             <tbody id="evaluationsTableBody">
@@ -3364,9 +3235,7 @@
                                     </td>
                                     <td class="evaluator-cell">
                                         <div class="evaluator-info">
-                                            <div class="evaluator-avatar">
-                                                <i class="fas fa-user-circle"></i>
-                                            </div>
+                                            <div class="evaluator-avatar"><i class="fas fa-user-circle"></i></div>
                                             <div class="evaluator-details">
                                                 <span class="evaluator-name">{{ evaluation.created_by.get_full_name|default:evaluation.created_by.username }}</span>
                                                 <span class="evaluator-role">{{ evaluation.created_by.profile.role|default:"Evaluador" }}</span>
@@ -3384,9 +3253,7 @@
                                                 <span class="score-percentage">{{ evaluation.overall_score|mul:20|floatformat:0 }}%</span>
                                             </div>
                                             {% else %}
-                                            <div class="score-circle pending">
-                                                --
-                                            </div>
+                                            <div class="score-circle pending">--</div>
                                             <div class="score-details">
                                                 <span class="score-label">Sin puntaje</span>
                                                 <span class="score-percentage">--</span>
@@ -3402,36 +3269,20 @@
                                     </td>
                                     <td class="status-cell">
                                         <span class="status-badge {% if evaluation.status == 'completed' %}completed{% elif evaluation.status == 'in_progress' %}in-progress{% else %}pending{% endif %}">
-                                            {% if evaluation.status == 'completed' %}
-                                                <i class="fas fa-check-circle"></i> Completada
-                                            {% elif evaluation.status == 'in_progress' %}
-                                                <i class="fas fa-clock"></i> En Progreso
-                                            {% elif evaluation.status == 'reviewed' %}
-                                                <i class="fas fa-circle-check"></i> Revisada
-                                            {% else %}
-                                                <i class="fas fa-hourglass-start"></i> Borrador
-                                            {% endif %}
+                                            {% if evaluation.status == 'completed' %}<i class="fas fa-check-circle"></i> Completada
+                                            {% elif evaluation.status == 'in_progress' %}<i class="fas fa-clock"></i> En Progreso
+                                            {% elif evaluation.status == 'reviewed' %}<i class="fas fa-circle-check"></i> Revisada
+                                            {% else %}<i class="fas fa-hourglass-start"></i> Borrador{% endif %}
                                         </span>
                                     </td>
                                     <td class="actions-cell">
                                         <div class="action-buttons">
-                                            <button class="btn-action view" onclick="viewEvaluation('{{ evaluation.id }}')" 
-                                                    title="Ver detalles">
-                                                <i class="fas fa-eye"></i>
-                                            </button>
+                                            <button class="btn-action view" onclick="viewEvaluation('{{ evaluation.id }}')" title="Ver detalles"><i class="fas fa-eye"></i></button>
                                             {% if evaluation.status == 'completed' %}
-                                            <a href="{% url 'risk_hoteles:assessment_pdf_preview' evaluation.id %}" 
-                                               class="btn-action report" 
-                                               title="Vista previa del reporte PDF"
-                                               target="_blank">
-                                                <i class="fas fa-file-pdf"></i>
-                                            </a>
+                                            <a href="{% url 'risk_hoteles:assessment_pdf_preview' evaluation.id %}" class="btn-action report" title="Vista previa PDF" target="_blank"><i class="fas fa-file-pdf"></i></a>
                                             {% endif %}
                                             {% if user.is_staff %}
-                                            <button class="btn-action edit" onclick="editEvaluation('{{ evaluation.id }}')" 
-                                                    title="Editar">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
+                                            <button class="btn-action edit" onclick="editEvaluation('{{ evaluation.id }}')" title="Editar"><i class="fas fa-edit"></i></button>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -3447,15 +3298,9 @@
                             Mostrando <span id="showingCount">{{ assessments_history|length }}</span> de <span id="totalCount">{{ assessments_history|length }}</span> evaluaciones
                         </div>
                         <div class="pagination-controls">
-                            <button class="pagination-btn" id="prevPage" disabled>
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <span class="pagination-numbers" id="paginationNumbers">
-                                <span class="page-number active">1</span>
-                            </span>
-                            <button class="pagination-btn" id="nextPage" disabled>
-                                <i class="fas fa-chevron-right"></i>
-                            </button>
+                            <button class="pagination-btn" id="prevPage" disabled><i class="fas fa-chevron-left"></i></button>
+                            <span class="pagination-numbers" id="paginationNumbers"><span class="page-number active">1</span></span>
+                            <button class="pagination-btn" id="nextPage" disabled><i class="fas fa-chevron-right"></i></button>
                         </div>
                     </div>
                 </div>
@@ -3465,68 +3310,52 @@
                     <h3>Sin Evaluaciones</h3>
                     <p>No hay evaluaciones registradas para este hotel aún.</p>
                     <a href="{% url 'risk_hoteles:create_analysis' hotel.id %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        Crear Primera Evaluación
+                        <i class="fas fa-plus"></i> Crear Primera Evaluación
                     </a>
                 </div>
                 {% endif %}
             </div>
 
-            <!-- Tab Content: Gráfica Avanzada -->
-            <div class="tab-content" id="tab-heatmap">
+            <!-- ═══ TAB: Gráfica Avanzada (Radar) ═════════════════ -->
+            <div class="tab-content ia-tab-pane" id="tab-heatmap">
                 <div class="radar-analysis">
-                    <div class="radar-header">
-                        <h3 class="radar-title">
+                    <div class="radar-header" style="margin-bottom:1rem;">
+                        <h3 class="radar-title" style="font-size:1rem;">
                             <i class="fas fa-chart-line"></i>
-                            Gráfica Radar - Análisis Multidimensional de Seguridad
+                            Gráfica Radar — Análisis Multidimensional
                         </h3>
-                        <p class="radar-subtitle">Visualización 360° del rendimiento por categorías de seguridad</p>
+                        <p class="radar-subtitle" style="font-size:0.8rem;">Visualización 360° del rendimiento por categorías de seguridad</p>
                     </div>
-                    
                     <div class="radar-container">
-                        <div class="radar-chart-wrapper">
-                            <canvas id="advancedRadarChart" style="height: 550px; width: 100%;"></canvas>
+                        <div class="radar-chart-wrapper" style="min-height:500px;padding:1.5rem;">
+                            <canvas id="advancedRadarChart" style="height:500px;width:100%;"></canvas>
                         </div>
                     </div>
-                    
-                    <div class="radar-legend">
-                        <h4><i class="fas fa-palette"></i> Zonas de Calor - Mapa de Rendimiento</h4>
+                    <div class="radar-legend" style="margin-top:1rem;">
+                        <h4 style="font-size:0.85rem;margin:0 0 0.75rem 0;"><i class="fas fa-palette"></i> Zonas de Calor</h4>
                         <div class="legend-scale">
-                            <div class="scale-item">
-                                <div class="scale-indicator critical"></div>
-                                <span>0-40% - Zona Crítica</span>
-                                <small>Requiere acción inmediata</small>
-                            </div>
-                            <div class="scale-item">
-                                <div class="scale-indicator moderate"></div>
-                                <span>40-60% - Zona Moderada</span>
-                                <small>Necesita mejoras graduales</small>
-                            </div>
-                            <div class="scale-item">
-                                <div class="scale-indicator good"></div>
-                                <span>60-80% - Zona Buena</span>
-                                <small>Rendimiento satisfactorio</small>
-                            </div>
-                            <div class="scale-item">
-                                <div class="scale-indicator excellent"></div>
-                                <span>80-100% - Zona Excelente</span>
-                                <small>Rendimiento óptimo</small>
-                            </div>
+                            <div class="scale-item"><div class="scale-indicator critical"></div><span>0-40% — Zona Crítica</span><small>Acción inmediata</small></div>
+                            <div class="scale-item"><div class="scale-indicator moderate"></div><span>40-60% — Zona Moderada</span><small>Mejoras graduales</small></div>
+                            <div class="scale-item"><div class="scale-indicator good"></div><span>60-80% — Zona Buena</span><small>Rendimiento aceptable</small></div>
+                            <div class="scale-item"><div class="scale-indicator excellent"></div><span>80-100% — Zona Excelente</span><small>Rendimiento óptimo</small></div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </div><!-- /.tabs-container -->
+
         {% else %}
-        <div class="no-data-message">
+        <div class="ia-no-data" style="padding:3rem;">
             <i class="fas fa-info-circle"></i>
             <h3>Sin Datos de Análisis</h3>
             <p>No hay evaluaciones disponibles para mostrar el análisis por categorías.</p>
         </div>
         {% endif %}
+
     </section>
 
-    <!-- Aquí se pueden agregar más secciones del detalle del hotel -->
+    <!-- MODAL DE EVALUACIÓN DETALLADA MEJORADO -->
     
     <!-- MODAL DE EVALUACIÓN DETALLADA MEJORADO -->
     <div id="detailModal" 
@@ -3619,7 +3448,7 @@
 {% block extra_js %}
 <script>
 // Debug condicional
-const DEBUG_MODE = {% if settings.DEBUG %}true{% else %}false{% endif %} || new URLSearchParams(window.location.search).has('debug');
+const DEBUG_MODE = {% if debug %}true{% else %}false{% endif %} || new URLSearchParams(window.location.search).has('debug');
 const debugLog = (message, data = null) => {
     if (DEBUG_MODE) { data !== null ? console.log(message, data) : console.log(message); }
 };
@@ -3764,424 +3593,250 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Line chart histórico con SVG
+// Line chart histórico con SVG — Catmull-Rom spline + zonas de riesgo + badges
 function createEvolutionLineChart() {
-    debugLog('🎯 Iniciando createEvolutionLineChart...');
     const svg = document.getElementById('evolutionLineChart');
-    if (!svg) {
-        debugLog('❌ No se encontró el elemento SVG evolutionLineChart');
-        return;
+    if (!svg) return;
+    
+    // ── Datos desde Django ────────────────────────────────────────────────
+    const labels = [
+        {% for assessment in assessments_history %}
+            "{{ assessment.assessment_date|date:'d/m/Y' }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const rawScores = [
+        {% for assessment in assessments_history %}
+            {% if assessment.overall_score %}{{ assessment.overall_score|floatformat:2 }}{% else %}0{% endif %}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    const chartData = { labels, scores: rawScores }; // compat alias
+
+    // -- Normalizacion y preparacion --------------------------------------
+    const n = Math.min(labels.length, rawScores.length);
+    if (n === 0) return;
+    const scores = rawScores.slice(0, n).map(s => Math.max(0, Math.min(5, parseFloat(s) || 0)));
+
+    // -- Layout -----------------------------------------------------------
+    const W = 1000, H = 220;
+    const pad = { top: 20, right: 44, bottom: 38, left: 58 };
+    const cW = W - pad.left - pad.right;  // 898
+    const cH = H - pad.top - pad.bottom;  // 162
+    const toX = i => pad.left + (n === 1 ? cW / 2 : (i / (n - 1)) * cW);
+    const toY = s => pad.top + cH * (1 - s / 5);
+    const pts = scores.map((s, i) => ({ x: toX(i), y: toY(s), s, lbl: labels[i] }));
+
+    // -- Helpers ----------------------------------------------------------
+    const NS = 'http://www.w3.org/2000/svg';
+    function svgEl(tag, attrs) {
+        const e = document.createElementNS(NS, tag);
+        Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+        return e;
     }
-    
-    debugLog('✅ SVG encontrado:', svg);
-    
-    // Datos de evaluaciones históricas (desde Django) - YA FILTRADO POR HOTEL EN LA VISTA
-    const chartData = {
-        labels: [
-            {% for assessment in assessments_history %}
-                "{{ assessment.assessment_date|date:'d/m/Y' }}"{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        scores: [
-            {% for assessment in assessments_history %}
-                {% if assessment.overall_score %}{{ assessment.overall_score|floatformat:0 }}{% else %}0{% endif %}{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        categories: [
-            {% for assessment in assessments_history %}
-                {{ assessment.selected_categories.count }}{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        assessmentIds: [
-            {% for assessment in assessments_history %}
-                "{{ assessment.id }}"{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ],
-        hotelIds: [
-            {% for assessment in assessments_history %}
-                "{{ assessment.hotel.id }}"{% if not forloop.last %},{% endif %}
-            {% endfor %}
-        ]
-    };
-    
-    // DEBUG: Verificar longitudes de arrays
-    debugLog('🔍 Longitudes de arrays:');
-    debugLog('  labels:', chartData.labels.length + ' (' + chartData.labels.length + ')', chartData.labels);
-    debugLog('  scores:', chartData.scores.length + ' (' + chartData.scores.length + ')', chartData.scores);
-    debugLog('  categories:', chartData.categories.length + ' (' + chartData.categories.length + ')', chartData.categories);
-    debugLog('  assessmentIds:', chartData.assessmentIds.length + ' (' + chartData.assessmentIds.length + ')', chartData.assessmentIds);
-    debugLog('  hotelIds:', chartData.hotelIds.length + ' (' + chartData.hotelIds.length + ')', chartData.hotelIds);
-    
-    // Validar que todos los scores estén en rango 0-5
-    debugLog('🔍 Validación de scores:');
-    const invalidScores = chartData.scores.filter(score => score < 0 || score > 5);
-    if (invalidScores.length > 0) {
-        debugLog('⚠️ Scores fuera de rango 0-5:', invalidScores);
-        // Corregir scores fuera de rango
-        chartData.scores = chartData.scores.map(score => Math.max(0, Math.min(5, score)));
-        debugLog('✅ Scores corregidos:', chartData.scores);
+    function scoreColor(s) {
+        if (s >= 4) return { stroke: '#059669', fill: '#d1fae5' };
+        if (s >= 3) return { stroke: '#3b82f6', fill: '#dbeafe' };
+        if (s >= 2) return { stroke: '#f59e0b', fill: '#fef3c7' };
+        if (s >= 1) return { stroke: '#ef4444', fill: '#fee2e2' };
+        return             { stroke: '#dc2626', fill: '#fecaca' };
     }
-    
-    debugLog('📊 Datos del gráfico (FILTRADOS POR HOTEL {{ hotel.id }}):', chartData);
-    debugLog('🏨 Hotel actual:', '{{ hotel.name }}', '{{ hotel.id }}');
-    debugLog('📈 Total evaluaciones del hotel:', chartData.scores.length);
-    debugLog('🔍 IDs de evaluaciones:', chartData.assessmentIds);
-    debugLog('🏨 IDs de hoteles en evaluaciones:', chartData.hotelIds);
-    
-    // Verificar si hay evaluaciones de otros hoteles
-    const otherHotels = chartData.hotelIds.filter(id => id !== '{{ hotel.id }}');
-    if (otherHotels.length > 0) {
-        debugLog('❌ ERROR: Se encontraron evaluaciones de otros hoteles:', otherHotels);
-    } else {
-        debugLog('✅ Todas las evaluaciones pertenecen al hotel correcto');
+    function scoreLabel(s) {
+        if (s >= 4) return 'Excelente';
+        if (s >= 3) return 'Bueno';
+        if (s >= 2) return 'Moderado';
+        if (s >= 1) return 'Bajo';
+        return 'Critico';
     }
-    
-    if (chartData.scores.length === 0) {
-        debugLog('⚠️ No hay datos para mostrar en el gráfico');
-        return;
+    function scoreToHex(s) {
+        if (s >= 4) return '#10b981';
+        if (s >= 3) return '#3b82f6';
+        if (s >= 2) return '#f59e0b';
+        if (s >= 1) return '#ef4444';
+        return '#dc2626';
     }
-    
-    // Verificar consistencia de arrays
-    const minLength = Math.min(
-        chartData.labels.length,
-        chartData.scores.length,
-        chartData.categories.length,
-        chartData.assessmentIds.length
-    );
-    
-    if (chartData.labels.length !== chartData.scores.length || 
-        chartData.scores.length !== chartData.categories.length) {
-        debugLog('⚠️ INCONSISTENCIA: Arrays tienen longitudes diferentes');
-        debugLog('  Usando longitud mínima:', minLength);
-        
-        // Truncar arrays al tamaño mínimo
-        chartData.labels = chartData.labels.slice(0, minLength);
-        chartData.scores = chartData.scores.slice(0, minLength);
-        chartData.categories = chartData.categories.slice(0, minLength);
-        chartData.assessmentIds = chartData.assessmentIds.slice(0, minLength);
-        chartData.hotelIds = chartData.hotelIds.slice(0, minLength);
-        
-        debugLog('✅ Arrays corregidos a longitud:', minLength);
-        debugLog('  labels corregido:', chartData.labels);
-        debugLog('  scores corregido:', chartData.scores);
-    }
-    
-    // Configuración del área del gráfico - ANCHO COMPLETO AMPLIADO
-    const width = 1000;
-    const height = 180;
-    const padding = { top: 30, right: 50, bottom: 40, left: 100 };
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
-    
-    debugLog('📏 Dimensiones:', { width, height, padding, chartWidth, chartHeight });
-    
-    // Escalar datos
-    const maxScore = 5;
-    const minScore = 0;
-    const scoreRange = maxScore - minScore;
-    
-    debugLog('📊 Rango de scores:', { minScore, maxScore, scoreRange });
-    
-    // Calcular posiciones de los puntos - usando arrays corregidos
-    const points = chartData.scores.map((score, index) => {
-        if (index >= chartData.labels.length) {
-            debugLog(`⚠️ Índice ${index} fuera de rango para labels`);
-            return null;
+    // Catmull-Rom a Bezier cubico para curva suave
+    function splinePath(pts) {
+        if (pts.length === 1) return `M ${pts[0].x} ${pts[0].y}`;
+        if (pts.length === 2) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+        let d = `M ${pts[0].x} ${pts[0].y}`;
+        for (let i = 0; i < pts.length - 1; i++) {
+            const p0 = pts[Math.max(i - 1, 0)];
+            const p1 = pts[i];
+            const p2 = pts[i + 1];
+            const p3 = pts[Math.min(i + 2, pts.length - 1)];
+            const cp1x = +(p1.x + (p2.x - p0.x) / 6).toFixed(2);
+            const cp1y = +(p1.y + (p2.y - p0.y) / 6).toFixed(2);
+            const cp2x = +(p2.x - (p3.x - p1.x) / 6).toFixed(2);
+            const cp2y = +(p2.y - (p3.y - p1.y) / 6).toFixed(2);
+            d += ` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${p2.x},${p2.y}`;
         }
-        
-        const x = padding.left + (index / Math.max(chartData.scores.length - 1, 1)) * chartWidth;
-        // Corregir cálculo Y: Y aumenta hacia abajo en SVG
-        const normalizedScore = Math.max(0, Math.min(5, score)); // Asegurar que esté en rango 0-5
-        const y = padding.top + chartHeight * (1 - (normalizedScore / maxScore)); // Invertir para SVG
-        
-        return { 
-            x: Math.round(x), 
-            y: Math.round(y), 
-            score: normalizedScore, 
-            label: chartData.labels[index], 
-            categories: chartData.categories[index] 
-        };
-    }).filter(point => point !== null); // Filtrar puntos nulos
-    
-    debugLog('📍 Puntos calculados (CORREGIDOS):', points);
-    
-    // Crear la línea suavizada (curva Bézier simplificada)
-    let pathData = '';
-    if (points.length > 0) {
-        pathData = `M ${points[0].x} ${points[0].y}`;
-        
-        if (points.length === 1) {
-            // Solo un punto, no necesitamos curva
-        } else if (points.length === 2) {
-            // Línea simple entre dos puntos
-            pathData += ` L ${points[1].x} ${points[1].y}`;
-        } else {
-            // Curvas suaves para múltiples puntos
-            for (let i = 1; i < points.length; i++) {
-                const curr = points[i];
-                const prev = points[i - 1];
-                
-                if (i === 1) {
-                    // Primera curva más simple
-                    const midX = (prev.x + curr.x) / 2;
-                    pathData += ` Q ${midX} ${prev.y}, ${curr.x} ${curr.y}`;
-                } else {
-                    // Curvas suaves
-                    const tension = 0.2;
-                    const cp1x = prev.x + (curr.x - prev.x) * tension;
-                    const cp1y = prev.y;
-                    const cp2x = curr.x - (curr.x - prev.x) * tension;
-                    const cp2y = curr.y;
-                    pathData += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${curr.x} ${curr.y}`;
-                }
-            }
-        }
+        return d;
     }
-    
-    debugLog('📈 Path data:', pathData);
-    
-    // Crear path del área (para el relleno)
-    let areaPath = '';
-    if (points.length > 0) {
-        areaPath = pathData; // Usar el mismo path de la línea
-        const lastPoint = points[points.length - 1];
-        const firstPoint = points[0];
-        const bottomY = padding.top + chartHeight; // Línea base del gráfico
-        
-        // Cerrar el área hacia abajo
-        areaPath += ` L ${lastPoint.x} ${bottomY}`;
-        areaPath += ` L ${firstPoint.x} ${bottomY}`;
-        areaPath += ' Z';
+
+    // -- Gradiente dinamico de linea --------------------------------------
+    const avg = scores.reduce((a, b) => a + b, 0) / n;
+    const lineStrokeEl = svg.querySelector('#lineStroke');
+    if (lineStrokeEl) {
+        const stops = lineStrokeEl.querySelectorAll('stop');
+        if (stops[0]) stops[0].style.stopColor = scoreToHex(scores[0]);
+        if (stops[1]) stops[1].style.stopColor = scoreToHex(avg);
+        if (stops[2]) stops[2].style.stopColor = scoreToHex(scores[n - 1]);
     }
-    
-    debugLog('🎨 Area path:', areaPath);
-    
-    // Actualizar el SVG
-    const linePathElement = svg.querySelector('#linePath');
-    const areaPathElement = svg.querySelector('#areaPath');
-    const dataPointsGroup = svg.querySelector('#dataPoints');
-    const xLabelsGroup = svg.querySelector('#xLabels');
-    
-    debugLog('🔍 Elementos encontrados:', {
-        linePathElement,
-        areaPathElement,
-        dataPointsGroup,
-        xLabelsGroup
-    });
-    
-    if (linePathElement) {
-        linePathElement.setAttribute('d', pathData);
-        debugLog('✅ Línea actualizada:', pathData);
-    
-    // Calcular degradado dinámico de la línea basado en puntuaciones
-    if (linePathElement && chartData.scores.length > 0) {
-        const avgScore = chartData.scores.reduce((sum, score) => sum + parseFloat(score), 0) / chartData.scores.length;
-        const lineGradient = svg.querySelector('#lineStroke');
-        
-        if (lineGradient) {
-            const lineStart = lineGradient.querySelector('#lineStart');
-            const lineMiddle = lineGradient.querySelector('#lineMiddle');
-            const lineEnd = lineGradient.querySelector('#lineEnd');
-            
-            // Ajustar colores basado en la progresión de scores
-            const firstScore = parseFloat(chartData.scores[0]);
-            const lastScore = parseFloat(chartData.scores[chartData.scores.length - 1]);
-            
-            // Color inicial basado en primera puntuación
-            if (firstScore <= 2) {
-                lineStart.setAttribute('style', 'stop-color:#ef4444'); // Rojo
-            } else if (firstScore <= 3.5) {
-                lineStart.setAttribute('style', 'stop-color:#f59e0b'); // Amarillo
-            } else {
-                lineStart.setAttribute('style', 'stop-color:#10b981'); // Verde
-            }
-            
-            // Color final basado en última puntuación
-            if (lastScore <= 2) {
-                lineEnd.setAttribute('style', 'stop-color:#ef4444'); // Rojo
-            } else if (lastScore <= 3.5) {
-                lineEnd.setAttribute('style', 'stop-color:#f59e0b'); // Amarillo
-            } else {
-                lineEnd.setAttribute('style', 'stop-color:#10b981'); // Verde
-            }
-            
-            // Color medio basado en promedio
-            if (avgScore <= 2) {
-                lineMiddle.setAttribute('style', 'stop-color:#f87171'); // Rojo claro
-            } else if (avgScore <= 3.5) {
-                lineMiddle.setAttribute('style', 'stop-color:#fbbf24'); // Amarillo
-            } else {
-                lineMiddle.setAttribute('style', 'stop-color:#34d399'); // Verde claro
-            }
-            
-            debugLog(`🎨 Degradado aplicado: Primera=${firstScore} Promedio=${avgScore.toFixed(1)} Última=${lastScore}`);
-        }
-    }
-    }
-    if (areaPathElement) {
-        areaPathElement.setAttribute('d', areaPath);
-        debugLog('✅ Área actualizada');
-    }
-    
-    // Limpiar puntos y etiquetas existentes
-    if (dataPointsGroup) dataPointsGroup.innerHTML = '';
-    if (xLabelsGroup) xLabelsGroup.innerHTML = '';
-    
-    // Agregar puntos de datos
-    debugLog('🔵 Agregando puntos al SVG...');
-    points.forEach((point, index) => {
-        debugLog(`Punto ${index + 1}:`, {
-            x: point.x,
-            y: point.y,
-            score: point.score,
-            label: point.label,
-            categories: point.categories
+
+    // -- Bandas de zona de riesgo ----------------------------------------
+    const riskZonesEl = svg.querySelector('#riskZones');
+    if (riskZonesEl) {
+        riskZonesEl.innerHTML = '';
+        [[5,4,'rgba(16,185,129,0.07)'],[4,3,'rgba(59,130,246,0.05)'],
+         [3,2,'rgba(245,158,11,0.07)'],[2,1,'rgba(239,68,68,0.06)'],
+         [1,0,'rgba(220,38,38,0.09)']].forEach(([hi, lo, fill]) => {
+            riskZonesEl.appendChild(svgEl('rect', {
+                x: pad.left, y: toY(hi),
+                width: cW, height: toY(lo) - toY(hi), fill
+            }));
         });
-        
-        // Punto principal con color basado en puntuación
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', point.x);
-        circle.setAttribute('cy', point.y);
-        circle.setAttribute('r', '5');
-        
-        // Determinar color y degradado basado en score
-        let fillColor, strokeColor, gradientId;
-        if (point.score <= 2) {
-            fillColor = 'url(#pointGradientLow)';
-            strokeColor = '#dc2626';
-            gradientId = 'pointGradientLow';
-        } else if (point.score <= 3.5) {
-            fillColor = 'url(#pointGradientMedium)';
-            strokeColor = '#d97706';
-            gradientId = 'pointGradientMedium';
-        } else {
-            fillColor = 'url(#pointGradientHigh)';
-            strokeColor = '#059669';
-            gradientId = 'pointGradientHigh';
-        }
-        
-        circle.setAttribute('fill', fillColor);
-        circle.setAttribute('stroke', strokeColor);
-        circle.setAttribute('stroke-width', '2');
-        circle.setAttribute('filter', 'url(#dropShadow)');
-        circle.style.cursor = 'pointer';
-        
-        // Agregar identificador para debugging
-        circle.setAttribute('data-assessment-index', index);
-        circle.setAttribute('data-score', point.score);
-        circle.setAttribute('data-label', point.label);
-        circle.setAttribute('data-gradient', gradientId);
-        
-        // Tooltip en hover con colores semáforo
-        circle.addEventListener('mouseenter', (e) => {
-            // Aumentar tamaño del punto con efecto pulsante
-            circle.setAttribute('r', '7');
-            circle.style.transition = 'r 0.2s ease';
-            
-            // Determinar color del tooltip basado en score
-            let bgColor, textColor, statusText, statusIcon;
-            if (point.score <= 2) {
-                bgColor = 'rgba(239, 68, 68, 0.95)';
-                textColor = 'white';
-                statusText = 'Riesgo Alto';
-                statusIcon = '🔴';
-            } else if (point.score <= 3.5) {
-                bgColor = 'rgba(245, 158, 11, 0.95)';
-                textColor = 'white';
-                statusText = 'Riesgo Medio';
-                statusIcon = '🟡';
-            } else {
-                bgColor = 'rgba(16, 185, 129, 0.95)';
-                textColor = 'white';
-                statusText = 'Bajo Riesgo';
-                statusIcon = '🟢';
-            }
-            
-            // Crear tooltip
-            const tooltip = document.createElement('div');
-            tooltip.className = 'svg-tooltip';
-            tooltip.innerHTML = `
-                <div style="font-weight: bold; margin-bottom: 4px;">
-                    ${statusIcon} ${statusText}
-                </div>
-                <div><strong>Evaluación del ${point.label}</strong></div>
-                <div>Puntuación: ${point.score}/5.0</div>
-                <div>Categorías: ${point.categories}</div>
-                <div>Porcentaje: ${Math.round(point.score * 20)}%</div>
-            `;
-            tooltip.style.cssText = `
-                position: absolute;
-                background: ${bgColor};
-                color: ${textColor};
-                padding: 10px 14px;
-                border-radius: 8px;
-                font-size: 12px;
-                pointer-events: none;
-                z-index: 1000;
-                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                backdrop-filter: blur(10px);
-                line-height: 1.4;
-            `;
-            
-            document.body.appendChild(tooltip);
-            
-            const moveTooltip = (event) => {
-                tooltip.style.left = (event.pageX + 15) + 'px';
-                tooltip.style.top = (event.pageY - tooltip.offsetHeight - 15) + 'px';
-            };
-            
-            e.target.addEventListener('mousemove', moveTooltip);
-            e.target.addEventListener('mouseleave', () => {
-                tooltip.remove();
-                circle.setAttribute('r', '5');
-                circle.style.transition = 'r 0.2s ease';
+    }
+
+    // -- Grid lines + benchmark ------------------------------------------
+    const gridEl = svg.querySelector('#gridLines');
+    if (gridEl) {
+        gridEl.innerHTML = '';
+        [0, 1, 2, 3, 4, 5].forEach(v => {
+            const isBorder = v === 0 || v === 5;
+            gridEl.appendChild(svgEl('line', {
+                x1: pad.left, y1: toY(v), x2: pad.left + cW, y2: toY(v),
+                stroke: isBorder ? '#cbd5e1' : '#e2e8f0',
+                'stroke-width': isBorder ? '1' : '0.7',
+                'stroke-dasharray': !isBorder ? '5 4' : 'none'
+            }));
+        });
+        const bY = toY(3);
+        gridEl.appendChild(svgEl('line', {
+            x1: pad.left, y1: bY, x2: pad.left + cW, y2: bY,
+            stroke: '#6366f1', 'stroke-width': '1.2',
+            'stroke-dasharray': '7 4', opacity: '0.45'
+        }));
+        const bLbl = document.createElementNS(NS, 'text');
+        bLbl.setAttribute('x', pad.left + cW + 3);
+        bLbl.setAttribute('y', bY + 4);
+        bLbl.setAttribute('fill', '#6366f1');
+        bLbl.setAttribute('font-size', '9');
+        bLbl.setAttribute('font-family', 'system-ui, sans-serif');
+        bLbl.setAttribute('font-weight', '700');
+        bLbl.setAttribute('opacity', '0.65');
+        bLbl.textContent = '3/5';
+        gridEl.appendChild(bLbl);
+    }
+
+    // -- Etiquetas eje Y coloreadas por zona ------------------------------
+    const yLabelsEl = svg.querySelector('#yLabels');
+    if (yLabelsEl) {
+        yLabelsEl.innerHTML = '';
+        [0, 1, 2, 3, 4, 5].forEach(v => {
+            const t = document.createElementNS(NS, 'text');
+            t.setAttribute('x', pad.left - 8);
+            t.setAttribute('y', toY(v) + 4);
+            t.setAttribute('text-anchor', 'end');
+            t.setAttribute('fill', scoreToHex(v));
+            t.setAttribute('font-size', '11');
+            t.setAttribute('font-family', 'system-ui, sans-serif');
+            t.setAttribute('font-weight', '600');
+            t.textContent = v;
+            yLabelsEl.appendChild(t);
+        });
+    }
+
+    // -- Area + linea con animacion draw-in -------------------------------
+    const linePth = splinePath(pts);
+    const areaPth = `${linePth} L ${pts[n-1].x},${toY(0)} L ${pts[0].x},${toY(0)} Z`;
+
+    const areaEl = svg.querySelector('#areaPath');
+    if (areaEl) {
+        areaEl.setAttribute('d', areaPth);
+        areaEl.style.opacity = '0';
+        areaEl.style.transition = 'opacity 0.8s ease 0.5s';
+        requestAnimationFrame(() => setTimeout(() => { areaEl.style.opacity = '1'; }, 60));
+    }
+
+    const lineEl = svg.querySelector('#linePath');
+    if (lineEl) {
+        lineEl.setAttribute('d', linePth);
+        try {
+            const len = lineEl.getTotalLength();
+            lineEl.style.strokeDasharray = len;
+            lineEl.style.strokeDashoffset = len;
+            lineEl.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(0.4,0,0.2,1)';
+            requestAnimationFrame(() => setTimeout(() => { lineEl.style.strokeDashoffset = '0'; }, 60));
+        } catch (_) { /* elemento aun no renderizado */ }
+    }
+
+    // -- Puntos con halo + anillo blanco + badge de score -----------------
+    const dpEl = svg.querySelector('#dataPoints');
+    if (dpEl) {
+        dpEl.innerHTML = '';
+        pts.forEach(p => {
+            const c = scoreColor(p.s);
+            const g = document.createElementNS(NS, 'g');
+            g.style.cursor = 'pointer';
+            g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '10', fill: c.fill, opacity: '0.35' }));
+            g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '5.5', fill: 'white', stroke: c.stroke, 'stroke-width': '2.5' }));
+            g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '2.5', fill: c.stroke }));
+            const lblY = p.y < pad.top + 24 ? p.y + 21 : p.y - 12;
+            const lbg = svgEl('rect', { x: p.x - 15, y: lblY - 10, width: 30, height: 14, rx: '4', fill: c.stroke });
+            const ltx = document.createElementNS(NS, 'text');
+            ltx.setAttribute('x', p.x); ltx.setAttribute('y', lblY);
+            ltx.setAttribute('text-anchor', 'middle'); ltx.setAttribute('fill', 'white');
+            ltx.setAttribute('font-size', '9'); ltx.setAttribute('font-family', 'system-ui, sans-serif');
+            ltx.setAttribute('font-weight', '700');
+            ltx.textContent = p.s.toFixed(1);
+            g.appendChild(lbg); g.appendChild(ltx);
+            let tip = null;
+            g.addEventListener('mouseenter', ev => {
+                g.children[1].setAttribute('r', '8');
+                tip = document.createElement('div');
+                tip.innerHTML = `
+                    <div style="font-size:10px;font-weight:700;letter-spacing:.05em;opacity:.8;margin-bottom:2px;text-transform:uppercase">${scoreLabel(p.s)}</div>
+                    <div style="font-size:15px;font-weight:800;line-height:1">${p.s.toFixed(2)} <span style="font-size:10px;font-weight:500;opacity:.75">/ 5.0</span></div>
+                    <div style="font-size:11px;margin-top:2px;opacity:.85">${Math.round(p.s * 20)}% de cumplimiento</div>
+                    <div style="font-size:10px;margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.25);opacity:.75">${p.lbl}</div>
+                `;
+                tip.style.cssText = `
+                    position:fixed;background:${c.stroke};color:#fff;
+                    padding:10px 14px;border-radius:10px;font-family:system-ui,sans-serif;
+                    pointer-events:none;z-index:9999;min-width:140px;
+                    box-shadow:0 8px 24px rgba(0,0,0,.2),0 0 0 1px rgba(255,255,255,.15);
+                `;
+                document.body.appendChild(tip);
+                const move = e2 => {
+                    tip.style.left = (e2.clientX + 16) + 'px';
+                    tip.style.top = (e2.clientY - tip.offsetHeight - 12) + 'px';
+                };
+                g.addEventListener('mousemove', move);
+                g.addEventListener('mouseleave', () => {
+                    if (tip) { tip.remove(); tip = null; }
+                    g.children[1].setAttribute('r', '5.5');
+                }, { once: true });
+                move(ev);
             });
-            
-            moveTooltip(e);
+            dpEl.appendChild(g);
         });
-        
-        if (dataPointsGroup) dataPointsGroup.appendChild(circle);
-        
-        // Etiqueta X (solo mostrar algunas para evitar solapamiento)
-        const showLabel = chartData.labels.length <= 4 || index % Math.ceil(chartData.labels.length / 4) === 0 || index === chartData.labels.length - 1;
-        if (showLabel && xLabelsGroup) {
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', point.x);
-            text.setAttribute('y', height - 15);
-            text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('fill', '#6b7280');
-            text.setAttribute('font-size', '12');
-            text.setAttribute('font-family', 'Arial, sans-serif');
-            text.textContent = point.label;
-            xLabelsGroup.appendChild(text);
-        }
-    });
-    
-    debugLog('✅ Gráfico completado');
-    debugLog(`📊 Total puntos agregados: ${points.length}`);
-    debugLog(`🎯 Elementos en dataPointsGroup: ${dataPointsGroup ? dataPointsGroup.children.length : 'N/A'}`);
-    
-    // Animación de entrada
-    if (linePathElement) {
-        const pathLength = linePathElement.getTotalLength();
-        linePathElement.style.strokeDasharray = pathLength;
-        linePathElement.style.strokeDashoffset = pathLength;
-        linePathElement.style.transition = 'stroke-dashoffset 2s ease-in-out';
-        
-        // Trigger animation
-        setTimeout(() => {
-            linePathElement.style.strokeDashoffset = '0';
-        }, 100);
     }
-    
-    // Animación del área
-    if (areaPathElement) {
-        areaPathElement.style.opacity = '0';
-        areaPathElement.style.transition = 'opacity 1s ease-in-out 0.5s';
-        setTimeout(() => {
-            areaPathElement.style.opacity = '1';
-        }, 100);
+
+    // -- Etiquetas eje X --------------------------------------------------
+    const xlEl = svg.querySelector('#xLabels');
+    if (xlEl) {
+        xlEl.innerHTML = '';
+        const step = n <= 6 ? 1 : Math.ceil(n / 6);
+        pts.forEach((p, i) => {
+            if (i % step !== 0 && i !== n - 1) return;
+            const t = document.createElementNS(NS, 'text');
+            t.setAttribute('x', p.x); t.setAttribute('y', H - 8);
+            t.setAttribute('text-anchor', 'middle');
+            t.setAttribute('fill', '#94a3b8');
+            t.setAttribute('font-size', '10');
+            t.setAttribute('font-family', 'system-ui, sans-serif');
+            t.textContent = p.lbl;
+            xlEl.appendChild(t);
+        });
     }
 }
 
@@ -4828,13 +4483,6 @@ function createRadarCharts() {
     debugLog('✅ Gráficos radar inicializados correctamente');
 }
 
-// Cerrar modal con Escape
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        closeDetailModal();
-    }
-});
-
 // Función personalizada para calcular diferencia (para el template)
 function subtract(a, b) {
     return parseFloat(a) - parseFloat(b);
@@ -4857,10 +4505,10 @@ function animateProgressBars() {
     });
 }
 
-// SISTEMA DE TABS
+// SISTEMA DE TABS — soporta ia-tab-btn + ia-tab-pane + legacy tab-content
 function initializeTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const tabContents = document.querySelectorAll('.tab-content, .ia-tab-pane');
     
     tabButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -4872,22 +4520,35 @@ function initializeTabs() {
             
             // Agregar active al botón clickeado y su contenido
             button.classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const pane = document.getElementById(`tab-${tabId}`);
+            if (pane) pane.classList.add('active');
             
             // Ejecutar funciones específicas según el tab
             if (tabId === 'heatmap') {
                 createAdvancedRadarChart();
             } else if (tabId === 'critical') {
                 animateCriticalCards();
+                animateRankBars();
             } else if (tabId === 'evaluations') {
                 handleTabChange('evaluations');
             } else if (tabId === 'general') {
-                // Re-animar barras de progreso
-                setTimeout(() => {
-                    animateProgressBars();
-                }, 100);
+                setTimeout(() => { animateProgressBars(); animateCatBars(); }, 80);
             }
         });
+    });
+}
+
+function animateCatBars() {
+    document.querySelectorAll('.ia-cat-bar-fill[data-target]').forEach(bar => {
+        const target = parseFloat(bar.getAttribute('data-target')) || 0;
+        requestAnimationFrame(() => { bar.style.width = Math.min(target, 100) + '%'; });
+    });
+}
+
+function animateRankBars() {
+    document.querySelectorAll('.ia-rank-bar-fill[data-target]').forEach(bar => {
+        const target = parseFloat(bar.getAttribute('data-target')) || 0;
+        requestAnimationFrame(() => { bar.style.width = Math.min(target, 100) + '%'; });
     });
 }
 
@@ -5449,6 +5110,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar sistema de tabs
     initializeTabs();
     
+    // Inicializar tabla de evaluaciones al cargar (tab activo por defecto)
+    setTimeout(() => {
+        initializeEvaluationsTable();
+    }, 100);
+    
     // Calcular estadísticas del heatmap si está visible
     if (document.querySelector('.heatmap-analysis')) {
         calculateHeatmapStats();
@@ -5681,22 +5347,6 @@ document.addEventListener('DOMContentLoaded', function() {
         rows.forEach(row => tableBody.appendChild(row));
     }
     
-    // Funciones de acciones - GLOBALES para onclick
-    function viewEvaluation(evaluationId) {
-        // Redirigir a la vista de resultados de la evaluación
-        window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/resultados/';
-    }
-    
-    function generateReport(evaluationId) {
-        // Abrir reporte PDF en nueva ventana
-        window.open('/risk-hoteles/evaluacion/' + evaluationId + '/pdf/download/', '_blank');
-    }
-    
-    function editEvaluation(evaluationId) {
-        // Redirigir al cuestionario de evaluación para editar
-        window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/cuestionario/';
-    }
-    
     // Inicializar tabla cuando se cambie a la pestaña de evaluaciones
     function handleTabChange(tabId) {
         if (tabId === 'evaluations') {
@@ -5717,7 +5367,7 @@ function viewEvaluation(evaluationId) {
 function generateReport(evaluationId) {
     debugLog('generateReport llamada con ID:', evaluationId);
     // Abrir reporte PDF en nueva ventana
-    window.open('/risk-hoteles/evaluacion/' + evaluationId + '/pdf/download/', '_blank');
+    window.open('/risk-hoteles/evaluacion/' + evaluationId + '/pdf/preview/', '_blank');
 }
 
 function editEvaluation(evaluationId) {
@@ -5726,11 +5376,6 @@ function editEvaluation(evaluationId) {
     window.location.href = '/risk-hoteles/evaluacion/' + evaluationId + '/cuestionario/';
 }
 
-function generateGeneralReport() {
-    debugLog('generateGeneralReport llamada');
-    // Abrir preview del reporte general avanzado con IA/ML
-    const previewUrl = `{% url 'risk_hoteles:reporte_general_preview' hotel.id %}`;
-    window.open(previewUrl, '_blank');
-}
+
 </script>
 {% endblock %}

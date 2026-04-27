@@ -16,32 +16,134 @@
     }
     
     .detail-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3a6e 0%, #1a3060 50%, #162a54 100%);
         color: white;
-        padding: 1.25rem 1.5rem;
+        padding: 0.75rem 1.25rem;
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        overflow: hidden;
+        gap: 0.75rem;
+    }
+
+    .detail-header::before {
+        content: '';
+        position: absolute;
+        top: -70px; right: -70px;
+        width: 220px; height: 220px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        pointer-events: none;
+    }
+
+    .detail-header::after {
+        content: '';
+        position: absolute;
+        bottom: -50px; left: 42%;
+        width: 160px; height: 160px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.03);
+        pointer-events: none;
+    }
+
+    .header-type-badge {
+        display: inline-flex;
         align-items: center;
+        gap: 0.35rem;
+        background: rgba(255,255,255,0.13);
+        border: 1px solid rgba(255,255,255,0.22);
+        color: rgba(255,255,255,0.88);
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.9px;
+        padding: 0.1rem 0.45rem;
+        border-radius: 20px;
+        margin-bottom: 0.25rem;
     }
-    
+
     .header-content h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
-        line-height: 1.2;
+        margin: 0 0 0.2rem 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1.15;
+        letter-spacing: -0.2px;
     }
-    
+
     .header-content .subtitle {
-        opacity: 0.9;
-        font-size: 0.95rem;
-        margin-top: 0.25rem;
+        opacity: 0.82;
+        font-size: 0.78rem;
+        margin-top: 0;
         line-height: 1.3;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.4rem;
     }
-    
+
+    .header-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.25rem;
+        margin-top: 0.35rem;
+    }
+
+    .header-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.18);
+        color: rgba(255,255,255,0.85);
+        font-size: 0.65rem;
+        font-weight: 500;
+        padding: 0.1rem 0.4rem;
+        border-radius: 20px;
+        white-space: nowrap;
+    }
+
+    .header-chip-amenity {
+        background: rgba(86,171,47,0.22);
+        border-color: rgba(86,171,47,0.45);
+    }
+
+    .header-right {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.4rem;
+        flex-shrink: 0;
+    }
+
+    .header-score-badge {
+        background: rgba(255,255,255,0.1);
+        border: 2px solid rgba(255,255,255,0.22);
+        border-radius: 10px;
+        padding: 0.3rem 0.7rem;
+        text-align: center;
+        min-width: 75px;
+    }
+
+    .header-score-value {
+        font-size: 1.15rem;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 0.15rem;
+    }
+
+    .header-score-label {
+        font-size: 0.68rem;
+        opacity: 0.72;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        font-weight: 600;
+    }
+
     .header-actions {
         display: flex;
         gap: 0.5rem;
         flex-wrap: wrap;
+        justify-content: flex-end;
     }
     
     .btn-header {
@@ -122,7 +224,7 @@
     }
     
     .evaluations-table th {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
         color: white;
         padding: 1rem;
         text-align: left;
@@ -181,18 +283,6 @@
         font-size: 1.1rem;
     }
     
-    .score-high {
-        color: #28a745;
-    }
-    
-    .score-medium {
-        color: #ffc107;
-    }
-    
-    .score-low {
-        color: #dc3545;
-    }
-    
     .actions-cell {
         text-align: center;
         white-space: nowrap;
@@ -239,15 +329,15 @@
     }
     
     .btn-table-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
         color: white;
-        border: 1px solid rgba(102, 126, 234, 0.3);
+        border: 1px solid rgba(30, 58, 110, 0.3);
     }
     
     .btn-table-primary:hover {
-        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        background: linear-gradient(135deg, #162a54 0%, #0f1e3c 100%);
         color: white;
-        border-color: rgba(102, 126, 234, 0.5);
+        border-color: rgba(30, 58, 110, 0.6);
     }
     
     .btn-table-success {
@@ -436,7 +526,7 @@
     
     .detail-section h3 i {
         margin-right: 0.5rem;
-        color: #667eea;
+        color: #1e3a6e;
     }
     
     .detail-grid {
@@ -490,14 +580,14 @@
     
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.35rem;
+        margin-bottom: 0.75rem;
     }
     
     .stat-card {
         background: white;
-        padding: 1rem;
+        padding: 0.4rem 0.5rem;
         border-radius: 8px;
         text-align: center;
         border: 1px solid #e9ecef;
@@ -510,77 +600,190 @@
     }
     
     .stat-number {
-        font-size: 1.5rem;
+        font-size: 0.95rem;
         font-weight: 600;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.05rem;
     }
     
     .stat-label {
-        font-size: 0.8rem;
+        font-size: 0.65rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         font-weight: 500;
-        margin-bottom: 0.25rem;
+        margin-bottom: 0.05rem;
     }
     
     .stat-description {
-        font-size: 0.65rem;
+        font-size: 0.55rem;
         opacity: 0.7;
     }
     
-    /* Estilos para Evolución Histórica */
-    .evolution-container {
-        margin-top: 1rem;
+    /* ── Evolución Histórica ──────────────────────────── */
+    .evo-kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 0;
     }
-    
-    .evolution-stats {
-        padding-left: 1rem;
+
+    .evo-kpi {
+        padding: 0.9rem 1rem;
+        text-align: center;
+        border-right: 1px solid #e9ecef;
+        position: relative;
     }
-    
-    .evolution-stat-item {
-        margin-bottom: 1rem;
-        padding: 1rem;
-        background: #f8f9fa;
+
+    .evo-kpi:last-child { border-right: none; }
+
+    .evo-kpi-icon {
+        width: 32px;
+        height: 32px;
         border-radius: 8px;
-        border-left: 4px solid #667eea;
-    }
-    
-    .evolution-stat-label {
-        font-size: 0.8rem;
-        color: #6c757d;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-    }
-    
-    .evolution-stat-value {
-        font-size: 1.2rem;
-        font-weight: 600;
         display: flex;
         align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        margin: 0 auto 0.35rem;
+    }
+
+    .evo-kpi-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.15rem;
+    }
+
+    .evo-kpi-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 600;
+        color: #6c757d;
+    }
+
+    .evo-kpi-sub {
+        font-size: 0.6rem;
+        color: #adb5bd;
+        margin-top: 0.1rem;
+    }
+
+    .evo-body {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        gap: 0;
+        min-height: 240px;
+    }
+
+    .evo-chart-panel {
+        padding: 1rem 1rem 0.75rem;
+        border-right: 1px solid #e9ecef;
+        position: relative;
+    }
+
+    .evo-chart-title {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 600;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .evo-chart-wrap {
+        position: relative;
+        height: 200px;
+    }
+
+    .evo-sidebar {
+        padding: 0.85rem 1rem;
+        display: flex;
+        flex-direction: column;
         gap: 0.5rem;
     }
-    
-    .evolution-stat-value .fas {
-        font-size: 1rem;
+
+    .evo-sidebar-title {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-weight: 700;
+        color: #6c757d;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid #e9ecef;
+        margin-bottom: 0.1rem;
     }
-    
-    .trend-up {
-        color: #28a745 !important;
+
+    .evo-stat-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        background: #f8f9fa;
     }
-    
-    .trend-down {
-        color: #dc3545 !important;
+
+    .evo-stat-row-label {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.72rem;
+        color: #495057;
+        font-weight: 500;
     }
-    
-    .trend-stable {
-        color: #ffc107 !important;
+
+    .evo-stat-row-label i {
+        width: 16px;
+        text-align: center;
+        font-size: 0.7rem;
     }
-    
-    #evolutionChart {
-        max-width: 100%;
-        height: auto;
+
+    .evo-stat-row-value {
+        font-size: 0.8rem;
+        font-weight: 700;
+    }
+
+    .evo-trend-bar {
+        height: 4px;
+        border-radius: 2px;
+        background: #e9ecef;
+        margin-top: 0.3rem;
+        overflow: hidden;
+    }
+
+    .evo-trend-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.8s ease;
+    }
+
+    .evo-compare-btn {
+        margin-top: auto;
+        padding-top: 0.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .evo-empty {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        color: #6c757d;
+    }
+
+    .evo-empty i {
+        font-size: 2rem;
+        opacity: 0.3;
+        margin-bottom: 0.75rem;
+    }
+
+    .trend-up  { color: #dc3545 !important; }
+    .trend-down { color: #28a745 !important; }
+    .trend-stable { color: #ffc107 !important; }
+
+    @media (max-width: 768px) {
+        .evo-kpi-strip { grid-template-columns: repeat(2, 1fr); }
+        .evo-body { grid-template-columns: 1fr; }
+        .evo-chart-panel { border-right: none; border-bottom: 1px solid #e9ecef; }
+        .evo-sidebar { flex-direction: row; flex-wrap: wrap; }
+        .evo-stat-row { flex: 1 1 calc(50% - 0.5rem); }
     }
     
     /* Estilos para Modal de Comparación */
@@ -751,14 +954,14 @@
     }
     
     .btn-primary-custom {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
         color: white;
         border: none;
     }
     
     .btn-primary-custom:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 4px 12px rgba(30, 58, 110, 0.4);
         color: white;
     }
     
@@ -776,12 +979,12 @@
     
     .btn-outline-custom {
         background: transparent;
-        color: #667eea;
-        border: 2px solid #667eea;
+        color: #1e3a6e;
+        border: 2px solid #1e3a6e;
     }
     
     .btn-outline-custom:hover {
-        background: #667eea;
+        background: #1e3a6e;
         color: white;
         transform: translateY(-2px);
     }
@@ -829,27 +1032,37 @@
     
     @media (max-width: 768px) {
         .detail-header {
-            padding: 1rem 1.25rem;
             flex-direction: column;
-            align-items: flex-start;
-            gap: 0.75rem;
+            padding: 1.25rem 1.5rem;
         }
-        
+
+        .header-type-badge {
+            font-size: 0.65rem;
+        }
+
         .header-content h1 {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
         }
-        
+
         .header-content .subtitle {
-            font-size: 0.875rem;
-            margin-top: 0.125rem;
+            font-size: 0.83rem;
         }
-        
+
+        .header-right {
+            align-items: flex-start;
+            width: 100%;
+        }
+
+        .header-score-badge {
+            min-width: auto;
+        }
+
         .header-actions {
             width: 100%;
             justify-content: flex-start;
             gap: 0.375rem;
         }
-        
+
         .btn-header {
             flex: 1;
             justify-content: center;
@@ -945,40 +1158,72 @@
     <!-- Header del conjunto -->
     <div class="detail-container">
         <div class="detail-header">
+            <!-- Lado izquierdo: info del conjunto -->
             <div class="header-content">
+                <div class="header-type-badge">
+                    <i class="fas fa-building"></i>
+                    {{ conjunto.tipo_conjunto.get_nombre_display|default:conjunto.tipo_conjunto|default:"Sin tipo" }}
+                </div>
                 <h1>{{ conjunto.nombre }}</h1>
                 <div class="subtitle">
-                    <i class="fas fa-map-marker-alt me-2"></i>
-                    {{ conjunto.direccion }}, {{ conjunto.ciudad }}, {{ conjunto.departamento }}
+                    <i class="fas fa-map-marker-alt mt-1"></i>
+                    <span>{{ conjunto.direccion }}, {{ conjunto.ciudad }}, {{ conjunto.departamento }}</span>
                 </div>
-                <div class="subtitle mt-2">
-                    <i class="fas fa-building me-2"></i>
-                    {{ conjunto.tipo_conjunto.get_nombre_display }}
+                <!-- Chips de información -->
+                <div class="header-chips">
+                    <span class="header-chip">
+                        <i class="fas fa-id-card"></i> NIT: {{ conjunto.nit }}
+                    </span>
+                    <span class="header-chip">
+                        <i class="fas fa-home"></i> {{ conjunto.numero_unidades }} unidade{{ conjunto.numero_unidades|pluralize:"s" }}
+                    </span>
+                    <span class="header-chip">
+                        <i class="fas fa-layer-group"></i> {{ conjunto.numero_torres }} torre{{ conjunto.numero_torres|pluralize:"s" }}
+                    </span>
+                    {% if conjunto.administrador_nombre %}
+                    <span class="header-chip">
+                        <i class="fas fa-user-tie"></i> {{ conjunto.administrador_nombre }}
+                    </span>
+                    {% endif %}
+                    {% if conjunto.tiene_piscina %}<span class="header-chip header-chip-amenity"><i class="fas fa-swimming-pool"></i> Piscina</span>{% endif %}
+                    {% if conjunto.tiene_gimnasio %}<span class="header-chip header-chip-amenity"><i class="fas fa-dumbbell"></i> Gimnasio</span>{% endif %}
+                    {% if conjunto.tiene_salon_social %}<span class="header-chip header-chip-amenity"><i class="fas fa-glass-cheers"></i> Sal&oacute;n Social</span>{% endif %}
+                    {% if conjunto.tiene_juegos_infantiles %}<span class="header-chip header-chip-amenity"><i class="fas fa-child"></i> Juegos</span>{% endif %}
+                    {% if conjunto.tiene_canchas_deportivas %}<span class="header-chip header-chip-amenity"><i class="fas fa-futbol"></i> Canchas</span>{% endif %}
                 </div>
             </div>
-            <div class="header-actions">
-                {% has_module_permission user 'risk_conjuntos' 'update' as can_update %}
-                {% if can_update %}
-                <button class="btn-header btn-header-primary" onclick="openEditModal('{{ conjunto.id }}')">
-                    <i class="fas fa-edit"></i>Editar
-                </button>
+            <!-- Lado derecho: score + botones -->
+            <div class="header-right">
+                {% if score_actual %}
+                <div class="header-score-badge">
+                    <div class="header-score-value">{{ score_actual|floatformat:1 }}%</div>
+                    <div class="header-score-label">Score Actual</div>
+                </div>
                 {% endif %}
-                {% has_module_permission user 'risk_conjuntos' 'create' as can_create %}
-                {% if can_create %}
-                <a href="{% url 'risk_conjuntos:iniciar_evaluacion' conjunto.id %}" class="btn-header btn-header-success">
-                    <i class="fas fa-shield-alt"></i>Nueva Evaluación
-                </a>
-                {% endif %}
-                {% if total_evaluaciones > 1 %}
-                {% has_module_permission user 'risk_conjuntos' 'read' as can_read_report %}
-                {% if can_read_report %}
-                <a href="{% url 'risk_conjuntos:generar_reporte_general' conjunto.id %}" 
-                   class="btn-header btn-header-report" target="_blank"
-                   title="Reporte General — Estado actual basado en {{ total_evaluaciones }} evaluaciones">
-                    <i class="fas fa-file-pdf"></i>Reporte General
-                </a>
-                {% endif %}
-                {% endif %}
+                <div class="header-actions">
+                    {% has_module_permission user 'risk_conjuntos' 'update' as can_update %}
+                    {% if can_update %}
+                    <button class="btn-header btn-header-primary" onclick="openEditModal('{{ conjunto.id }}')">
+                        <i class="fas fa-edit"></i>Editar
+                    </button>
+                    {% endif %}
+                    {% has_module_permission user 'risk_conjuntos' 'create' as can_create %}
+                    {% if can_create %}
+                    <a href="{% url 'risk_conjuntos:iniciar_evaluacion' conjunto.id %}" class="btn-header btn-header-success">
+                        <i class="fas fa-shield-alt"></i>Nueva Evaluaci&oacute;n
+                    </a>
+                    {% endif %}
+                    {% if total_evaluaciones > 1 %}
+                    {% has_module_permission user 'risk_conjuntos' 'read' as can_read_report %}
+                    {% if can_read_report %}
+                    <a href="{% url 'risk_conjuntos:generar_reporte_general' conjunto.id %}"
+                       class="btn-header btn-header-report" target="_blank"
+                       title="Reporte General — Estado actual basado en {{ total_evaluaciones }} evaluaciones">
+                        <i class="fas fa-file-pdf"></i>Reporte General
+                    </a>
+                    {% endif %}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -1016,60 +1261,111 @@
 
     <!-- Evolución Histórica -->
     <div class="detail-container">
-        <div class="detail-section">
-            <h3><i class="fas fa-chart-line"></i>Evolución Histórica</h3>
-            {% if evaluaciones|length > 1 %}
-                <div class="evolution-container">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <canvas id="evolutionChart" width="400" height="200"></canvas>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="evolution-stats">
-                                <div class="evolution-stat-item">
-                                    <div class="evolution-stat-label">Tendencia General</div>
-                                    <div class="evolution-stat-value" id="tendenciaGeneral">
-                                        <i class="fas fa-spinner fa-spin"></i> Calculando...
-                                    </div>
-                                </div>
-                                <div class="evolution-stat-item">
-                                    <div class="evolution-stat-label">Mejor Score</div>
-                                    <div class="evolution-stat-value text-success" id="mejorScore">
-                                        <i class="fas fa-spinner fa-spin"></i>
-                                    </div>
-                                </div>
-                                <div class="evolution-stat-item">
-                                    <div class="evolution-stat-label">Score Actual</div>
-                                    <div class="evolution-stat-value text-primary" id="scoreActual">
-                                        {% if score_actual %}{{ score_actual|floatformat:1 }}%{% else %}N/A{% endif %}
-                                    </div>
-                                </div>
-                                <div class="evolution-stat-item">
-                                    <div class="evolution-stat-label">Total Evaluaciones</div>
-                                    <div class="evolution-stat-value text-info">
-                                        {{ total_evaluaciones }}
-                                    </div>
-                                </div>
-                                <div class="evolution-actions mt-3">
-                                    {% has_module_permission user 'risk_conjuntos' 'read' as can_compare %}
-                                    {% if can_compare %}
-                                    <button class="btn btn-outline-primary btn-sm w-100" onclick="openComparisonModal()">
-                                        <i class="fas fa-chart-radar me-2"></i>Comparar Evaluaciones
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
+        <div class="detail-section" style="padding: 1rem 1.25rem 0.75rem;">
+            <h3 style="margin-bottom: 0.75rem;"><i class="fas fa-chart-line"></i>Evolución Histórica</h3>
+        </div>
+
+        {% if evaluaciones|length > 1 %}
+
+        <!-- KPI Strip -->
+        <div class="evo-kpi-strip">
+            <div class="evo-kpi">
+                <div class="evo-kpi-icon" style="background:#e8f0fe; color:#1e3a6e;">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="evo-kpi-value" style="color:#1e3a6e;" id="kpiTendencia">
+                    <i class="fas fa-spinner fa-spin fa-xs"></i>
+                </div>
+                <div class="evo-kpi-label">Tendencia</div>
+                <div class="evo-kpi-sub" id="kpiTendenciaSub">&nbsp;</div>
+            </div>
+            <div class="evo-kpi">
+                <div class="evo-kpi-icon" style="background:#d4edda; color:#155724;">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="evo-kpi-value" style="color:#155724;" id="kpiMejor">
+                    <i class="fas fa-spinner fa-spin fa-xs"></i>
+                </div>
+                <div class="evo-kpi-label">Mejor Score</div>
+                <div class="evo-kpi-sub">Menor riesgo</div>
+            </div>
+            <div class="evo-kpi">
+                <div class="evo-kpi-icon" style="background:#fff3cd; color:#856404;">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="evo-kpi-value" style="color:#856404;">
+                    {% if score_actual %}{{ score_actual|floatformat:1 }}%{% else %}N/A{% endif %}
+                </div>
+                <div class="evo-kpi-label">Score Actual</div>
+                <div class="evo-kpi-sub">&Uacute;ltima evaluaci&oacute;n</div>
+            </div>
+            <div class="evo-kpi">
+                <div class="evo-kpi-icon" style="background:#e2e3e5; color:#495057;">
+                    <i class="fas fa-clipboard-check"></i>
+                </div>
+                <div class="evo-kpi-value" style="color:#495057;">{{ total_evaluaciones }}</div>
+                <div class="evo-kpi-label">Evaluaciones</div>
+                <div class="evo-kpi-sub">Total realizadas</div>
+            </div>
+        </div>
+
+        <!-- Cuerpo: gráfico + sidebar -->
+        <div class="evo-body">
+            <!-- Gráfico -->
+            <div class="evo-chart-panel">
+                <div class="evo-chart-title">Historial de Score de Riesgo (%)</div>
+                <div class="evo-chart-wrap">
+                    <canvas id="evolutionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sidebar de métricas -->
+            <div class="evo-sidebar">
+                <div class="evo-sidebar-title"><i class="fas fa-analytics me-1"></i>Análisis Rápido</div>
+
+                <div class="evo-stat-row">
+                    <span class="evo-stat-row-label"><i class="fas fa-arrow-trend-up text-danger"></i> Peor score</span>
+                    <span class="evo-stat-row-value text-danger" id="kpiPeor">—</span>
+                </div>
+                <div class="evo-stat-row">
+                    <span class="evo-stat-row-label"><i class="fas fa-calculator text-primary"></i> Promedio</span>
+                    <span class="evo-stat-row-value text-primary" id="kpiPromedio">—</span>
+                </div>
+                <div class="evo-stat-row">
+                    <span class="evo-stat-row-label"><i class="fas fa-ruler-horizontal text-secondary"></i> Variación</span>
+                    <span class="evo-stat-row-value text-secondary" id="kpiVariacion">—</span>
+                </div>
+                <div class="evo-stat-row">
+                    <span class="evo-stat-row-label"><i class="fas fa-calendar-check text-info"></i> &Uacute;ltima eval.</span>
+                    <span class="evo-stat-row-value text-info" id="kpiFechaUltima">—</span>
+                </div>
+
+                <!-- Barra de progreso de variación -->
+                <div style="padding: 0 0.1rem;">
+                    <div style="font-size:0.62rem; color:#6c757d; margin-bottom:0.2rem;" id="kpiBarLabel">Cambio total</div>
+                    <div class="evo-trend-bar">
+                        <div class="evo-trend-bar-fill" id="kpiBarFill" style="width:0%; background:#6c757d;"></div>
                     </div>
                 </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="fas fa-chart-line"></i>
-                    <h5>Evolución no disponible</h5>
-                    <p class="text-muted">Se necesitan al menos 2 evaluaciones completadas para mostrar la evolución histórica.</p>
+
+                <div class="evo-compare-btn">
+                    {% has_module_permission user 'risk_conjuntos' 'read' as can_compare %}
+                    {% if can_compare %}
+                    <button class="btn btn-outline-secondary btn-sm w-100" onclick="openComparisonModal()">
+                        <i class="fas fa-chart-bar me-1"></i>Comparar evaluaciones
+                    </button>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         </div>
+
+        {% else %}
+        <div class="evo-empty">
+            <div><i class="fas fa-chart-line d-block mb-2"></i></div>
+            <strong>Evolución no disponible</strong>
+            <p class="mb-0 mt-1" style="font-size:0.82rem;">Se necesitan al menos 2 evaluaciones completadas.</p>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Tabla de Evaluaciones -->
@@ -1417,12 +1713,12 @@ function initEvolutionChart() {
             datasets: [{
                 label: 'Score de Riesgo (%)',
                 data: scores,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderColor: '#1e3a6e',
+                backgroundColor: 'rgba(30, 58, 110, 0.1)',
                 borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: '#667eea',
+                pointBackgroundColor: '#1e3a6e',
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 6,
@@ -1440,7 +1736,7 @@ function initEvolutionChart() {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     titleColor: '#ffffff',
                     bodyColor: '#ffffff',
-                    borderColor: '#667eea',
+                    borderColor: '#1e3a6e',
                     borderWidth: 1,
                     callbacks: {
                         label: function(context) {
@@ -1474,43 +1770,60 @@ function initEvolutionChart() {
 
 function calculateEvolutionStats() {
     const scores = evolutionData.map(item => item.score);
-    
-    // Calcular tendencia
+    const n = scores.length;
     const firstScore = scores[0];
-    const lastScore = scores[scores.length - 1];
+    const lastScore  = scores[n - 1];
     const difference = lastScore - firstScore;
-    
-    let tendencia = '';
-    let tendenciaClass = '';
-    let tendenciaIcon = '';
-    
+    const minScore   = Math.min(...scores);
+    const maxScore   = Math.max(...scores);
+    const avgScore   = scores.reduce((a, b) => a + b, 0) / n;
+    const lastFecha  = evolutionData[n - 1].fecha;
+
+    // Tendencia
+    let tendencia, tendenciaClass, tendenciaIcon, tendenciaSub;
     if (Math.abs(difference) < 2) {
-        tendencia = 'Estable';
-        tendenciaClass = 'trend-stable';
-        tendenciaIcon = 'fas fa-minus';
+        tendencia = 'Estable';    tendenciaClass = 'trend-stable'; tendenciaIcon = 'fa-minus';      tendenciaSub = 'Sin cambio significativo';
     } else if (difference > 0) {
-        tendencia = "Aumentando (+" + difference.toFixed(1) + "%)";
-        tendenciaClass = 'trend-up';
-        tendenciaIcon = 'fas fa-arrow-up';
+        tendencia = '+' + difference.toFixed(1) + '%'; tendenciaClass = 'trend-up';   tendenciaIcon = 'fa-arrow-up';   tendenciaSub = 'Riesgo aumentando';
     } else {
-        tendencia = "Disminuyendo (" + difference.toFixed(1) + "%)";
-        tendenciaClass = 'trend-down';
-        tendenciaIcon = 'fas fa-arrow-down';
+        tendencia = difference.toFixed(1) + '%';       tendenciaClass = 'trend-down'; tendenciaIcon = 'fa-arrow-down'; tendenciaSub = 'Riesgo disminuyendo';
     }
-    
-    // Actualizar elementos
-    const tendenciaElement = document.getElementById('tendenciaGeneral');
-    if (tendenciaElement) {
-        tendenciaElement.innerHTML = '<i class="' + tendenciaIcon + ' ' + tendenciaClass + '"></i> ' + tendencia;
-        tendenciaElement.className = 'evolution-stat-value ' + tendenciaClass;
+
+    // KPI strip
+    const kpiTend = document.getElementById('kpiTendencia');
+    if (kpiTend) {
+        kpiTend.innerHTML = '<i class="fas ' + tendenciaIcon + ' me-1"></i>' + tendencia;
+        kpiTend.className = 'evo-kpi-value ' + tendenciaClass;
     }
-    
-    // Mejor score
-    const mejorScore = Math.min(...scores);
-    const mejorScoreElement = document.getElementById('mejorScore');
-    if (mejorScoreElement) {
-        mejorScoreElement.innerHTML = '<i class="fas fa-trophy"></i> ' + mejorScore.toFixed(1) + '%';
+    const kpiTendSub = document.getElementById('kpiTendenciaSub');
+    if (kpiTendSub) kpiTendSub.textContent = tendenciaSub;
+
+    const kpiMejor = document.getElementById('kpiMejor');
+    if (kpiMejor) kpiMejor.textContent = minScore.toFixed(1) + '%';
+
+    // Sidebar
+    const kpiPeor = document.getElementById('kpiPeor');
+    if (kpiPeor) kpiPeor.textContent = maxScore.toFixed(1) + '%';
+
+    const kpiProm = document.getElementById('kpiPromedio');
+    if (kpiProm) kpiProm.textContent = avgScore.toFixed(1) + '%';
+
+    const kpiVar = document.getElementById('kpiVariacion');
+    if (kpiVar) kpiVar.textContent = (maxScore - minScore).toFixed(1) + ' pts';
+
+    const kpiFecha = document.getElementById('kpiFechaUltima');
+    if (kpiFecha) kpiFecha.textContent = lastFecha;
+
+    // Barra de variación
+    const barFill  = document.getElementById('kpiBarFill');
+    const barLabel = document.getElementById('kpiBarLabel');
+    const absChange = Math.abs(difference);
+    const barWidth  = Math.min(absChange, 100);
+    if (barFill) {
+        barFill.style.width = barWidth + '%';
+        barFill.style.background = difference > 2 ? '#dc3545' : difference < -2 ? '#28a745' : '#ffc107';
     }
+    if (barLabel) barLabel.textContent = 'Cambio total: ' + (difference >= 0 ? '+' : '') + difference.toFixed(1) + '%';
 }
 
 // Funciones para toasts
@@ -2026,8 +2339,54 @@ function createRadarCharts() {
 
 // Función para descargar comparación
 function downloadComparison() {
-    // Implementar funcionalidad de descarga (PDF/Excel)
-    showSuccessToast('Funcionalidad de descarga en desarrollo');
+    if (!primeraEvaluacionData || !ultimaEvaluacionData) {
+        showErrorToast('No hay datos de comparación disponibles para exportar.');
+        return;
+    }
+
+    // Capturar los dos canvas de radar como imágenes
+    const canvas1 = document.getElementById('primeraRadarChart');
+    const canvas2 = document.getElementById('ultimaRadarChart');
+
+    if (!canvas1 || !canvas2) {
+        showErrorToast('Los gráficos no están disponibles para exportar.');
+        return;
+    }
+
+    // Crear un canvas combinado para descarga
+    const combined = document.createElement('canvas');
+    combined.width = canvas1.width * 2 + 40;
+    combined.height = canvas1.height + 100;
+    const ctx = combined.getContext('2d');
+
+    // Fondo blanco
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, combined.width, combined.height);
+
+    // Título
+    ctx.fillStyle = '#1e3a6e';
+    ctx.font = 'bold 18px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('Comparación de Evaluaciones — ' + '{{ conjunto.nombre|escapejs }}', combined.width / 2, 30);
+
+    // Sub-etiquetas
+    ctx.font = '13px Arial';
+    ctx.fillStyle = '#555';
+    ctx.textAlign = 'center';
+    ctx.fillText('Primera: ' + (primeraEvaluacionData.fecha || '') + '  (' + primeraEvaluacionData.score.toFixed(1) + '%)', canvas1.width / 2 + 10, 55);
+    ctx.fillText('Última: ' + (ultimaEvaluacionData.fecha || '') + '  (' + ultimaEvaluacionData.score.toFixed(1) + '%)', canvas1.width + 30 + canvas2.width / 2, 55);
+
+    // Dibujar los dos gráficos lado a lado
+    ctx.drawImage(canvas1, 10, 70);
+    ctx.drawImage(canvas2, canvas1.width + 30, 70);
+
+    // Descargar
+    const link = document.createElement('a');
+    link.download = 'comparacion_evaluaciones_{{ conjunto.nombre|slugify|default:"conjunto" }}.png';
+    link.href = combined.toDataURL('image/png');
+    link.click();
+
+    showSuccessToast('Comparación exportada como imagen PNG.');
 }
 
 // Variables para eliminación de evaluaciones

@@ -32,10 +32,12 @@ urlpatterns = [
     path('evaluacion/<uuid:assessment_id>/pdf/preview/', views_pdf_individual.assessment_pdf_preview, name='assessment_pdf_preview'),
     path('evaluacion/<uuid:assessment_id>/pdf/print/', views_pdf_individual.assessment_pdf_print, name='assessment_pdf_print'),
     
-    # Reporte General Avanzado con IA/ML
-    path('hoteles/<uuid:hotel_id>/reporte-general/preview/', views_reporte_general.reporte_general_preview, name='reporte_general_preview'),
-    path('hoteles/<uuid:hotel_id>/reporte-general/print/', views_reporte_general.reporte_general_print, name='reporte_general_print'),
+    # Reporte General - API de datos
     path('hoteles/<uuid:hotel_id>/reporte-general/api/', views_reporte_general.reporte_general_api, name='reporte_general_api'),
+
+    # Nuevo Reporte General (reports/)
+    path('hoteles/<uuid:hotel_id>/reporte/', views_reporte_general.reporte_general, name='reporte_general'),
+    path('hoteles/<uuid:hotel_id>/reporte/print/', views_reporte_general.reporte_general_print, name='reporte_general_print'),
     
     # Exportación
     path('exportar/', views.export_data, name='export_data'),

@@ -6,937 +6,651 @@
 {% block title %}{{ page_title }}{% endblock %}
 
 {% block extra_css %}
-<link href="{% static 'css/risk_conjuntos.css' %}" rel="stylesheet">
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        color: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-    }
-    
-    .stats-card .card-body {
-        padding: 1.5rem;
-    }
-    
-    .stats-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stats-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .conjunto-card {
-        border: none;
+    /* ===== Navy Dashboard Theme ===== */
+    .dash-header {
+        background: linear-gradient(135deg, #1e3a6e 0%, #162a54 100%);
         border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
+        padding: 1.5rem 2rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 20px rgba(30,58,110,.28);
     }
-    
-    .conjunto-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    .dash-header h1 {
+        font-size: 1.45rem;
+        font-weight: 700;
+        margin-bottom: .2rem;
     }
-    
-    .risk-badge {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.8rem;
+    .dash-header p {
+        font-size: .83rem;
+        opacity: .78;
+        margin: 0;
+    }
+    .btn-dash-new {
+        background: #e94560;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: .6rem 1.25rem;
+        font-size: .875rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        text-decoration: none;
+        transition: all .2s;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
     }
-    
-    .risk-muy-bajo { background: #d4edda; color: #155724; }
-    .risk-bajo { background: #cce5f0; color: #0c5460; }
-    .risk-medio { background: #fff3cd; color: #856404; }
-    .risk-alto { background: #f8d7da; color: #721c24; }
-    .risk-critico { background: #f5c6cb; color: #491217; }
-    .risk-sin-evaluar { background: #e2e3e5; color: #383d41; }
-    
-    .evaluation-item {
-        border-left: 4px solid #667eea;
-        padding: 1rem;
-        margin-bottom: 0.5rem;
-        background: #f8f9fa;
-        border-radius: 0 8px 8px 0;
+    .btn-dash-new:hover {
+        background: #c73652;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(233,69,96,.4);
     }
-    
-    .distribution-chart {
-        max-width: 400px;
-        margin: 0 auto;
-    }
-    
-    .chart-container {
-        position: relative;
-        margin: 0 auto;
-    }
-    
-    .chart-container canvas {
-        max-height: 300px;
-    }
-    
-    .chart-legend {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
+
+    /* KPI Grid */
+    .dash-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
         gap: 1rem;
-        margin-top: 1rem;
+        margin-bottom: 1.5rem;
     }
-    
-    .legend-item {
+    @media (max-width: 992px) { .dash-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px)  { .dash-kpi-grid { grid-template-columns: 1fr 1fr; } }
+
+    .dash-kpi {
+        background: white;
+        border-radius: 10px;
+        padding: 1.1rem 1.25rem;
+        border-top: 3px solid;
+        box-shadow: 0 2px 10px rgba(0,0,0,.07);
+        position: relative;
+        overflow: hidden;
+    }
+    .dash-kpi::after {
+        content: '';
+        position: absolute;
+        right: -8px; top: -8px;
+        width: 55px; height: 55px;
+        border-radius: 50%;
+        opacity: .05;
+    }
+    .dash-kpi-navy  { border-top-color: #1e3a6e; }
+    .dash-kpi-navy::after  { background: #1e3a6e; }
+    .dash-kpi-green { border-top-color: #28a745; }
+    .dash-kpi-green::after { background: #28a745; }
+    .dash-kpi-yellow{ border-top-color: #ffc107; }
+    .dash-kpi-yellow::after{ background: #ffc107; }
+    .dash-kpi-red   { border-top-color: #e94560; }
+    .dash-kpi-red::after   { background: #e94560; }
+
+    .kpi-icon  { font-size: 1.35rem; margin-bottom: .4rem; display: block; }
+    .kpi-value { font-size: 1.85rem; font-weight: 700; color: #1e3a6e; line-height: 1; margin-bottom: .2rem; }
+    .kpi-label { font-size: .73rem; color: #6c757d; text-transform: uppercase; letter-spacing: .4px; font-weight: 600; }
+    .kpi-sub   { font-size: .68rem; color: #adb5bd; margin-top: .15rem; }
+
+    /* Sección card */
+    .dash-section {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.07);
+        overflow: hidden;
+        height: 100%;
+    }
+    .dash-section-header {
+        background: linear-gradient(135deg, #1e3a6e 0%, #1a3060 100%);
+        color: white;
+        padding: .7rem 1.2rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: .5rem;
+        font-size: .83rem;
+        font-weight: 600;
     }
-    
-    .legend-color {
-        width: 12px;
-        height: 12px;
-        border-radius: 2px;
+    .dash-section-header i { font-size: .88rem; opacity: .85; }
+    .dash-section-body { padding: 1rem 1.2rem; }
+
+    /* Alertas compactas */
+    .dash-alert {
+        border-radius: 8px;
+        padding: .55rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        font-size: .82rem;
+        margin-bottom: .4rem;
     }
+    .dash-alert-warn   { background: #fff8e1; border-left: 3px solid #ffc107; color: #856404; }
+    .dash-alert-danger { background: #fdf0f1; border-left: 3px solid #e94560; color: #721c24; }
+    .dash-alert a { font-weight: 600; margin-left: auto; white-space: nowrap; font-size: .77rem; }
+
+    /* Risk badge */
+    .risk-badge {
+        padding: .22rem .55rem;
+        border-radius: 20px;
+        font-size: .73rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .3px;
+        white-space: nowrap;
+    }
+    .risk-muy_bajo, .risk-muy-bajo { background: #d4edda; color: #155724; }
+    .risk-bajo       { background: #cce5f0; color: #0c5460; }
+    .risk-medio      { background: #fff3cd; color: #856404; }
+    .risk-alto       { background: #f8d7da; color: #721c24; }
+    .risk-critico    { background: #f5c6cb; color: #491217; }
+    .risk-sin_evaluar, .risk-sin-evaluar { background: #e2e3e5; color: #383d41; }
+
+    /* Top conjuntos */
+    .top-item {
+        display: flex;
+        align-items: center;
+        padding: .55rem 0;
+        border-bottom: 1px solid #f1f3f5;
+        gap: .7rem;
+    }
+    .top-item:last-child { border-bottom: none; }
+    .top-rank {
+        width: 24px; height: 24px;
+        border-radius: 50%;
+        font-size: .7rem;
+        font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .top-info { flex: 1; min-width: 0; }
+    .top-name {
+        font-size: .83rem; font-weight: 600; color: #1e3a6e;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: .08rem;
+    }
+    .top-meta { font-size: .72rem; color: #6c757d; }
+    .top-score { font-size: 1rem; font-weight: 700; color: #1e3a6e; text-align: right; flex-shrink: 0; }
+
+    /* Evaluaciones recientes */
+    .eval-rec-item {
+        border-left: 3px solid #1e3a6e;
+        padding: .45rem .75rem;
+        margin-bottom: .35rem;
+        background: #f8f9fa;
+        border-radius: 0 6px 6px 0;
+    }
+    .eval-rec-item:last-child { margin-bottom: 0; }
+
+    /* Distribución bars */
+    .dist-row {
+        display: flex; align-items: center; gap: .6rem;
+        padding: .35rem 0;
+        border-bottom: 1px solid #f1f3f5;
+        font-size: .8rem;
+    }
+    .dist-row:last-child { border-bottom: none; }
+    .dist-bar-wrap { flex: 1; background: #f1f3f5; border-radius: 10px; height: 7px; overflow: hidden; }
+    .dist-bar-fill  { height: 100%; border-radius: 10px; width: 0%; transition: width .7s ease; }
+    .dist-count { font-weight: 700; color: #1e3a6e; min-width: 20px; text-align: right; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 2rem 1rem; color: #adb5bd; }
+    .empty-state i { font-size: 2.3rem; margin-bottom: .65rem; display: block; }
+    .empty-state p { font-size: .83rem; margin-bottom: .75rem; }
+
+    /* Chart */
+    .chart-wrap { position: relative; }
+    .chart-wrap canvas { max-width: 100% !important; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-3 py-3">
+
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="h3 mb-1">Dashboard Risk Conjuntos</h1>
-                    <p class="text-muted mb-0">Análisis de riesgo para conjuntos residenciales</p>
-                </div>
-                <div>
-                    <a href="{% url 'risk_conjuntos:crear_conjunto' %}" class="btn btn-primary">
-                        <i class="fas fa-plus me-2"></i>Nuevo Conjunto
-                    </a>
-                </div>
+    <div class="dash-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-shield-alt me-2" style="opacity:.75"></i>Dashboard Risk Conjuntos</h1>
+                <p>Análisis integral de riesgo para conjuntos residenciales</p>
             </div>
+            <a href="{% url 'risk_conjuntos:crear_conjunto' %}" class="btn-dash-new">
+                <i class="fas fa-plus"></i> Nuevo Conjunto
+            </a>
         </div>
     </div>
 
-    <!-- Estadísticas principales -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stats-card">
-                <div class="card-body text-center">
-                    <div class="stats-number">{{ total_conjuntos }}</div>
-                    <div class="stats-label">Total Conjuntos</div>
-                </div>
-            </div>
+    <!-- KPIs -->
+    <div class="dash-kpi-grid">
+        <div class="dash-kpi dash-kpi-navy">
+            <i class="fas fa-building kpi-icon" style="color:#1e3a6e;opacity:.6"></i>
+            <div class="kpi-value">{{ total_conjuntos }}</div>
+            <div class="kpi-label">Total Conjuntos</div>
+            <div class="kpi-sub">{{ conjuntos_sin_evaluar }} sin evaluar</div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stats-card">
-                <div class="card-body text-center">
-                    <div class="stats-number">{{ total_evaluaciones }}</div>
-                    <div class="stats-label">Evaluaciones Completadas</div>
-                </div>
-            </div>
+        <div class="dash-kpi dash-kpi-green">
+            <i class="fas fa-clipboard-check kpi-icon" style="color:#28a745;opacity:.7"></i>
+            <div class="kpi-value">{{ total_evaluaciones }}</div>
+            <div class="kpi-label">Evaluaciones</div>
+            <div class="kpi-sub">Completadas totales</div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stats-card">
-                <div class="card-body text-center">
-                    <div class="stats-number">{{ score_promedio|default:"0" }}%</div>
-                    <div class="stats-label">Score Promedio</div>
-                </div>
-            </div>
+        <div class="dash-kpi dash-kpi-yellow">
+            <i class="fas fa-chart-line kpi-icon" style="color:#ffc107;opacity:.8"></i>
+            <div class="kpi-value">{{ score_promedio|default:"0" }}%</div>
+            <div class="kpi-label">Score Promedio</div>
+            <div class="kpi-sub">Portfolio activo</div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card stats-card">
-                <div class="card-body text-center">
-                    <div class="stats-number">{{ evaluaciones_mes|default:"0" }}</div>
-                    <div class="stats-label">Evaluaciones Este Mes</div>
-                </div>
-            </div>
+        <div class="dash-kpi dash-kpi-red">
+            <i class="fas fa-calendar-check kpi-icon" style="color:#e94560;opacity:.7"></i>
+            <div class="kpi-value">{{ evaluaciones_mes|default:"0" }}</div>
+            <div class="kpi-label">Este Mes</div>
+            <div class="kpi-sub">Evaluaciones completadas</div>
         </div>
     </div>
 
-    <!-- Gráficas de análisis -->
-    <div class="row mb-4">
-        <!-- Gráfica de distribución de riesgos -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-bar text-primary me-2"></i>Distribución de Riesgos
-                    </h5>
+    <!-- Alerts strip -->
+    {% if conjuntos_sin_evaluar > 0 or alertas_riesgo_alto > 0 %}
+    <div class="mb-4">
+        {% if conjuntos_sin_evaluar > 0 %}
+        <div class="dash-alert dash-alert-warn">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{ conjuntos_sin_evaluar }} conjunto{{ conjuntos_sin_evaluar|pluralize }} sin evaluaciones de seguridad</span>
+            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}?tiene_evaluaciones=no" class="btn btn-sm btn-warning ms-auto">Ver →</a>
+        </div>
+        {% endif %}
+        {% if alertas_riesgo_alto > 0 %}
+        <div class="dash-alert dash-alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <span>{{ alertas_riesgo_alto }} conjunto{{ alertas_riesgo_alto|pluralize }} con nivel de riesgo alto o crítico</span>
+            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}?nivel_riesgo=critico" class="btn btn-sm btn-danger ms-auto">Ver →</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Charts fila 1: Distribución barras + distribución pie/leyenda -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-8">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-chart-bar"></i> Distribución de Riesgos por Nivel
                 </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 300px;">
+                <div class="dash-section-body">
+                    <div class="chart-wrap" style="height:250px">
                         <canvas id="riskDistributionChart"></canvas>
                     </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Distribución completa por nivel de riesgo con tendencias vs. mes anterior
-                        </small>
-                        <div class="mt-2">
-                            <small class="text-muted d-block">
-                                <span class="me-3">↗️ Subiendo</span>
-                                <span class="me-3">↘️ Bajando</span>
-                                <span>➡️ Estable</span>
-                            </small>
+                    <small class="text-muted d-block mt-2" style="font-size:.72rem">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Los porcentajes representan la probabilidad de materialización — menor % es mejor nivel de seguridad.
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-chart-pie"></i> Resumen Distribución
+                </div>
+                <div class="dash-section-body">
+                    <div class="chart-wrap mb-2" style="height:175px">
+                        <canvas id="riskPieChart"></canvas>
+                    </div>
+                    <div>
+                        {% for nivel, cantidad in distribucion_riesgo.items %}
+                        {% if cantidad > 0 %}
+                        <div class="dist-row">
+                            <span class="risk-badge risk-{{ nivel }}" style="min-width:72px;text-align:center">
+                                {% if nivel == 'muy_bajo' %}Muy Bajo
+                                {% elif nivel == 'bajo' %}Bajo
+                                {% elif nivel == 'medio' %}Medio
+                                {% elif nivel == 'alto' %}Alto
+                                {% elif nivel == 'critico' %}Crítico
+                                {% else %}Sin Eval.{% endif %}
+                            </span>
+                            <div class="dist-bar-wrap">
+                                <div class="dist-bar-fill"
+                                     data-width="{% if total_conjuntos > 0 %}{% widthratio cantidad total_conjuntos 100 %}{% else %}0{% endif %}"
+                                     style="background:{% if nivel == 'muy_bajo' %}#28a745{% elif nivel == 'bajo' %}#17a2b8{% elif nivel == 'medio' %}#ffc107{% elif nivel == 'alto' %}#fd7e14{% elif nivel == 'critico' %}#dc3545{% else %}#6c757d{% endif %}"></div>
+                            </div>
+                            <span class="dist-count">{{ cantidad }}</span>
                         </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% if total_conjuntos == 0 %}
+                        <div class="empty-state">
+                            <i class="fas fa-chart-pie"></i>
+                            <p>Sin datos aún</p>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Gráfica de evaluaciones por mes -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-bar text-success me-2"></i>Evaluaciones por Mes
-                    </h5>
+    <!-- Charts fila 2: Evaluaciones mensuales + Score evolución -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-6">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-calendar-alt"></i> Evaluaciones por Mes (últimos 6 meses)
                 </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 300px;">
+                <div class="dash-section-body">
+                    <div class="chart-wrap" style="height:210px">
                         <canvas id="monthlyEvaluationsChart"></canvas>
                     </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Número de evaluaciones completadas por mes
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Gráficas de tendencias avanzadas -->
-    <div class="row mb-4">
-        <!-- Evolución del Score Promedio -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line text-info me-2"></i>Evolución Score Promedio
-                    </h5>
+        <div class="col-lg-6">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-chart-line"></i> Evolución Score Promedio (12 meses)
                 </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 250px;">
+                <div class="dash-section-body">
+                    <div class="chart-wrap" style="height:210px">
                         <canvas id="scoreEvolutionChart"></canvas>
                     </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Score promedio del portfolio últimos 12 meses
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tasa de Cobertura -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-percentage text-warning me-2"></i>Tasa de Cobertura
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 250px;">
-                        <canvas id="coverageChart"></canvas>
-                    </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            % de conjuntos evaluados por mes
-                        </small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Distribución Temporal -->
-        <div class="col-lg-4 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-layer-group text-danger me-2"></i>Distribución Temporal
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container" style="position: relative; height: 250px;">
-                        <canvas id="temporalDistributionChart"></canvas>
-                    </div>
-                    <div class="mt-3">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Evolución de niveles de riesgo en el tiempo
-                        </small>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Alertas y resumen -->
-    <div class="row mb-4">
-        {% if conjuntos_sin_evaluar > 0 %}
-        <div class="col-md-6 mb-3">
-            <div class="alert alert-warning border-0 rounded-3">
-                <h6 class="alert-heading">
-                    <i class="fas fa-exclamation-triangle me-2"></i>Conjuntos sin evaluar
-                </h6>
-                <p class="mb-2">Hay {{ conjuntos_sin_evaluar }} conjunto{{ conjuntos_sin_evaluar|pluralize }} sin evaluaciones de seguridad.</p>
-                <a href="{% url 'risk_conjuntos:lista_conjuntos' %}?tiene_evaluaciones=no" class="btn btn-sm btn-warning">
-                    Ver conjuntos sin evaluar
-                </a>
-            </div>
-        </div>
-        {% endif %}
-        
-        {% if alertas_riesgo_alto > 0 %}
-        <div class="col-md-6 mb-3">
-            <div class="alert alert-danger border-0 rounded-3">
-                <h6 class="alert-heading">
-                    <i class="fas fa-shield-alt me-2"></i>Alertas de riesgo alto
-                </h6>
-                <p class="mb-2">{{ alertas_riesgo_alto }} conjunto{{ alertas_riesgo_alto|pluralize }} con score de riesgo alto (< 60%).</p>
-                <a href="{% url 'risk_conjuntos:lista_conjuntos' %}?nivel_riesgo=critico" class="btn btn-sm btn-danger">
-                    Ver conjuntos críticos
-                </a>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-
-    <div class="row">
-        <!-- Top conjuntos -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-trophy text-warning me-2"></i>Top Conjuntos por Score
-                    </h5>
+    <!-- Fila inferior: Top conjuntos + Recientes -->
+    <div class="row g-3 mb-3">
+        <div class="col-lg-7">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-trophy"></i> Top Conjuntos por Score
                 </div>
-                <div class="card-body">
+                <div class="dash-section-body">
                     {% if top_conjuntos %}
-                        {% for conjunto in top_conjuntos %}
-                        <div class="d-flex align-items-center justify-content-between py-2 {% if not forloop.last %}border-bottom{% endif %}">
-                            <div>
-                                <h6 class="mb-1">{{ conjunto.nombre }}</h6>
-                                <small class="text-muted">{{ conjunto.ciudad }} • {{ conjunto.numero_unidades }} unidades</small>
-                            </div>
-                            <div class="text-end">
-                                <div class="h6 mb-0">{{ conjunto.ultimo_score_seguridad }}%</div>
-                                <span class="risk-badge risk-{{ conjunto.get_nivel_riesgo }}">
-                                    {{ conjunto.get_nivel_riesgo_display }}
-                                </span>
-                            </div>
+                    {% for conjunto in top_conjuntos %}
+                    <div class="top-item">
+                        <div class="top-rank"
+                             style="{% if forloop.counter == 1 %}background:#ffd700;color:#6b5700{% elif forloop.counter == 2 %}background:#c0c0c0;color:#555{% elif forloop.counter == 3 %}background:#cd7f32;color:#fff{% else %}background:#1e3a6e;color:#fff{% endif %}">
+                            {{ forloop.counter }}
                         </div>
-                        {% endfor %}
-                        <div class="mt-3 text-center">
-                            <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="btn btn-sm btn-outline-primary">
-                                Ver todos los conjuntos
-                            </a>
+                        <div class="top-info">
+                            <div class="top-name">{{ conjunto.nombre }}</div>
+                            <div class="top-meta">{{ conjunto.ciudad }} &middot; {{ conjunto.numero_unidades }} unidades</div>
                         </div>
+                        <div class="text-end">
+                            <div class="top-score">{{ conjunto.ultimo_score_seguridad }}%</div>
+                            <span class="risk-badge risk-{{ conjunto.get_nivel_riesgo }}">{{ conjunto.get_nivel_riesgo_display }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'risk_conjuntos:lista_conjuntos' %}"
+                           class="btn btn-sm" style="border:1.5px solid #1e3a6e;color:#1e3a6e;border-radius:6px;font-size:.8rem;font-weight:600">
+                            Ver todos los conjuntos
+                        </a>
+                    </div>
                     {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-building text-muted mb-3" style="font-size: 3rem;"></i>
-                            <p class="text-muted">No hay conjuntos evaluados aún.</p>
-                            <a href="{% url 'risk_conjuntos:crear_conjunto' %}" class="btn btn-primary">
-                                <i class="fas fa-plus me-2"></i>Crear primer conjunto
-                            </a>
-                        </div>
+                    <div class="empty-state">
+                        <i class="fas fa-building"></i>
+                        <p>No hay conjuntos evaluados aún</p>
+                        <a href="{% url 'risk_conjuntos:crear_conjunto' %}" class="btn-dash-new" style="font-size:.8rem;padding:.45rem .9rem">
+                            <i class="fas fa-plus"></i> Crear conjunto
+                        </a>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-
-        <!-- Distribución por riesgo -->
-        <div class="col-lg-6 mb-4">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-pie text-info me-2"></i>Distribución por Nivel de Riesgo
-                    </h5>
+        <div class="col-lg-5">
+            <div class="dash-section">
+                <div class="dash-section-header">
+                    <i class="fas fa-clock"></i> Evaluaciones Recientes
                 </div>
-                <div class="card-body">
-                    <div class="distribution-chart">
-                        {% for nivel, cantidad in distribucion_riesgo.items %}
-                        {% if cantidad > 0 %}
-                        <div class="d-flex align-items-center justify-content-between py-2">
-                            <div class="d-flex align-items-center">
-                                <span class="risk-badge risk-{{ nivel }} me-3">
-                                    {% if nivel == 'muy_bajo' %}Muy Bajo
-                                    {% elif nivel == 'bajo' %}Bajo
-                                    {% elif nivel == 'medio' %}Medio
-                                    {% elif nivel == 'alto' %}Alto
-                                    {% elif nivel == 'critico' %}Crítico
-                                    {% else %}Sin Evaluar
-                                    {% endif %}
-                                </span>
-                                <span>{{ cantidad }} conjunto{{ cantidad|pluralize }}</span>
-                            </div>
-                            <div>
-                                {% if total_conjuntos > 0 %}
-                                    {% widthratio cantidad total_conjuntos 100 %}%
-                                {% else %}
-                                    0%
-                                {% endif %}
-                            </div>
+                <div class="dash-section-body">
+                    {% if evaluaciones_recientes %}
+                    {% for evaluacion in evaluaciones_recientes %}
+                    <div class="eval-rec-item">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span style="font-weight:600;color:#1e3a6e;font-size:.81rem">{{ evaluacion.conjunto.nombre }}</span>
+                            <small style="color:#adb5bd;font-size:.72rem">{{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</small>
                         </div>
-                        {% endif %}
-                        {% endfor %}
-                        
-                        <!-- Mostrar mensaje si no hay conjuntos -->
-                        {% if total_conjuntos == 0 %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>
-                            <p class="text-muted">No hay conjuntos registrados</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="risk-badge risk-{{ evaluacion.get_nivel_riesgo }}">
+                                {% if evaluacion.promedio_general %}{{ evaluacion.promedio_general|multiply:100|floatformat:0 }}%{% else %}N/A{% endif %}
+                            </span>
+                            <a href="{% url 'risk_conjuntos:detalle_evaluacion' evaluacion.conjunto.id evaluacion.id %}"
+                               style="font-size:.75rem;color:#1e3a6e;font-weight:600;text-decoration:none">Ver detalle →</a>
                         </div>
-                        {% elif distribucion_riesgo.sin_evaluar == total_conjuntos %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-chart-pie text-muted mb-3" style="font-size: 3rem;"></i>
-                            <p class="text-muted">Todos los conjuntos están sin evaluar</p>
-                        </div>
-                        {% endif %}
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Evaluaciones recientes -->
-    {% if evaluaciones_recientes %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card border-0 rounded-3">
-                <div class="card-header bg-white border-0 pb-0">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-clock text-success me-2"></i>Evaluaciones Recientes
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        {% for evaluacion in evaluaciones_recientes %}
-                        <div class="col-lg-6 mb-3">
-                            <div class="evaluation-item">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="mb-1">{{ evaluacion.conjunto.nombre }}</h6>
-                                    <small class="text-muted">{{ evaluacion.fecha_evaluacion|date:"d/m/Y" }}</small>
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="risk-badge risk-{{ evaluacion.get_nivel_riesgo }}">
-                                        {% if evaluacion.promedio_general %}
-                                            {{ evaluacion.promedio_general|multiply:100|floatformat:0 }}%
-                                        {% else %}
-                                            N/A
-                                        {% endif %}
-                                    </span>
-                                    <a href="{% url 'risk_conjuntos:detalle_evaluacion' evaluacion.conjunto.id evaluacion.id %}" class="btn btn-sm btn-outline-primary">
-                                        Ver detalle
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
+                    {% endfor %}
                     <div class="text-center mt-3">
-                        <a href="{% url 'risk_conjuntos:lista_conjuntos' %}" class="btn btn-outline-primary">
-                            Ver todas las evaluaciones
+                        <a href="{% url 'risk_conjuntos:lista_conjuntos' %}"
+                           class="btn btn-sm" style="border:1.5px solid #1e3a6e;color:#1e3a6e;border-radius:6px;font-size:.8rem;font-weight:600">
+                            Ver todas
                         </a>
                     </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No hay evaluaciones completadas</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
-    {% endif %}
+
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
+// Animar barras de distribución
+document.querySelectorAll(".dist-bar-fill").forEach(function(el) {
+    var w = parseFloat(el.dataset.width) || 0;
+    setTimeout(function() { el.style.width = w + "%"; }, 200);
+});
+
 $(document).ready(function() {
-    // Datos para gráficas desde Django
     const chartData = JSON.parse('{{ chart_data|escapejs }}');
-    
-    // Inicializar gráficas
-    inicializarGraficas();
-    
-    let isUpdating = false;
-    
-    function inicializarGraficas() {
-        // Gráfica de distribución de riesgos (Barras horizontales con tendencias)
-        const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
-        
-        // Colores para niveles de riesgo
-        const riskColors = {
-            'muy_bajo': '#28a745',
-            'bajo': '#17a2b8', 
-            'medio': '#ffc107',
-            'alto': '#fd7e14',
-            'critico': '#dc3545',
-            'sin_evaluar': '#6c757d'
-        };
-        
-        // Etiquetas traducidas en orden de riesgo
-        const riskLabelsOrder = ['muy_bajo', 'bajo', 'medio', 'alto', 'critico', 'sin_evaluar'];
-        const riskLabels = {
-            'muy_bajo': 'Muy Bajo',
-            'bajo': 'Bajo',
-            'medio': 'Medio',
-            'alto': 'Alto',
-            'critico': 'Crítico',
-            'sin_evaluar': 'Sin Evaluar'
-        };
-        
-        const riskData = chartData.distribucion_riesgo;
-        
-        // Preparar datos en orden correcto (TODOS los niveles)
-        const orderedLabels = [];
-        const orderedData = [];
-        const orderedColors = [];
-        const orderedTrends = [];
-        
-        riskLabelsOrder.forEach(level => {
-            const index = riskData.labels.indexOf(level);
-            const value = index !== -1 ? riskData.data[index] : 0;
-            const trend = riskData.tendencias ? riskData.tendencias[level] : 'estable';
-            
-            // Agregar emoji de tendencia al label
-            let trendIcon = '';
-            if (trend === 'subida') trendIcon = ' ↗️';
-            else if (trend === 'bajada') trendIcon = ' ↘️';
-            else trendIcon = ' ➡️';
-            
-            orderedLabels.push(riskLabels[level] + trendIcon);
-            orderedData.push(value);
-            orderedColors.push(riskColors[level]);
-            orderedTrends.push(trend);
-        });
-        
-        new Chart(riskCtx, {
-            type: 'bar',
-            data: {
-                labels: orderedLabels,
-                datasets: [{
-                    label: 'Conjuntos',
-                    data: orderedData,
-                    backgroundColor: orderedColors.map(color => color + '80'), // 50% transparencia
-                    borderColor: orderedColors,
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                indexAxis: 'y', // Barras horizontales
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        callbacks: {
-                            label: function(context) {
-                                const value = context.parsed.x || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0';
-                                const trendText = orderedTrends[context.dataIndex];
-                                let trendLabel = '';
-                                
-                                if (trendText === 'subida') trendLabel = ' (Tendencia: ↗️ Subiendo)';
-                                else if (trendText === 'bajada') trendLabel = ' (Tendencia: ↘️ Bajando)';
-                                else trendLabel = ' (Tendencia: ➡️ Estable)';
-                                
-                                return `${value} conjuntos (${percentage}%)${trendLabel}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            precision: 0
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    y: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-        
-        // Gráfica de evaluaciones mensuales (Bar)
-        const monthlyCtx = document.getElementById('monthlyEvaluationsChart').getContext('2d');
-        
-        new Chart(monthlyCtx, {
-            type: 'bar',
-            data: {
-                labels: chartData.evaluaciones_mensuales.labels,
-                datasets: [{
-                    label: 'Evaluaciones Completadas',
-                    data: chartData.evaluaciones_mensuales.data,
-                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
-                    borderColor: 'rgba(102, 126, 234, 1)',
-                    borderWidth: 2,
-                    borderRadius: 8,
-                    borderSkipped: false,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            precision: 0
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45
-                        }
-                    }
-                }
-            }
-        });
-        
-        // ===== NUEVAS GRÁFICAS DE TENDENCIAS =====
-        
-        // 1. Gráfica de Evolución del Score Promedio
-        const scoreEvolutionCtx = document.getElementById('scoreEvolutionChart').getContext('2d');
-        
-        new Chart(scoreEvolutionCtx, {
-            type: 'line',
-            data: {
-                labels: chartData.evolucion_score_promedio.labels,
-                datasets: [{
-                    label: 'Score Promedio (%)',
-                    data: chartData.evolucion_score_promedio.data,
-                    borderColor: '#17a2b8',
-                    backgroundColor: 'rgba(23, 162, 184, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#17a2b8',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        callbacks: {
-                            label: function(context) {
-                                return `Score: ${context.parsed.y}%`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45
-                        }
-                    }
-                }
-            }
-        });
-        
-        // 2. Gráfica de Tasa de Cobertura
-        const coverageCtx = document.getElementById('coverageChart').getContext('2d');
-        
-        new Chart(coverageCtx, {
-            type: 'line',
-            data: {
-                labels: chartData.tasa_cobertura.labels,
-                datasets: [{
-                    label: 'Tasa de Cobertura (%)',
-                    data: chartData.tasa_cobertura.data,
-                    borderColor: '#ffc107',
-                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#ffc107',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff',
-                        callbacks: {
-                            label: function(context) {
-                                return `Cobertura: ${context.parsed.y}%`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45
-                        }
-                    }
-                }
-            }
-        });
-        
-        // 3. Gráfica de Distribución Temporal (Líneas Múltiples)
-        const temporalCtx = document.getElementById('temporalDistributionChart').getContext('2d');
-        
-        const riskColorsTemp = {
-            'muy_bajo': '#28a745',
-            'bajo': '#17a2b8',
-            'medio': '#ffc107',
-            'alto': '#fd7e14',
-            'critico': '#dc3545',
-            'sin_evaluar': '#6c757d'
-        };
-        
-        const datasets = [];
-        const riskOrder = ['muy_bajo', 'bajo', 'medio', 'alto', 'critico', 'sin_evaluar'];
-        const riskLabelsTemp = {
-            'muy_bajo': 'Muy Bajo',
-            'bajo': 'Bajo',
-            'medio': 'Medio',
-            'alto': 'Alto',
-            'critico': 'Crítico',
-            'sin_evaluar': 'Sin Evaluar'
-        };
-        
-        riskOrder.forEach(level => {
-            datasets.push({
-                label: riskLabelsTemp[level],
-                data: chartData.distribucion_temporal[level],
-                borderColor: riskColorsTemp[level],
-                backgroundColor: riskColorsTemp[level] + '20',
+
+    // Registrar plugin de etiquetas
+    Chart.register(ChartDataLabels);
+
+    Chart.defaults.animation = false;
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    const navyColor = '#1e3a6e';
+    const riskColors = {
+        'muy_bajo':   '#28a745',
+        'bajo':       '#17a2b8',
+        'medio':      '#ffc107',
+        'alto':       '#fd7e14',
+        'critico':    '#dc3545',
+        'sin_evaluar':'#6c757d'
+    };
+    const riskLabels = {
+        'muy_bajo':   'Muy Bajo',
+        'bajo':       'Bajo',
+        'medio':      'Medio',
+        'alto':       'Alto',
+        'critico':    'Crítico',
+        'sin_evaluar':'Sin Evaluar'
+    };
+    const riskOrder = ['muy_bajo','bajo','medio','alto','critico','sin_evaluar'];
+
+    const riskData = chartData.distribucion_riesgo;
+    const orderedLabels = [], orderedData = [], orderedColors = [];
+    riskOrder.forEach(function(level) {
+        const idx = riskData.labels.indexOf(level);
+        orderedLabels.push(riskLabels[level]);
+        orderedData.push(idx !== -1 ? riskData.data[idx] : 0);
+        orderedColors.push(riskColors[level]);
+    });
+
+    // ── Barras horizontales distribución ──
+    const riskCtx = document.getElementById('riskDistributionChart').getContext('2d');
+    new Chart(riskCtx, {
+        type: 'bar',
+        data: {
+            labels: orderedLabels,
+            datasets: [{
+                label: 'Conjuntos',
+                data: orderedData,
+                backgroundColor: orderedColors.map(function(c) { return c + 'cc'; }),
+                borderColor: orderedColors,
                 borderWidth: 2,
-                fill: false,
-                tension: 0.4,
-                pointBackgroundColor: riskColorsTemp[level],
-                pointBorderColor: '#fff',
-                pointBorderWidth: 1,
-                pointRadius: 4
-            });
-        });
-        
-        new Chart(temporalCtx, {
-            type: 'line',
-            data: {
-                labels: chartData.distribucion_temporal.labels,
-                datasets: datasets
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            layout: { padding: { right: 60 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(30,58,110,.9)',
+                    callbacks: {
+                        label: function(ctx) {
+                            const total = ctx.dataset.data.reduce(function(a,b){return a+b;}, 0);
+                            const pct = total > 0 ? ((ctx.parsed.x / total) * 100).toFixed(1) : '0';
+                            return ctx.parsed.x + ' conj. (' + pct + '%)';
+                        }
+                    }
+                },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'right',
+                    color: '#495057',
+                    font: { size: 11, weight: '600' },
+                    formatter: function(value, ctx) {
+                        if (!value) return '';
+                        const total = ctx.dataset.data.reduce(function(a,b){return a+b;}, 0);
+                        const pct = total > 0 ? ((value / total) * 100).toFixed(0) : '0';
+                        return value + ' (' + pct + '%)';
+                    }
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom',
-                        labels: {
-                            usePointStyle: true,
-                            padding: 10,
-                            font: {
-                                size: 10
-                            }
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            maxRotation: 45
-                        }
-                    }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                }
-            }
-        });
-    }
-    
-    function actualizarEstadisticas() {
-        if (isUpdating) return; // Evitar requests múltiples
-        
-        isUpdating = true;
-        
-        $.get('{% url "risk_conjuntos:api_dashboard_stats" %}')
-            .done(function(data) {
-                if (data && data.success) {
-                    // Actualizar estadísticas principales
-                    if (data.stats) {
-                        $('.stats-number').eq(0).text(data.stats.total_conjuntos || '0');
-                        $('.stats-number').eq(1).text(data.stats.total_evaluaciones || '0');
-                        $('.stats-number').eq(2).text((data.stats.score_promedio || 0) + '%');
-                        $('.stats-number').eq(3).text(data.stats.evaluaciones_mes || '0');
-                    }
-                    
-                    // Actualizar alertas si hay cambios
-                    if (data.alertas) {
-                        actualizarAlertas(data.alertas);
-                    }
-                    
-                    console.log('✅ Estadísticas actualizadas:', new Date().toLocaleTimeString());
-                } else {
-                    console.log('⚠️ No hay datos nuevos para actualizar');
-                }
-            })
-            .fail(function(xhr, status, error) {
-                console.error('❌ Error actualizando estadísticas:', error);
-            })
-            .always(function() {
-                isUpdating = false;
-            });
-    }
-    
-    function actualizarAlertas(alertas) {
-        // Actualizar contador de conjuntos sin evaluar
-        if (alertas.conjuntos_sin_evaluar !== undefined) {
-            const alertSinEvaluar = $('.alert-warning');
-            if (alertas.conjuntos_sin_evaluar > 0) {
-                alertSinEvaluar.find('p').text(
-                    `Hay ${alertas.conjuntos_sin_evaluar} conjunto${alertas.conjuntos_sin_evaluar > 1 ? 's' : ''} sin evaluaciones de seguridad.`
-                );
-                alertSinEvaluar.show();
-            } else {
-                alertSinEvaluar.hide();
+            scales: {
+                x: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0,0,0,.06)' } },
+                y: { grid: { display: false } }
             }
         }
-        
-        // Actualizar contador de riesgo alto
-        if (alertas.alertas_riesgo_alto !== undefined) {
-            const alertRiesgoAlto = $('.alert-danger');
-            if (alertas.alertas_riesgo_alto > 0) {
-                alertRiesgoAlto.find('p').text(
-                    `${alertas.alertas_riesgo_alto} conjunto${alertas.alertas_riesgo_alto > 1 ? 's' : ''} con score de riesgo alto (< 60%).`
-                );
-                alertRiesgoAlto.show();
-            } else {
-                alertRiesgoAlto.hide();
+    });
+
+    // ── Donut pie ──
+    const filteredIdx = orderedData.reduce(function(acc, v, i) { if (v > 0) acc.push(i); return acc; }, []);
+    const pieCtx = document.getElementById('riskPieChart').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: filteredIdx.map(function(i) { return orderedLabels[i]; }),
+            datasets: [{
+                data: filteredIdx.map(function(i) { return orderedData[i]; }),
+                backgroundColor: filteredIdx.map(function(i) { return orderedColors[i]; }),
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverBorderWidth: 3
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(30,58,110,.9)',
+                    callbacks: { label: function(ctx) { return ctx.label + ': ' + ctx.parsed; } }
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: { size: 11, weight: 'bold' },
+                    textShadowBlur: 4,
+                    textShadowColor: 'rgba(0,0,0,.4)',
+                    formatter: function(value, ctx) {
+                        const total = ctx.dataset.data.reduce(function(a,b){return a+b;}, 0);
+                        const pct = total > 0 ? ((value / total) * 100).toFixed(0) : '0';
+                        return pct + '%';
+                    }
+                }
+            },
+            cutout: '62%'
+        }
+    });
+
+    // ── Evaluaciones por mes ──
+    const monthCtx = document.getElementById('monthlyEvaluationsChart').getContext('2d');
+    new Chart(monthCtx, {
+        type: 'bar',
+        data: {
+            labels: chartData.evaluaciones_mensuales.labels,
+            datasets: [{
+                label: 'Evaluaciones',
+                data: chartData.evaluaciones_mensuales.data,
+                backgroundColor: navyColor + 'bb',
+                borderColor: navyColor,
+                borderWidth: 2,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            layout: { padding: { top: 20 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: 'rgba(30,58,110,.9)' },
+                datalabels: {
+                    anchor: 'end',
+                    align: 'top',
+                    color: navyColor,
+                    font: { size: 11, weight: '700' },
+                    formatter: function(value) {
+                        return value > 0 ? value : '';
+                    }
+                }
+            },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0,0,0,.06)' } },
+                x: { grid: { display: false } }
             }
         }
-    }
-    
-    // Actualizar cada 60 segundos (reducido de 30 para menos carga)
-    const updateInterval = setInterval(actualizarEstadisticas, 60000);
-    
-    // Limpiar interval cuando la página se cierra
-    $(window).on('beforeunload', function() {
-        clearInterval(updateInterval);
     });
-    
-    // Actualizar al enfocar la página (cuando el usuario vuelve)
-    $(window).on('focus', function() {
-        setTimeout(actualizarEstadisticas, 1000);
+
+    // ── Score evolución (línea) ──
+    const scoreCtx = document.getElementById('scoreEvolutionChart').getContext('2d');
+    new Chart(scoreCtx, {
+        type: 'line',
+        data: {
+            labels: chartData.evolucion_score_promedio.labels,
+            datasets: [{
+                label: 'Score Promedio %',
+                data: chartData.evolucion_score_promedio.data,
+                borderColor: '#e94560',
+                backgroundColor: 'rgba(233,69,96,.1)',
+                borderWidth: 2.5,
+                pointBackgroundColor: '#e94560',
+                pointRadius: 4,
+                fill: true,
+                tension: .35
+            }]
+        },
+        options: {
+            layout: { padding: { top: 20 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { backgroundColor: 'rgba(30,58,110,.9)' },
+                datalabels: {
+                    anchor: 'top',
+                    align: 'top',
+                    color: '#e94560',
+                    font: { size: 10, weight: '700' },
+                    formatter: function(value) {
+                        return value > 0 ? value + '%' : '';
+                    }
+                }
+            },
+            scales: {
+                y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,.06)' } },
+                x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } }
+            }
+        }
     });
-    
-    console.log('🚀 Dashboard inicializado - actualizaciones automáticas activas');
 });
 </script>
 {% endblock %}

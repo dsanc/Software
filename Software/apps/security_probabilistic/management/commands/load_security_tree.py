@@ -152,39 +152,48 @@ class Command(BaseCommand):
                     preguntas_map[p_data['id_ref']] = pregunta
 
                 # 3. Definir opciones y flujo
-                # Formato: (id_pregunta_origen, texto_opcion, id_pregunta_destino_o_None)
+                # Formato: (id_pregunta_origen, texto_opcion, id_pregunta_destino_o_None, valor_ponderado, orden, es_final)
                 flujo = [
-                    (6, 'SI', 7), (6, 'NO', 7),
-                    (7, 'SI', 8), (7, 'NO', 10),
-                    (8, 'Menos de 3 meses', 9), (8, 'De 4 a 10 meses', 9), (8, 'Mas de 10 meses', 9), (8, 'NO', 9),
-                    (9, 'Menos de 3 meses', 10), (9, 'De 4 a 10 meses', 10), (9, 'Mas de 10 meses', 10), (9, 'NO', 10),
-                    (10, 'SI', 11), (10, 'NO', 18),
-                    (11, 'SI', 12), (11, 'NO', 18),
-                    (12, 'SI', 13), (12, 'NO', 13),
-                    (13, 'SI', 14), (13, 'NO', 14),
-                    (14, 'SI', 15), (14, 'NO', 15),
-                    (15, 'SI', 16), (15, 'NO', 16),
-                    (16, 'SI', 17), (16, 'NO', 17),
-                    (17, 'SI', 18), (17, 'NO', 18),
-                    (18, 'SI', 19), (18, 'NO', 19),
-                    (19, 'SI', 20), (19, 'NO', 20),
-                    (20, 'SI', 21), (20, 'NO', 21),
-                    (21, 'SI', 22), (21, 'NO', 22),
-                    (22, 'SI', 23), (22, 'NO', 23),
-                    (23, 'SI', None), (23, 'NO', None),
+                    (6, 'SI', 7,  1.000, 1, False), (6, 'NO', 7,  0.000, 2, False),
+                    (7, 'SI', 8,  1.000, 1, False), (7, 'NO', 10, 0.000, 2, False),
+                    (8, 'Menos de 3 meses', 9, 0.250, 1, False),
+                    (8, 'De 4 a 10 meses',  9, 0.500, 2, False),
+                    (8, 'Mas de 10 meses',  9, 0.750, 3, False),
+                    (8, 'NO',               9, 0.000, 4, False),
+                    (9, 'Menos de 3 meses', 10, 0.250, 1, False),
+                    (9, 'De 4 a 10 meses',  10, 0.500, 2, False),
+                    (9, 'Mas de 10 meses',  10, 0.750, 3, False),
+                    (9, 'NO',               10, 0.000, 4, False),
+                    (10, 'SI', 11, 1.000, 1, False), (10, 'NO', 18, 0.000, 2, False),
+                    (11, 'SI', 12, 1.000, 1, False), (11, 'NO', 18, 0.000, 2, False),
+                    (12, 'SI', 13, 1.000, 1, False), (12, 'NO', 13, 0.000, 2, False),
+                    (13, 'SI', 14, 1.000, 1, False), (13, 'NO', 14, 0.000, 2, False),
+                    (14, 'SI', 15, 1.000, 1, False), (14, 'NO', 15, 0.000, 2, False),
+                    (15, 'SI', 16, 1.000, 1, False), (15, 'NO', 16, 0.000, 2, False),
+                    (16, 'SI', 17, 1.000, 1, False), (16, 'NO', 17, 0.000, 2, False),
+                    (17, 'SI', 18, 1.000, 1, False), (17, 'NO', 18, 0.000, 2, False),
+                    (18, 'SI', 19, 1.000, 1, False), (18, 'NO', 19, 0.000, 2, False),
+                    (19, 'SI', 20, 1.000, 1, False), (19, 'NO', 20, 0.000, 2, False),
+                    (20, 'SI', 21, 1.000, 1, False), (20, 'NO', 21, 0.000, 2, False),
+                    (21, 'SI', 22, 1.000, 1, False), (21, 'NO', 22, 0.000, 2, False),
+                    (22, 'SI', 23, 1.000, 1, False), (22, 'NO', 23, 0.000, 2, False),
+                    (23, 'SI', None, 1.000, 1, True), (23, 'NO', None, 0.000, 2, True),
                 ]
 
                 # Crear opciones y conectar
-                for id_origen, texto, id_destino in flujo:
+                for id_origen, texto, id_destino, valor, orden, es_final in flujo:
                     pregunta_origen = preguntas_map.get(id_origen)
                     pregunta_destino = preguntas_map.get(id_destino) if id_destino else None
-                    
+
                     if pregunta_origen:
                         OpcionRespuesta.objects.update_or_create(
                             pregunta=pregunta_origen,
                             texto=texto,
                             defaults={
-                                'pregunta_siguiente': pregunta_destino
+                                'pregunta_siguiente': pregunta_destino,
+                                'valor_ponderado': valor,
+                                'orden': orden,
+                                'es_respuesta_final': es_final,
                             }
                         )
 

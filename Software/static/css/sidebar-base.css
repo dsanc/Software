@@ -1,0 +1,1141 @@
+﻿    /* =================================================================
+       CSS CUSTOM PROPERTIES PARA MEJOR MANTENIBILIDAD
+       ================================================================= */
+    :root {
+        /* Sidebar Dimensions */
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --sidebar-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Colors and Themes */
+        --sidebar-bg-gradient: linear-gradient(145deg, #0f1419 0%, #1a202c 50%, #2d3748 100%);
+        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --text-primary: #f8fafc;
+        --text-secondary: #cbd5e0;
+        --text-muted: #6c757d;
+        
+        /* Interactive States */
+        --hover-bg: rgba(255, 255, 255, 0.08);
+        --active-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        --sidebar-box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        --sidebar-border: 1px solid rgba(255, 255, 255, 0.08);
+        
+        /* Responsive Breakpoints */
+        --mobile-breakpoint: 991px;
+        
+        /* Performance */
+        --gpu-acceleration: translateZ(0);
+    }
+    
+    /* =================================================================
+       SIDEBAR PRINCIPAL - ESTILOS CRÍTICOS
+       ================================================================= */
+    .modern-sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: var(--sidebar-width) !important;
+        height: 100vh !important;
+        background: var(--sidebar-bg-gradient) !important;
+        z-index: 1040 !important;
+        overflow: hidden !important;
+        transition: all var(--sidebar-transition) !important;
+        box-shadow: var(--sidebar-box-shadow) !important;
+        border-right: var(--sidebar-border) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        
+        /* Performance optimization */
+        will-change: width, transform !important;
+        transform: var(--gpu-acceleration) !important; /* Force hardware acceleration */
+        backface-visibility: hidden !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+    }
+    
+    .modern-sidebar.collapsed {
+        width: var(--sidebar-collapsed-width) !important;
+    }
+
+    /* =================================================================
+       HOVER EFFECTS Y ESTADOS INTERACTIVOS
+       ================================================================= */
+    .modern-sidebar.collapsed:hover,
+    .modern-sidebar.collapsed.hover-expanded {
+        width: var(--sidebar-width) !important;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4) !important;
+    }
+    
+    /* Mostrar texto cuando hace hover en sidebar colapsado */
+    .modern-sidebar.collapsed .nav-text,
+    .modern-sidebar.collapsed .logo-text,
+    .modern-sidebar.collapsed .submenu-indicator,
+    .modern-sidebar.collapsed .nav-badge,
+    .modern-sidebar.collapsed .nav-shortcut {
+        display: none !important; /* FIX DEFINITIVO: Eliminar del layout */
+        opacity: 0 !important;
+        visibility: hidden !important;
+        max-width: 0 !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease, max-width 0.2s ease !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .nav-text,
+    .modern-sidebar.collapsed:hover .logo-text,
+    .modern-sidebar.collapsed:hover .submenu-indicator,
+    .modern-sidebar.collapsed:hover .nav-badge,
+    .modern-sidebar.collapsed:hover .nav-shortcut,
+    .modern-sidebar.collapsed.hover-expanded .nav-text,
+    .modern-sidebar.collapsed.hover-expanded .logo-text,
+    .modern-sidebar.collapsed.hover-expanded .submenu-indicator,
+    .modern-sidebar.collapsed.hover-expanded .nav-badge,
+    .modern-sidebar.collapsed.hover-expanded .nav-shortcut {
+        display: inline !important; /* Restaurar para hover */
+        opacity: 1 !important;
+        visibility: visible !important;
+        max-width: 500px !important;
+        transition: opacity 0.3s ease 0.15s, visibility 0.3s ease 0.15s, max-width 0.3s ease !important;
+    }
+    
+    /* Ocultar detalles del usuario cuando está colapsado */
+    .modern-sidebar.collapsed .user-details {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        overflow: hidden !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-details,
+    .modern-sidebar.collapsed.hover-expanded .user-details {
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+        transition: opacity 0.3s ease 0.1s, visibility 0.3s ease 0.1s !important;
+    }
+    
+    /* Mejorar la animación de transición para user-details */
+    .modern-sidebar .user-details {
+        transition: all 0.3s ease !important;
+    }
+    
+    /* CENTRADO PERFECTO DEL AVATAR CUANDO ESTÁ COLAPSADO */
+    .modern-sidebar.collapsed .user-info {
+        justify-content: center !important;
+        gap: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed .user-avatar {
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: relative !important;
+    }
+    
+    /* Centrar específicamente la imagen y las iniciales cuando está colapsado */
+    .modern-sidebar.collapsed .user-avatar .avatar-image,
+    .modern-sidebar.collapsed .user-avatar .avatar-initials {
+        margin: 0 !important;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 40px !important;
+        height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-avatar,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar {
+        margin: 0 !important;
+    }
+    
+    /* Restaurar posicionamiento normal de imagen/iniciales cuando se hace hover */
+    .modern-sidebar.collapsed:hover .user-avatar .avatar-image,
+    .modern-sidebar.collapsed:hover .user-avatar .avatar-initials,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar .avatar-image,
+    .modern-sidebar.collapsed.hover-expanded .user-avatar .avatar-initials {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Centrar iconos cuando está colapsado */
+    .modern-sidebar.collapsed .nav-link {
+        justify-content: center !important;
+        padding: 12px 8px !important;
+        gap: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .nav-link,
+    .modern-sidebar.collapsed.hover-expanded .nav-link {
+        justify-content: flex-start !important;
+        padding: 12px 16px !important;
+        gap: 12px !important;
+    }
+    
+    /* Ocultar submenús cuando está colapsado */
+    .modern-sidebar.collapsed .submenu {
+        display: none !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .submenu,
+    .modern-sidebar.collapsed.hover-expanded .submenu {
+        display: block !important;
+    }
+    
+    /* =================================================================
+       TOOLTIPS PARA NAVEGACI�"N COLAPSADA
+       ================================================================= */
+    .sidebar-tooltip {
+        position: absolute !important;
+        left: 100% !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: rgba(0, 0, 0, 0.9) !important;
+        color: var(--text-primary) !important;
+        padding: 6px 12px !important;
+        border-radius: 6px !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap !important;
+        margin-left: 10px !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+        z-index: 1050 !important;
+        transition: opacity var(--sidebar-transition) !important;
+    }
+    
+    .modern-sidebar.collapsed .nav-link:hover .sidebar-tooltip {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* NO mostrar tooltips cuando el sidebar está expandido por hover */
+    .modern-sidebar.collapsed:hover .sidebar-tooltip,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-tooltip {
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+    
+    /* Header del sidebar */
+    .sidebar-header {
+        padding: 20px !important;
+        background: rgba(255, 255, 255, 0.02) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 70px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Logo del sidebar */
+    .logo-icon {
+        width: 32px !important;
+        height: 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border-radius: 8px !important;
+        color: #fff !important;
+        font-size: 1.2rem !important;
+        flex-shrink: 0 !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        position: relative !important;
+    }
+
+    /* Estilos para diferentes tipos de logo */
+    .sidebar-logo-image,
+    .logo-text-alternative {
+        transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        object-fit: contain !important;
+    }
+
+    .logo-text-alternative {
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 8px !important;
+        text-align: center !important;
+        line-height: 1.1 !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* Hover effect para logo cuando está colapsado */
+    .modern-sidebar.collapsed .logo-icon:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    }
+
+    /* Animación para cambio de logo */
+    .logo-icon.changing {
+        transform: scale(0.9) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+    }
+
+    .logo-icon.changing .sidebar-logo-image,
+    .logo-icon.changing .logo-text-alternative {
+        opacity: 0.7 !important;
+        filter: blur(1px) !important;
+    }
+
+    /* Indicador visual de que el logo es clickeable */
+    .modern-sidebar.collapsed .logo-icon {
+        position: relative !important;
+    }
+
+    .modern-sidebar.collapsed .logo-icon::after {
+        content: '�Y""' !important;
+        position: absolute !important;
+        top: -2px !important;
+        right: -2px !important;
+        font-size: 8px !important;
+        opacity: 0 !important;
+        transition: opacity 0.3s ease !important;
+        pointer-events: none !important;
+        background: rgba(255,255,255,0.9) !important;
+        border-radius: 50% !important;
+        width: 12px !important;
+        height: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 6px !important;
+    }
+
+    .modern-sidebar.collapsed .logo-icon:hover::after {
+        opacity: 1 !important;
+    }
+
+    /* Cuando está colapsado, centrar el logo */
+    .modern-sidebar.collapsed .sidebar-header {
+        justify-content: center !important;
+        padding: 20px 10px !important;
+    }
+    
+    .modern-sidebar.collapsed .sidebar-logo {
+        justify-content: center !important;
+        gap: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-header,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-header {
+        justify-content: space-between !important;
+        padding: 20px !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-logo,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-logo {
+        gap: 12px !important;
+    }
+    
+    /* Ocultar toggle button cuando está colapsado */
+    .modern-sidebar.collapsed .sidebar-toggle {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-toggle,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-toggle {
+        opacity: 1 !important;
+        visibility: visible !important;
+        width: auto !important;
+        padding: 8px !important;
+    }
+    
+    .sidebar-logo {
+        color: #f8fafc !important;
+        text-decoration: none !important;
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .sidebar-toggle {
+        background: none !important;
+        border: none !important;
+        color: #cbd5e0 !important;
+        font-size: 1.2rem !important;
+        padding: 8px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        flex-shrink: 0 !important;
+    }
+    
+    .sidebar-toggle:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        color: #f8fafc !important;
+    }
+    
+    /* Navegación */
+    .sidebar-nav-container {
+        flex: 1 !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        padding: 12px 0 !important;
+    }
+    
+    /* Scrollbar personalizado */
+    .sidebar-nav-container::-webkit-scrollbar {
+        width: 6px !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-radius: 3px !important;
+    }
+    
+    .sidebar-nav-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .sidebar-nav {
+        padding: 0 !important;
+        margin: 0 !important;
+        list-style: none !important;
+    }
+    
+    .sidebar-nav .nav-item {
+        margin: 4px 12px !important;
+        position: relative !important;
+    }
+    
+    /* Cuando está colapsado, menos margen */
+    .modern-sidebar.collapsed .sidebar-nav .nav-item {
+        margin: 4px 8px !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-nav .nav-item,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-nav .nav-item {
+        margin: 4px 12px !important;
+    }
+    
+    .sidebar-nav .nav-link {
+        display: flex !important;
+        align-items: center !important;
+        padding: 12px 16px !important;
+        color: #cbd5e0 !important;
+        text-decoration: none !important;
+        border-radius: 12px !important;
+        transition: all 0.2s ease !important;
+        position: relative !important;
+        gap: 12px !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        /* Performance optimization for hover effects */
+        will-change: background-color, color, transform !important;
+        transform: translateZ(0) !important;
+    }
+    
+    .sidebar-nav .nav-link:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #f8fafc !important;
+        transform: translateX(4px) !important;
+    }
+    
+    .sidebar-nav .nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    }
+    
+    .nav-icon {
+        font-size: 1.1rem !important;
+        width: 1.25rem !important;
+        min-width: 20px !important;
+        text-align: center !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        margin-right: 0.75rem !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    /* Iconos siempre visibles incluso cuando está colapsado */
+    .modern-sidebar.collapsed .nav-icon,
+    .modern-sidebar.collapsed .logo-icon {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    .nav-text {
+        flex: 1 !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        min-width: 0 !important;
+    }
+    
+    /* Layout principal */
+    body.sidebar-layout {
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+        transition: margin-left var(--sidebar-transition) !important;
+    }
+
+    .main-content {
+        margin-left: var(--sidebar-width) !important;
+        min-height: 100vh !important;
+        transition: margin-left var(--sidebar-transition) !important;
+    }
+
+    body.sidebar-collapsed .main-content {
+        margin-left: var(--sidebar-collapsed-width) !important;
+    }    /* TOPBAR / NAVBAR */
+    .main-topbar {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e5e7eb !important;
+        padding: 1rem 1.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1030 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    }
+    
+    .topbar-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 1rem !important;
+    }
+    
+    .topbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        color: #1f2937 !important;
+    }
+    
+    .topbar-actions {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+    }
+    
+    .topbar-actions .btn {
+        background: none !important;
+        border: none !important;
+        color: #6b7280 !important;
+        padding: 0.5rem !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        position: relative !important;
+    }
+    
+    .topbar-actions .btn:hover {
+        background: #f3f4f6 !important;
+        color: #1f2937 !important;
+    }
+    
+    .topbar-actions .btn i {
+        font-size: 1.2rem !important;
+    }
+    
+    /* Dropdown del navbar */
+    .topbar-actions .dropdown-menu {
+        border: 1px solid #e5e7eb !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+        border-radius: 12px !important;
+        padding: 0.5rem !important;
+        min-width: 250px !important;
+    }
+    
+    .topbar-actions .dropdown-item {
+        border-radius: 8px !important;
+        padding: 0.5rem 1rem !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .topbar-actions .dropdown-item:hover {
+        background: #f3f4f6 !important;
+    }
+    
+    /* Badge del navbar */
+    .topbar-actions .badge {
+        font-size: 0.65rem !important;
+        padding: 0.25em 0.5em !important;
+    }
+    
+    /* Sidebar User (footer del sidebar) */
+    .sidebar-user {
+        padding: 1rem !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        margin-top: auto !important;
+        min-height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Cuando está colapsado, centrar todo en el sidebar-user */
+    .modern-sidebar.collapsed .sidebar-user {
+        justify-content: center !important;
+        padding: 1rem 0.5rem !important;
+        display: flex !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .sidebar-user,
+    .modern-sidebar.collapsed.hover-expanded .sidebar-user {
+        justify-content: flex-start !important;
+        padding: 1rem !important;
+    }
+    
+    /* Cuando está colapsado, centrar el user-info */
+    .modern-sidebar.collapsed .user-info {
+        justify-content: center !important;
+        gap: 0 !important;
+        width: auto !important;
+        flex: none !important;
+    }
+    
+    .modern-sidebar.collapsed:hover .user-info,
+    .modern-sidebar.collapsed.hover-expanded .user-info {
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        width: 100% !important;
+        flex: 1 !important;
+    }
+    
+    .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .user-avatar .avatar-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+    
+    .user-avatar .avatar-fallback {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+    }
+    
+    .user-avatar .avatar-initials {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 1 !important;
+    }
+    
+    .user-details {
+        flex: 1 !important;
+        overflow: hidden !important;
+        min-width: 0 !important;
+    }
+    
+    .user-name {
+        margin: 0 !important;
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .user-role {
+        margin: 0 !important;
+        color: #cbd5e0 !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    /* Submenús */
+    .submenu {
+        list-style: none !important;
+        padding: 0 0 0 2rem !important;
+        margin: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        transition: max-height 0.3s ease !important;
+    }
+    
+    .has-submenu.active .submenu {
+        max-height: 500px !important;
+    }
+    
+    .submenu-indicator {
+        margin-left: auto !important;
+        font-size: 0.75rem !important;
+        transition: transform 0.3s ease !important;
+    }
+    
+    .has-submenu.active .submenu-indicator {
+        transform: rotate(90deg) !important;
+    }
+    
+    /* Mobile */
+    @media (max-width: 991px) {
+        .modern-sidebar {
+            transform: translateX(-100%) !important;
+        }
+        
+        .modern-sidebar.mobile-open {
+            transform: translateX(0) !important;
+        }
+        
+        .main-content {
+            margin-left: 0 !important;
+        }
+        
+        .topbar-title {
+            font-size: 1.25rem !important;
+        }
+
+        .sidebar-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.5) !important;
+            z-index: 1039 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        .sidebar-overlay.active {
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+    }
+    
+    /* Estilos mejorados para navegación simplificada */
+    .nav-external {
+        font-size: 0.75rem !important;
+        margin-left: auto !important;
+        opacity: 0.7 !important;
+        transition: opacity 0.3s ease !important;
+    }
+    
+    .nav-link:hover .nav-external {
+        opacity: 1 !important;
+    }
+    
+    .logout-item .nav-link,
+    .logout-item button {
+        color: #f87171 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .logout-item .nav-link:hover,
+    .logout-item button:hover {
+        background: rgba(248, 113, 113, 0.1) !important;
+        color: #ef4444 !important;
+    }
+    
+    /* Estilos específicos para botones de logout */
+    .logout-item button {
+        display: flex !important;
+        align-items: center !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .logout-item button:focus {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    .nav-badge {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+        color: white !important;
+        font-size: 0.7rem !important;
+        padding: 0.2rem 0.5rem !important;
+        border-radius: 0.75rem !important;
+        font-weight: 500 !important;
+        margin-left: auto !important;
+        box-shadow: 0 1px 3px rgba(59, 130, 246, 0.3) !important;
+        animation: pulse-subtle 2s infinite !important;
+    }
+    
+    @keyframes pulse-subtle {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.05);
+            opacity: 0.9;
+        }
+    }
+    
+    .nav-shortcut {
+        background: rgba(255, 255, 255, 0.1) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-size: 0.65rem !important;
+        padding: 0.2rem 0.4rem !important;
+        border-radius: 0.375rem !important;
+        margin-left: auto !important;
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace !important;
+        font-weight: 500 !important;
+    }
+    
+    .nav-separator {
+        height: 1px !important;
+        background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%) !important;
+        margin: 0.5rem 1rem !important;
+        border: none !important;
+    }
+    
+    /* Mejoras en los iconos */
+    .nav-link:hover .nav-icon,
+    .nav-link.active .nav-icon {
+        color: #ffffff !important;
+        transform: scale(1.1) !important;
+    }
+    
+    /* Spacing mejorado para nav-items */
+    .sidebar-nav .nav-item {
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .sidebar-nav .nav-item:last-child {
+        margin-bottom: 0 !important;
+    }
+    
+    /* DEBUGGING: Asegurar visibilidad del sidebar-user */
+    .sidebar-user,
+    .sidebar-user * {
+        box-sizing: border-box !important;
+    }
+    
+    .sidebar-user .user-info,
+    .sidebar-user .user-avatar,
+    .sidebar-user .user-details {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Mejorar especificidad de estilos del sidebar-user */
+    .modern-sidebar .sidebar-user {
+        padding: 1rem !important;
+        background: rgba(0, 0, 0, 0.2) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        margin-top: auto !important;
+        min-height: 72px !important;
+        display: flex !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    .modern-sidebar .user-info {
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+    
+    /* Asegurar que el avatar sea siempre visible con mayor especificidad */
+    .modern-sidebar .user-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        flex-shrink: 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        overflow: hidden !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    /* Estilos mejorados para la imagen del avatar */
+    .modern-sidebar .user-avatar .avatar-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        border-radius: 50% !important;
+        display: block !important;
+        position: relative !important;
+        z-index: 2 !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+    }
+    
+    /* Asegurar posicionamiento normal cuando NO está colapsado */
+    .modern-sidebar:not(.collapsed) .user-avatar .avatar-image,
+    .modern-sidebar:not(.collapsed) .user-avatar .avatar-initials {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        width: 100% !important;
+        height: 100% !important;
+    }
+    
+    /* Estilos mejorados para las iniciales del avatar */
+    .modern-sidebar .user-avatar .avatar-initials {
+        width: 100% !important;
+        height: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 0.9rem !important;
+        border-radius: 50% !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        z-index: 1 !important;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }
+    
+    /* Mejorar especificidad de los detalles del usuario */
+    .modern-sidebar .user-details {
+        flex: 1 !important;
+        overflow: hidden !important;
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        gap: 2px !important;
+    }
+    
+    .modern-sidebar .user-name {
+        margin: 0 !important;
+        color: #f8fafc !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.3 !important;
+        padding: 0 !important;
+    }
+    
+    .modern-sidebar .user-role {
+        margin: 0 !important;
+        color: #cbd5e0 !important;
+        font-size: 0.75rem !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        line-height: 1.2 !important;
+        padding: 0 !important;
+        font-weight: 500 !important;
+        opacity: 0.9 !important;
+    }
+    
+    /* Estilos específicos para diferentes roles de usuario (data-role) */
+    .modern-sidebar .user-role[data-role="superadmin"] {
+        color: #fbbf24 !important;
+        font-weight: 600 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="admin"] {
+        color: #60a5fa !important;
+        font-weight: 600 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="user"] {
+        color: #34d399 !important;
+    }
+    
+    .modern-sidebar .user-role[data-role="guest"] {
+        color: #9ca3af !important;
+        font-style: italic !important;
+    }
+    
+    /* Indicador visual para diferentes roles */
+    .modern-sidebar .user-role::before {
+        content: "�-�" !important;
+        margin-right: 4px !important;
+        font-size: 0.6rem !important;
+        opacity: 0.8 !important;
+    }
+    
+    /* Indicador de estado online */
+    .user-status-indicator {
+        display: inline-block !important;
+        width: 8px !important;
+        height: 8px !important;
+        background-color: #10b981 !important;
+        border-radius: 50% !important;
+        margin-right: 6px !important;
+        animation: pulse-online 2s infinite !important;
+        box-shadow: 0 0 3px rgba(16, 185, 129, 0.5) !important;
+    }
+    
+    @keyframes pulse-online {
+        0% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Estilos para usuarios no autenticados */
+    .modern-sidebar .user-avatar .avatar-initials {
+        display: flex !important;
+    }
+    
+    /* Cuando hay imagen, ocultar iniciales */
+    .modern-sidebar .user-avatar .avatar-image + .avatar-initials {
+        display: none !important;
+    }
+    
+    /* Forzar estilos críticos para debugging */
+    .sidebar-user {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .user-avatar {
+        border: 2px solid rgba(255, 255, 255, 0.2) !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+    
+    /* Asegurar que las imágenes SVG se rendericen correctamente */
+    .avatar-image {
+        image-rendering: auto !important;
+        image-rendering: crisp-edges !important;
+        image-rendering: -webkit-optimize-contrast !important;
+    }
+    
+    /* Hover más suave en nav-links */
+    .nav-link {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border-radius: 0.5rem !important;
+        margin: 0 0.5rem !important;
+        padding: 0.75rem !important;
+    }
+    
+    .nav-link:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: translateX(4px) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Estilo para items activos */
+    .nav-link.active {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(29, 78, 216, 0.1) 100%) !important;
+        border-left: 3px solid #3b82f6 !important;
+        margin-left: 0.5rem !important;
+        padding-left: 1rem !important;
+    }
+    
+    /* Reset de main.css para forms y elementos generales */
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Login form básico */
+    .login-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+    }
+    
+    .login-card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        border: none;
+    }
+    
+    /* Contenedor del contenido principal */
+    .main-content-wrapper {
+        min-height: calc(100vh - 70px) !important;
+        background: #f9fafb !important;
+        padding: 0 !important;
+    }
+    
+    .main-content-wrapper .container-fluid {
+        background: transparent !important;
+    }
