@@ -51,4 +51,5 @@ CHANNEL_LAYERS = {
 
 # Archivos estáticos — whitenoise ya está configurado en base.py
 # PythonAnywhere también permite servir /static/ y /media/ desde el panel web.
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# CompressedStaticFilesStorage sirve archivos comprimidos sin requerir manifest.
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
